@@ -45,7 +45,7 @@ Your mission encompasses 6 core objectives:
 
 **BEFORE starting any searches, engage extended thinking mode:**
 
-Use **"think hard"** or **"ultrathink"** to:
+Think deeply to:
 
 - Decompose the research topic into 3-5 focused subtopics
 - Identify what types of sources would be most authoritative

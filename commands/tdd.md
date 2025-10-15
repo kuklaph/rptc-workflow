@@ -259,7 +259,18 @@ All implementation steps complete! Proceeding to quality gates...
 
 **CRITICAL**: After ALL tests passing, request efficiency review.
 
-**Ask PM for Permission**:
+**Step 1: Check for Global Thinking Mode Configuration**:
+
+```bash
+# Check .claude/settings.json for rptc.defaultThinkingMode
+if [ -f ".claude/settings.json" ]; then
+  cat .claude/settings.json
+fi
+```
+
+Extract `rptc.defaultThinkingMode` if it exists (e.g., "think", "think hard", "ultrathink")
+
+**Step 2: Ask PM for Permission**:
 
 ```text
 ✅ Implementation Complete - All Tests Passing!
@@ -278,7 +289,15 @@ The Master Efficiency Agent will:
 - Identify over-engineering
 - Ensure KISS and YAGNI principles
 
-Type "yes" or "approved" to delegate to Efficiency Agent.
+💡 TIP: You can specify a thinking mode for the agent:
+- "think" - Basic extended thinking (default, ~4K tokens)
+- "think hard" - Medium depth thinking (~10K tokens)
+- "ultrathink" - Maximum depth thinking (~32K tokens, best for complex refactors)
+
+[If global default exists: Currently configured: "[mode]"]
+
+Which thinking mode would you like?
+Type "yes"/"approved" to use [global default or "think"], or specify a mode (e.g., "ultrathink").
 Type "skip" to proceed without efficiency review.
 
 Waiting for your sign-off...
@@ -288,9 +307,18 @@ Waiting for your sign-off...
 
 #### Efficiency Agent Delegation (If Approved)
 
+**Step 1: Determine Final Thinking Mode**:
+   - If user specified a mode: Use user's choice
+   - Else if global default exists: Use global default
+   - Else: Use "think"
+
+**Step 2: Create Sub-Agent**:
+
 **Sub-Agent Prompt**:
 
 ```text
+Use [determined thinking mode] thinking mode for this efficiency review.
+
 You are a MASTER EFFICIENCY AGENT - a world-class expert in code optimization and simplicity.
 
 Your mission: Improve code efficiency, readability, and simplicity WITHOUT changing functionality.
@@ -374,7 +402,18 @@ Proceeding to security review...
 
 ### Phase 3: Master Security Agent Review (WITH PERMISSION)
 
-**Ask PM for Permission**:
+**Step 1: Check for Global Thinking Mode Configuration**:
+
+```bash
+# Check .claude/settings.json for rptc.defaultThinkingMode
+if [ -f ".claude/settings.json" ]; then
+  cat .claude/settings.json
+fi
+```
+
+Extract `rptc.defaultThinkingMode` if it exists (e.g., "think", "think hard", "ultrathink")
+
+**Step 2: Ask PM for Permission**:
 
 ```text
 🎯 Efficiency Review Complete!
@@ -388,7 +427,15 @@ The Master Security Agent will:
 - Identify potential exploits
 - Ensure security best practices
 
-Type "yes" or "approved" to delegate to Security Agent.
+💡 TIP: You can specify a thinking mode for the agent:
+- "think" - Basic extended thinking (default, ~4K tokens)
+- "think hard" - Medium depth thinking (~10K tokens)
+- "ultrathink" - Maximum depth thinking (~32K tokens, best for security-critical code)
+
+[If global default exists: Currently configured: "[mode]"]
+
+Which thinking mode would you like?
+Type "yes"/"approved" to use [global default or "think"], or specify a mode (e.g., "ultrathink").
 Type "skip" to proceed without security review.
 
 Waiting for your sign-off...
@@ -398,9 +445,18 @@ Waiting for your sign-off...
 
 #### Security Agent Delegation (If Approved)
 
+**Step 1: Determine Final Thinking Mode**:
+   - If user specified a mode: Use user's choice
+   - Else if global default exists: Use global default
+   - Else: Use "think"
+
+**Step 2: Create Sub-Agent**:
+
 **Sub-Agent Prompt**:
 
 ```text
+Use [determined thinking mode] thinking mode for this security audit.
+
 You are a MASTER SECURITY AGENT - a world-class expert in application security and vulnerability assessment.
 
 Your mission: Identify and fix security vulnerabilities in the implementation.

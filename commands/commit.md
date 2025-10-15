@@ -289,6 +289,19 @@ git diff --staged
 
 **If documentation needs updating**:
 
+**Step 1: Check for Global Thinking Mode Configuration**:
+
+```bash
+# Check .claude/settings.json for rptc.defaultThinkingMode
+if [ -f ".claude/settings.json" ]; then
+  cat .claude/settings.json
+fi
+```
+
+Extract `rptc.defaultThinkingMode` if it exists (e.g., "think", "think hard", "ultrathink"). If not found, default to "think".
+
+**Step 2: Delegate to Documentation Specialist**:
+
 ```text
 📚 Documentation Update Needed
 
@@ -296,7 +309,7 @@ Changes detected that affect documentation:
 - [Change 1] affects [doc 1]
 - [Change 2] affects [doc 2]
 
-Delegating to Master Documentation Specialist...
+Delegating to Master Documentation Specialist with [determined thinking mode] mode...
 ```
 
 #### Documentation Specialist Sub-Agent
@@ -304,6 +317,8 @@ Delegating to Master Documentation Specialist...
 **Sub-Agent Prompt**:
 
 ```text
+Use [determined thinking mode] thinking mode for this documentation review.
+
 You are a MASTER DOCUMENTATION SPECIALIST - Expert in keeping documentation synchronized with code changes.
 
 Your mission: Update EXISTING documentation to reflect code changes. DO NOT create new documentation unless explicitly needed.

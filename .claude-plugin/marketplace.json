@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "Official marketplace for RPTC (Research → Plan → TDD → Commit) workflow plugin",
-    "version": "1.0.6"
+    "version": "1.0.7"
   },
   "plugins": [
     {
       "name": "rptc-workflow",
       "source": "./",
       "description": "Complete RPTC workflow with research, planning, TDD implementation, and quality gates",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "author": {
         "name": "kuklaph",
         "email": "30103848+kuklaph@users.noreply.github.com"

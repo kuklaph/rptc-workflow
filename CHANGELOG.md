@@ -117,6 +117,62 @@ Three-tier fallback system (priority order):
 
 ---
 
+## [1.0.7] - 2025-10-14
+
+### Added
+
+- **Global Thinking Mode Configuration**: Users can now set a default thinking mode for all RPTC sub-agents via `.claude/settings.json`:
+  ```json
+  {
+    "rptc": {
+      "defaultThinkingMode": "think"
+    }
+  }
+  ```
+- **Thinking Mode Selection**: All sub-agent delegations now prompt users to specify thinking mode:
+  - `"think"` - Basic extended thinking (~4K tokens, default)
+  - `"think hard"` - Medium depth thinking (~10K tokens)
+  - `"ultrathink"` - Maximum depth thinking (~32K tokens)
+- **Power User Tip**: Init command now displays thinking mode configuration guidance on first setup
+
+### Changed
+
+- **Default Thinking Mode**: Changed from implicit "extended" to explicit "think" (4K tokens) to be mindful of Pro plan users
+- **Thinking Mode Keywords**: Updated to use official Anthropic keywords:
+  - Replaced generic "extended" with "think"
+  - Replaced generic "normal" with "think" (basic mode)
+  - Verified "ultrathink" keyword (~32K tokens) from official sources
+- **Research Phase** (`/rptc:research`):
+  - Added thinking mode prompt for Master Web Research Agent delegation
+  - Removed prescriptive "ultrathink" instruction from agent itself
+  - Checks `.claude/settings.json` for global default before prompting
+- **Planning Phase** (`/rptc:plan`):
+  - Added thinking mode prompt for Master Feature Planner delegation
+  - Global default used if user doesn't specify
+  - Updated token budget descriptions for each mode
+- **TDD Phase** (`/rptc:tdd`):
+  - Added thinking mode prompt for Master Efficiency Agent delegation
+  - Added thinking mode prompt for Master Security Agent delegation
+  - Both agents check global configuration before prompting
+- **Commit Phase** (`/rptc:commit`):
+  - Master Documentation Specialist now respects global thinking mode
+  - Automatically uses configured default (no prompt, as delegation is automatic)
+- **Thinking Mode Precedence**: Established hierarchy: User per-command choice > Global setting > Default ("think")
+
+### Improved
+
+- **Token Budget Transparency**: All thinking mode tips now display approximate token budgets
+- **Pro Plan Consideration**: Default mode set to "think" to avoid excessive token usage for users on Pro plans
+- **Configuration Discoverability**: Init command prominently displays thinking mode configuration example
+
+### Technical
+
+- Verified custom configuration options are supported in Claude Code plugin settings via hierarchical settings merge
+- Implemented configuration check pattern across all command files
+- Updated all agent delegation prompts to accept thinking mode parameter
+
+---
+
 ## [Unreleased]
 
 ### Planned Features
@@ -131,6 +187,7 @@ Three-tier fallback system (priority order):
 
 ## Version History
 
+- **1.0.7** (2025-10-14): Added global thinking mode configuration and user-selectable thinking modes for all sub-agents
 - **1.0.0** (2025-10-14): Initial plugin release with full RPTC workflow
 
 ---

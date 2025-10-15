@@ -166,7 +166,18 @@ This is just a starting point. Let's refine it together...
 
 **CRITICAL**: Get explicit permission to delegate to Master Feature Planner.
 
-**Ask clearly**:
+**Step 1: Check for Global Thinking Mode Configuration**:
+
+```bash
+# Check .claude/settings.json for rptc.defaultThinkingMode
+if [ -f ".claude/settings.json" ]; then
+  cat .claude/settings.json
+fi
+```
+
+Extract `rptc.defaultThinkingMode` if it exists (e.g., "think", "think hard", "ultrathink")
+
+**Step 2: Ask for Permission**:
 
 ```text
 📋 Plan Scaffold Complete!
@@ -185,7 +196,15 @@ The Master Feature Planner will create a comprehensive, detailed plan including:
 - Acceptance criteria
 - Risk assessment
 
-Type "yes" or "approved" to delegate to Master Planner.
+💡 TIP: You can specify a thinking mode for the agent:
+- "think" - Basic extended thinking (default, ~4K tokens)
+- "think hard" - Medium depth thinking (~10K tokens)
+- "ultrathink" - Maximum depth thinking (~32K tokens, best for complex features)
+
+[If global default exists: Currently configured: "[mode]"]
+
+Which thinking mode would you like?
+Type "yes"/"approved" to use [global default or "think"], or specify a mode (e.g., "ultrathink").
 Type "wait" to refine scaffold further.
 
 Waiting for your sign-off...
@@ -195,11 +214,18 @@ Waiting for your sign-off...
 
 ### Phase 5: Master Feature Planner Delegation (Only After Approval)
 
-Once approved, delegate using Task tool to `master-feature-planner-agent`:
+**Step 1: Determine Final Thinking Mode**:
+   - If user specified a mode: Use user's choice
+   - Else if global default exists: Use global default
+   - Else: Use "think"
+
+**Step 2: Delegate** using Task tool to `master-feature-planner-agent`:
 
 **Agent Prompt**:
 
 ```text
+Use [determined thinking mode] thinking mode for this planning task.
+
 You are the MASTER FEATURE PLANNER - create a comprehensive, TDD-ready implementation plan.
 
 Context:

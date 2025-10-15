@@ -134,26 +134,55 @@ Once you understand WHAT we're building, search the codebase:
 
 **If web research is needed**:
 
-1. **Ask Permission First**:
+1. **Determine Thinking Mode**:
+
+   First, check for global thinking mode configuration:
+
+   ```bash
+   # Check .claude/settings.json for rptc.defaultThinkingMode
+   if [ -f ".claude/settings.json" ]; then
+     cat .claude/settings.json
+   fi
+   ```
+
+   Extract `rptc.defaultThinkingMode` if it exists (e.g., "think", "think hard", "ultrathink")
+
+2. **Ask Permission**:
 
 ```text
    I'd like to research [specific topic] online for best practices.
    Should I delegate to the Master Web Research Agent?
+
+   💡 TIP: You can specify a thinking mode for the agent:
+   - "think" - Basic extended thinking (default, ~4K tokens)
+   - "think hard" - Medium depth thinking (~10K tokens)
+   - "ultrathink" - Maximum depth thinking (~32K tokens, best for complex topics)
+
+   [If global default exists: Currently configured: "[mode]"]
+
+   Which thinking mode would you like? (or just say "yes" to use [global default or "think"])
 ```
 
-2. **Wait for explicit approval**
+3. **Wait for explicit approval** and note any thinking mode preference
 
-3. **If approved**: Use the Task tool to delegate to `master-web-research-agent`
+4. **Determine Final Thinking Mode**:
+   - If user specified a mode: Use user's choice
+   - Else if global default exists: Use global default
+   - Else: Use "think"
+
+5. **If approved**: Use the Task tool to delegate to `master-web-research-agent`
 
 ```text
    Prompt for agent:
+   Use [determined thinking mode] thinking mode.
+
    Research [specific topic] for best practices, implementation patterns,
    common pitfalls, library recommendations, and security/performance considerations.
 
    Focus on actionable insights for implementing [feature] in [tech stack].
 ```
 
-4. **Agent should find**:
+6. **Agent should find**:
    - Best practice implementations
    - Common pitfalls and solutions
    - Library/framework recommendations
