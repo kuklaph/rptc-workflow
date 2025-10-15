@@ -52,6 +52,19 @@ Load SOPs using fallback chain (highest priority first):
 
 ### Phase 1: Pre-Commit Verification (CRITICAL)
 
+**Load Configuration**:
+
+```bash
+# Load RPTC configuration from settings.json (with fallbacks)
+if [ -f ".claude/settings.json" ] && command -v jq >/dev/null 2>&1; then
+  COVERAGE_TARGET=$(jq -r '.rptc.testCoverageTarget // 85' .claude/settings.json 2>/dev/null)
+  DOCS_LOC=$(jq -r '.rptc.docsLocation // "docs"' .claude/settings.json 2>/dev/null)
+else
+  COVERAGE_TARGET=85
+  DOCS_LOC="docs"
+fi
+```
+
 #### 1. Test Suite Verification (NON-NEGOTIABLE)
 
 **Run FULL test suite**:
@@ -100,13 +113,21 @@ npm run test:coverage || npm run coverage || pytest --cov || go test -cover ./..
 
 **Extract coverage percentage**:
 
-- If ≥ 80%: ✅ Coverage meets target
-- If < 80%: ⚠️ Coverage below 80% target (warn but allow)
+```bash
+# Compare against configured target
+ACTUAL_COVERAGE=[extracted from coverage output]
+
+if [ "$ACTUAL_COVERAGE" -ge "$COVERAGE_TARGET" ]; then
+  echo "✅ Coverage: ${ACTUAL_COVERAGE}% (target: ${COVERAGE_TARGET}%)"
+else
+  echo "⚠️  Coverage: ${ACTUAL_COVERAGE}% (below target: ${COVERAGE_TARGET}%)"
+fi
+```
 
 **Report**:
 
 ```text
-📊 Coverage: [X]%
+📊 Coverage: [X]% (target: [COVERAGE_TARGET]%)
 ```
 
 #### 3. Code Quality Checks
@@ -241,7 +262,7 @@ Closes #124
 ════════════════════════════════════════
 
 🧪 Test Suite: ✅ [X] tests passing
-📊 Coverage: ✅ [Y]% (target: 80%)
+📊 Coverage: ✅ [Y]% (target: [COVERAGE_TARGET]%)
 🔍 Linting: ✅ No errors
 📝 Types: ✅ No errors
 🔒 Security: ✅ No issues found
@@ -332,7 +353,7 @@ Context:
 - `CLAUDE.md` - Project guidelines, commands, workflow
 - `README.md` - Setup, usage, overview
 - `.context/` files - Project-specific context
-- `docs/` folder - If exists, check for affected docs
+- `$DOCS_LOC/` folder - If exists, check for affected docs
 - `CONTRIBUTING.md` - If contribution process changed
 - API docs - If API endpoints changed
 
@@ -451,7 +472,7 @@ COMMIT_MSG
 
    ## Checklist
    - [x] All tests passing
-   - [x] Coverage ≥ 80%
+   - [x] Coverage ≥ [COVERAGE_TARGET]%
    - [x] Code quality verified
    - [x] No debug code
    - [x] Conventional commit format
@@ -544,7 +565,7 @@ Fix these issues before committing.
 ⚠️  Warning: Coverage below target
 
 Current: [X]%
-Target: 80%
+Target: [COVERAGE_TARGET]%
 
 This is allowed but not ideal.
 Consider adding tests for:
@@ -588,7 +609,7 @@ Agent:
 ✅ 47 tests passing
 
 📊 Checking coverage...
-✅ 87% coverage (target: 80%)
+✅ 87% coverage (target: [COVERAGE_TARGET]%)
 
 🔍 Running linter...
 ✅ No linting errors

@@ -20,6 +20,19 @@ Act as an intelligent brainstorming partner who:
 
 **Key Principle**: Keep asking questions until you have a SOLID understanding. Don't rush to solutions.
 
+## Step 0a: Load Configuration
+
+Load RPTC configuration from settings.json (with fallbacks):
+
+```bash
+# Load RPTC configuration
+if [ -f ".claude/settings.json" ] && command -v jq >/dev/null 2>&1; then
+  ARTIFACT_LOC=$(jq -r '.rptc.artifactLocation // ".rptc"' .claude/settings.json 2>/dev/null)
+else
+  ARTIFACT_LOC=".rptc"
+fi
+```
+
 ## Step 0: Load Reference Materials
 
 Load SOPs using fallback chain (highest priority first):
@@ -265,13 +278,13 @@ Once approved, check workspace structure first:
 
 ```bash
 # Ensure directory exists
-if [ ! -d ".rptc/research" ]; then
-  echo "⚠️  Workspace not initialized. Creating .rptc/research/"
-  mkdir -p .rptc/research
+if [ ! -d "$ARTIFACT_LOC/research" ]; then
+  echo "⚠️  Workspace not initialized. Creating $ARTIFACT_LOC/research/"
+  mkdir -p "$ARTIFACT_LOC/research"
 fi
 ```
 
-Save to: `.rptc/research/[topic-slug].md`
+Save to: `$ARTIFACT_LOC/research/[topic-slug].md`
 
 **Use template from plugin**:
 
@@ -280,7 +293,7 @@ Save to: `.rptc/research/[topic-slug].md`
 TEMPLATE=$(cat "${CLAUDE_PLUGIN_ROOT}/templates/research.md")
 
 # Fill in template with research findings
-# Save to .rptc/research/[sanitized-topic-name].md
+# Save to $ARTIFACT_LOC/research/[sanitized-topic-name].md
 ```
 
 **Format** (based on template):
@@ -394,10 +407,10 @@ _SOP References: [List SOPs consulted]_
 After saving:
 
 ```text
-✅ Research saved to .rptc/research/[topic-slug].md
+✅ Research saved to $ARTIFACT_LOC/research/[topic-slug].md
 
 Next steps:
-- Review: cat .rptc/research/[topic-slug].md
+- Review: cat $ARTIFACT_LOC/research/[topic-slug].md
 - Plan: /rptc:plan "@[topic-slug].md"
 - Or plan directly: /rptc:plan "[work item name]"
 ```
@@ -444,7 +457,7 @@ Use these if you need additional project context.
 - [ ] Listed all relevant files with line numbers
 - [ ] Presented clear findings with SOP references
 - [ ] Received explicit PM approval
-- [ ] Saved research document to `.rptc/research/`
+- [ ] Saved research document to `$ARTIFACT_LOC/research/`
 - [ ] Ready for planning phase
 
 ---

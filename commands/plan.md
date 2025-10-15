@@ -45,6 +45,19 @@ Load SOPs using fallback chain (highest priority first):
 - Choosing implementation patterns
 - Reviewing code structure
 
+## Step 0a: Load Configuration
+
+Load RPTC configuration from settings.json (with fallbacks):
+
+```bash
+# Load RPTC configuration
+if [ -f ".claude/settings.json" ] && command -v jq >/dev/null 2>&1; then
+  ARTIFACT_LOC=$(jq -r '.rptc.artifactLocation // ".rptc"' .claude/settings.json 2>/dev/null)
+else
+  ARTIFACT_LOC=".rptc"
+fi
+```
+
 ## Planning Process
 
 ### Phase 1: Context Loading (REQUIRED)
@@ -53,7 +66,7 @@ Load SOPs using fallback chain (highest priority first):
 
 1. **Check for Research Document**
 
-   - If user provides `@research-doc.md`, check `.rptc/research/[name].md`
+   - If user provides `@research-doc.md`, check `$ARTIFACT_LOC/research/[name].md`
    - Extract key findings and recommendations
    - Note relevant files and patterns
 
@@ -79,7 +92,7 @@ Load SOPs using fallback chain (highest priority first):
 ```text
 📚 Context Loaded:
 
-Research: [Summary if research doc provided from .rptc/research/]
+Research: [Summary if research doc provided from $ARTIFACT_LOC/research/]
 Tech Stack: [From CLAUDE.md]
 Related Files: [Relevant existing code]
 Patterns: [Identified patterns from architecture SOP]
@@ -230,7 +243,7 @@ You are the MASTER FEATURE PLANNER - create a comprehensive, TDD-ready implement
 
 Context:
 - Feature: [feature description]
-- Research findings: [if applicable, from .rptc/research/]
+- Research findings: [if applicable, from $ARTIFACT_LOC/research/]
 - Tech stack: [project tech from CLAUDE.md]
 - Scaffold: [initial plan structure]
 - PM input: [clarifications from PM]
@@ -297,7 +310,7 @@ For EACH step:
 
 Use template from: ${CLAUDE_PLUGIN_ROOT}/templates/plan.md
 
-Save to: .rptc/plans/[name-slug].md
+Save to: $ARTIFACT_LOC/plans/[name-slug].md
 
 Focus on TDD-readiness: tests clearly defined BEFORE implementation.
 Reference SOPs for standards and patterns.
@@ -370,7 +383,7 @@ All modifications incorporated.
 - Type "modify" to make additional changes
 - Provide specific feedback for adjustments
 
-This plan will be saved to: .rptc/plans/[name-slug].md
+This plan will be saved to: $ARTIFACT_LOC/plans/[name-slug].md
 
 Waiting for your final sign-off...
 ```
@@ -383,13 +396,13 @@ Check workspace structure first:
 
 ```bash
 # Ensure directory exists
-if [ ! -d ".rptc/plans" ]; then
-  echo "⚠️  Workspace not initialized. Creating .rptc/plans/"
-  mkdir -p .rptc/plans
+if [ ! -d "$ARTIFACT_LOC/plans" ]; then
+  echo "⚠️  Workspace not initialized. Creating $ARTIFACT_LOC/plans/"
+  mkdir -p "$ARTIFACT_LOC/plans"
 fi
 ```
 
-Save to: `.rptc/plans/[name-slug].md`
+Save to: `$ARTIFACT_LOC/plans/[name-slug].md`
 
 **Use template from plugin**:
 
@@ -398,7 +411,7 @@ Save to: `.rptc/plans/[name-slug].md`
 TEMPLATE=$(cat "${CLAUDE_PLUGIN_ROOT}/templates/plan.md")
 
 # Fill in with plan content from Master Planner
-# Save to .rptc/plans/[sanitized-feature-name].md
+# Save to $ARTIFACT_LOC/plans/[sanitized-feature-name].md
 ```
 
 **Format** (based on template + Master Planner output):
@@ -416,7 +429,7 @@ TEMPLATE=$(cat "${CLAUDE_PLUGIN_ROOT}/templates/plan.md")
 
 [What we're building and why]
 
-**Related Research**: `.rptc/research/[topic].md` (if applicable)
+**Related Research**: `$ARTIFACT_LOC/research/[topic].md` (if applicable)
 
 ---
 
@@ -553,10 +566,10 @@ _SOP References: [List SOPs consulted]_
 After saving:
 
 ```text
-✅ Plan saved to .rptc/plans/[name-slug].md
+✅ Plan saved to $ARTIFACT_LOC/plans/[name-slug].md
 
 Next steps:
-- Review: cat .rptc/plans/[name-slug].md
+- Review: cat $ARTIFACT_LOC/plans/[name-slug].md
 - Implement: /rptc:tdd "@[name-slug].md"
 ```
 
@@ -596,7 +609,7 @@ Next steps:
 - [ ] Plan reviewed by PM
 - [ ] Modifications incorporated (if needed)
 - [ ] PM explicitly approved final plan
-- [ ] Plan document saved to `.rptc/plans/`
+- [ ] Plan document saved to `$ARTIFACT_LOC/plans/`
 - [ ] Ready for TDD implementation
 
 ---

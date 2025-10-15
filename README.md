@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 1.0.0
+**Version**: 1.0.8
 **Status**: Beta
 **License**: MIT
 
@@ -305,35 +305,86 @@ You get to review and approve the documentation before commit.
 
 ## Configuration
 
-### Plugin Settings
+RPTC configuration is managed through `.claude/settings.json` in your project. The plugin itself has no configurable settings - all configuration is user-controlled.
 
-Configure in `.claude-plugin/plugin.json`:
+### Available Settings
 
-```json
-{
-  "config": {
-    "artifactLocation": ".rptc",
-    "docsLocation": "docs",
-    "autoPromoteToDocsOnComplete": false,
-    "retentionPolicy": "prompt",
-    "testCoverageTarget": 80,
-    "maxPlanningAttempts": 10
-  }
-}
-```
-
-### Project Settings
-
-Override in `.claude/settings.json`:
+All RPTC configuration lives under the `rptc` namespace in `.claude/settings.json`:
 
 ```json
 {
   "rptc": {
-    "testCoverageTarget": 90,
+    "defaultThinkingMode": "think",
+    "artifactLocation": ".rptc",
+    "docsLocation": "docs",
+    "testCoverageTarget": 85,
+    "maxPlanningAttempts": 10,
     "customSopPath": ".claude/sop"
   }
 }
 ```
+
+**Configuration Options:**
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `defaultThinkingMode` | `"think"` | Default thinking mode for sub-agents: `"think"`, `"think hard"`, or `"ultrathink"` |
+| `artifactLocation` | `".rptc"` | Directory for working artifacts (research, plans, archive) |
+| `docsLocation` | `"docs"` | Directory for permanent documentation |
+| `testCoverageTarget` | `85` | Minimum test coverage percentage (used in commit phase) |
+| `maxPlanningAttempts` | `10` | Maximum auto-retry attempts during TDD implementation |
+| `customSopPath` | `".claude/sop"` | Project-specific SOP directory (for fallback chain) |
+
+**Note:** The init command (`/rptc:admin:init`) automatically creates this file with sensible defaults.
+
+### Thinking Mode Configuration (v1.0.7+)
+
+**Configure default thinking depth for all sub-agent delegations:**
+
+RPTC sub-agents (Web Research, Feature Planner, Efficiency, Security, Documentation) support extended thinking modes with different token budgets:
+
+| Mode | Token Budget | Best For | Default |
+|------|-------------|----------|---------|
+| `"think"` | ~4K tokens | Most tasks, Pro plan users | ✅ Yes |
+| `"think hard"` | ~10K tokens | Complex analysis | |
+| `"ultrathink"` | ~32K tokens | Maximum depth, complex features | |
+
+**Set global default** in `.claude/settings.json`:
+
+```json
+{
+  "rptc": {
+    "defaultThinkingMode": "think"
+  }
+}
+```
+
+**How it works:**
+- Commands check for global setting before prompting
+- You can override per-command when prompted
+- Precedence: **User choice** > **Global setting** > **Default** ("think")
+
+**Example workflow:**
+
+```bash
+# Set global default to ultrathink (Max plan users)
+echo '{
+  "rptc": {
+    "defaultThinkingMode": "ultrathink"
+  }
+}' > .claude/settings.json
+
+# Now all sub-agents use ultrathink by default
+/rptc:research "complex authentication"
+# Agent automatically uses ultrathink
+
+# Or override per-command:
+/rptc:plan "simple feature"
+# When prompted: "yes" uses ultrathink, or specify "think" for this one
+```
+
+**Pro plan consideration:**
+Default is `"think"` (~4K tokens) to be mindful of Pro plan token limits. Max plan users can set `"ultrathink"` as their default.
 
 ---
 
@@ -400,6 +451,22 @@ Override in `.claude/settings.json`:
 /rptc:helper:cleanup
 # Review and archive completed plans
 ```
+
+### Q: How do I set a default thinking mode for sub-agents?
+
+```bash
+# Add to .claude/settings.json:
+{
+  "rptc": {
+    "defaultThinkingMode": "think"
+  }
+}
+
+# Options: "think" (4K), "think hard" (10K), "ultrathink" (32K)
+# You can override per-command when prompted
+```
+
+See [Thinking Mode Configuration](#thinking-mode-configuration-v107) for details.
 
 ---
 

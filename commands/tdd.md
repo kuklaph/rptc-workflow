@@ -61,11 +61,26 @@ Load SOPs using fallback chain (highest priority first):
 **Project Overrides** (`.context/`):
 Check for project-specific testing strategies or code style overrides.
 
+## Step 0a: Load Configuration
+
+Load RPTC configuration from settings.json (with fallbacks):
+
+```bash
+# Load RPTC configuration
+if [ -f ".claude/settings.json" ] && command -v jq >/dev/null 2>&1; then
+  ARTIFACT_LOC=$(jq -r '.rptc.artifactLocation // ".rptc"' .claude/settings.json 2>/dev/null)
+  MAX_ATTEMPTS=$(jq -r '.rptc.maxPlanningAttempts // 10' .claude/settings.json 2>/dev/null)
+else
+  ARTIFACT_LOC=".rptc"
+  MAX_ATTEMPTS=10
+fi
+```
+
 ### Phase 0: Load Plan (REQUIRED)
 
 **If plan document provided**:
 
-1. Read `.rptc/plans/[plan-name].md`
+1. Read `$ARTIFACT_LOC/plans/[plan-name].md`
 2. Extract implementation steps (look for checkbox items `- [ ]`)
 3. Note test strategy
 4. Confirm understanding
@@ -162,7 +177,7 @@ Proceeding to GREEN phase...
    - Check results
 
 3. **Auto-Iteration (if tests fail)**
-   - Maximum 10 iterations per step
+   - Maximum $MAX_ATTEMPTS iterations per step
    - Each iteration:
      - Analyze specific failure
      - Make targeted fix
@@ -229,7 +244,7 @@ Step [N] complete!
 
 **After each step**:
 
-1. **Update plan document** (`.rptc/plans/[plan-name].md`):
+1. **Update plan document** (`$ARTIFACT_LOC/plans/[plan-name].md`):
 
    - Mark step complete: Change `- [ ]` to `- [x]` for this step
    - Mark all tests for this step complete
@@ -244,7 +259,7 @@ Tests: [X] passing
 Files modified: [list]
 Coverage: [Y]% (for new code)
 
-📝 Plan synchronized: Step [N] marked complete in `.rptc/plans/[plan-name].md`
+📝 Plan synchronized: Step [N] marked complete in `$ARTIFACT_LOC/plans/[plan-name].md`
 
 [If more steps remaining:]
 Next: Step [N+1] - [Next step name]
@@ -595,7 +610,7 @@ Waiting for your final sign-off...
 
 Once approved:
 
-1. Update plan document (`.rptc/plans/[plan-name].md`):
+1. Update plan document (`$ARTIFACT_LOC/plans/[plan-name].md`):
 
    - Change status from "In Progress" to "Complete"
    - Mark all remaining checkboxes as complete
@@ -607,7 +622,7 @@ Once approved:
 ```text
 ✅ TDD Phase Approved by Project Manager!
 
-Plan updated: `.rptc/plans/[plan-name].md`
+Plan updated: `$ARTIFACT_LOC/plans/[plan-name].md`
 - Status: ✅ Complete
 - All steps: ✅ Marked complete
 - Tests: [X] passing
@@ -620,7 +635,7 @@ Next step: `/rptc:commit` or `/rptc:commit pr` to verify and ship!
 
 **When tests fail during GREEN phase**:
 
-- **Maximum 10 iterations** per test failure
+- **Maximum $MAX_ATTEMPTS iterations** per test failure
 - **Each iteration**:
   1. Analyze failure message carefully
   2. Identify root cause
@@ -628,10 +643,10 @@ Next step: `/rptc:commit` or `/rptc:commit pr` to verify and ship!
   4. Re-run tests
   5. Report: "Iteration N: [what was fixed] → [result]"
 
-**If still failing after 10 iterations**:
+**If still failing after $MAX_ATTEMPTS iterations**:
 
 ```text
-❌ Auto-iteration limit reached (10 attempts)
+❌ Auto-iteration limit reached ($MAX_ATTEMPTS attempts)
 
 Persistent failure: [test name]
 Error: [error message]
@@ -654,7 +669,7 @@ What would you like to do?
 
 - ✅ Write tests BEFORE implementation (always)
 - ✅ Follow RED → GREEN → REFACTOR cycle strictly
-- ✅ Auto-iterate on test failures (max 10)
+- ✅ Auto-iterate on test failures (max $MAX_ATTEMPTS)
 - ✅ Run tests after every change
 - ✅ Ask permission before quality gate sub-agents
 - ✅ Keep all tests passing

@@ -254,7 +254,67 @@ else
 fi
 ```
 
-## Step 7: Update .gitignore
+## Step 7: Create/Update .claude/settings.json
+
+Create or update `.claude/settings.json` with RPTC default configuration:
+
+```bash
+mkdir -p .claude
+
+if [ ! -f ".claude/settings.json" ]; then
+  # Create new settings.json with RPTC defaults
+  cat > .claude/settings.json <<'EOF'
+{
+  "rptc": {
+    "defaultThinkingMode": "think",
+    "artifactLocation": ".rptc",
+    "docsLocation": "docs",
+    "testCoverageTarget": 85,
+    "maxPlanningAttempts": 10,
+    "customSopPath": ".claude/sop"
+  }
+}
+EOF
+  echo "✓ Created .claude/settings.json with RPTC defaults"
+  echo "  Default thinking mode: \"think\" (~4K tokens)"
+  echo "  Test coverage target: 85%"
+  echo "  Artifact location: .rptc/"
+  echo "  Documentation location: docs/"
+else
+  # File exists - check if it needs RPTC section
+  if ! grep -q '"rptc"' .claude/settings.json; then
+    # Settings file exists but no rptc section - add it
+    # Check if jq is available for safe JSON merging
+    if command -v jq >/dev/null 2>&1; then
+      # Use jq for safe merging
+      TEMP_FILE=$(mktemp)
+      jq '. + {"rptc": {"defaultThinkingMode": "think", "artifactLocation": ".rptc", "docsLocation": "docs", "testCoverageTarget": 85, "maxPlanningAttempts": 10, "customSopPath": ".claude/sop"}}' .claude/settings.json > "$TEMP_FILE"
+      mv "$TEMP_FILE" .claude/settings.json
+      echo "✓ Added RPTC configuration to existing .claude/settings.json"
+    else
+      # jq not available - warn user to manually add
+      echo "⚠️  .claude/settings.json exists but lacks RPTC config"
+      echo ""
+      echo "  Please add the following to your .claude/settings.json:"
+      echo ""
+      echo '  "rptc": {'
+      echo '    "defaultThinkingMode": "think",'
+      echo '    "artifactLocation": ".rptc",'
+      echo '    "docsLocation": "docs",'
+      echo '    "testCoverageTarget": 85,'
+      echo '    "maxPlanningAttempts": 10,'
+      echo '    "customSopPath": ".claude/sop"'
+      echo '  }'
+      echo ""
+      echo "  (Install 'jq' for automatic merging in future)"
+    fi
+  else
+    echo "ℹ️  .claude/settings.json already contains RPTC configuration"
+  fi
+fi
+```
+
+## Step 8: Update .gitignore
 
 Add RPTC-specific gitignore entries if not already present:
 
@@ -276,7 +336,7 @@ else
 fi
 ```
 
-## Step 8: Create README Section (Optional Suggestion)
+## Step 9: Create README Section (Optional Suggestion)
 
 Suggest adding RPTC section to README:
 
@@ -294,7 +354,7 @@ echo "   - \`/rptc:commit [pr]\` - Verify and ship"
 echo ""
 ```
 
-## Step 9: Summary Report
+## Step 10: Summary Report
 
 Provide clear summary of what was created:
 
@@ -309,6 +369,7 @@ echo "  .rptc/research/         - Active research"
 echo "  .rptc/plans/            - Active plans"
 echo "  .rptc/archive/          - Old work"
 echo "  .rptc/CLAUDE.md         - RPTC workflow instructions"
+echo "  .claude/settings.json   - RPTC configuration"
 echo "  docs/                   - Permanent documentation"
 echo ""
 echo "SOP Configuration:"
@@ -322,21 +383,17 @@ else
   echo "  Plugin SOPs (read-only) - $PLUGIN_ROOT/sop/"
 fi
 echo ""
-echo "💡 Power User Tip: Configure Global Thinking Mode"
+echo "💡 Thinking Mode Configuration"
 echo ""
-echo "  RPTC sub-agents support extended thinking modes:"
+echo "  Default thinking mode set to \"think\" (~4K tokens)"
+echo "  Edit .claude/settings.json to change:"
+echo ""
+echo "  Available modes:"
 echo "    - \"think\"       - Basic extended thinking (~4K tokens, default)"
 echo "    - \"think hard\"  - Medium depth thinking (~10K tokens)"
 echo "    - \"ultrathink\" - Maximum depth thinking (~32K tokens)"
 echo ""
-echo "  Set a global default in .claude/settings.json:"
-echo "  {"
-echo "    \"rptc\": {"
-echo "      \"defaultThinkingMode\": \"think\""
-echo "    }"
-echo "  }"
-echo ""
-echo "  Or specify per-command when prompted (e.g., \"ultrathink\")"
+echo "  You can also specify thinking mode per-command when prompted."
 echo "  User choice always overrides global setting."
 echo ""
 echo "Next Steps:"

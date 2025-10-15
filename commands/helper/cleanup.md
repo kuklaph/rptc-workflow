@@ -1,17 +1,32 @@
 ---
-description: Review and cleanup completed plans from .rptc/plans/
+description: Review and cleanup completed plans from $ARTIFACT_LOC/plans/
 ---
 
 # RPTC Helper: Cleanup Completed Plans
 
 You are helping the user manage completed plans in their workspace.
 
+## Step 0: Load Configuration
+
+Load RPTC configuration from settings.json (with fallbacks):
+
+```bash
+# Load RPTC configuration
+if [ -f ".claude/settings.json" ] && command -v jq >/dev/null 2>&1; then
+  ARTIFACT_LOC=$(jq -r '.rptc.artifactLocation // ".rptc"' .claude/settings.json 2>/dev/null)
+  DOCS_LOC=$(jq -r '.rptc.docsLocation // "docs"' .claude/settings.json 2>/dev/null)
+else
+  ARTIFACT_LOC=".rptc"
+  DOCS_LOC="docs"
+fi
+```
+
 ## Purpose
 
-Review completed plans in `.rptc/plans/` and help user decide what to do with them:
+Review completed plans in `$ARTIFACT_LOC/plans/` and help user decide what to do with them:
 
 - Keep for reference
-- Archive to `.rptc/archive/`
+- Archive to `$ARTIFACT_LOC/archive/`
 - Delete if no longer needed
 - Promote to `docs/` if architecturally significant
 
@@ -19,13 +34,13 @@ Review completed plans in `.rptc/plans/` and help user decide what to do with th
 
 ```bash
 # Find plans marked as complete
-grep -l "Status.*Complete" .rptc/plans/*.md 2>/dev/null
+grep -l "Status.*Complete" $ARTIFACT_LOC/plans/*.md 2>/dev/null
 ```
 
 If no completed plans found:
 
 ```text
-ℹ️  No completed plans found in .rptc/plans/
+ℹ️  No completed plans found in $ARTIFACT_LOC/plans/
 
 All plans are either in progress or the workspace is empty.
 ```
@@ -60,9 +75,9 @@ For each plan, ask user what to do:
 [Show first 20 lines as preview]
 
 Options:
-1. [k] Keep in .rptc/plans/ (no action)
-2. [a] Archive to .rptc/archive/
-3. [p] Promote to docs/decisions/
+1. [k] Keep in $ARTIFACT_LOC/plans/ (no action)
+2. [a] Archive to $ARTIFACT_LOC/archive/
+3. [p] Promote to $DOCS_LOC/decisions/
 4. [d] Delete (cannot be undone)
 5. [s] Skip (review later)
 
@@ -74,23 +89,23 @@ What should we do with this plan? [k/a/p/d/s]:
 ### Archive (a)
 
 ```bash
-mkdir -p .rptc/archive
-mv .rptc/plans/[name].md .rptc/archive/[name].md
+mkdir -p "$ARTIFACT_LOC/archive"
+mv $ARTIFACT_LOC/plans/[name].md $ARTIFACT_LOC/archive/[name].md
 
-echo "✅ Archived to .rptc/archive/[name].md"
+echo "✅ Archived to $ARTIFACT_LOC/archive/[name].md"
 ```
 
 ### Promote (p)
 
 ```bash
-mkdir -p docs/decisions
-cp .rptc/plans/[name].md docs/decisions/[name].md
+mkdir -p "$DOCS_LOC/decisions"
+cp $ARTIFACT_LOC/plans/[name].md $DOCS_LOC/decisions/[name].md
 
-echo "✅ Promoted to docs/decisions/[name].md"
-echo "   Original kept in .rptc/plans/"
+echo "✅ Promoted to $DOCS_LOC/decisions/[name].md"
+echo "   Original kept in $ARTIFACT_LOC/plans/"
 echo ""
 echo "   Tip: You may want to archive the original:"
-echo "   mv .rptc/plans/[name].md .rptc/archive/"
+echo "   mv $ARTIFACT_LOC/plans/[name].md $ARTIFACT_LOC/archive/"
 ```
 
 ### Delete (d)
@@ -100,14 +115,14 @@ echo "   mv .rptc/plans/[name].md .rptc/archive/"
 echo "⚠️  Are you sure? This cannot be undone. [y/N]:"
 
 # If confirmed:
-rm .rptc/plans/[name].md
+rm $ARTIFACT_LOC/plans/[name].md
 echo "✅ Deleted [name].md"
 ```
 
 ### Keep or Skip
 
 ```text
-ℹ️  Kept in .rptc/plans/[name].md
+ℹ️  Kept in $ARTIFACT_LOC/plans/[name].md
 ```
 
 ## Step 5: Summary
@@ -127,9 +142,9 @@ Actions taken:
 - Skipped: [V] plans
 
 Storage usage:
-- .rptc/plans/: [size] ([N] files)
-- .rptc/archive/: [size] ([M] files)
-- docs/decisions/: [size] ([P] files)
+- $ARTIFACT_LOC/plans/: [size] ([N] files)
+- $ARTIFACT_LOC/archive/: [size] ([M] files)
+- $DOCS_LOC/decisions/: [size] ([P] files)
 
 Cleanup complete!
 ═══════════════════════════════════════════════════════
@@ -196,7 +211,7 @@ Options:
 
 What should we do? [k/a/p/d/s]: a
 
-✅ Archived to .rptc/archive/user-avatar-upload.md
+✅ Archived to $ARTIFACT_LOC/archive/user-avatar-upload.md
 
 ───────────────────────────────────────────────────────
 
@@ -221,4 +236,4 @@ Cleanup complete!
 
 - **Batch mode**: If user says "archive all" or "promote all", process all plans with that action (but confirm first)
 - **Undo**: Remind user that git tracks changes, so accidental deletions can be recovered if committed
-- **Frequency**: Suggest running this command monthly or when `.rptc/plans/` has > 10 completed plans
+- **Frequency**: Suggest running this command monthly or when `$ARTIFACT_LOC/plans/` has > 10 completed plans
