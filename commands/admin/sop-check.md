@@ -14,7 +14,63 @@ Show exactly which SOP file will be loaded for a given SOP name, demonstrating t
 
 Accept optional SOP name to check. If not provided, check all SOPs.
 
-## Step 1: Parse Arguments
+## Step 1: Locate Plugin Directory (CRITICAL)
+
+Before checking SOPs, find where the RPTC plugin is installed:
+
+```bash
+# Find the plugin directory by searching for the unique plugin manifest
+PLUGIN_ROOT=""
+
+# Check user plugins directory
+if [ -d "$HOME/.claude/plugins" ]; then
+  FOUND=$(find "$HOME/.claude/plugins" -name "plugin.json" -path "*/.claude-plugin/plugin.json" 2>/dev/null | while read manifest; do
+    if grep -q '"name".*"rptc-workflow"' "$manifest" 2>/dev/null; then
+      dirname "$(dirname "$manifest")"
+      break
+    fi
+  done | head -1)
+  if [ -n "$FOUND" ]; then
+    PLUGIN_ROOT="$FOUND"
+  fi
+fi
+
+# If not found, check system plugins directory
+if [ -z "$PLUGIN_ROOT" ] && [ -d "/opt/claude/plugins" ]; then
+  FOUND=$(find "/opt/claude/plugins" -name "plugin.json" -path "*/.claude-plugin/plugin.json" 2>/dev/null | while read manifest; do
+    if grep -q '"name".*"rptc-workflow"' "$manifest" 2>/dev/null; then
+      dirname "$(dirname "$manifest")"
+      break
+    fi
+  done | head -1)
+  if [ -n "$FOUND" ]; then
+    PLUGIN_ROOT="$FOUND"
+  fi
+fi
+
+# If still not found, try alternative search in home directory
+if [ -z "$PLUGIN_ROOT" ]; then
+  FOUND=$(find "$HOME" -type f -name "plugin.json" -path "*rptc-workflow*/.claude-plugin/plugin.json" 2>/dev/null | while read manifest; do
+    if grep -q '"name".*"rptc-workflow"' "$manifest" 2>/dev/null; then
+      dirname "$(dirname "$manifest")"
+      break
+    fi
+  done | head -1)
+  if [ -n "$FOUND" ]; then
+    PLUGIN_ROOT="$FOUND"
+  fi
+fi
+
+if [ -z "$PLUGIN_ROOT" ]; then
+  echo "❌ ERROR: Could not locate RPTC plugin installation directory"
+  echo ""
+  echo "Please ensure the rptc-workflow plugin is properly installed."
+  echo "Try: /plugin install rptc-workflow"
+  exit 1
+fi
+```
+
+## Step 2: Parse Arguments
 
 ```text
 If user provides SOP name (e.g., "testing-guide"):
@@ -24,7 +80,7 @@ If no argument provided:
   - Check resolution for all standard SOPs
 ```
 
-## Step 2: Define SOP Resolution Function
+## Step 3: Define SOP Resolution Function
 
 For each SOP, check in priority order:
 
@@ -35,7 +91,7 @@ function resolve_sop() {
   local locations=(
     ".claude/sop/${sop_name}.md"
     "~/.claude/global/sop/${sop_name}.md"
-    "${CLAUDE_PLUGIN_ROOT}/sop/${sop_name}.md"
+    "$PLUGIN_ROOT/sop/${sop_name}.md"
   )
 
   for location in "${locations[@]}"; do
@@ -50,7 +106,7 @@ function resolve_sop() {
 }
 ```
 
-## Step 3: Check Specific SOP (If Provided)
+## Step 4: Check Specific SOP (If Provided)
 
 If user provided a SOP name:
 
@@ -102,13 +158,13 @@ else
 fi
 
 echo ""
-echo "3. Plugin default level (${CLAUDE_PLUGIN_ROOT}/sop/):"
-if [ -f "${CLAUDE_PLUGIN_ROOT}/sop/${SOP_NAME}.md" ]; then
-  echo "   ✓ FOUND: ${CLAUDE_PLUGIN_ROOT}/sop/${SOP_NAME}.md"
+echo "3. Plugin default level ($PLUGIN_ROOT/sop/):"
+if [ -f "$PLUGIN_ROOT/sop/${SOP_NAME}.md" ]; then
+  echo "   ✓ FOUND: $PLUGIN_ROOT/sop/${SOP_NAME}.md"
   echo "   ⚡ This file will be used (plugin default)"
 
   # Show file info
-  FILE_SIZE=$(wc -c < "${CLAUDE_PLUGIN_ROOT}/sop/${SOP_NAME}.md")
+  FILE_SIZE=$(wc -c < "$PLUGIN_ROOT/sop/${SOP_NAME}.md")
   echo "   📊 Size: ${FILE_SIZE} bytes"
   echo "   📅 Plugin version"
 else
@@ -120,7 +176,7 @@ echo ""
 echo "═══════════════════════════════════════════════════════"
 ```
 
-## Step 4: Check All SOPs (If No Argument)
+## Step 5: Check All SOPs (If No Argument)
 
 If user didn't provide a specific SOP:
 
@@ -148,7 +204,7 @@ for sop in "${SOPS[@]}"; do
     echo "  ⚡ Project (.claude/sop/)"
   elif [ -f "~/.claude/global/sop/${sop}.md" ]; then
     echo "  ⚡ User (~/.claude/global/sop/)"
-  elif [ -f "${CLAUDE_PLUGIN_ROOT}/sop/${sop}.md" ]; then
+  elif [ -f "$PLUGIN_ROOT/sop/${sop}.md" ]; then
     echo "  ⚡ Plugin (default)"
   else
     echo "  ✗ NOT FOUND (ERROR)"
@@ -160,7 +216,7 @@ done
 echo "═══════════════════════════════════════════════════════"
 ```
 
-## Step 5: Provide Override Instructions
+## Step 6: Provide Override Instructions
 
 ```bash
 echo ""
@@ -176,12 +232,12 @@ echo "  # Copies SOPs to ~/.claude/global/sop/ as defaults"
 echo ""
 echo "Manual copy:"
 echo "  mkdir -p .claude/sop"
-echo "  cp \"\${CLAUDE_PLUGIN_ROOT}/sop/testing-guide.md\" .claude/sop/"
+echo "  cp \"$PLUGIN_ROOT/sop/testing-guide.md\" .claude/sop/"
 echo "  # Edit .claude/sop/testing-guide.md"
 echo ""
 ```
 
-## Step 6: Compare Versions (Advanced)
+## Step 7: Compare Versions (Advanced)
 
 If multiple versions exist (project + user or user + plugin):
 

@@ -56,7 +56,71 @@ echo "  .rptc/archive/      - Archived work"
 echo "  docs/               - Permanent documentation"
 ```
 
-## Step 3: Handle SOP Copying (If Requested)
+## Step 3: Locate Plugin Directory (CRITICAL)
+
+Before copying files, we need to find where the RPTC plugin is installed:
+
+```bash
+# Find the plugin directory by searching for the unique plugin manifest
+# Search in common Claude Code plugin installation locations
+PLUGIN_ROOT=""
+
+# Check user plugins directory
+if [ -d "$HOME/.claude/plugins" ]; then
+  FOUND=$(find "$HOME/.claude/plugins" -name "plugin.json" -path "*/.claude-plugin/plugin.json" 2>/dev/null | while read manifest; do
+    if grep -q '"name".*"rptc-workflow"' "$manifest" 2>/dev/null; then
+      dirname "$(dirname "$manifest")"
+      break
+    fi
+  done | head -1)
+  if [ -n "$FOUND" ]; then
+    PLUGIN_ROOT="$FOUND"
+  fi
+fi
+
+# If not found, check system plugins directory
+if [ -z "$PLUGIN_ROOT" ] && [ -d "/opt/claude/plugins" ]; then
+  FOUND=$(find "/opt/claude/plugins" -name "plugin.json" -path "*/.claude-plugin/plugin.json" 2>/dev/null | while read manifest; do
+    if grep -q '"name".*"rptc-workflow"' "$manifest" 2>/dev/null; then
+      dirname "$(dirname "$manifest")"
+      break
+    fi
+  done | head -1)
+  if [ -n "$FOUND" ]; then
+    PLUGIN_ROOT="$FOUND"
+  fi
+fi
+
+# If still not found, try alternative search in home directory
+if [ -z "$PLUGIN_ROOT" ]; then
+  FOUND=$(find "$HOME" -type f -name "plugin.json" -path "*rptc-workflow*/.claude-plugin/plugin.json" 2>/dev/null | while read manifest; do
+    if grep -q '"name".*"rptc-workflow"' "$manifest" 2>/dev/null; then
+      dirname "$(dirname "$manifest")"
+      break
+    fi
+  done | head -1)
+  if [ -n "$FOUND" ]; then
+    PLUGIN_ROOT="$FOUND"
+  fi
+fi
+
+if [ -z "$PLUGIN_ROOT" ]; then
+  echo "❌ ERROR: Could not locate RPTC plugin installation directory"
+  echo ""
+  echo "Searched in:"
+  echo "  - $HOME/.claude/plugins/"
+  echo "  - /opt/claude/plugins/"
+  echo "  - $HOME/**/rptc-workflow/"
+  echo ""
+  echo "Please ensure the rptc-workflow plugin is properly installed."
+  echo "Try: /plugin install rptc-workflow"
+  exit 1
+fi
+
+echo "✓ Found plugin at: $PLUGIN_ROOT"
+```
+
+## Step 4: Handle SOP Copying (If Requested)
 
 ### If `--copy-sops` was provided:
 
@@ -67,8 +131,14 @@ If `--global` was NOT provided:
 ```bash
 mkdir -p .claude/sop
 
+# Verify SOPs exist
+if [ ! -d "$PLUGIN_ROOT/sop" ]; then
+  echo "❌ ERROR: SOPs directory not found at $PLUGIN_ROOT/sop"
+  exit 1
+fi
+
 # Copy all SOPs from plugin
-cp "${CLAUDE_PLUGIN_ROOT}/sop/"*.md .claude/sop/
+cp "$PLUGIN_ROOT/sop/"*.md .claude/sop/
 
 echo "✓ Copied SOPs to .claude/sop/ for project-specific customization"
 echo ""
@@ -90,8 +160,14 @@ If `--global` was provided:
 ```bash
 mkdir -p ~/.claude/global/sop
 
+# Verify SOPs exist
+if [ ! -d "$PLUGIN_ROOT/sop" ]; then
+  echo "❌ ERROR: SOPs directory not found at $PLUGIN_ROOT/sop"
+  exit 1
+fi
+
 # Copy all SOPs from plugin to user global
-cp "${CLAUDE_PLUGIN_ROOT}/sop/"*.md ~/.claude/global/sop/
+cp "$PLUGIN_ROOT/sop/"*.md ~/.claude/global/sop/
 
 echo "✓ Copied SOPs to ~/.claude/global/sop/ as user defaults"
 echo ""
@@ -106,7 +182,7 @@ echo "  Edit these files to set your personal coding standards."
 ```bash
 echo "ℹ️  SOPs will be referenced from plugin (read-only)"
 echo ""
-echo "  Commands will use: ${CLAUDE_PLUGIN_ROOT}/sop/"
+echo "  Commands will use: $PLUGIN_ROOT/sop/"
 echo ""
 echo "  To customize SOPs for this project, run:"
 echo "  /rptc:admin:init --copy-sops"
@@ -115,14 +191,20 @@ echo "  To set personal defaults across all projects, run:"
 echo "  /rptc:admin:init --copy-sops --global"
 ```
 
-## Step 4: Create RPTC Workflow Instructions
+## Step 5: Create RPTC Workflow Instructions
 
 Copy the RPTC workflow template to `.rptc/CLAUDE.md`:
 
 ```bash
 if [ ! -f ".rptc/CLAUDE.md" ]; then
+  # Verify template exists
+  if [ ! -f "$PLUGIN_ROOT/docs/PROJECT_TEMPLATE.md" ]; then
+    echo "❌ ERROR: Project template not found at $PLUGIN_ROOT/docs/PROJECT_TEMPLATE.md"
+    exit 1
+  fi
+
   # Copy RPTC workflow template
-  cp "${CLAUDE_PLUGIN_ROOT}/docs/PROJECT_TEMPLATE.md" .rptc/CLAUDE.md
+  cp "$PLUGIN_ROOT/docs/PROJECT_TEMPLATE.md" .rptc/CLAUDE.md
 
   echo "✓ Created .rptc/CLAUDE.md with RPTC workflow instructions"
   echo "  This file contains RPTC-specific guidance for this project"
@@ -132,7 +214,7 @@ else
 fi
 ```
 
-## Step 5: Add RPTC Reference to Root CLAUDE.md (If Exists)
+## Step 6: Add RPTC Reference to Root CLAUDE.md (If Exists)
 
 If the user has a project root `CLAUDE.md`, automatically add a reference to `.rptc/CLAUDE.md`:
 
@@ -172,7 +254,7 @@ else
 fi
 ```
 
-## Step 6: Update .gitignore
+## Step 7: Update .gitignore
 
 Add RPTC-specific gitignore entries if not already present:
 
@@ -194,7 +276,7 @@ else
 fi
 ```
 
-## Step 7: Create README Section (Optional Suggestion)
+## Step 8: Create README Section (Optional Suggestion)
 
 Suggest adding RPTC section to README:
 
@@ -212,7 +294,7 @@ echo "   - \`/rptc:commit [pr]\` - Verify and ship"
 echo ""
 ```
 
-## Step 8: Summary Report
+## Step 9: Summary Report
 
 Provide clear summary of what was created:
 
@@ -237,7 +319,7 @@ if [ --copy-sops provided ]; then
     echo "  .claude/sop/            - Project-specific SOPs"
   fi
 else
-  echo "  Plugin SOPs (read-only) - ${CLAUDE_PLUGIN_ROOT}/sop/"
+  echo "  Plugin SOPs (read-only) - $PLUGIN_ROOT/sop/"
 fi
 echo ""
 echo "Next Steps:"
@@ -255,7 +337,7 @@ echo "════════════════════════�
 - **Preserve existing files** - never overwrite .rptc/CLAUDE.md if it exists
 - **Separate concerns** - .rptc/CLAUDE.md is for RPTC workflow, project root CLAUDE.md is for general project instructions
 - **Be explicit about SOP location** - clearly tell user where SOPs are coming from
-- **Validate paths** - ensure ${CLAUDE_PLUGIN_ROOT} resolves correctly before copying
+- **Validate paths** - ensure $PLUGIN_ROOT resolves correctly before copying (use Step 3's search logic)
 
 ## Error Handling
 
