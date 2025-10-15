@@ -166,22 +166,23 @@ Once you understand WHAT we're building, search the codebase:
    I'd like to research [specific topic] online for best practices.
    Should I delegate to the Master Web Research Agent?
 
-   💡 TIP: You can specify a thinking mode for the agent:
-   - "think" - Basic extended thinking (default, ~4K tokens)
-   - "think hard" - Medium depth thinking (~10K tokens)
-   - "ultrathink" - Maximum depth thinking (~32K tokens, best for complex topics)
+   💡 Thinking Mode:
+   [If global default exists: Will use configured mode: "[mode]" (~[X]K tokens)]
+   [If no global default: Will use default mode: "think" (~4K tokens)]
 
-   [If global default exists: Currently configured: "[mode]"]
+   - Type "yes" or "approved" to proceed with configured mode
+   - To override thinking mode, say: "yes, use ultrathink" (or "think hard")
 
-   Which thinking mode would you like? (or just say "yes" to use [global default or "think"])
+   Available modes: "think" (~4K), "think hard" (~10K), "ultrathink" (~32K)
+   Configure default in .claude/settings.json: "rptc.defaultThinkingMode"
 ```
 
-3. **Wait for explicit approval** and note any thinking mode preference
+3. **Wait for explicit approval**
 
 4. **Determine Final Thinking Mode**:
-   - If user specified a mode: Use user's choice
-   - Else if global default exists: Use global default
-   - Else: Use "think"
+   - If user specified a mode override (e.g., "yes, use ultrathink"): Use user's choice
+   - Else if global default exists in .claude/settings.json: Use that mode
+   - Else: Use default "think" mode
 
 5. **If approved**: Use the Task tool to delegate to `master-web-research-agent`
 
@@ -205,6 +206,8 @@ Once you understand WHAT we're building, search the codebase:
 ### Phase 4: Findings Presentation (REQUIRED)
 
 Present your findings clearly:
+
+**CRITICAL FORMATTING NOTE:** Each section, file reference, pattern, consideration, and recommendation MUST be on its own line with proper newlines. Never concatenate items.
 
 ```markdown
 ## Research Summary

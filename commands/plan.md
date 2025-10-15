@@ -87,6 +87,8 @@ fi
 - `/rptc:helper-catch-up-med` - Medium context (5-10 min)
 - `/rptc:helper-catch-up-deep` - Deep analysis (15-30 min)
 
+**FORMATTING NOTE:** Each context item must be on its own line with proper newlines.
+
 **Present Context Summary**:
 
 ```text
@@ -121,6 +123,8 @@ Create high-level plan structure:
    - What needs testing? (reference testing SOP)
    - Testing approach (unit, integration, e2e)
    - Coverage expectations (default: 80%+)
+
+**FORMATTING NOTE:** Each step and test strategy line must be on its own line with proper newlines.
 
 **Present Initial Scaffold**:
 
@@ -190,6 +194,8 @@ fi
 
 Extract `rptc.defaultThinkingMode` if it exists (e.g., "think", "think hard", "ultrathink")
 
+**FORMATTING NOTE:** Each list item must be on its own line with proper newlines.
+
 **Step 2: Ask for Permission**:
 
 ```text
@@ -209,16 +215,17 @@ The Master Feature Planner will create a comprehensive, detailed plan including:
 - Acceptance criteria
 - Risk assessment
 
-💡 TIP: You can specify a thinking mode for the agent:
-- "think" - Basic extended thinking (default, ~4K tokens)
-- "think hard" - Medium depth thinking (~10K tokens)
-- "ultrathink" - Maximum depth thinking (~32K tokens, best for complex features)
+💡 Thinking Mode:
+[If global default exists: Will use configured mode: "[mode]" (~[X]K tokens)]
+[If no global default: Will use default mode: "think" (~4K tokens)]
 
-[If global default exists: Currently configured: "[mode]"]
+Ready to delegate to Master Feature Planner?
+- Type "yes" or "approved" to proceed with configured mode
+- Type "wait" to refine scaffold further
+- To override thinking mode, say: "yes, use ultrathink" (or "think hard")
 
-Which thinking mode would you like?
-Type "yes"/"approved" to use [global default or "think"], or specify a mode (e.g., "ultrathink").
-Type "wait" to refine scaffold further.
+Available modes: "think" (~4K), "think hard" (~10K), "ultrathink" (~32K)
+Configure default in .claude/settings.json: "rptc.defaultThinkingMode"
 
 Waiting for your sign-off...
 ```
@@ -228,9 +235,9 @@ Waiting for your sign-off...
 ### Phase 5: Master Feature Planner Delegation (Only After Approval)
 
 **Step 1: Determine Final Thinking Mode**:
-   - If user specified a mode: Use user's choice
-   - Else if global default exists: Use global default
-   - Else: Use "think"
+   - If user specified a mode override (e.g., "yes, use ultrathink"): Use user's choice
+   - Else if global default exists in .claude/settings.json: Use that mode
+   - Else: Use default "think" mode
 
 **Step 2: Delegate** using Task tool to `master-feature-planner-agent`:
 
@@ -320,6 +327,8 @@ Reference SOPs for standards and patterns.
 
 ### Phase 6: Present Plan to PM (REQUIRED)
 
+**CRITICAL FORMATTING NOTE:** Each section and list item MUST be on its own line. Never concatenate items (e.g., `Install: pkg1Migrations: Yes` is WRONG).
+
 **Present the detailed plan clearly**:
 
 ```text
@@ -370,6 +379,8 @@ Let me know how to proceed...
 **Keep iterating until PM explicitly approves.**
 
 ### Phase 8: Final PM Sign-Off (REQUIRED)
+
+**FORMATTING NOTE:** Each option line must be on its own line with proper newlines.
 
 **Get explicit approval to save**:
 

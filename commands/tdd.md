@@ -87,6 +87,8 @@ fi
 
 **Present Plan Summary**:
 
+**FORMATTING NOTE:** Ensure each list item is on its own line with proper newlines.
+
 ```text
 📋 Plan Loaded: [Work Item Name]
 
@@ -147,6 +149,8 @@ Throughout implementation, you MUST keep the plan document synchronized:
 
 **Report RED State**:
 
+**FORMATTING NOTE:** Each list item MUST be on its own line with proper newlines.
+
 ```text
 🔴 RED Phase Complete - Step [N]: [Step Name]
 
@@ -186,6 +190,8 @@ Proceeding to GREEN phase...
 
 **Report Each Iteration**:
 
+**FORMATTING NOTE:** Ensure each status line is on its own line.
+
 ```text
 Iteration [N]: [What was fixed]
 Tests: [X] passing, [Y] failing
@@ -193,6 +199,8 @@ Tests: [X] passing, [Y] failing
 ```
 
 **Report GREEN State**:
+
+**FORMATTING NOTE:** Keep all status items on separate lines.
 
 ```text
 🟢 GREEN Phase Complete - Step [N]: [Step Name]
@@ -227,6 +235,8 @@ Proceeding to REFACTOR phase...
 
 **Report REFACTOR Complete**:
 
+**FORMATTING NOTE:** Each improvement and status line must be on its own line.
+
 ```text
 🔧 REFACTOR Phase Complete - Step [N]: [Step Name]
 
@@ -251,6 +261,8 @@ Step [N] complete!
    - Save updated plan
 
 2. **Report completion**:
+
+**FORMATTING NOTE:** Each status line (Tests, Files, Coverage) must be on separate lines with proper newlines.
 
 ```text
 ✅ Step [N] Complete: [Step Name]
@@ -287,6 +299,8 @@ Extract `rptc.defaultThinkingMode` if it exists (e.g., "think", "think hard", "u
 
 **Step 2: Ask PM for Permission**:
 
+**FORMATTING NOTE:** Each list item must be on its own line with proper newlines.
+
 ```text
 ✅ Implementation Complete - All Tests Passing!
 
@@ -304,16 +318,17 @@ The Master Efficiency Agent will:
 - Identify over-engineering
 - Ensure KISS and YAGNI principles
 
-💡 TIP: You can specify a thinking mode for the agent:
-- "think" - Basic extended thinking (default, ~4K tokens)
-- "think hard" - Medium depth thinking (~10K tokens)
-- "ultrathink" - Maximum depth thinking (~32K tokens, best for complex refactors)
+💡 Thinking Mode:
+[If global default exists: Will use configured mode: "[mode]" (~[X]K tokens)]
+[If no global default: Will use default mode: "think" (~4K tokens)]
 
-[If global default exists: Currently configured: "[mode]"]
+Ready to delegate to Master Efficiency Agent?
+- Type "yes" or "approved" to proceed with configured mode
+- Type "skip" to proceed without efficiency review
+- To override thinking mode, say: "yes, use ultrathink" (or "think hard")
 
-Which thinking mode would you like?
-Type "yes"/"approved" to use [global default or "think"], or specify a mode (e.g., "ultrathink").
-Type "skip" to proceed without efficiency review.
+Available modes: "think" (~4K), "think hard" (~10K), "ultrathink" (~32K)
+Configure default in .claude/settings.json: "rptc.defaultThinkingMode"
 
 Waiting for your sign-off...
 ```
@@ -323,9 +338,9 @@ Waiting for your sign-off...
 #### Efficiency Agent Delegation (If Approved)
 
 **Step 1: Determine Final Thinking Mode**:
-   - If user specified a mode: Use user's choice
-   - Else if global default exists: Use global default
-   - Else: Use "think"
+   - If user specified a mode override (e.g., "yes, use ultrathink"): Use user's choice
+   - Else if global default exists in .claude/settings.json: Use that mode
+   - Else: Use default "think" mode
 
 **Step 2: Create Sub-Agent**:
 
@@ -430,6 +445,8 @@ Extract `rptc.defaultThinkingMode` if it exists (e.g., "think", "think hard", "u
 
 **Step 2: Ask PM for Permission**:
 
+**FORMATTING NOTE:** Keep all list items on separate lines.
+
 ```text
 🎯 Efficiency Review Complete!
 
@@ -442,16 +459,17 @@ The Master Security Agent will:
 - Identify potential exploits
 - Ensure security best practices
 
-💡 TIP: You can specify a thinking mode for the agent:
-- "think" - Basic extended thinking (default, ~4K tokens)
-- "think hard" - Medium depth thinking (~10K tokens)
-- "ultrathink" - Maximum depth thinking (~32K tokens, best for security-critical code)
+💡 Thinking Mode:
+[If global default exists: Will use configured mode: "[mode]" (~[X]K tokens)]
+[If no global default: Will use default mode: "think" (~4K tokens)]
 
-[If global default exists: Currently configured: "[mode]"]
+Ready to delegate to Master Security Agent?
+- Type "yes" or "approved" to proceed with configured mode
+- Type "skip" to proceed without security review
+- To override thinking mode, say: "yes, use ultrathink" (or "think hard")
 
-Which thinking mode would you like?
-Type "yes"/"approved" to use [global default or "think"], or specify a mode (e.g., "ultrathink").
-Type "skip" to proceed without security review.
+Available modes: "think" (~4K), "think hard" (~10K), "ultrathink" (~32K)
+Configure default in .claude/settings.json: "rptc.defaultThinkingMode"
 
 Waiting for your sign-off...
 ```
@@ -461,9 +479,9 @@ Waiting for your sign-off...
 #### Security Agent Delegation (If Approved)
 
 **Step 1: Determine Final Thinking Mode**:
-   - If user specified a mode: Use user's choice
-   - Else if global default exists: Use global default
-   - Else: Use "think"
+   - If user specified a mode override (e.g., "yes, use ultrathink"): Use user's choice
+   - Else if global default exists in .claude/settings.json: Use that mode
+   - Else: Use default "think" mode
 
 **Step 2: Create Sub-Agent**:
 
@@ -619,6 +637,8 @@ Once approved:
 
 2. **Confirm next step**:
 
+**FORMATTING NOTE:** Each status item must be on its own line.
+
 ```text
 ✅ TDD Phase Approved by Project Manager!
 
@@ -644,6 +664,8 @@ Next step: `/rptc:commit` or `/rptc:commit pr` to verify and ship!
   5. Report: "Iteration N: [what was fixed] → [result]"
 
 **If still failing after $MAX_ATTEMPTS iterations**:
+
+**FORMATTING NOTE:** Ensure each option is on its own line with proper newlines.
 
 ```text
 ❌ Auto-iteration limit reached ($MAX_ATTEMPTS attempts)

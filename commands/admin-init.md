@@ -41,6 +41,7 @@ Create the RPTC workspace structure:
 mkdir -p .rptc/research
 mkdir -p .rptc/plans
 mkdir -p .rptc/complete
+mkdir -p .rptc/sop
 
 # Documentation directory
 mkdir -p docs/research
@@ -52,7 +53,8 @@ mkdir -p docs/api
 echo "✓ Created workspace directories:"
 echo "  .rptc/research/     - Active research findings"
 echo "  .rptc/plans/        - Active implementation plans"
-echo "  .rptc/complete/      - Archived work"
+echo "  .rptc/complete/     - Archived work"
+echo "  .rptc/sop/          - Project-specific SOPs (optional)"
 echo "  docs/               - Permanent documentation"
 ```
 
@@ -129,15 +131,13 @@ echo "✓ Found plugin at: $PLUGIN_ROOT"
 If `--global` was NOT provided:
 
 ```bash
-mkdir -p .rptc/sop
-
 # Verify SOPs exist
 if [ ! -d "$PLUGIN_ROOT/sop" ]; then
   echo "❌ ERROR: SOPs directory not found at $PLUGIN_ROOT/sop"
   exit 1
 fi
 
-# Copy all SOPs from plugin
+# Copy all SOPs from plugin (.rptc/sop/ already created in Step 2)
 cp "$PLUGIN_ROOT/sop/"*.md .rptc/sop/
 
 echo "✓ Copied SOPs to .rptc/sop/ for project-specific customization"
@@ -266,7 +266,7 @@ if [ ! -f ".claude/settings.json" ]; then
   cat > .claude/settings.json <<'EOF'
 {
   "rptc": {
-    "_rptcVersion": "1.1.2",
+    "_rptcVersion": "1.1.3",
     "defaultThinkingMode": "think",
     "artifactLocation": ".rptc",
     "docsLocation": "docs",
@@ -289,7 +289,7 @@ else
     if command -v jq >/dev/null 2>&1; then
       # Use jq for safe merging
       TEMP_FILE=$(mktemp)
-      jq '. + {"rptc": {"_rptcVersion": "1.1.2", "defaultThinkingMode": "think", "artifactLocation": ".rptc", "docsLocation": "docs", "testCoverageTarget": 85, "maxPlanningAttempts": 10, "customSopPath": ".rptc/sop"}}' .claude/settings.json > "$TEMP_FILE"
+      jq '. + {"rptc": {"_rptcVersion": "1.1.3", "defaultThinkingMode": "think", "artifactLocation": ".rptc", "docsLocation": "docs", "testCoverageTarget": 85, "maxPlanningAttempts": 10, "customSopPath": ".rptc/sop"}}' .claude/settings.json > "$TEMP_FILE"
       mv "$TEMP_FILE" .claude/settings.json
       echo "✓ Added RPTC configuration to existing .claude/settings.json"
     else
@@ -299,7 +299,7 @@ else
       echo "  Please add the following to your .claude/settings.json:"
       echo ""
       echo '  "rptc": {'
-      echo '    "_rptcVersion": "1.1.2",'
+      echo '    "_rptcVersion": "1.1.3",'
       echo '    "defaultThinkingMode": "think",'
       echo '    "artifactLocation": ".rptc",'
       echo '    "docsLocation": "docs",'
@@ -368,7 +368,8 @@ echo ""
 echo "Structure created:"
 echo "  .rptc/research/         - Active research"
 echo "  .rptc/plans/            - Active plans"
-echo "  .rptc/complete/          - Old work"
+echo "  .rptc/complete/         - Old work"
+echo "  .rptc/sop/              - Project-specific SOPs (ready for your files)"
 echo "  .rptc/CLAUDE.md         - RPTC workflow instructions"
 echo "  .claude/settings.json   - RPTC configuration"
 echo "  docs/                   - Permanent documentation"
@@ -376,12 +377,16 @@ echo ""
 echo "SOP Configuration:"
 if [ --copy-sops provided ]; then
   if [ --global provided ]; then
-    echo "  ~/.claude/global/sop/   - User defaults (all projects)"
+    echo "  ✓ Copied SOPs to ~/.claude/global/sop/ (user defaults)"
   else
-    echo "  .rptc/sop/              - Project-specific SOPs"
+    echo "  ✓ Copied SOPs to .rptc/sop/ (project-specific)"
   fi
 else
-  echo "  Plugin SOPs (read-only) - $PLUGIN_ROOT/sop/"
+  echo "  ℹ️  .rptc/sop/ created (empty, ready for your SOPs)"
+  echo "  📖 Commands will use plugin SOPs: $PLUGIN_ROOT/sop/"
+  echo ""
+  echo "  To copy plugin SOPs for customization:"
+  echo "    /rptc:admin-init --copy-sops"
 fi
 echo ""
 echo "💡 Thinking Mode Configuration"

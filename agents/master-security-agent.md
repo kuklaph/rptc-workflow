@@ -461,6 +461,8 @@ it("should reject expired tokens", async () => {
 
 **Executive Summary**:
 
+**CRITICAL FORMATTING NOTE:** Each stat item MUST be on its own line with proper newlines. Never concatenate items (e.g., `Total Issues: 5Auto-Fixed: 3` is WRONG).
+
 ```markdown
 # Security Audit Report
 
@@ -479,6 +481,8 @@ it("should reject expired tokens", async () => {
 ```
 
 **Detailed Findings** (per vulnerability):
+
+**FORMATTING NOTE:** Each finding section and list item must be on its own line with proper newlines.
 
 ```markdown
 ## SEC-001: SQL Injection in User Authentication
@@ -514,6 +518,8 @@ User input directly concatenated into SQL query without parameterization, allowi
 
 **Manual Review Items**:
 
+**FORMATTING NOTE:** Each manual review item must be on its own line with proper newlines.
+
 ```markdown
 ## Manual Review Required
 
@@ -534,6 +540,8 @@ Review authorization matrix in `.context/` and validate implementation.
 ```
 
 #### 4.2 Metrics & Coverage
+
+**FORMATTING NOTE:** Each metric line (before/after, test status) must be on its own line.
 
 ```markdown
 ## Security Posture Improvement
@@ -560,6 +568,8 @@ Review authorization matrix in `.context/` and validate implementation.
 
 #### 4.3 Tool Output Summary
 
+**FORMATTING NOTE:** Each tool and finding line must be on its own line.
+
 ```markdown
 ## Tool Findings Summary
 
@@ -580,6 +590,8 @@ Review authorization matrix in `.context/` and validate implementation.
 ```
 
 #### 4.4 Next Steps
+
+**FORMATTING NOTE:** Each action and recommendation must be on its own line.
 
 ```markdown
 ## Recommended Next Steps
@@ -930,6 +942,8 @@ it("should require authentication", async () => {
 
 Deliver results in this exact format:
 
+**CRITICAL FORMATTING NOTE:** This is the FINAL REPORT OUTPUT. Every single list item, stat line, and finding MUST be on its own line with proper newlines. Never concatenate items together (e.g., `Critical: 2High: 3` is WRONG - should be `Critical: 2\nHigh: 3`). This is absolutely critical for readability.
+
 ```markdown
 # 🔒 Master Security Agent - Audit Complete
 
@@ -1082,6 +1096,8 @@ Ready for PM final sign-off and commit phase.
 
 ### If Security Tools Fail
 
+**FORMATTING NOTE:** Each error detail and completed scan must be on its own line.
+
 ```markdown
 ⚠️ Security Agent - Partial Results
 
@@ -1101,6 +1117,8 @@ Ready for PM final sign-off and commit phase.
 
 ### If Auto-Fix Fails
 
+**FORMATTING NOTE:** Each detail line must be on its own line with proper newlines.
+
 ```markdown
 ⚠️ Auto-Fix Failed: SEC-XXX
 
@@ -1114,6 +1132,8 @@ Ready for PM final sign-off and commit phase.
 ```
 
 ### If Tests Fail After Fix
+
+**FORMATTING NOTE:** Each detail and analysis line must be on its own line.
 
 ```markdown
 ❌ Test Failure After Security Fix

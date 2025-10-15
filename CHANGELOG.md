@@ -7,6 +7,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.4] - 2025-10-15
+
+### Fixed
+
+- **Critical: Output Formatting Issue**: Fixed line-running (concatenation) issues in dynamically generated output
+  - Root cause: Markdown source files were properly formatted, but output instructions lacked explicit formatting reminders
+  - Claude sometimes concatenated list items during runtime (e.g., "Files Created: 7Files Modified: 3")
+  - Added 40+ formatting notes across all critical output sections
+  - Files updated:
+    - `commands/tdd.md`: 10 formatting notes added to step reports, quality gates
+    - `commands/commit.md`: 11 formatting notes added to verification summaries, PR reports
+    - `commands/plan.md`: 5 formatting notes added to scaffolds, plan presentations
+    - `commands/research.md`: 1 critical formatting note added to findings presentation
+    - `agents/master-security-agent.md`: 9 formatting notes added to audit reports
+    - `agents/master-efficiency-agent.md`: Already had critical formatting note (verified)
+  - Standard formatting notes use pattern: "Each list item MUST be on its own line with proper newlines"
+  - Critical sections use explicit wrong/right examples to prevent concatenation
+
+- **Thinking Mode Approval Terminology Confusion**: Separated thinking mode configuration from approval prompts
+  - Root cause: Prompts mixed approval keywords with thinking mode selection
+  - Previous: "Type 'yes' to use default or 'ultrathink' for different mode" (confusing)
+  - Fixed: "Type 'yes' to proceed. To override: say 'yes, use ultrathink'" (clear separation)
+  - Impact: Users no longer mistake thinking mode keywords ("ultrathink") for approval terminology
+  - Files updated:
+    - `commands/tdd.md`: Fixed Efficiency and Security Agent delegation prompts
+    - `commands/plan.md`: Fixed Master Feature Planner delegation prompt
+    - `commands/research.md`: Fixed Master Web Research Agent delegation prompt
+  - Thinking mode determination logic preserved: User override > Global config > Default "think"
+  - All prompts now clearly show configured mode and explain override syntax separately
+
+### Improved
+
+- **Output Clarity**: All critical report outputs (quality gates, verification summaries, audit results) now have explicit formatting guidance to prevent line concatenation
+- **Approval UX**: Clear separation between approval actions ("yes"/"approved") and optional thinking mode overrides
+- **User Control**: Users retain full ability to override thinking mode per-command while avoiding terminology confusion
+
+### Technical
+
+- Formatting notes inserted immediately before all ```text and ```markdown output blocks where lists/multi-item displays are generated
+- Thinking mode prompts restructured to show: configured mode → approval options → override syntax (as separate concerns)
+- No changes to underlying thinking mode determination logic or configuration system
+
+---
+
+## [1.1.3] - 2025-10-15
+
+### Changed
+
+- **Always Create `.rptc/sop/` Directory**: The init command now always creates `.rptc/sop/` directory during workspace initialization, even without `--copy-sops` flag
+  - Makes it easy for users to add their own SOPs without creating the directory manually
+  - Provides consistent workspace structure across all installations
+  - Directory can remain empty if user prefers to use plugin or global SOPs
+  - Upgrade command now also verifies `.rptc/sop/` directory exists
+
+### Improved
+
+- **Clearer SOP Configuration Messaging**: Summary report now clearly indicates when `.rptc/sop/` is empty and ready for user files vs when plugin SOPs were copied
+
+---
+
 ## [1.1.2] - 2025-10-15
 
 ### Improved
@@ -504,6 +564,7 @@ Three-tier fallback system (priority order):
 
 ## Version History
 
+- **1.1.3** (2025-10-15): Always create .rptc/sop/ directory for consistent workspace structure
 - **1.1.2** (2025-10-15): Enhanced upgrade command - comprehensive workspace verification that respects user customizations
 - **1.1.1** (2025-10-15): Patch release - Fixed Windows backslash issue and shortened plugin name (rptc-workflow → rptc)
 - **1.1.0** (2025-10-15): Added version tracking system, upgrade command, and migrated SOP path from .claude/sop to .rptc/sop

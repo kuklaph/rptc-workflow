@@ -76,6 +76,8 @@ npm test || npm run test || pytest || go test ./... || cargo test
 
 **If ANY test fails**:
 
+**CRITICAL FORMATTING NOTE:** Ensure each failure item is on its own line with proper newlines. Never concatenate test failures together.
+
 ```text
 ════════════════════════════════════════
   ❌ COMMIT BLOCKED - TESTS FAILING
@@ -126,6 +128,8 @@ fi
 
 **Report**:
 
+**FORMATTING NOTE:** Ensure each metric is on its own line with proper newlines.
+
 ```text
 📊 Coverage: [X]% (target: [COVERAGE_TARGET]%)
 ```
@@ -142,6 +146,8 @@ For each staged file:
 - ⚠️ `TODO`/`FIXME` comments? → Warn but allow
 
 **If blocking issues found**:
+
+**CRITICAL FORMATTING NOTE:** Each issue MUST be on its own line with proper newlines. Never concatenate issues together.
 
 ```text
 ════════════════════════════════════════
@@ -200,6 +206,8 @@ git diff --staged
 
 **Report**:
 
+**FORMATTING NOTE:** Each status line must be on its own line with proper newlines.
+
 ```text
 🔍 Git Status:
 - Branch: [branch-name] ✅
@@ -255,6 +263,8 @@ Closes #124
 ### Phase 3: Verification Summary
 
 **Present comprehensive summary**:
+
+**CRITICAL FORMATTING NOTE:** Each verification item MUST be on its own line. Never concatenate items (e.g., `Test Suite: ✅Coverage: ✅` is WRONG).
 
 ```text
 ════════════════════════════════════════
@@ -323,6 +333,8 @@ Extract `rptc.defaultThinkingMode` if it exists (e.g., "think", "think hard", "u
 
 **Step 2: Delegate to Documentation Specialist**:
 
+**FORMATTING NOTE:** Each change line must be on its own line with proper newlines.
+
 ```text
 📚 Documentation Update Needed
 
@@ -389,6 +401,8 @@ CRITICAL: Only update existing docs. Ask before creating new docs.
 
 **Present Documentation Results**:
 
+**FORMATTING NOTE:** Ensure each documentation update and summary item is on its own line with proper newlines.
+
 ```text
 📚 Master Documentation Specialist Complete!
 
@@ -430,6 +444,8 @@ COMMIT_MSG
 ```
 
 **Report success**:
+
+**FORMATTING NOTE:** Ensure each status line is on its own line with proper newlines.
 
 ```text
 ✅ Committed: [commit-hash]
@@ -482,6 +498,8 @@ COMMIT_MSG
 
 4. **Report PR creation**:
 
+**FORMATTING NOTE:** Each PR detail must be on its own line.
+
 ```text
    🔀 Pull Request Created!
 
@@ -494,6 +512,8 @@ COMMIT_MSG
 ### Phase 7: Final Summary
 
 **Complete workflow summary**:
+
+**CRITICAL FORMATTING NOTE:** Each workflow step MUST be on its own line. Never concatenate steps (e.g., `✅ Research: Complete✅ Planning: Complete` is WRONG).
 
 ```text
 ════════════════════════════════════════
@@ -522,6 +542,8 @@ Great work! 🚀
 
 ### Tests Failing
 
+**CRITICAL FORMATTING NOTE:** Each test failure MUST be on its own line with proper newlines.
+
 ```text
 ════════════════════════════════════════
   ❌ COMMIT BLOCKED - TESTS FAILING
@@ -545,6 +567,8 @@ Use '/rptc:tdd' for auto-iteration fix.
 
 ### Code Quality Issues
 
+**CRITICAL FORMATTING NOTE:** Each quality issue MUST be on its own line. Never concatenate issues together.
+
 ```text
 ════════════════════════════════════════
   ❌ COMMIT BLOCKED - QUALITY ISSUES
@@ -560,6 +584,8 @@ Fix these issues before committing.
 ```
 
 ### Coverage Warning (Non-Blocking)
+
+**FORMATTING NOTE:** Each coverage item must be on its own line with proper newlines.
 
 ```text
 ⚠️  Warning: Coverage below target
