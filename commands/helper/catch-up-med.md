@@ -18,7 +18,7 @@ Gather thorough context in 5-10 minutes:
 **Standard Operating Procedures** (resolved via fallback chain):
 SOPs are loaded from (highest priority first):
 
-1. `.claude/sop/` - Project-specific overrides
+1. `.rptc/sop/` - Project-specific overrides
 2. `~/.claude/global/sop/` - User global defaults
 3. Plugin SOPs - Plugin defaults
 

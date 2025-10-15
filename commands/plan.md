@@ -28,7 +28,7 @@ Facilitate comprehensive planning through:
 
 Load SOPs using fallback chain (highest priority first):
 
-1. **Check project SOPs**: `.claude/sop/`
+1. **Check project SOPs**: `.rptc/sop/`
 2. **Check user global SOPs**: `~/.claude/global/sop/`
 3. **Use plugin defaults**: `${CLAUDE_PLUGIN_ROOT}/sop/`
 
@@ -256,7 +256,7 @@ Load these via fallback chain (project → user → plugin):
 - Security: Security considerations
 
 Fallback locations:
-1. .claude/sop/[name].md
+1. .rptc/sop/[name].md
 2. ~/.claude/global/sop/[name].md
 3. ${CLAUDE_PLUGIN_ROOT}/sop/[name].md
 

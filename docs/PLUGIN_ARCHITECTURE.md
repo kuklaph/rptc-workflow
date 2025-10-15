@@ -100,8 +100,8 @@ cd ~/my-project
 **What happens**:
 
 - Creates `.rptc/` in user's project (empty workspace)
-- Creates `.rptc/plans/`, `.rptc/research/`, `.rptc/archive/`
-- Optionally copies SOPs to `.claude/sop/` (if `--copy-sops` flag used)
+- Creates `.rptc/plans/`, `.rptc/research/`, `.rptc/complete/`
+- Optionally copies SOPs to `.rptc/sop/` (if `--copy-sops` flag used)
 - User's project now has its own workspace
 
 ### 3. User Uses Workflow
@@ -114,7 +114,7 @@ cd ~/my-project
 
 - Command loaded from plugin: `${CLAUDE_PLUGIN_ROOT}/commands/research.md`
 - SOPs loaded via fallback chain:
-  1. `.claude/sop/` (user's project overrides) ← checked first
+  1. `.rptc/sop/` (user's project overrides) ← checked first
   2. `~/.claude/global/sop/` (user's global settings) ← checked second
   3. `${CLAUDE_PLUGIN_ROOT}/sop/` (plugin defaults) ← checked last
 - Research saved to user's project: `.rptc/research/user-authentication.md`
@@ -126,7 +126,7 @@ cd ~/my-project
 | Category          | Plugin Includes                   | User Creates                   | Purpose                 |
 | ----------------- | --------------------------------- | ------------------------------ | ----------------------- |
 | **Commands**      | ✅ All `.md` files in `commands/` | ❌ None                        | Workflow automation     |
-| **SOPs**          | ✅ Defaults in `sop/`             | ✅ Overrides in `.claude/sop/` | Customizable standards  |
+| **SOPs**          | ✅ Defaults in `sop/`             | ✅ Overrides in `.rptc/sop/` | Customizable standards  |
 | **Agents**        | ✅ All `.md` files in `agents/`   | ❌ None                        | Specialist delegation   |
 | **Templates**     | ✅ In `templates/`                | ❌ None                        | Document scaffolding    |
 | **Workspace**     | ❌ Not included                   | ✅ `.rptc/` in project         | User's working files    |
@@ -198,7 +198,7 @@ PLUGIN_CONVERSION_STATUS.md      # Development tracking
 # Working artifacts (should be gitignored by users)
 .rptc/research/*
 .rptc/plans/*
-.rptc/archive/*
+.rptc/complete/*
 
 # Keep important plans/research with explicit add
 # Users can: git add -f .rptc/plans/important-feature.md
@@ -222,7 +222,7 @@ PLUGIN_CONVERSION_STATUS.md      # Development tracking
 
 **SOP Fallback Chain = Customization** (3 levels)
 
-1. Project: `.claude/sop/` (overrides everything)
+1. Project: `.rptc/sop/` (overrides everything)
 2. User: `~/.claude/global/sop/` (overrides plugin)
 3. Plugin: `${CLAUDE_PLUGIN_ROOT}/sop/` (defaults)
 

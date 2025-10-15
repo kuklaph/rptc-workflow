@@ -36,7 +36,7 @@ if [ -d ".rptc" ]; then
   echo "  ✓ .rptc/ directory exists"
   echo "    - research/: $(find .rptc/research -type f 2>/dev/null | wc -l) files"
   echo "    - plans/:    $(find .rptc/plans -type f 2>/dev/null | wc -l) files"
-  echo "    - archive/:  $(find .rptc/archive -type f 2>/dev/null | wc -l) files"
+  echo "    - complete/:  $(find .rptc/complete -type f 2>/dev/null | wc -l) files"
 else
   echo "  ✗ .rptc/ not initialized"
   echo "    Run: /rptc:admin:init"
@@ -51,18 +51,18 @@ Show where SOPs are being loaded from:
 echo ""
 echo "SOP Configuration:"
 echo "  Resolution order (highest priority first):"
-echo "  1. Project:  .claude/sop/"
+echo "  1. Project:  .rptc/sop/"
 echo "  2. User:     ~/.claude/global/sop/"
 echo "  3. Plugin:   ${CLAUDE_PLUGIN_ROOT}/sop/"
 echo ""
 
 # Check project SOPs
-if [ -d ".claude/sop" ]; then
-  SOP_COUNT=$(find .claude/sop -name "*.md" 2>/dev/null | wc -l)
-  echo "  ✓ Project SOPs: ${SOP_COUNT} files in .claude/sop/"
-  find .claude/sop -name "*.md" -exec basename {} \; 2>/dev/null | sed 's/^/    - /'
+if [ -d ".rptc/sop" ]; then
+  SOP_COUNT=$(find .rptc/sop -name "*.md" 2>/dev/null | wc -l)
+  echo "  ✓ Project SOPs: ${SOP_COUNT} files in .rptc/sop/"
+  find .rptc/sop -name "*.md" -exec basename {} \; 2>/dev/null | sed 's/^/    - /'
 else
-  echo "  ✗ No project SOPs (.claude/sop/ not found)"
+  echo "  ✗ No project SOPs (.rptc/sop/ not found)"
 fi
 
 echo ""
@@ -132,7 +132,7 @@ if [ -d ".git" ]; then
   echo "  ✓ Git repository detected"
 
   # Check .gitignore
-  if grep -q ".rptc/archive" .gitignore 2>/dev/null; then
+  if grep -q ".rptc/complete" .gitignore 2>/dev/null; then
     echo "  ✓ .gitignore contains RPTC entries"
   else
     echo "  ⚠️  .gitignore missing RPTC entries"
@@ -160,7 +160,7 @@ if [ ! -d ".rptc" ]; then
   echo "  • Initialize workspace: /rptc:admin:init"
 fi
 
-if [ ! -d ".claude/sop" ] && [ ! -d "~/.claude/global/sop" ]; then
+if [ ! -d ".rptc/sop" ] && [ ! -d "~/.claude/global/sop" ]; then
   echo "  • Copy SOPs for customization: /rptc:admin:init --copy-sops"
   echo "    (or --copy-sops --global for user-wide defaults)"
 fi

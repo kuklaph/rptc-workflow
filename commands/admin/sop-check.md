@@ -89,8 +89,8 @@ For each SOP, check in priority order:
 function resolve_sop() {
   local sop_name=$1
   local locations=(
-    ".claude/sop/${sop_name}.md"
-    "~/.claude/global/sop/${sop_name}.md"
+    ".rptc/sop/${sop_name}.md"
+    "$HOME/.claude/global/sop/${sop_name}.md"
     "$PLUGIN_ROOT/sop/${sop_name}.md"
   )
 
@@ -119,21 +119,21 @@ echo "Checking in priority order:"
 echo ""
 
 # Check each location
-echo "1. Project level (.claude/sop/):"
-if [ -f ".claude/sop/${SOP_NAME}.md" ]; then
-  echo "   ✓ FOUND: .claude/sop/${SOP_NAME}.md"
+echo "1. Project level (.rptc/sop/):"
+if [ -f ".rptc/sop/${SOP_NAME}.md" ]; then
+  echo "   ✓ FOUND: .rptc/sop/${SOP_NAME}.md"
   echo "   ⚡ This file will be used (highest priority)"
 
   # Show file info
-  FILE_SIZE=$(wc -c < ".claude/sop/${SOP_NAME}.md")
-  LAST_MODIFIED=$(stat -c %y ".claude/sop/${SOP_NAME}.md" 2>/dev/null || stat -f %Sm ".claude/sop/${SOP_NAME}.md")
+  FILE_SIZE=$(wc -c < ".rptc/sop/${SOP_NAME}.md")
+  LAST_MODIFIED=$(stat -c %y ".rptc/sop/${SOP_NAME}.md" 2>/dev/null || stat -f %Sm ".rptc/sop/${SOP_NAME}.md")
   echo "   📊 Size: ${FILE_SIZE} bytes"
   echo "   📅 Last modified: ${LAST_MODIFIED}"
 
   # Show first few lines as preview
   echo ""
   echo "   Preview (first 5 lines):"
-  head -5 ".claude/sop/${SOP_NAME}.md" | sed 's/^/   │ /'
+  head -5 ".rptc/sop/${SOP_NAME}.md" | sed 's/^/   │ /'
 
   exit 0  # Found, no need to check further
 else
@@ -142,13 +142,13 @@ fi
 
 echo ""
 echo "2. User global level (~/.claude/global/sop/):"
-if [ -f "~/.claude/global/sop/${SOP_NAME}.md" ]; then
-  echo "   ✓ FOUND: ~/.claude/global/sop/${SOP_NAME}.md"
+if [ -f "$HOME/.claude/global/sop/${SOP_NAME}.md" ]; then
+  echo "   ✓ FOUND: $HOME/.claude/global/sop/${SOP_NAME}.md"
   echo "   ⚡ This file will be used (user default)"
 
   # Show file info
-  FILE_SIZE=$(wc -c < "~/.claude/global/sop/${SOP_NAME}.md")
-  LAST_MODIFIED=$(stat -c %y "~/.claude/global/sop/${SOP_NAME}.md" 2>/dev/null || stat -f %Sm "~/.claude/global/sop/${SOP_NAME}.md")
+  FILE_SIZE=$(wc -c < "$HOME/.claude/global/sop/${SOP_NAME}.md")
+  LAST_MODIFIED=$(stat -c %y "$HOME/.claude/global/sop/${SOP_NAME}.md" 2>/dev/null || stat -f %Sm "$HOME/.claude/global/sop/${SOP_NAME}.md")
   echo "   📊 Size: ${FILE_SIZE} bytes"
   echo "   📅 Last modified: ${LAST_MODIFIED}"
 
@@ -200,9 +200,9 @@ for sop in "${SOPS[@]}"; do
   echo "• ${sop}.md"
 
   # Check resolution
-  if [ -f ".claude/sop/${sop}.md" ]; then
-    echo "  ⚡ Project (.claude/sop/)"
-  elif [ -f "~/.claude/global/sop/${sop}.md" ]; then
+  if [ -f ".rptc/sop/${sop}.md" ]; then
+    echo "  ⚡ Project (.rptc/sop/)"
+  elif [ -f "$HOME/.claude/global/sop/${sop}.md" ]; then
     echo "  ⚡ User (~/.claude/global/sop/)"
   elif [ -f "$PLUGIN_ROOT/sop/${sop}.md" ]; then
     echo "  ⚡ Plugin (default)"
@@ -224,16 +224,16 @@ echo "💡 To override SOPs:"
 echo ""
 echo "For this project only:"
 echo "  /rptc:admin:init --copy-sops"
-echo "  # Copies SOPs to .claude/sop/ for customization"
+echo "  # Copies SOPs to .rptc/sop/ for customization"
 echo ""
 echo "For all your projects:"
 echo "  /rptc:admin:init --copy-sops --global"
 echo "  # Copies SOPs to ~/.claude/global/sop/ as defaults"
 echo ""
 echo "Manual copy:"
-echo "  mkdir -p .claude/sop"
-echo "  cp \"$PLUGIN_ROOT/sop/testing-guide.md\" .claude/sop/"
-echo "  # Edit .claude/sop/testing-guide.md"
+echo "  mkdir -p .rptc/sop"
+echo "  cp \"$PLUGIN_ROOT/sop/testing-guide.md\" .rptc/sop/"
+echo "  # Edit .rptc/sop/testing-guide.md"
 echo ""
 ```
 
@@ -248,18 +248,18 @@ echo "Showing differences between versions:"
 echo ""
 
 # If both project and user/plugin exist, show diff summary
-if [ -f ".claude/sop/${SOP_NAME}.md" ] && [ -f "~/.claude/global/sop/${SOP_NAME}.md" ]; then
+if [ -f ".rptc/sop/${SOP_NAME}.md" ] && [ -f "$HOME/.claude/global/sop/${SOP_NAME}.md" ]; then
   echo "Comparing:"
-  echo "  Active:   .claude/sop/${SOP_NAME}.md"
-  echo "  Fallback: ~/.claude/global/sop/${SOP_NAME}.md"
+  echo "  Active:   .rptc/sop/${SOP_NAME}.md"
+  echo "  Fallback: $HOME/.claude/global/sop/${SOP_NAME}.md"
   echo ""
 
   # Show brief diff stats
-  LINES_DIFF=$(diff .claude/sop/${SOP_NAME}.md ~/.claude/global/sop/${SOP_NAME}.md 2>/dev/null | grep -c "^[<>]")
+  LINES_DIFF=$(diff .rptc/sop/${SOP_NAME}.md "$HOME/.claude/global/sop/${SOP_NAME}.md" 2>/dev/null | grep -c "^[<>]")
 
   if [ "$LINES_DIFF" -gt 0 ]; then
     echo "  📊 ${LINES_DIFF} lines differ between versions"
-    echo "  💡 Run 'diff .claude/sop/${SOP_NAME}.md ~/.claude/global/sop/${SOP_NAME}.md' to see details"
+    echo "  💡 Run 'diff .rptc/sop/${SOP_NAME}.md ~/.claude/global/sop/${SOP_NAME}.md' to see details"
   else
     echo "  ✓ Files are identical"
   fi

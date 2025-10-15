@@ -42,7 +42,7 @@ You will receive:
 
 SOPs are resolved via fallback chain (highest priority first):
 
-1. `.claude/sop/[name].md` - Project-specific overrides
+1. `.rptc/sop/[name].md` - Project-specific overrides
 2. `~/.claude/global/sop/[name].md` - User global defaults
 3. `${CLAUDE_PLUGIN_ROOT}/sop/[name].md` - Plugin defaults
 

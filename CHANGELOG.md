@@ -7,6 +7,82 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.0] - 2025-10-15
+
+### Added
+
+- **Version Tracking System**: Workspace now tracks plugin version via `_rptcVersion` field in settings.json
+- **Automatic Upgrade Detection**: Commands can detect when workspace is outdated
+- **New Command: `/rptc:admin:upgrade`**: Migrate workspace configuration when plugin updates
+  - Detects version gap between workspace and plugin
+  - Shows relevant changelogs
+  - Merges new configuration fields while preserving user values
+  - Creates backup before making changes
+  - Handles version-specific migrations (e.g., SOP path migration)
+  - Interactive prompts for breaking changes
+  - Idempotent and safe to run multiple times
+
+### Fixed
+
+- **Critical: SOP Fallback Chain Bug**: Fixed bash tilde expansion issue in `/rptc:admin:sop-check`
+  - User global SOPs (`~/.claude/global/sop/`) were never being found due to quoted tilde
+  - Changed `"~/.claude/global/sop"` → `"$HOME/.claude/global/sop"` throughout sop-check.md
+  - Impact: SOP fallback chain now works correctly at all three levels (project → user → plugin)
+  - **Note**: This was a day-one bug present since v1.0.0 - user global SOPs were never functional
+
+### Changed
+
+- **Default SOP Path**: Changed from `.claude/sop` to `.rptc/sop` for better workspace organization
+  - All RPTC files now centralized in `.rptc/` directory
+  - `.rptc/sop/` - Project-specific SOPs (was `.claude/sop/`)
+  - `~/.claude/global/sop/` - User global SOPs (unchanged)
+  - `${CLAUDE_PLUGIN_ROOT}/sop/` - Plugin defaults (unchanged)
+- **Directory Structure**: Renamed `.rptc/archive/` to `.rptc/complete/` for better semantics
+  - Clearer naming for completed work
+  - Updated all references in commands and documentation
+- **Gitignore Behavior**: Init command no longer auto-adds `.rptc/` entries to gitignore
+  - Users can choose to track research/plans in version control
+  - Still auto-adds `.claude/settings.local.json` and `.claude/.env*` (Claude-specific)
+- **SOP Fallback Chain**: Updated to reflect new default path
+  1. Project: `.rptc/sop/` (highest priority)
+  2. User: `~/.claude/global/sop/`
+  3. Plugin: `${CLAUDE_PLUGIN_ROOT}/sop/`
+- **Init Command** (`/rptc:admin:init`):
+  - Now sets `_rptcVersion` in settings.json
+  - Copies SOPs to `.rptc/sop/` instead of `.claude/sop/`
+  - Creates `.rptc/sop/` directory for project-specific SOPs
+- **SOP Check Command** (`/rptc:admin:sop-check`):
+  - Updated to check `.rptc/sop/` first
+  - Instructions updated to reference new path
+- **Directory Structure**: Project SOPs now live in `.rptc/sop/` alongside other RPTC artifacts
+
+### Improved
+
+- **User Experience**: Centralized workspace with all RPTC files in `.rptc/`
+- **Upgrade Path**: Clear migration from older versions with `/rptc:admin:upgrade`
+- **Future-Proofing**: Version tracking enables smooth future upgrades
+- **Workspace Organization**: Cleaner separation between Claude settings (`.claude/`) and RPTC workspace (`.rptc/`)
+
+### Migration Notes
+
+**Upgrading from v1.0.x**:
+
+```bash
+# Automatic upgrade (recommended)
+/rptc:admin:upgrade
+
+# Or manual steps:
+# 1. Add "_rptcVersion": "1.1.0" to .claude/settings.json
+# 2. Move .claude/sop/ → .rptc/sop/ (or update customSopPath)
+# 3. Update customSopPath default to ".rptc/sop"
+```
+
+**For existing .claude/sop/ users**:
+- Option 1: Move to `.rptc/sop/` (recommended)
+- Option 2: Keep `.claude/sop/` and set `customSopPath: ".claude/sop"` in settings.json
+
+---
+
 ## [1.0.9] - 2025-10-15
 
 ### Fixed
@@ -227,7 +303,7 @@ Three-tier fallback system (priority order):
 
 ### Architecture Decisions
 
-- **User Workspace**: `.rptc/research/`, `.rptc/plans/`, `.rptc/archive/` preserved (user artifacts)
+- **User Workspace**: `.rptc/research/`, `.rptc/plans/`, `.rptc/complete/` preserved (user artifacts)
 - **Plugin Resources**: Commands, agents, SOPs, templates stay at plugin root
 - **Documentation Promotion**: Automatic via Documentation Specialist (not manual prompts)
 - **PM-Controlled Workflow**: Explicit approvals required at every phase transition
@@ -347,6 +423,7 @@ Three-tier fallback system (priority order):
 
 ## Version History
 
+- **1.1.0** (2025-10-15): Added version tracking system, upgrade command, and migrated SOP path from .claude/sop to .rptc/sop
 - **1.0.9** (2025-10-15): Patch release - Fixed version synchronization (plugin.json now matches marketplace versions)
 - **1.0.8** (2025-10-15): Made all configuration options functional - customizable paths, coverage targets, and iteration limits
 - **1.0.7** (2025-10-14): Added global thinking mode configuration and user-selectable thinking modes for all sub-agents

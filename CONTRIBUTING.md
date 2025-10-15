@@ -140,7 +140,7 @@ Before submitting a PR, test the following:
 
 **SOP Fallback Chain:**
 
-- [ ] Project SOPs (`.claude/sop/`) override user SOPs
+- [ ] Project SOPs (`.rptc/sop/`) override user SOPs
 - [ ] User SOPs (`~/.claude/global/sop/`) override plugin SOPs
 - [ ] Plugin SOPs work as fallback
 

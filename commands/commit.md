@@ -39,7 +39,7 @@ Use these if you need additional project context during commit phase.
 
 Load SOPs using fallback chain (highest priority first):
 
-1. **Check project SOPs**: `.claude/sop/`
+1. **Check project SOPs**: `.rptc/sop/`
 2. **Check user global SOPs**: `~/.claude/global/sop/`
 3. **Use plugin defaults**: `${CLAUDE_PLUGIN_ROOT}/sop/`
 

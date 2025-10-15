@@ -37,7 +37,7 @@ fi
 
 Load SOPs using fallback chain (highest priority first):
 
-1. **Check project SOPs**: `.claude/sop/`
+1. **Check project SOPs**: `.rptc/sop/`
 2. **Check user global SOPs**: `~/.claude/global/sop/`
 3. **Use plugin defaults**: `${CLAUDE_PLUGIN_ROOT}/sop/`
 
@@ -51,7 +51,7 @@ Load SOPs using fallback chain (highest priority first):
 
 ```bash
 # Try to read in order, use first one found:
-1. .claude/sop/architecture-patterns.md
+1. .rptc/sop/architecture-patterns.md
 2. ~/.claude/global/sop/architecture-patterns.md
 3. ${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md
 ```

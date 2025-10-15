@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 1.0.9
+**Version**: 1.1.0
 **Status**: Beta
 **License**: MIT
 
@@ -73,11 +73,12 @@ RESEARCH → PLAN → TDD → COMMIT
 
 ### Admin Commands
 
-| Command                                     | Purpose               |
-| ------------------------------------------- | --------------------- |
-| `/rptc:admin:init [--copy-sops] [--global]` | Initialize workspace  |
-| `/rptc:admin:config`                        | Show configuration    |
-| `/rptc:admin:sop-check [name]`              | Verify SOP resolution |
+| Command                                     | Purpose                        |
+| ------------------------------------------- | ------------------------------ |
+| `/rptc:admin:init [--copy-sops] [--global]` | Initialize workspace           |
+| `/rptc:admin:config`                        | Show configuration             |
+| `/rptc:admin:sop-check [name]`              | Verify SOP resolution          |
+| `/rptc:admin:upgrade`                       | Upgrade workspace to latest version |
 
 ---
 
@@ -128,7 +129,7 @@ RESEARCH → PLAN → TDD → COMMIT
 SOPs are resolved in this order (highest priority first):
 
 ```text
-1. Project:  .claude/sop/testing-guide.md
+1. Project:  .rptc/sop/testing-guide.md
 2. User:     ~/.claude/global/sop/testing-guide.md
 3. Plugin:   ${CLAUDE_PLUGIN_ROOT}/sop/testing-guide.md
 ```
@@ -139,7 +140,7 @@ SOPs are resolved in this order (highest priority first):
 
 ```bash
 /rptc:admin:init --copy-sops
-# Copies SOPs to .claude/sop/ for customization
+# Copies SOPs to .rptc/sop/ for customization
 ```
 
 **For all your projects**:
@@ -224,7 +225,7 @@ your-project/
 │   │   └── feature-x.md
 │   ├── plans/                   # Active/completed plans
 │   │   └── feature-x.md
-│   └── archive/                 # Old plans (optional)
+│   └── complete/                # Completed plans (optional)
 ├── docs/                        # Permanent documentation
 │   ├── research/                # (optional, for promoted research)
 │   ├── plans/                   # (optional, for promoted plans)
@@ -233,9 +234,9 @@ your-project/
 │   └── api/                     # Auto-created by Doc Specialist
 ├── .claude/
 │   ├── settings.json            # Project settings
-│   ├── settings.local.json      # Local overrides (gitignored)
-│   └── sop/                     # Project SOPs (optional)
-│       └── testing-guide.md     # Overrides plugin default
+│   └── settings.local.json      # Local overrides (gitignored)
+├── .rptc/sop/                   # Project SOPs (optional)
+│   └── testing-guide.md         # Overrides plugin default
 ├── CLAUDE.md                    # Your project instructions (add RPTC reference)
 └── .gitignore                   # Updated with RPTC entries
 ```
@@ -319,7 +320,7 @@ All RPTC configuration lives under the `rptc` namespace in `.claude/settings.jso
     "docsLocation": "docs",
     "testCoverageTarget": 85,
     "maxPlanningAttempts": 10,
-    "customSopPath": ".claude/sop"
+    "customSopPath": ".rptc/sop"
   }
 }
 ```
@@ -329,11 +330,11 @@ All RPTC configuration lives under the `rptc` namespace in `.claude/settings.jso
 | Setting | Default | Description |
 |---------|---------|-------------|
 | `defaultThinkingMode` | `"think"` | Default thinking mode for sub-agents: `"think"`, `"think hard"`, or `"ultrathink"` |
-| `artifactLocation` | `".rptc"` | Directory for working artifacts (research, plans, archive) |
+| `artifactLocation` | `".rptc"` | Directory for working artifacts (research, plans, complete) |
 | `docsLocation` | `"docs"` | Directory for permanent documentation |
 | `testCoverageTarget` | `85` | Minimum test coverage percentage (used in commit phase) |
 | `maxPlanningAttempts` | `10` | Maximum auto-retry attempts during TDD implementation |
-| `customSopPath` | `".claude/sop"` | Project-specific SOP directory (for fallback chain) |
+| `customSopPath` | `".rptc/sop"` | Project-specific SOP directory (for fallback chain) |
 
 **Note:** The init command (`/rptc:admin:init`) automatically creates this file with sensible defaults.
 
@@ -416,6 +417,13 @@ Default is `"think"` (~4K tokens) to be mindful of Pro plan token limits. Max pl
 ---
 
 ## Troubleshooting
+
+### Q: Plugin updated but workspace outdated?
+
+```bash
+/rptc:admin:upgrade
+# Automatically migrates configuration to latest version
+```
 
 ### Q: How do I know which SOP is being used?
 

@@ -14,7 +14,7 @@ Set up the RPTC workflow structure in the user's project, creating necessary dir
 
 Parse the user's input for options:
 
-- `--copy-sops`: Copy SOPs from plugin to `.claude/sop/` for project-specific customization
+- `--copy-sops`: Copy SOPs from plugin to `.rptc/sop/` for project-specific customization
 - `--global`: Copy SOPs to `~/.claude/global/sop/` for user-wide defaults (requires `--copy-sops`)
 
 ## Step 1: Verify Current Directory
@@ -40,7 +40,7 @@ Create the RPTC workspace structure:
 # Working artifact directories
 mkdir -p .rptc/research
 mkdir -p .rptc/plans
-mkdir -p .rptc/archive
+mkdir -p .rptc/complete
 
 # Documentation directory
 mkdir -p docs/research
@@ -52,7 +52,7 @@ mkdir -p docs/api
 echo "✓ Created workspace directories:"
 echo "  .rptc/research/     - Active research findings"
 echo "  .rptc/plans/        - Active implementation plans"
-echo "  .rptc/archive/      - Archived work"
+echo "  .rptc/complete/      - Archived work"
 echo "  docs/               - Permanent documentation"
 ```
 
@@ -129,7 +129,7 @@ echo "✓ Found plugin at: $PLUGIN_ROOT"
 If `--global` was NOT provided:
 
 ```bash
-mkdir -p .claude/sop
+mkdir -p .rptc/sop
 
 # Verify SOPs exist
 if [ ! -d "$PLUGIN_ROOT/sop" ]; then
@@ -138,9 +138,9 @@ if [ ! -d "$PLUGIN_ROOT/sop" ]; then
 fi
 
 # Copy all SOPs from plugin
-cp "$PLUGIN_ROOT/sop/"*.md .claude/sop/
+cp "$PLUGIN_ROOT/sop/"*.md .rptc/sop/
 
-echo "✓ Copied SOPs to .claude/sop/ for project-specific customization"
+echo "✓ Copied SOPs to .rptc/sop/ for project-specific customization"
 echo ""
 echo "  Project SOPs will override plugin defaults:"
 echo "  - testing-guide.md"
@@ -172,7 +172,7 @@ cp "$PLUGIN_ROOT/sop/"*.md ~/.claude/global/sop/
 echo "✓ Copied SOPs to ~/.claude/global/sop/ as user defaults"
 echo ""
 echo "  These SOPs will be used across ALL your projects unless"
-echo "  overridden by project-specific SOPs in .claude/sop/"
+echo "  overridden by project-specific SOPs in .rptc/sop/"
 echo ""
 echo "  Edit these files to set your personal coding standards."
 ```
@@ -266,12 +266,13 @@ if [ ! -f ".claude/settings.json" ]; then
   cat > .claude/settings.json <<'EOF'
 {
   "rptc": {
+    "_rptcVersion": "1.1.0",
     "defaultThinkingMode": "think",
     "artifactLocation": ".rptc",
     "docsLocation": "docs",
     "testCoverageTarget": 85,
     "maxPlanningAttempts": 10,
-    "customSopPath": ".claude/sop"
+    "customSopPath": ".rptc/sop"
   }
 }
 EOF
@@ -288,7 +289,7 @@ else
     if command -v jq >/dev/null 2>&1; then
       # Use jq for safe merging
       TEMP_FILE=$(mktemp)
-      jq '. + {"rptc": {"defaultThinkingMode": "think", "artifactLocation": ".rptc", "docsLocation": "docs", "testCoverageTarget": 85, "maxPlanningAttempts": 10, "customSopPath": ".claude/sop"}}' .claude/settings.json > "$TEMP_FILE"
+      jq '. + {"rptc": {"_rptcVersion": "1.1.0", "defaultThinkingMode": "think", "artifactLocation": ".rptc", "docsLocation": "docs", "testCoverageTarget": 85, "maxPlanningAttempts": 10, "customSopPath": ".rptc/sop"}}' .claude/settings.json > "$TEMP_FILE"
       mv "$TEMP_FILE" .claude/settings.json
       echo "✓ Added RPTC configuration to existing .claude/settings.json"
     else
@@ -298,12 +299,13 @@ else
       echo "  Please add the following to your .claude/settings.json:"
       echo ""
       echo '  "rptc": {'
+      echo '    "_rptcVersion": "1.1.0",'
       echo '    "defaultThinkingMode": "think",'
       echo '    "artifactLocation": ".rptc",'
       echo '    "docsLocation": "docs",'
       echo '    "testCoverageTarget": 85,'
       echo '    "maxPlanningAttempts": 10,'
-      echo '    "customSopPath": ".claude/sop"'
+      echo '    "customSopPath": ".rptc/sop"'
       echo '  }'
       echo ""
       echo "  (Install 'jq' for automatic merging in future)"
@@ -316,20 +318,19 @@ fi
 
 ## Step 8: Update .gitignore
 
-Add RPTC-specific gitignore entries if not already present:
+Add Claude settings gitignore entries if not already present:
 
 ```bash
 if [ -f ".gitignore" ]; then
-  if ! grep -q ".rptc/archive" .gitignore; then
+  if ! grep -q ".claude/settings.local.json" .gitignore; then
     echo "" >> .gitignore
-    echo "# RPTC workflow" >> .gitignore
-    echo ".rptc/archive/          # Archived plans (optional)" >> .gitignore
+    echo "# Claude settings" >> .gitignore
     echo ".claude/settings.local.json  # Local overrides" >> .gitignore
     echo ".claude/.env*           # Secrets" >> .gitignore
 
-    echo "✓ Updated .gitignore with RPTC entries"
+    echo "✓ Updated .gitignore with Claude settings entries"
   else
-    echo "ℹ️  .gitignore already contains RPTC entries"
+    echo "ℹ️  .gitignore already contains Claude settings entries"
   fi
 else
   echo "⚠️  No .gitignore found. Consider creating one."
@@ -367,7 +368,7 @@ echo ""
 echo "Structure created:"
 echo "  .rptc/research/         - Active research"
 echo "  .rptc/plans/            - Active plans"
-echo "  .rptc/archive/          - Old work"
+echo "  .rptc/complete/          - Old work"
 echo "  .rptc/CLAUDE.md         - RPTC workflow instructions"
 echo "  .claude/settings.json   - RPTC configuration"
 echo "  docs/                   - Permanent documentation"
@@ -377,7 +378,7 @@ if [ --copy-sops provided ]; then
   if [ --global provided ]; then
     echo "  ~/.claude/global/sop/   - User defaults (all projects)"
   else
-    echo "  .claude/sop/            - Project-specific SOPs"
+    echo "  .rptc/sop/              - Project-specific SOPs"
   fi
 else
   echo "  Plugin SOPs (read-only) - $PLUGIN_ROOT/sop/"
@@ -407,7 +408,7 @@ echo "════════════════════════�
 
 ## Important Notes
 
-- **Do not create files in user's src/ directory** - only create .rptc/, docs/, and .claude/sop/ (if --copy-sops)
+- **Do not create files in user's src/ directory** - only create .rptc/, docs/, and .rptc/sop/ (if --copy-sops)
 - **Preserve existing files** - never overwrite .rptc/CLAUDE.md if it exists
 - **Separate concerns** - .rptc/CLAUDE.md is for RPTC workflow, project root CLAUDE.md is for general project instructions
 - **Be explicit about SOP location** - clearly tell user where SOPs are coming from

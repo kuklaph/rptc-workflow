@@ -40,7 +40,7 @@ Use these if you need additional project context during implementation.
 
 Load SOPs using fallback chain (highest priority first):
 
-1. **Check project SOPs**: `.claude/sop/`
+1. **Check project SOPs**: `.rptc/sop/`
 2. **Check user global SOPs**: `~/.claude/global/sop/`
 3. **Use plugin defaults**: `${CLAUDE_PLUGIN_ROOT}/sop/`
 
@@ -345,7 +345,7 @@ Context:
 
 **Reference for Standards** (use fallback chain):
 Load via fallback (project → user → plugin):
-1. .claude/sop/languages-and-style.md
+1. .rptc/sop/languages-and-style.md
 2. ~/.claude/global/sop/languages-and-style.md
 3. ${CLAUDE_PLUGIN_ROOT}/sop/languages-and-style.md
 
@@ -483,7 +483,7 @@ Context:
 
 **Reference for Standards** (use fallback chain):
 Load security SOP via fallback:
-1. .claude/sop/security-and-performance.md
+1. .rptc/sop/security-and-performance.md
 2. ~/.claude/global/sop/security-and-performance.md
 3. ${CLAUDE_PLUGIN_ROOT}/sop/security-and-performance.md
 
