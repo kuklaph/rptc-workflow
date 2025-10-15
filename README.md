@@ -23,14 +23,6 @@
 /rptc:admin:init
 ```
 
-### Installation (Bash Method - Legacy)
-
-```bash
-git clone https://github.com/kuklaph/rptc-workflow
-cd rptc-workflow
-bash setup/setup-rptc-workflow.sh
-```
-
 ---
 
 ## What is RPTC?
