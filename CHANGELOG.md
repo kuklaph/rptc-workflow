@@ -7,6 +7,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.5] - 2025-10-15
+
+### Added
+
+- **Sequential Planning Architecture for Complex Features**: Intelligent complexity-based planning strategy prevents Master Feature Planner timeout
+  - **Problem**: Large features with many steps (>3) could cause single planning agent to timeout
+  - **Solution**: Automatic complexity detection with dual-route planning strategy
+    - **Simple Features** (≤3 steps): Single Master Feature Planner agent (fast, comprehensive)
+    - **Complex Features** (>3 steps): Sequential planning architecture with context handoff
+  - **Sequential Architecture**:
+    - Analyzes scaffold complexity after PM approval
+    - Creates step-specific planning agents that execute **sequentially** (not parallel)
+    - Each agent receives full context from all previous step plans
+    - Agent N plans Step N with knowledge of Steps 1 through N-1
+    - Final coordination agent aggregates all step plans
+    - Coordination agent resolves conflicts and generates integration tests
+  - **Benefits**:
+    - ✅ Prevents timeout on large/complex features (distributes work)
+    - ✅ Maintains full coordination (each agent sees previous decisions)
+    - ✅ Clean context handoff (sequential execution, not parallel)
+    - ✅ Automatic conflict resolution via coordination agent
+    - ✅ Integration test generation (addresses cross-step interactions)
+    - ✅ Transparent to user (automatic complexity detection)
+  - **File updated**: `commands/plan.md` - Added Step 2 (complexity analysis) and Step 3b (sequential agents) to Phase 5
+  - **User experience**: Users see "Complex Feature Detected" message and sequential planning progress
+  - **Architectural Advantage**: Sequential execution with context passing is superior to parallel execution:
+    - Agents can coordinate on naming, interfaces, and file structure
+    - Each agent builds on previous decisions (vs. planning in isolation)
+    - Final coordination agent ensures consistency
+    - No race conditions or aggregation complexity
+
+### Changed
+
+- **Agent Rename**: `Master Web Research Agent` → `Master Research Agent`
+  - Reflects accurate scope: agent performs both web research AND codebase exploration
+  - Previous name was misleading (implied web-only research)
+  - Files updated:
+    - `agents/master-web-research-agent.md` → `agents/master-research-agent.md`
+    - `commands/research.md` - Updated delegation references
+    - `README.md` - Updated agent description and directory structure
+
+### Technical
+
+- Sequential agent execution pattern: Agent 1 → Wait → Agent 2 (with context) → Wait → Agent 3 (with contexts 1-2) → ...
+- Complexity threshold: 3 steps (configurable via simple vs. complex decision point)
+- Context handoff includes: files created/modified, key decisions, dependencies, test approach
+- Final coordination agent performs: conflict resolution, integration test generation, dependency consolidation
+
+---
+
 ## [1.1.4] - 2025-10-15
 
 ### Fixed

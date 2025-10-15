@@ -239,7 +239,14 @@ Waiting for your sign-off...
    - Else if global default exists in .claude/settings.json: Use that mode
    - Else: Use default "think" mode
 
-**Step 2: Delegate** using Task tool to `master-feature-planner-agent`:
+**Step 2: Analyze Scaffold Complexity**:
+   - Count the number of steps in the approved scaffold
+   - **Simple Feature**: ≤3 steps → Use Step 3a (Single Master Feature Planner)
+   - **Complex Feature**: >3 steps → Use Step 3b (Sequential Planning Agents)
+
+**Step 3a: Simple Route - Single Master Feature Planner** (if ≤3 steps):
+
+Delegate using Task tool to `master-feature-planner-agent`:
 
 **Agent Prompt**:
 
@@ -317,13 +324,204 @@ For EACH step:
 
 Use template from: ${CLAUDE_PLUGIN_ROOT}/templates/plan.md
 
-Save to: $ARTIFACT_LOC/plans/[name-slug].md
-
 Focus on TDD-readiness: tests clearly defined BEFORE implementation.
 Reference SOPs for standards and patterns.
 ```
 
 **Wait for agent to complete comprehensive plan.**
+
+**Step 3b: Complex Route - Sequential Planning Agents** (if >3 steps):
+
+**Purpose**: Prevent timeout on large features by distributing planning work across sequential agents with context handoff.
+
+**Architecture**: Each agent plans one step and passes context to the next. Final coordination agent aggregates everything.
+
+**Inform User**:
+
+```text
+🔀 Complex Feature Detected!
+
+Your feature has [N] steps, which could cause timeout with a single planning agent.
+
+I'll use **Sequential Planning Architecture**:
+- [N] step-specific planning agents (one per step)
+- Each agent receives context from previous steps
+- Final coordination agent aggregates all plans
+- Maintains consistency and generates integration tests
+
+This approach:
+✅ Prevents timeout on large features
+✅ Maintains coordination (agents see previous decisions)
+✅ Produces comprehensive, consistent plan
+
+Starting sequential planning...
+```
+
+**Sequential Agent Execution**:
+
+For each step in the scaffold (Step 1 through Step N):
+
+**Agent Prompt for Step [X]**:
+
+```text
+Use [determined thinking mode] thinking mode for this planning task.
+
+You are a STEP-SPECIFIC PLANNING AGENT for Step [X] of [N].
+
+**Overall Feature Context**:
+- Feature: [feature description]
+- Research findings: [if applicable]
+- Tech stack: [from CLAUDE.md]
+- Scaffold overview: [summary]
+- PM input: [clarifications]
+
+**Previous Steps Context** (if X > 1):
+[Include detailed results from Steps 1 through X-1]:
+- Step [X-1] Summary:
+  - Files created/modified: [list]
+  - Key decisions: [decisions]
+  - Dependencies introduced: [deps]
+  - Test approach: [approach]
+
+**Your Task**: Create detailed plan for Step [X] ONLY.
+
+Step [X] Description: [from scaffold]
+
+**SOPs to Reference** (use fallback chain):
+1. .rptc/sop/[name].md
+2. ~/.claude/global/sop/[name].md
+3. ${CLAUDE_PLUGIN_ROOT}/sop/[name].md
+
+Reference: Architecture patterns, Testing guide, Languages & style, Security
+
+**Project Overrides**: Check `.context/` for project-specific requirements.
+
+Create detailed plan for Step [X]:
+
+## Step [X]: [Name]
+
+### What
+[What this step accomplishes]
+
+### Tests to Write First (from testing SOP)
+- [ ] Happy path: [description]
+- [ ] Edge case: [description]
+- [ ] Error handling: [description]
+[Continue with comprehensive test list]
+
+### Files to Create/Modify
+- `path/to/file1` - [What changes, why]
+- `path/to/file2` - [What changes, why]
+
+### Implementation Details
+[Specific code to write, algorithms, patterns from architecture SOP]
+
+### Dependencies
+- Packages: [if needed]
+- From previous steps: [what this step requires from earlier steps]
+
+### Expected Outcome
+[What works after this step completes]
+
+### Risks
+- [Risk 1]: [Mitigation]
+- [Risk 2]: [Mitigation]
+
+**CRITICAL**:
+- Use `- [ ]` checkbox format for all tests
+- Coordinate with previous steps (check file paths, naming, interfaces)
+- Reference SOPs for standards
+```
+
+**Execute agents sequentially** (not parallel):
+1. Create Step 1 planning agent → Wait for completion → Store result
+2. Create Step 2 planning agent with Step 1 context → Wait → Store result
+3. Create Step 3 planning agent with Steps 1-2 context → Wait → Store result
+4. Continue for all N steps
+
+**After All Step Agents Complete - Final Coordination Agent**:
+
+**Agent Prompt**:
+
+```text
+Use [determined thinking mode] thinking mode for this planning task.
+
+You are the FINAL COORDINATION AGENT - aggregate sequential step plans into unified, comprehensive plan.
+
+**Overall Feature Context**:
+- Feature: [feature description]
+- Research findings: [if applicable]
+- Tech stack: [from CLAUDE.md]
+- PM input: [clarifications]
+
+**All Step Plans**:
+[Include complete output from all N step planning agents]
+
+**Your Task**: Create final unified plan by:
+
+1. **Resolve Conflicts**:
+   - Check for file naming conflicts
+   - Verify interface consistency across steps
+   - Ensure dependency order is correct
+   - Resolve any contradictory decisions
+
+2. **Generate Integration Tests**:
+   - Identify integration points between steps
+   - Create integration test scenarios
+   - Define end-to-end test flows
+
+3. **Aggregate Dependencies**:
+   - Consolidate all external dependencies
+   - Order by installation/migration sequence
+   - Note any conflicts
+
+4. **Create Unified Plan**:
+
+Use template from: ${CLAUDE_PLUGIN_ROOT}/templates/plan.md
+
+## 1. Implementation Steps (Aggregated)
+[All steps from sequential agents, with conflicts resolved]
+
+## 2. Test Strategy (Comprehensive)
+### Unit Tests (from step agents)
+[Aggregate all unit tests]
+
+### Integration Tests (YOU GENERATE)
+- [ ] Integration test 1: [Steps X+Y interaction]
+- [ ] Integration test 2: [Steps Y+Z interaction]
+[Generate comprehensive integration tests]
+
+### E2E Tests
+- [ ] E2E test 1: [Full feature flow]
+[Generate end-to-end scenarios]
+
+### Coverage Goals
+- Overall: 80%+
+- Critical paths: 100%
+
+## 3. Test Files Structure
+[Aggregate from all step agents + add integration test files]
+
+## 4. Dependencies (Consolidated)
+[All dependencies in install order]
+
+## 5. Acceptance Criteria
+[Aggregate from steps + add feature-level criteria]
+
+## 6. Risk Assessment (Consolidated)
+[All risks + cross-step integration risks]
+
+## 7. File Reference Map (Complete)
+[All files from all steps, check for conflicts]
+
+**CRITICAL**:
+- All tests use `- [ ]` checkbox format
+- Resolve all conflicts and document resolution
+- Integration tests are MANDATORY
+- Reference SOPs for standards
+```
+
+**Wait for final coordination agent to complete unified plan.**
 
 ### Phase 6: Present Plan to PM (REQUIRED)
 

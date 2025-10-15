@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 1.1.4
+**Version**: 1.1.5
 **Status**: Beta
 **License**: MIT
 
@@ -193,7 +193,7 @@ rptc-workflow/
 │   ├── admin-sop-check.md       # /rptc:admin-sop-check
 │   └── admin-upgrade.md         # /rptc:admin-upgrade
 ├── agents/
-│   ├── master-web-research-agent.md
+│   ├── master-research-agent.md
 │   ├── master-feature-planner-agent.md
 │   ├── master-efficiency-agent.md
 │   ├── master-security-agent.md
@@ -246,9 +246,9 @@ your-project/
 
 When you approve delegation, specialized AI agents provide expert analysis:
 
-### Master Web Research Agent
+### Master Research Agent
 
-**Purpose**: Find best practices and implementation patterns
+**Purpose**: Research best practices through web search and codebase exploration
 **When**: Research phase (optional, with permission)
 **Provides**: Authoritative sources, implementation examples, pitfalls
 

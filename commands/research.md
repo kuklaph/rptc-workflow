@@ -164,7 +164,7 @@ Once you understand WHAT we're building, search the codebase:
 
 ```text
    I'd like to research [specific topic] online for best practices.
-   Should I delegate to the Master Web Research Agent?
+   Should I delegate to the Master Research Agent?
 
    💡 Thinking Mode:
    [If global default exists: Will use configured mode: "[mode]" (~[X]K tokens)]
@@ -184,7 +184,7 @@ Once you understand WHAT we're building, search the codebase:
    - Else if global default exists in .claude/settings.json: Use that mode
    - Else: Use default "think" mode
 
-5. **If approved**: Use the Task tool to delegate to `master-web-research-agent`
+5. **If approved**: Use the Task tool to delegate to `master-research-agent`
 
 ```text
    Prompt for agent:
@@ -245,7 +245,7 @@ Present your findings clearly:
 
 ### Web Research Findings (if applicable)
 
-[External research results from Master Web Research Agent]
+[External research results from Master Research Agent]
 
 ### Recommendations
 
@@ -359,7 +359,7 @@ TEMPLATE=$(cat "${CLAUDE_PLUGIN_ROOT}/templates/research.md")
 
 ## Web Research Findings (if conducted)
 
-[Summary from Master Web Research Agent]
+[Summary from Master Research Agent]
 
 ---
 

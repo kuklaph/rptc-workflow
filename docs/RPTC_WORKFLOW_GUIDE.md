@@ -290,11 +290,11 @@ Agent definitions are provided by the plugin at `${CLAUDE_PLUGIN_ROOT}/agents/`
 
 These agents have specialized prompts and capabilities for specific tasks.
 
-### Master Web Research Agent
+### Master Research Agent
 
-**Purpose**: Find best practices and implementation examples
+**Purpose**: Research best practices through web search and codebase exploration
 
-**Definition:** `${CLAUDE_PLUGIN_ROOT}/agents/master-web-research-agent.md`
+**Definition:** `${CLAUDE_PLUGIN_ROOT}/agents/master-research-agent.md`
 
 **What it does**:
 
