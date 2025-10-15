@@ -1,6 +1,6 @@
 {
   "name": "rptc-workflow",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Research → Plan → TDD → Commit workflow with PM collaboration. Systematic development with quality gates, test-driven implementation, and intelligent documentation management.",
   "author": {
     "name": "kuklaph",
