@@ -46,7 +46,7 @@ SOPs are resolved via fallback chain (highest priority first):
 2. `~/.claude/global/sop/[name].md` - User global defaults
 3. `${CLAUDE_PLUGIN_ROOT}/sop/[name].md` - Plugin defaults
 
-Use `/rptc:admin:sop-check [filename]` to verify which SOP will be loaded.
+Use `/rptc:admin-sop-check [filename]` to verify which SOP will be loaded.
 
 Consult these SOPs for cross-project best practices:
 
@@ -868,7 +868,7 @@ describe('[component]', () => {
 ### How to Handle Changes During Implementation
 
 1. **Small Adjustments:** Update plan inline, note in "Deviations" section
-2. **Major Changes:** Use `/rptc:helper:update-plan` command
+2. **Major Changes:** Use `/rptc:helper-update-plan` command
 3. **Blockers:** Document in "Implementation Notes" section
 
 ### Deviations Log

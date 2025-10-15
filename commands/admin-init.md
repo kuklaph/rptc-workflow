@@ -112,8 +112,8 @@ if [ -z "$PLUGIN_ROOT" ]; then
   echo "  - /opt/claude/plugins/"
   echo "  - $HOME/**/rptc-workflow/"
   echo ""
-  echo "Please ensure the rptc-workflow plugin is properly installed."
-  echo "Try: /plugin install rptc-workflow"
+  echo "Please ensure the RPTC plugin is properly installed."
+  echo "Try: /plugin install rptc"
   exit 1
 fi
 
@@ -185,10 +185,10 @@ echo ""
 echo "  Commands will use: $PLUGIN_ROOT/sop/"
 echo ""
 echo "  To customize SOPs for this project, run:"
-echo "  /rptc:admin:init --copy-sops"
+echo "  /rptc:admin-init --copy-sops"
 echo ""
 echo "  To set personal defaults across all projects, run:"
-echo "  /rptc:admin:init --copy-sops --global"
+echo "  /rptc:admin-init --copy-sops --global"
 ```
 
 ## Step 5: Create RPTC Workflow Instructions
@@ -266,7 +266,7 @@ if [ ! -f ".claude/settings.json" ]; then
   cat > .claude/settings.json <<'EOF'
 {
   "rptc": {
-    "_rptcVersion": "1.1.0",
+    "_rptcVersion": "1.1.1",
     "defaultThinkingMode": "think",
     "artifactLocation": ".rptc",
     "docsLocation": "docs",
@@ -289,7 +289,7 @@ else
     if command -v jq >/dev/null 2>&1; then
       # Use jq for safe merging
       TEMP_FILE=$(mktemp)
-      jq '. + {"rptc": {"_rptcVersion": "1.1.0", "defaultThinkingMode": "think", "artifactLocation": ".rptc", "docsLocation": "docs", "testCoverageTarget": 85, "maxPlanningAttempts": 10, "customSopPath": ".rptc/sop"}}' .claude/settings.json > "$TEMP_FILE"
+      jq '. + {"rptc": {"_rptcVersion": "1.1.1", "defaultThinkingMode": "think", "artifactLocation": ".rptc", "docsLocation": "docs", "testCoverageTarget": 85, "maxPlanningAttempts": 10, "customSopPath": ".rptc/sop"}}' .claude/settings.json > "$TEMP_FILE"
       mv "$TEMP_FILE" .claude/settings.json
       echo "✓ Added RPTC configuration to existing .claude/settings.json"
     else
@@ -299,7 +299,7 @@ else
       echo "  Please add the following to your .claude/settings.json:"
       echo ""
       echo '  "rptc": {'
-      echo '    "_rptcVersion": "1.1.0",'
+      echo '    "_rptcVersion": "1.1.1",'
       echo '    "defaultThinkingMode": "think",'
       echo '    "artifactLocation": ".rptc",'
       echo '    "docsLocation": "docs",'

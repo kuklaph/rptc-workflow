@@ -46,7 +46,7 @@ claude plugin install .
 
 # Initialize a test workspace
 mkdir test-project && cd test-project
-/rptc:admin:init
+/rptc:admin-init
 ```
 
 ---
@@ -120,10 +120,10 @@ Before submitting a PR, test the following:
 
 **Admin Commands:**
 
-- [ ] `/rptc:admin:init` creates correct directory structure
-- [ ] `/rptc:admin:init --copy-sops` copies SOPs correctly
-- [ ] `/rptc:admin:sop-check` resolves SOPs via fallback chain
-- [ ] `/rptc:admin:config` displays configuration
+- [ ] `/rptc:admin-init` creates correct directory structure
+- [ ] `/rptc:admin-init --copy-sops` copies SOPs correctly
+- [ ] `/rptc:admin-sop-check` resolves SOPs via fallback chain
+- [ ] `/rptc:admin-config` displays configuration
 
 **Core Workflow:**
 
@@ -135,8 +135,8 @@ Before submitting a PR, test the following:
 **Helper Commands:**
 
 - [ ] `/rptc:helper:catch-up-*` provides appropriate context
-- [ ] `/rptc:helper:update-plan` modifies plans correctly
-- [ ] `/rptc:helper:cleanup` archives completed plans
+- [ ] `/rptc:helper-update-plan` modifies plans correctly
+- [ ] `/rptc:helper-cleanup` archives completed plans
 
 **SOP Fallback Chain:**
 
@@ -293,7 +293,7 @@ Follow Conventional Commits:
 **Examples:**
 
 ```text
-feat(commands): add /rptc:helper:resume-plan command
+feat(commands): add /rptc:helper-resume-plan command
 
 Allows users to resume previous work by loading plan context
 and recent progress. Useful after breaks or context switches.

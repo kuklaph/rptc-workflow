@@ -39,7 +39,7 @@ if [ -d ".rptc" ]; then
   echo "    - complete/:  $(find .rptc/complete -type f 2>/dev/null | wc -l) files"
 else
   echo "  ✗ .rptc/ not initialized"
-  echo "    Run: /rptc:admin:init"
+  echo "    Run: /rptc:admin-init"
 fi
 ```
 
@@ -100,7 +100,7 @@ elif [ -f "CLAUDE.md" ]; then
   echo "    Size: ${LINE_COUNT} lines"
 else
   echo "  ✗ No CLAUDE.md found"
-  echo "    Run: /rptc:admin:init"
+  echo "    Run: /rptc:admin-init"
 fi
 ```
 
@@ -136,7 +136,7 @@ if [ -d ".git" ]; then
     echo "  ✓ .gitignore contains RPTC entries"
   else
     echo "  ⚠️  .gitignore missing RPTC entries"
-    echo "    Run: /rptc:admin:init (will update .gitignore)"
+    echo "    Run: /rptc:admin-init (will update .gitignore)"
   fi
 
   # Check current branch
@@ -157,16 +157,16 @@ echo "════════════════════════�
 echo "💡 Recommendations:"
 
 if [ ! -d ".rptc" ]; then
-  echo "  • Initialize workspace: /rptc:admin:init"
+  echo "  • Initialize workspace: /rptc:admin-init"
 fi
 
 if [ ! -d ".rptc/sop" ] && [ ! -d "~/.claude/global/sop" ]; then
-  echo "  • Copy SOPs for customization: /rptc:admin:init --copy-sops"
+  echo "  • Copy SOPs for customization: /rptc:admin-init --copy-sops"
   echo "    (or --copy-sops --global for user-wide defaults)"
 fi
 
 if [ ! -f ".claude/CLAUDE.md" ] && [ ! -f "CLAUDE.md" ]; then
-  echo "  • Create project instructions: /rptc:admin:init"
+  echo "  • Create project instructions: /rptc:admin-init"
 fi
 
 echo "═══════════════════════════════════════════════════════"

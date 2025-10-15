@@ -7,13 +7,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.1] - 2025-10-15
+
+### Fixed
+
+- **Windows Command Display Issue**: Fixed backslashes appearing in command names on Windows
+  - Root cause: Subdirectories in `commands/` folder caused Windows path separators in command names
+  - Example: `/rptc:\admin:config` appeared with backslash instead of `/rptc:admin-config`
+  - Solution: Flattened directory structure - moved all commands to root `commands/` folder
+  - Admin commands: `commands/admin/*.md` → `commands/admin-*.md`
+  - Helper commands: `commands/helper/*.md` → `commands/helper-*.md`
+
+### Changed
+
+- **Plugin Name**: Shortened from `rptc-workflow` to `rptc` for more concise commands
+  - Commands now use `/rptc:` prefix instead of `/rptc-workflow:`
+  - Example: `/rptc-workflow:research` → `/rptc:research`
+  - Shorter, cleaner command names for better UX
+- **Command Naming Convention**: Established consistent dash-separated naming
+  - Core workflow: `/rptc:research`, `/rptc:plan`, `/rptc:tdd`, `/rptc:commit`
+  - Admin commands: `/rptc:admin-config`, `/rptc:admin-init`, `/rptc:admin-sop-check`, `/rptc:admin-upgrade`
+  - Helper commands: `/rptc:helper-catch-up-quick`, `/rptc:helper-cleanup`, etc.
+- **Directory Structure**: Commands now organized flat with prefixes instead of subdirectories
+  - Before: `commands/admin/config.md`, `commands/helper/cleanup.md`
+  - After: `commands/admin-config.md`, `commands/helper-cleanup.md`
+- **Documentation**: Updated all references to new command names throughout README, CONTRIBUTING, and docs
+
+### Migration Notes
+
+**Upgrading from v1.1.0**:
+
+Commands have changed names - update any scripts or documentation that reference old command names:
+- `/rptc-workflow:research` → `/rptc:research`
+- `/rptc-workflow:admin:config` → `/rptc:admin-config`
+- `/rptc-workflow:helper:cleanup` → `/rptc:helper-cleanup`
+
+---
+
 ## [1.1.0] - 2025-10-15
 
 ### Added
 
 - **Version Tracking System**: Workspace now tracks plugin version via `_rptcVersion` field in settings.json
 - **Automatic Upgrade Detection**: Commands can detect when workspace is outdated
-- **New Command: `/rptc:admin:upgrade`**: Migrate workspace configuration when plugin updates
+- **New Command: `/rptc:admin-upgrade`**: Migrate workspace configuration when plugin updates
   - Detects version gap between workspace and plugin
   - Shows relevant changelogs
   - Merges new configuration fields while preserving user values
@@ -24,7 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **Critical: SOP Fallback Chain Bug**: Fixed bash tilde expansion issue in `/rptc:admin:sop-check`
+- **Critical: SOP Fallback Chain Bug**: Fixed bash tilde expansion issue in `/rptc:admin-sop-check`
   - User global SOPs (`~/.claude/global/sop/`) were never being found due to quoted tilde
   - Changed `"~/.claude/global/sop"` → `"$HOME/.claude/global/sop"` throughout sop-check.md
   - Impact: SOP fallback chain now works correctly at all three levels (project → user → plugin)
@@ -47,11 +84,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   1. Project: `.rptc/sop/` (highest priority)
   2. User: `~/.claude/global/sop/`
   3. Plugin: `${CLAUDE_PLUGIN_ROOT}/sop/`
-- **Init Command** (`/rptc:admin:init`):
+- **Init Command** (`/rptc:admin-init`):
   - Now sets `_rptcVersion` in settings.json
   - Copies SOPs to `.rptc/sop/` instead of `.claude/sop/`
   - Creates `.rptc/sop/` directory for project-specific SOPs
-- **SOP Check Command** (`/rptc:admin:sop-check`):
+- **SOP Check Command** (`/rptc:admin-sop-check`):
   - Updated to check `.rptc/sop/` first
   - Instructions updated to reference new path
 - **Directory Structure**: Project SOPs now live in `.rptc/sop/` alongside other RPTC artifacts
@@ -59,7 +96,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Improved
 
 - **User Experience**: Centralized workspace with all RPTC files in `.rptc/`
-- **Upgrade Path**: Clear migration from older versions with `/rptc:admin:upgrade`
+- **Upgrade Path**: Clear migration from older versions with `/rptc:admin-upgrade`
 - **Future-Proofing**: Version tracking enables smooth future upgrades
 - **Workspace Organization**: Cleaner separation between Claude settings (`.claude/`) and RPTC workspace (`.rptc/`)
 
@@ -69,7 +106,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ```bash
 # Automatic upgrade (recommended)
-/rptc:admin:upgrade
+/rptc:admin-upgrade
 
 # Or manual steps:
 # 1. Add "_rptcVersion": "1.1.0" to .claude/settings.json
@@ -122,7 +159,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Init Command** (`/rptc:admin:init`):
+- **Init Command** (`/rptc:admin-init`):
   - Now creates `.claude/settings.json` with RPTC defaults on first run
   - Intelligently merges RPTC config into existing settings files
   - Summary report shows settings file creation and thinking mode tip
@@ -131,7 +168,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Planning Phase** (`/rptc:plan`): Uses `artifactLocation` for storing and reading plans
   - **TDD Phase** (`/rptc:tdd`): Uses `artifactLocation` for plan synchronization AND `maxPlanningAttempts` for auto-iteration limits
   - **Commit Phase** (`/rptc:commit`): Uses `testCoverageTarget` for coverage validation AND `docsLocation` for documentation updates
-  - **Cleanup Helper** (`/rptc:helper:cleanup`): Uses `artifactLocation` for archives AND `docsLocation` for promotions
+  - **Cleanup Helper** (`/rptc:helper-cleanup`): Uses `artifactLocation` for archives AND `docsLocation` for promotions
 - **Config Loading Pattern**: All commands now load configuration on startup with proper fallbacks to defaults
 
 ### Improved
@@ -167,7 +204,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `"think hard"` - Medium depth thinking (~10K tokens)
   - `"ultrathink"` - Maximum depth thinking (~32K tokens)
 - **Power User Tip**: Init command now displays thinking mode configuration guidance on first setup
-- **Automatic Settings Creation**: `/rptc:admin:init` now creates `.claude/settings.json` with RPTC defaults if it doesn't exist, or merges RPTC config if file exists (using `jq` if available)
+- **Automatic Settings Creation**: `/rptc:admin-init` now creates `.claude/settings.json` with RPTC defaults if it doesn't exist, or merges RPTC config if file exists (using `jq` if available)
 
 ### Changed
 
@@ -219,18 +256,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Helper Commands
 
-- `/rptc:helper:catch-up-quick` - Quick project context (2 minutes)
-- `/rptc:helper:catch-up-med` - Medium project context (5-10 minutes)
-- `/rptc:helper:catch-up-deep` - Deep project analysis (15-30 minutes)
-- `/rptc:helper:update-plan` - Modify existing implementation plans
-- `/rptc:helper:resume-plan` - Resume previous work after breaks
-- `/rptc:helper:cleanup` - Review and archive completed plans
+- `/rptc:helper-catch-up-quick` - Quick project context (2 minutes)
+- `/rptc:helper-catch-up-med` - Medium project context (5-10 minutes)
+- `/rptc:helper-catch-up-deep` - Deep project analysis (15-30 minutes)
+- `/rptc:helper-update-plan` - Modify existing implementation plans
+- `/rptc:helper-resume-plan` - Resume previous work after breaks
+- `/rptc:helper-cleanup` - Review and archive completed plans
 
 #### Admin Commands
 
-- `/rptc:admin:init` - Initialize RPTC workspace with optional `--copy-sops` and `--global` flags
-- `/rptc:admin:config` - Display current configuration
-- `/rptc:admin:sop-check` - Verify SOP resolution via fallback chain
+- `/rptc:admin-init` - Initialize RPTC workspace with optional `--copy-sops` and `--global` flags
+- `/rptc:admin-config` - Display current configuration
+- `/rptc:admin-sop-check` - Verify SOP resolution via fallback chain
 
 #### Master Specialist Agents
 
@@ -333,7 +370,7 @@ Three-tier fallback system (priority order):
   - `"think hard"` - Medium depth thinking (~10K tokens)
   - `"ultrathink"` - Maximum depth thinking (~32K tokens)
 - **Power User Tip**: Init command now displays thinking mode configuration guidance on first setup
-- **Automatic Settings Creation**: `/rptc:admin:init` now creates `.claude/settings.json` with RPTC defaults if it doesn't exist, or merges RPTC config if file exists (using `jq` if available)
+- **Automatic Settings Creation**: `/rptc:admin-init` now creates `.claude/settings.json` with RPTC defaults if it doesn't exist, or merges RPTC config if file exists (using `jq` if available)
 - **Full Configuration System**: Complete RPTC configuration now available via `.claude/settings.json`:
   ```json
   {
@@ -376,7 +413,7 @@ Three-tier fallback system (priority order):
   - Master Documentation Specialist now respects global thinking mode
   - Automatically uses configured default (no prompt, as delegation is automatic)
 - **Thinking Mode Precedence**: Established hierarchy: User per-command choice > Global setting > Default ("think")
-- **Init Command** (`/rptc:admin:init`):
+- **Init Command** (`/rptc:admin-init`):
   - Now creates `.claude/settings.json` with RPTC defaults on first run
   - Intelligently merges RPTC config into existing settings files
   - Summary report shows settings file creation and thinking mode tip
@@ -385,7 +422,7 @@ Three-tier fallback system (priority order):
   - **Planning Phase** (`/rptc:plan`): Uses `artifactLocation` for storing and reading plans
   - **TDD Phase** (`/rptc:tdd`): Uses `artifactLocation` for plan synchronization AND `maxPlanningAttempts` for auto-iteration limits
   - **Commit Phase** (`/rptc:commit`): Uses `testCoverageTarget` for coverage validation AND `docsLocation` for documentation updates
-  - **Cleanup Helper** (`/rptc:helper:cleanup`): Uses `artifactLocation` for archives AND `docsLocation` for promotions
+  - **Cleanup Helper** (`/rptc:helper-cleanup`): Uses `artifactLocation` for archives AND `docsLocation` for promotions
 - **Config Loading Pattern**: All commands now load configuration on startup with proper fallbacks to defaults
 
 ### Improved
@@ -423,6 +460,7 @@ Three-tier fallback system (priority order):
 
 ## Version History
 
+- **1.1.1** (2025-10-15): Patch release - Fixed Windows backslash issue and shortened plugin name (rptc-workflow → rptc)
 - **1.1.0** (2025-10-15): Added version tracking system, upgrade command, and migrated SOP path from .claude/sop to .rptc/sop
 - **1.0.9** (2025-10-15): Patch release - Fixed version synchronization (plugin.json now matches marketplace versions)
 - **1.0.8** (2025-10-15): Made all configuration options functional - customizable paths, coverage targets, and iteration limits

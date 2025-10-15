@@ -11,7 +11,7 @@
 bash setup-rptc-workflow.sh
 
 # Start using it
-/rptc:helper:catch-up-med                    # Get context
+/rptc:helper-catch-up-med                    # Get context
 /rptc:research "topic to explore"   # Interactive discovery
 /rptc:plan "@research.md"             # Collaborative planning
 /rptc:tdd "@plan.md"                  # TDD implementation
@@ -230,7 +230,7 @@ bash setup-rptc-workflow.sh
 
 Get project context at different depth levels:
 
-#### `/rptc:helper:catch-up-quick` (2 minutes)
+#### `/rptc:helper-catch-up-quick` (2 minutes)
 
 - Project basics (CLAUDE.md, package.json, README)
 - Recent 5 commits
@@ -238,7 +238,7 @@ Get project context at different depth levels:
 
 **Use when**: Quick questions, small fixes, immediate tasks
 
-#### `/rptc:helper:catch-up-med` (5-10 minutes)
+#### `/rptc:helper-catch-up-med` (5-10 minutes)
 
 - Architecture understanding
 - Recent 15 commits with context
@@ -247,7 +247,7 @@ Get project context at different depth levels:
 
 **Use when**: Implementation work, understanding existing code
 
-#### `/rptc:helper:catch-up-deep` (15-30 minutes)
+#### `/rptc:helper-catch-up-deep` (15-30 minutes)
 
 - Complete architecture analysis
 - Full git history review
@@ -259,7 +259,7 @@ Get project context at different depth levels:
 
 ### Plan Updates
 
-#### `/rptc:helper:update-plan "@plan.md" "changes"`
+#### `/rptc:helper-update-plan "@plan.md" "changes"`
 
 Modify existing implementation plans:
 
@@ -404,7 +404,7 @@ These agents have specialized prompts and capabilities for specific tasks.
 
 ```bash
 # Get context first
-> /rptc:helper:catch-up-med
+> /rptc:helper-catch-up-med
 
 # Interactive research phase
 > /rptc:research "payment processing integration"
@@ -447,7 +447,7 @@ These agents have specialized prompts and capabilities for specific tasks.
 
 ```bash
 # Mid-implementation, requirements change
-> /rptc:helper:update-plan "@payment-processing.md" "add PayPal support"
+> /rptc:helper-update-plan "@payment-processing.md" "add PayPal support"
 
 # Claude:
 # - Loads current plan
@@ -467,9 +467,9 @@ These agents have specialized prompts and capabilities for specific tasks.
 
 ```text
 Need context first?
-├─ Quick context (2 min) → /rptc:helper:catch-up-quick
-├─ Medium context (5-10 min) → /rptc:helper:catch-up-med
-└─ Deep analysis (15-30 min) → /rptc:helper:catch-up-deep
+├─ Quick context (2 min) → /rptc:helper-catch-up-quick
+├─ Medium context (5-10 min) → /rptc:helper-catch-up-med
+└─ Deep analysis (15-30 min) → /rptc:helper-catch-up-deep
 
 Is it a bug fix?
 └─ Yes → /rptc:tdd "bug description"
@@ -481,10 +481,10 @@ Is it complex or unfamiliar?
 └─ Yes → /rptc:research "topic" → /rptc:plan "@research.md" → /rptc:tdd "@plan.md"
 
 Need to modify existing plan?
-└─ Yes → /rptc:helper:update-plan "@plan.md" "changes"
+└─ Yes → /rptc:helper-update-plan "@plan.md" "changes"
 
 Resuming previous work?
-└─ Yes → /rptc:helper:resume-plan "@plan.md"
+└─ Yes → /rptc:helper-resume-plan "@plan.md"
 
 Ready to ship?
 └─ Yes → /rptc:commit [pr]
@@ -524,7 +524,7 @@ Ready to ship?
 
 ### 5. Plans Are Living Documents
 
-- Update as you learn (/rptc:helper:update-plan)
+- Update as you learn (/rptc:helper-update-plan)
 - Preserve context from research
 - Track changes with update logs
 - Reference in future work
@@ -585,15 +585,15 @@ your-project/
 
 ### Q: Plan needs changes mid-implementation
 
-**A**: Use `/rptc:helper:update-plan "@plan.md" "your changes"`
+**A**: Use `/rptc:helper-update-plan "@plan.md" "your changes"`
 
 ### Q: Forgot what we researched
 
-**A**: Read `.rptc/research/[topic].md` or use `/rptc:helper:catch-up-med`
+**A**: Read `.rptc/research/[topic].md` or use `/rptc:helper-catch-up-med`
 
 ### Q: Resuming work after a break
 
-**A**: Use `/rptc:helper:resume-plan "@plan.md"` for smart context restoration
+**A**: Use `/rptc:helper-resume-plan "@plan.md"` for smart context restoration
 
 ### Q: Want to see what Master agents do
 
@@ -633,7 +633,7 @@ After using this workflow:
 3. **Try a complex flow**:
 
    ```bash
-   /rptc:helper:catch-up-med
+   /rptc:helper-catch-up-med
    /rptc:research "complex topic"
    /rptc:plan "@complex-topic.md"
    /rptc:tdd "@complex-topic.md"

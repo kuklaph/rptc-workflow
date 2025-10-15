@@ -94,7 +94,7 @@ claude plugin install github.com/your-org/rptc-workflow
 
 ```bash
 cd ~/my-project
-/rptc:admin:init
+/rptc:admin-init
 ```
 
 **What happens**:

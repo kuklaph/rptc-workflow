@@ -26,7 +26,7 @@ SOPs are loaded from (highest priority first):
 3. Plugin SOPs - Plugin defaults
 
 These SOPs provide consistent cross-project guidance.
-Use `/rptc:admin:sop-check [filename]` to verify which SOP will be loaded.
+Use `/rptc:admin-sop-check [filename]` to verify which SOP will be loaded.
 Check `.context/` for project-specific context documents.
 
 ### 2. Complete Architecture Analysis

@@ -4,7 +4,7 @@ Resume implementation of a plan from a previous session with full context restor
 
 Arguments:
 
-- Plan reference: `/rptc:helper:resume-plan "@plan-name.md"`
+- Plan reference: `/rptc:helper-resume-plan "@plan-name.md"`
 
 ## Purpose
 
@@ -56,21 +56,21 @@ Based on remaining work, automatically decide:
 
 ```text
 🔄 Running quick context catch-up...
-[Automatically invoke /rptc:helper:catch-up-quick]
+[Automatically invoke /rptc:helper-catch-up-quick]
 ```
 
 **If 3-5 steps or moderate complexity**:
 
 ```text
 🔄 Running medium context catch-up...
-[Automatically invoke /rptc:helper:catch-up-med]
+[Automatically invoke /rptc:helper-catch-up-med]
 ```
 
 **If 6+ steps or high complexity**:
 
 ```text
 🔄 Running deep context catch-up...
-[Automatically invoke /rptc:helper:catch-up-deep]
+[Automatically invoke /rptc:helper-catch-up-deep]
 ```
 
 ### 3. Load Related Research (If Exists)
@@ -160,7 +160,7 @@ To continue implementation:
   /rptc:tdd "@[plan-name].md"
 
 To modify plan first:
-  /rptc:helper:update-plan "@[plan-name].md" "changes"
+  /rptc:helper-update-plan "@[plan-name].md" "changes"
 
 To start fresh research:
   /rptc:research "[topic]"
@@ -214,7 +214,7 @@ Address these before continuing implementation.
 
 ```text
 # You worked on auth feature yesterday, continuing today
-/rptc:helper:resume-plan "@user-authentication.md"
+/rptc:helper-resume-plan "@user-authentication.md"
 
 # Output:
 # - Loads plan (5 steps, 3 complete)
@@ -227,7 +227,7 @@ Address these before continuing implementation.
 
 ```text
 # Haven't touched plan in 2 weeks
-/rptc:helper:resume-plan "@payment-processing.md"
+/rptc:helper-resume-plan "@payment-processing.md"
 
 # Output:
 # - Loads plan (8 steps, 2 complete)
@@ -241,7 +241,7 @@ Address these before continuing implementation.
 
 ```text
 # Switched to urgent bug, now back to feature
-/rptc:helper:resume-plan "@analytics-dashboard.md"
+/rptc:helper-resume-plan "@analytics-dashboard.md"
 
 # Output:
 # - Loads plan (7 steps, 6 complete)

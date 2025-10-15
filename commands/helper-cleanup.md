@@ -176,7 +176,7 @@ When reviewing a plan, provide smart suggestions based on content:
 ## Example Interaction
 
 ```text
-User: /rptc:helper:cleanup
+User: /rptc:helper-cleanup
 
 Agent:
 📋 Completed Plans Found: 3 plans

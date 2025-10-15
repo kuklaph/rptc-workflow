@@ -64,8 +64,8 @@ fi
 if [ -z "$PLUGIN_ROOT" ]; then
   echo "❌ ERROR: Could not locate RPTC plugin installation directory"
   echo ""
-  echo "Please ensure the rptc-workflow plugin is properly installed."
-  echo "Try: /plugin install rptc-workflow"
+  echo "Please ensure the RPTC plugin is properly installed."
+  echo "Try: /plugin install rptc"
   exit 1
 fi
 ```
@@ -223,11 +223,11 @@ echo ""
 echo "💡 To override SOPs:"
 echo ""
 echo "For this project only:"
-echo "  /rptc:admin:init --copy-sops"
+echo "  /rptc:admin-init --copy-sops"
 echo "  # Copies SOPs to .rptc/sop/ for customization"
 echo ""
 echo "For all your projects:"
-echo "  /rptc:admin:init --copy-sops --global"
+echo "  /rptc:admin-init --copy-sops --global"
 echo "  # Copies SOPs to ~/.claude/global/sop/ as defaults"
 echo ""
 echo "Manual copy:"

@@ -83,9 +83,9 @@ fi
 
 **Helper commands available**:
 
-- `/rptc:helper:catch-up-quick` - Quick context (2 min)
-- `/rptc:helper:catch-up-med` - Medium context (5-10 min)
-- `/rptc:helper:catch-up-deep` - Deep analysis (15-30 min)
+- `/rptc:helper-catch-up-quick` - Quick context (2 min)
+- `/rptc:helper-catch-up-med` - Medium context (5-10 min)
+- `/rptc:helper-catch-up-deep` - Deep analysis (15-30 min)
 
 **Present Context Summary**:
 

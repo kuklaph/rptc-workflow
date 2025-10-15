@@ -319,7 +319,7 @@ Note: Passwords are hashed with bcrypt before storage.
 
 ⚠️ CLAUDE.md (lines 120-125)
 
-- New helper command /rptc:helper:resume-plan added
+- New helper command /rptc:helper-resume-plan added
 - Should be documented in helper commands section
 - Confidence: 65% (workflow documentation)
 
@@ -366,7 +366,7 @@ File: CLAUDE.md
 Section: Helper Commands (lines 120-125)
 Confidence: 65%
 
-Reason: New helper command /rptc:helper:resume-plan detected in commit
+Reason: New helper command /rptc:helper-resume-plan detected in commit
 
 Proposed change:
 ───────────────────────────────────────
@@ -376,8 +376,8 @@ Before:
 ```markdown
 ### Helper Commands
 
-- /rptc:helper:catch-up-quick - Quick context
-- /rptc:helper:catch-up-med - Medium context
+- /rptc:helper-catch-up-quick - Quick context
+- /rptc:helper-catch-up-med - Medium context
 ````
 
 After:
@@ -385,9 +385,9 @@ After:
 ```markdown
 ### Helper Commands
 
-- /rptc:helper:catch-up-quick - Quick context
-- /rptc:helper:catch-up-med - Medium context
-- /rptc:helper:resume-plan - Resume work from saved plan
+- /rptc:helper-catch-up-quick - Quick context
+- /rptc:helper-catch-up-med - Medium context
+- /rptc:helper-resume-plan - Resume work from saved plan
 ```
 
 ───────────────────────────────────────

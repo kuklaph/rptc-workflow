@@ -4,8 +4,8 @@ Modify an existing implementation plan with PM collaboration.
 
 Arguments:
 
-- Plan reference: `/rptc:helper:update-plan "@plan-name.md"`
-- Plan + changes: `/rptc:helper:update-plan "@plan-name.md" "add OAuth support"`
+- Plan reference: `/rptc:helper-update-plan "@plan-name.md"`
+- Plan + changes: `/rptc:helper-update-plan "@plan-name.md" "add OAuth support"`
 
 ## Process
 
@@ -158,7 +158,7 @@ Updated sections:
 
 Next actions:
 - Continue with `/rptc:tdd "@[plan-name].md"` (if implementing)
-- Or make more updates with `/rptc:helper:update-plan "@[plan-name].md"`
+- Or make more updates with `/rptc:helper-update-plan "@[plan-name].md"`
 ```
 
 ## Use Cases
@@ -166,25 +166,25 @@ Next actions:
 ### Add New Step
 
 ```text
-/rptc:helper:update-plan "@user-auth.md" "add password strength validation"
+/rptc:helper-update-plan "@user-auth.md" "add password strength validation"
 ```
 
 ### Modify Existing Step
 
 ```text
-/rptc:helper:update-plan "@user-auth.md" "change JWT expiry from 1h to 24h"
+/rptc:helper-update-plan "@user-auth.md" "change JWT expiry from 1h to 24h"
 ```
 
 ### Update Test Strategy
 
 ```text
-/rptc:helper:update-plan "@user-auth.md" "add load testing for 1000 concurrent users"
+/rptc:helper-update-plan "@user-auth.md" "add load testing for 1000 concurrent users"
 ```
 
 ### Change Acceptance Criteria
 
 ```text
-/rptc:helper:update-plan "@user-auth.md" "coverage must be 90% not 80%"
+/rptc:helper-update-plan "@user-auth.md" "coverage must be 90% not 80%"
 ```
 
 ## Success Criteria

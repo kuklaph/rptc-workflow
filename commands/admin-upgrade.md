@@ -18,7 +18,7 @@ if [ ! -f ".claude/settings.json" ]; then
   echo "❌ ERROR: No .claude/settings.json found"
   echo ""
   echo "This workspace hasn't been initialized."
-  echo "Run: /rptc:admin:init"
+  echo "Run: /rptc:admin-init"
   exit 1
 fi
 
@@ -35,7 +35,7 @@ else
 fi
 
 # Plugin version (update this with each release)
-PLUGIN_VERSION="1.1.0"
+PLUGIN_VERSION="1.1.1"
 ```
 
 ## Step 2: Check if Upgrade Needed
@@ -93,7 +93,7 @@ case "$WORKSPACE_VERSION" in
     echo "  • Version tracking system"
     echo "  • Automatic upgrade detection"
     echo "  • SOP path moved from .claude/sop to .rptc/sop"
-    echo "  • New /rptc:admin:upgrade command"
+    echo "  • New /rptc:admin-upgrade command"
     echo ""
     ;;
 esac
@@ -180,7 +180,7 @@ else
   echo "Please manually update .claude/settings.json:"
   echo ""
   echo "  Add or update these fields in the \"rptc\" section:"
-  echo '    "_rptcVersion": "1.1.0",'
+  echo '    "_rptcVersion": "1.1.1",'
   echo '    "defaultThinkingMode": "think"  (if missing),'
   echo '    "artifactLocation": ".rptc"  (if missing),'
   echo '    "docsLocation": "docs"  (if missing),'
@@ -255,17 +255,17 @@ echo ""
 echo "Backup: .claude/settings.json.backup"
 echo ""
 echo "To review your configuration:"
-echo "  /rptc:admin:config"
+echo "  /rptc:admin-config"
 echo ""
 echo "To verify SOP paths:"
-echo "  /rptc:admin:sop-check"
+echo "  /rptc:admin-sop-check"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 ```
 
 ## Error Handling
 
-- If workspace not initialized, direct user to `/rptc:admin:init`
+- If workspace not initialized, direct user to `/rptc:admin-init`
 - If jq not available, provide manual instructions
 - Always create backup before making changes
 - Handle edge cases (missing fields, malformed JSON)

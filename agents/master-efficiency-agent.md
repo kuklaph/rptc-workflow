@@ -57,7 +57,7 @@ SOPs are resolved via fallback chain (highest priority first):
 2. `~/.claude/global/sop/[name].md` - User global defaults
 3. `${CLAUDE_PLUGIN_ROOT}/sop/[name].md` - Plugin defaults
 
-Use `/rptc:admin:sop-check [filename]` to verify which SOP will be loaded.
+Use `/rptc:admin-sop-check [filename]` to verify which SOP will be loaded.
 
 **MUST CONSULT before making changes:**
 

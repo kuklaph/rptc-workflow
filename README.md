@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 1.1.0
+**Version**: 1.1.1
 **Status**: Beta
 **License**: MIT
 
@@ -17,10 +17,10 @@
 /plugin marketplace add https://github.com/kuklaph/rptc-workflow
 
 # Step 2: Install the plugin
-/plugin install rptc-workflow
+/plugin install rptc
 
 # Step 3: Initialize workspace
-/rptc:admin:init
+/rptc:admin-init
 ```
 
 ---
@@ -53,32 +53,32 @@ RESEARCH → PLAN → TDD → COMMIT
 
 ### Core Workflow
 
-| Command                  | Purpose                | When to Use             |
-| ------------------------ | ---------------------- | ----------------------- |
-| `/rptc:research "topic"` | Interactive discovery  | Complex/unfamiliar work |
-| `/rptc:plan "feature"`   | Collaborative planning | Medium to complex work  |
-| `/rptc:tdd "@plan.md"`   | TDD implementation     | Always (TDD required)   |
-| `/rptc:commit [pr]`      | Verify and ship        | Ready to commit         |
+| Command                     | Purpose                | When to Use             |
+| --------------------------- | ---------------------- | ----------------------- |
+| `/rptc:research "topic"`    | Interactive discovery  | Complex/unfamiliar work |
+| `/rptc:plan "feature"`      | Collaborative planning | Medium to complex work  |
+| `/rptc:tdd "@plan.md"`      | TDD implementation     | Always (TDD required)   |
+| `/rptc:commit [pr]`         | Verify and ship        | Ready to commit         |
 
 ### Helper Commands
 
-| Command                                         | Purpose                | Duration    |
-| ----------------------------------------------- | ---------------------- | ----------- |
-| `/rptc:helper:catch-up-quick`                   | Quick project context  | 2 min       |
-| `/rptc:helper:catch-up-med`                     | Medium project context | 5-10 min    |
-| `/rptc:helper:catch-up-deep`                    | Deep project analysis  | 15-30 min   |
-| `/rptc:helper:update-plan "@plan.md" "changes"` | Modify existing plan   | As needed   |
-| `/rptc:helper:resume-plan "@plan.md"`           | Resume previous work   | After break |
-| `/rptc:helper:cleanup`                          | Review completed plans | Periodic    |
+| Command                                           | Purpose                | Duration    |
+| ------------------------------------------------- | ---------------------- | ----------- |
+| `/rptc:helper-catch-up-quick`                     | Quick project context  | 2 min       |
+| `/rptc:helper-catch-up-med`                       | Medium project context | 5-10 min    |
+| `/rptc:helper-catch-up-deep`                      | Deep project analysis  | 15-30 min   |
+| `/rptc:helper-update-plan "@plan.md" "changes"`   | Modify existing plan   | As needed   |
+| `/rptc:helper-resume-plan "@plan.md"`             | Resume previous work   | After break |
+| `/rptc:helper-cleanup`                            | Review completed plans | Periodic    |
 
 ### Admin Commands
 
-| Command                                     | Purpose                        |
-| ------------------------------------------- | ------------------------------ |
-| `/rptc:admin:init [--copy-sops] [--global]` | Initialize workspace           |
-| `/rptc:admin:config`                        | Show configuration             |
-| `/rptc:admin:sop-check [name]`              | Verify SOP resolution          |
-| `/rptc:admin:upgrade`                       | Upgrade workspace to latest version |
+| Command                                       | Purpose                        |
+| --------------------------------------------- | ------------------------------ |
+| `/rptc:admin-init [--copy-sops] [--global]`   | Initialize workspace           |
+| `/rptc:admin-config`                          | Show configuration             |
+| `/rptc:admin-sop-check [name]`                | Verify SOP resolution          |
+| `/rptc:admin-upgrade`                         | Upgrade workspace to latest version |
 
 ---
 
@@ -105,7 +105,7 @@ RESEARCH → PLAN → TDD → COMMIT
 
 ```bash
 # Get context first
-/rptc:helper:catch-up-med
+/rptc:helper-catch-up-med
 
 # Interactive research
 /rptc:research "payment processing integration"
@@ -139,21 +139,21 @@ SOPs are resolved in this order (highest priority first):
 **For this project only**:
 
 ```bash
-/rptc:admin:init --copy-sops
+/rptc:admin-init --copy-sops
 # Copies SOPs to .rptc/sop/ for customization
 ```
 
 **For all your projects**:
 
 ```bash
-/rptc:admin:init --copy-sops --global
+/rptc:admin-init --copy-sops --global
 # Copies SOPs to ~/.claude/global/sop/ as defaults
 ```
 
 **Verify which SOP is being used**:
 
 ```bash
-/rptc:admin:sop-check testing-guide
+/rptc:admin-sop-check testing-guide
 # Shows which file will be loaded
 ```
 
@@ -182,17 +182,16 @@ rptc-workflow/
 │   ├── plan.md                  # /rptc:plan
 │   ├── tdd.md                   # /rptc:tdd
 │   ├── commit.md                # /rptc:commit
-│   ├── helper/                  # /rptc:helper:*
-│   │   ├── catch-up-quick.md
-│   │   ├── catch-up-med.md
-│   │   ├── catch-up-deep.md
-│   │   ├── update-plan.md
-│   │   ├── resume-plan.md
-│   │   └── cleanup.md
-│   └── admin/                   # /rptc:admin:*
-│       ├── init.md
-│       ├── config.md
-│       └── sop-check.md
+│   ├── helper-catch-up-quick.md # /rptc:helper-catch-up-quick
+│   ├── helper-catch-up-med.md   # /rptc:helper-catch-up-med
+│   ├── helper-catch-up-deep.md  # /rptc:helper-catch-up-deep
+│   ├── helper-update-plan.md    # /rptc:helper-update-plan
+│   ├── helper-resume-plan.md    # /rptc:helper-resume-plan
+│   ├── helper-cleanup.md        # /rptc:helper-cleanup
+│   ├── admin-init.md            # /rptc:admin-init
+│   ├── admin-config.md          # /rptc:admin-config
+│   ├── admin-sop-check.md       # /rptc:admin-sop-check
+│   └── admin-upgrade.md         # /rptc:admin-upgrade
 ├── agents/
 │   ├── master-web-research-agent.md
 │   ├── master-feature-planner-agent.md
@@ -336,7 +335,7 @@ All RPTC configuration lives under the `rptc` namespace in `.claude/settings.jso
 | `maxPlanningAttempts` | `10` | Maximum auto-retry attempts during TDD implementation |
 | `customSopPath` | `".rptc/sop"` | Project-specific SOP directory (for fallback chain) |
 
-**Note:** The init command (`/rptc:admin:init`) automatically creates this file with sensible defaults.
+**Note:** The init command (`/rptc:admin-init`) automatically creates this file with sensible defaults.
 
 ### Thinking Mode Configuration (v1.0.7+)
 
@@ -421,42 +420,42 @@ Default is `"think"` (~4K tokens) to be mindful of Pro plan token limits. Max pl
 ### Q: Plugin updated but workspace outdated?
 
 ```bash
-/rptc:admin:upgrade
+/rptc:admin-upgrade
 # Automatically migrates configuration to latest version
 ```
 
 ### Q: How do I know which SOP is being used?
 
 ```bash
-/rptc:admin:sop-check testing-guide
+/rptc:admin-sop-check testing-guide
 ```
 
 ### Q: Workspace not initialized?
 
 ```bash
-/rptc:admin:init
+/rptc:admin-init
 ```
 
 ### Q: Want to customize SOPs?
 
 ```bash
 # For this project:
-/rptc:admin:init --copy-sops
+/rptc:admin-init --copy-sops
 
 # For all projects:
-/rptc:admin:init --copy-sops --global
+/rptc:admin-init --copy-sops --global
 ```
 
 ### Q: See current configuration?
 
 ```bash
-/rptc:admin:config
+/rptc:admin-config
 ```
 
 ### Q: Plans cluttering .rptc/?
 
 ```bash
-/rptc:helper:cleanup
+/rptc:helper-cleanup
 # Review and archive completed plans
 ```
 
@@ -483,7 +482,7 @@ See [Thinking Mode Configuration](#thinking-mode-configuration-v107) for details
 If you previously used bash setup scripts:
 
 1. **Your existing `.rptc/` and `.claude/` are preserved**
-2. **Install plugin**: `/plugin install rptc-workflow`
+2. **Install plugin**: `/plugin install rptc`
 3. **No re-initialization needed**: Workspace already exists
 4. **Commands now use plugin versions**: Old commands still work
 5. **SOPs**: Existing project SOPs will override plugin defaults

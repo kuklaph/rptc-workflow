@@ -91,7 +91,7 @@ if [[ "$test_exists" = false ]]; then
 File: ${filename}
 Recommended: Write tests first in ${test_suggestion}
 
-Reference: testing-guide.md (TDD cycle) - Use /rptc:admin:sop-check to verify SOP location
+Reference: testing-guide.md (TDD cycle) - Use /rptc:admin-sop-check to verify SOP location
 
 EOF
 fi

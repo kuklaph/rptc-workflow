@@ -1,6 +1,6 @@
 # RPTC Workflow Project
 
-> **NOTE**: This file is auto-created at `.rptc/CLAUDE.md` when you run `/rptc:admin:init`.
+> **NOTE**: This file is auto-created at `.rptc/CLAUDE.md` when you run `/rptc:admin-init`.
 > If you have a project root `CLAUDE.md`, the init command automatically adds a reference to this file.
 
 ---
@@ -27,11 +27,11 @@
 /rptc:commit [pr]             # Verify and ship (optional PR)
 
 # Helpers
-/rptc:helper:catch-up-quick          # Quick context (2 min)
-/rptc:helper:catch-up-med            # Medium context (5-10 min)
-/rptc:helper:catch-up-deep           # Deep analysis (15-30 min)
-/rptc:helper:update-plan "@plan.md"  # Modify existing plan
-/rptc:helper:resume-plan "@plan.md"  # Resume from previous session
+/rptc:helper-catch-up-quick          # Quick context (2 min)
+/rptc:helper-catch-up-med            # Medium context (5-10 min)
+/rptc:helper-catch-up-deep           # Deep analysis (15-30 min)
+/rptc:helper-update-plan "@plan.md"  # Modify existing plan
+/rptc:helper-resume-plan "@plan.md"  # Resume from previous session
 ```
 
 ## RPTC Workflow Philosophy
@@ -172,29 +172,29 @@ Need context first?
   └─ /rptc:helper:catch-up-[quick|med|deep]
 
 Need to update a plan?
-  └─ /rptc:helper:update-plan "@plan.md"
+  └─ /rptc:helper-update-plan "@plan.md"
 
 Resuming previous work?
-  └─ /rptc:helper:resume-plan "@plan.md"
+  └─ /rptc:helper-resume-plan "@plan.md"
 ```
 
 ## Context Helpers
 
-### `/rptc:helper:catch-up-quick` (2 min)
+### `/rptc:helper-catch-up-quick` (2 min)
 
 - Project basics
 - Recent commits
 - Current branch status
 - Use for: Quick questions, small fixes
 
-### `/rptc:helper:catch-up-med` (5-10 min)
+### `/rptc:helper-catch-up-med` (5-10 min)
 
 - Architecture understanding
 - Recent history (15 commits)
 - Existing research/plans
 - Use for: Implementation work, code understanding
 
-### `/rptc:helper:catch-up-deep` (15-30 min)
+### `/rptc:helper-catch-up-deep` (15-30 min)
 
 - Complete architecture analysis
 - Full dependency analysis
@@ -231,7 +231,7 @@ your-project/
 └── src/                         # Your application code
 ```
 
-**Project Root CLAUDE.md**: If you have a project root `CLAUDE.md`, the `/rptc:admin:init` command automatically adds an RPTC reference at the top, preserving your existing content below.
+**Project Root CLAUDE.md**: If you have a project root `CLAUDE.md`, the `/rptc:admin-init` command automatically adds an RPTC reference at the top, preserving your existing content below.
 
 ### Plugin Resources (Referenced, Not Copied)
 
@@ -250,7 +250,7 @@ SOPs are resolved in this order (highest priority first):
 2. `~/.claude/global/sop/[name].md` - User global defaults
 3. `${CLAUDE_PLUGIN_ROOT}/sop/[name].md` - Plugin defaults
 
-Use `/rptc:admin:sop-check [name]` to verify which SOP will be loaded.
+Use `/rptc:admin-sop-check [name]` to verify which SOP will be loaded.
 
 ## Quality Standards
 
@@ -279,7 +279,7 @@ Use `/rptc:admin:sop-check [name]` to verify which SOP will be loaded.
 - **You are the decision maker** - Claude facilitates and executes
 - **Always ask for permission** - Master agents require your approval
 - **Explicit sign-offs required** - No assumptions, clear approvals
-- **Plans are living documents** - Update with `/rptc:helper:update-plan`
+- **Plans are living documents** - Update with `/rptc:helper-update-plan`
 - **Tests first, always** - Non-negotiable TDD principle
 - **Quality gates matter** - Efficiency and Security reviews catch issues
 
@@ -287,7 +287,7 @@ Use `/rptc:admin:sop-check [name]` to verify which SOP will be loaded.
 
 ```bash
 # 1. Start with context
-> /rptc:helper:catch-up-med
+> /rptc:helper-catch-up-med
 
 # 2. Research phase
 > /rptc:research "user authentication"
