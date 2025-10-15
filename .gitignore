@@ -4,6 +4,8 @@ PLUGIN_CONVERSION_STATUS.md
 .claude
 CLAUDE.md
 README-Old.md
+scripts/
+scripts/**
 
 # Version control
 .git/
