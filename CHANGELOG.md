@@ -7,6 +7,129 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.9] - 2025-10-15
+
+### Fixed
+
+- **Version Synchronization**: Updated `plugin.json` version to match marketplace versions
+  - Previous v1.0.8 release accidentally omitted `plugin.json` version update (remained at 1.0.6)
+  - All three version locations now synchronized at 1.0.9:
+    - `plugin.json` → 1.0.9
+    - `marketplace.json` metadata.version → 1.0.9
+    - `marketplace.json` plugins[0].version → 1.0.9
+  - No functional changes; patch release for version consistency only
+
+---
+
+## [1.0.8] - 2025-10-15
+
+### Added
+
+- **Full Configuration System**: Complete RPTC configuration now available via `.claude/settings.json`:
+  ```json
+  {
+    "rptc": {
+      "defaultThinkingMode": "think",
+      "artifactLocation": ".rptc",
+      "docsLocation": "docs",
+      "testCoverageTarget": 85,
+      "maxPlanningAttempts": 10,
+      "customSopPath": ".claude/sop"
+    }
+  }
+  ```
+- **Configurable Artifact Location** (`artifactLocation`): Users can now customize where working artifacts (research, plans, archives) are stored
+- **Configurable Documentation Location** (`docsLocation`): Users can now customize where permanent documentation is stored
+- **Configurable Test Coverage Target** (`testCoverageTarget`): Users can now set their own coverage threshold (default: 85%)
+- **Configurable Max Planning Attempts** (`maxPlanningAttempts`): Users can now customize auto-iteration limits during TDD (default: 10)
+- **Configurable SOP Path** (`customSopPath`): Users can now specify custom project-specific SOP directory location
+
+### Changed
+
+- **Init Command** (`/rptc:admin:init`):
+  - Now creates `.claude/settings.json` with RPTC defaults on first run
+  - Intelligently merges RPTC config into existing settings files
+  - Summary report shows settings file creation and thinking mode tip
+- **Configuration Made Functional**: All configuration options now actively used by commands:
+  - **Research Phase** (`/rptc:research`): Uses `artifactLocation` for storing research documents
+  - **Planning Phase** (`/rptc:plan`): Uses `artifactLocation` for storing and reading plans
+  - **TDD Phase** (`/rptc:tdd`): Uses `artifactLocation` for plan synchronization AND `maxPlanningAttempts` for auto-iteration limits
+  - **Commit Phase** (`/rptc:commit`): Uses `testCoverageTarget` for coverage validation AND `docsLocation` for documentation updates
+  - **Cleanup Helper** (`/rptc:helper:cleanup`): Uses `artifactLocation` for archives AND `docsLocation` for promotions
+- **Config Loading Pattern**: All commands now load configuration on startup with proper fallbacks to defaults
+
+### Improved
+
+- **Workspace Flexibility**: Users can now customize artifact and documentation locations to fit their project structure
+- **Coverage Control**: Teams can now set coverage thresholds that match their quality standards
+- **Iteration Control**: Users can adjust auto-iteration limits based on project complexity and time constraints
+
+### Technical
+
+- Implemented configuration check pattern across all command files
+- Implemented consistent config loading pattern using `jq` with fallback defaults
+- All hardcoded paths replaced with configuration variables (`$ARTIFACT_LOC`, `$DOCS_LOC`, `$COVERAGE_TARGET`, `$MAX_ATTEMPTS`)
+- Configuration loading occurs at command startup (Step 0a) before any operations
+- Backward compatibility maintained: all defaults match previous hardcoded values
+
+---
+
+## [1.0.7] - 2025-10-14
+
+### Added
+
+- **Global Thinking Mode Configuration**: Users can now set a default thinking mode for all RPTC sub-agents via `.claude/settings.json`:
+  ```json
+  {
+    "rptc": {
+      "defaultThinkingMode": "think"
+    }
+  }
+  ```
+- **Thinking Mode Selection**: All sub-agent delegations now prompt users to specify thinking mode:
+  - `"think"` - Basic extended thinking (~4K tokens, default)
+  - `"think hard"` - Medium depth thinking (~10K tokens)
+  - `"ultrathink"` - Maximum depth thinking (~32K tokens)
+- **Power User Tip**: Init command now displays thinking mode configuration guidance on first setup
+- **Automatic Settings Creation**: `/rptc:admin:init` now creates `.claude/settings.json` with RPTC defaults if it doesn't exist, or merges RPTC config if file exists (using `jq` if available)
+
+### Changed
+
+- **Default Thinking Mode**: Changed from implicit "extended" to explicit "think" (4K tokens) to be mindful of Pro plan users
+- **Thinking Mode Keywords**: Updated to use official Anthropic keywords:
+  - Replaced generic "extended" with "think"
+  - Replaced generic "normal" with "think" (basic mode)
+  - Verified "ultrathink" keyword (~32K tokens) from official sources
+- **Research Phase** (`/rptc:research`):
+  - Added thinking mode prompt for Master Web Research Agent delegation
+  - Removed prescriptive "ultrathink" instruction from agent itself
+  - Checks `.claude/settings.json` for global default before prompting
+- **Planning Phase** (`/rptc:plan`):
+  - Added thinking mode prompt for Master Feature Planner delegation
+  - Global default used if user doesn't specify
+  - Updated token budget descriptions for each mode
+- **TDD Phase** (`/rptc:tdd`):
+  - Added thinking mode prompt for Master Efficiency Agent delegation
+  - Added thinking mode prompt for Master Security Agent delegation
+  - Both agents check global configuration before prompting
+- **Commit Phase** (`/rptc:commit`):
+  - Master Documentation Specialist now respects global thinking mode
+  - Automatically uses configured default (no prompt, as delegation is automatic)
+- **Thinking Mode Precedence**: Established hierarchy: User per-command choice > Global setting > Default ("think")
+
+### Improved
+
+- **Token Budget Transparency**: All thinking mode tips now display approximate token budgets
+- **Pro Plan Consideration**: Default mode set to "think" to avoid excessive token usage for users on Pro plans
+- **Configuration Discoverability**: Init command prominently displays thinking mode configuration example
+
+### Technical
+
+- Verified custom configuration options are supported in Claude Code plugin settings via hierarchical settings merge
+- Updated all agent delegation prompts to accept thinking mode parameter
+
+---
+
 ## [1.0.0] - 2025-10-14
 
 ### Added
@@ -224,6 +347,7 @@ Three-tier fallback system (priority order):
 
 ## Version History
 
+- **1.0.9** (2025-10-15): Patch release - Fixed version synchronization (plugin.json now matches marketplace versions)
 - **1.0.8** (2025-10-15): Made all configuration options functional - customizable paths, coverage targets, and iteration limits
 - **1.0.7** (2025-10-14): Added global thinking mode configuration and user-selectable thinking modes for all sub-agents
 - **1.0.0** (2025-10-14): Initial plugin release with full RPTC workflow
