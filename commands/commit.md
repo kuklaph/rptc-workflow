@@ -204,10 +204,6 @@ type(scope): brief description
 - Coverage: [current coverage]%
 
 Closes #[issue-number] (if applicable)
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
 **Types**:
@@ -233,10 +229,6 @@ feat(auth): add Google OAuth2 authentication
 - Coverage: 87% (up from 82%)
 
 Closes #124
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
 ### Phase 3: Verification Summary
@@ -448,8 +440,6 @@ COMMIT_MSG
    - [x] Code quality verified
    - [x] No debug code
    - [x] Conventional commit format
-
-   🤖 Generated with [Claude Code](https://claude.com/claude-code)
    PR_BODY
    )"
    ```
@@ -608,10 +598,6 @@ feat(auth): add Google OAuth2 authentication
 - Coverage: 87% (up from 82%)
 
 Closes #124
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
 ───────────────────────────────────────
 
 Files: 8 files changed, 234 insertions(+)
