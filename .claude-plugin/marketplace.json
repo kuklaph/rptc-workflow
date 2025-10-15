@@ -1,0 +1,31 @@
+{
+  "name": "rptc-workflow-marketplace",
+  "owner": {
+    "name": "kuklaph",
+    "url": "https://github.com/kuklaph"
+  },
+  "description": "Official marketplace for RPTC (Research → Plan → TDD → Commit) workflow plugin",
+  "plugins": [
+    {
+      "name": "rptc-workflow",
+      "source": "./",
+      "description": "Complete RPTC workflow with research, planning, TDD implementation, and quality gates",
+      "version": "1.0.0",
+      "keywords": [
+        "workflow",
+        "tdd",
+        "research",
+        "planning",
+        "quality-gates",
+        "documentation",
+        "pm-collaboration"
+      ],
+      "categories": [
+        "workflow",
+        "testing",
+        "documentation",
+        "code-quality"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "name": "rptc-workflow",
+  "version": "1.0.0",
+  "description": "Research → Plan → TDD → Commit workflow with PM collaboration. Systematic development with quality gates, test-driven implementation, and intelligent documentation management.",
+  "author": "kuklaph",
+  "keywords": [
+    "workflow",
+    "tdd",
+    "research",
+    "planning",
+    "quality-gates",
+    "documentation",
+    "pm-collaboration",
+    "test-driven-development",
+    "multi-agent"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kuklaph/rptc-workflow"
+  },
+  "homepage": "https://github.com/kuklaph/rptc-workflow#readme",
+  "bugs": {
+    "url": "https://github.com/kuklaph/rptc-workflow/issues"
+  },
+  "engines": {
+    "claude-code": ">=2.0.0"
+  },
+  "requirements": {
+    "mcp": []
+  },
+  "config": {
+    "artifactLocation": ".rptc",
+    "docsLocation": "docs",
+    "autoPromoteToDocsOnComplete": false,
+    "retentionPolicy": "prompt",
+    "testCoverageTarget": 80,
+    "maxPlanningAttempts": 10,
+    "sopFallbackChain": [
+      ".claude/sop",
+      "~/.claude/global/sop",
+      "${CLAUDE_PLUGIN_ROOT}/sop"
+    ]
+  }
+}

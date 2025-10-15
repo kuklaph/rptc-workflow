@@ -1,0 +1,38 @@
+# Development artifacts (don't distribute with plugin)
+legacy
+PLUGIN_CONVERSION_STATUS.md
+.claude
+README-Old.md
+
+# Version control
+.git/
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependencies (if any)
+node_modules/
+vendor/
+
+# Build outputs (if any)
+dist/
+build/
+*.pyc
+__pycache__/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
