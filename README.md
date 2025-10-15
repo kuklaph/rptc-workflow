@@ -13,23 +13,13 @@
 ### Installation (Plugin Method - Recommended)
 
 ```bash
-# Install from GitHub
-/plugin install https://github.com/kuklaph/rptc-workflow
-
-# Initialize workspace
-/rptc:admin:init
-```
-
-**Alternative**: If you have the plugin marketplace configured:
-
-```bash
-# Add marketplace
+# Step 1: Add the marketplace
 /plugin marketplace add https://github.com/kuklaph/rptc-workflow
 
-# Install plugin
+# Step 2: Install the plugin
 /plugin install rptc-workflow
 
-# Initialize workspace
+# Step 3: Initialize workspace
 /rptc:admin:init
 ```
 
