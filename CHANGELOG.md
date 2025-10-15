@@ -7,6 +7,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.2] - 2025-10-15
+
+### Improved
+
+- **Comprehensive Upgrade Command**: Enhanced `/rptc:admin-upgrade` to be a complete workspace verification and repair tool
+  - Now performs full health check on every run, even when version is current
+  - Detects and respects user customizations (directory names, config values)
+  - Interactive prompts for ambiguous changes (asks before modifying potential customizations)
+  - Auto-fixes clearly system-level issues (missing config fields, missing directories)
+  - Verifies directory structure based on user's configured locations
+  - Validates configuration file completeness
+  - Checks important files (CLAUDE.md, .gitignore)
+  - Validates SOP locations and fallback chain
+  - Shows current configuration values for transparency
+
+- **User Customization Detection**:
+  - Detects non-standard directory names (e.g., `.rptc/archive` vs `.rptc/complete`)
+  - Detects customized config values (e.g., coverage target changed from 85 to 90)
+  - Asks before changing anything that might be intentional
+  - Default response preserves user customizations
+
+- **Smart Repair Logic**:
+  - Auto-creates missing directories (clearly unintentional)
+  - Auto-adds missing config fields (system-level only)
+  - Asks before recreating deleted files (might be intentional)
+  - Asks before renaming directories (might be customized naming)
+  - Provides rollback instructions for all changes
+
+### Philosophy
+
+The upgrade command now follows a "respect user intent" philosophy:
+
+**Auto-fix without asking**: Missing config fields, version updates, completely missing directories
+
+**Ask first**: Directory renames, missing files, SOP location changes, any non-standard structure
+
+**Never change silently**: Custom config values, non-standard naming, anything suggesting user preference
+
+### Migration Notes
+
+No migration needed from v1.1.1. The enhanced upgrade command is backward compatible and will work with any v1.0.x or v1.1.x workspace.
+
+---
+
 ## [1.1.1] - 2025-10-15
 
 ### Fixed
@@ -460,6 +504,7 @@ Three-tier fallback system (priority order):
 
 ## Version History
 
+- **1.1.2** (2025-10-15): Enhanced upgrade command - comprehensive workspace verification that respects user customizations
 - **1.1.1** (2025-10-15): Patch release - Fixed Windows backslash issue and shortened plugin name (rptc-workflow → rptc)
 - **1.1.0** (2025-10-15): Added version tracking system, upgrade command, and migrated SOP path from .claude/sop to .rptc/sop
 - **1.0.9** (2025-10-15): Patch release - Fixed version synchronization (plugin.json now matches marketplace versions)
