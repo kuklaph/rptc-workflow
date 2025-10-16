@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.9] - 2025-10-16
+
+### Fixed
+
+- **Marketplace Plugin Detection (admin-sop-check)**: Fixed `/rptc:admin-sop-check` failing to detect marketplace-installed plugins
+  - **Problem**: Same plugin detection bug as 1.1.8 but in the SOP verification command
+  - **Root Cause**: Search pattern in `admin-sop-check.md` still used restrictive `"rptc-workflow"` match
+  - **Impact**: Users couldn't verify SOP resolution paths when using marketplace install
+  - **Solution**: Updated all three plugin search locations in `admin-sop-check.md` to use broader `"rptc"` pattern
+  - **Backward Compatible**: Works with direct installs, marketplace installs, and development installs
+
+---
+
+
 ## [1.1.8] - 2025-10-16
 
 ### Fixed

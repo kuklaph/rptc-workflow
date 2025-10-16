@@ -22,10 +22,11 @@ Before checking SOPs, find where the RPTC plugin is installed:
 # Find the plugin directory by searching for the unique plugin manifest
 PLUGIN_ROOT=""
 
-# Check user plugins directory
+# Check user plugins directory (including marketplaces subdirectory)
 if [ -d "$HOME/.claude/plugins" ]; then
   FOUND=$(find "$HOME/.claude/plugins" -name "plugin.json" -path "*/.claude-plugin/plugin.json" 2>/dev/null | while read manifest; do
-    if grep -q '"name".*"rptc-workflow"' "$manifest" 2>/dev/null; then
+    # Check for either "rptc-workflow" or "rptc" as plugin name
+    if grep -q '"name".*"rptc' "$manifest" 2>/dev/null; then
       dirname "$(dirname "$manifest")"
       break
     fi
@@ -35,10 +36,11 @@ if [ -d "$HOME/.claude/plugins" ]; then
   fi
 fi
 
-# If not found, check system plugins directory
+# If not found, check system plugins directory (including marketplaces subdirectory)
 if [ -z "$PLUGIN_ROOT" ] && [ -d "/opt/claude/plugins" ]; then
   FOUND=$(find "/opt/claude/plugins" -name "plugin.json" -path "*/.claude-plugin/plugin.json" 2>/dev/null | while read manifest; do
-    if grep -q '"name".*"rptc-workflow"' "$manifest" 2>/dev/null; then
+    # Check for either "rptc-workflow" or "rptc" as plugin name
+    if grep -q '"name".*"rptc' "$manifest" 2>/dev/null; then
       dirname "$(dirname "$manifest")"
       break
     fi
@@ -50,8 +52,9 @@ fi
 
 # If still not found, try alternative search in home directory
 if [ -z "$PLUGIN_ROOT" ]; then
-  FOUND=$(find "$HOME" -type f -name "plugin.json" -path "*rptc-workflow*/.claude-plugin/plugin.json" 2>/dev/null | while read manifest; do
-    if grep -q '"name".*"rptc-workflow"' "$manifest" 2>/dev/null; then
+  FOUND=$(find "$HOME" -type f -name "plugin.json" -path "*rptc*/.claude-plugin/plugin.json" 2>/dev/null | while read manifest; do
+    # Check for either "rptc-workflow" or "rptc" as plugin name
+    if grep -q '"name".*"rptc' "$manifest" 2>/dev/null; then
       dirname "$(dirname "$manifest")"
       break
     fi
