@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.6] - 2025-10-15
+
+### Fixed
+
+- **Thinking Mode Configuration Not Loaded**: Fixed all workflow commands not loading `defaultThinkingMode` from settings.json
+  - **Problem**: Users configured `"rptc.defaultThinkingMode"` in settings.json but commands always defaulted to "think" mode
+  - **Root Cause**: Commands were not loading THINKING_MODE variable in Step 0/0a configuration blocks
+  - **Impact**: All agent delegations (Research, Planner, Efficiency, Security, Documentation) were ignoring user's configured thinking mode preference
+  - **Solution**: Standardized configuration loading pattern across all commands
+    - Added `THINKING_MODE=$(jq -r '.rptc.defaultThinkingMode // "think"' ...)` to Step 0/0a in each command
+    - Updated agent delegation sections to use pre-loaded `$THINKING_MODE` variable
+    - Removed redundant settings.json checks later in workflow
+  - **Files Updated**:
+    - `commands/commit.md`: Added THINKING_MODE to Step 0, updated Phase 4 (Documentation Specialist)
+    - `commands/research.md`: Added THINKING_MODE to Step 0a, updated Phase 3 (Master Research Agent)
+    - `commands/plan.md`: Added THINKING_MODE to Step 0a, updated Phase 4 & 5 (Feature Planner)
+    - `commands/tdd.md`: Added THINKING_MODE to Step 0a, updated Phase 2 & 3 (Efficiency + Security)
+  - **User Impact**: Configured thinking mode now properly respected throughout entire RPTC workflow
+
+### Technical
+
+- Configuration loading now consistent: All config vars loaded once in Step 0/0a, reused via variables throughout
+- Pattern: Load ALL settings upfront with jq, use bash variables downstream (eliminates redundant file reads)
+- Backward compatible: Defaults unchanged, only fixes configuration not being read
+
+---
+
 ## [1.1.5] - 2025-10-15
 
 ### Added
