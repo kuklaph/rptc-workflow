@@ -8,18 +8,26 @@ You are helping the user manage completed plans in their workspace.
 
 ## Step 0: Load Configuration
 
-Load RPTC configuration from settings.json (with fallbacks):
+**Load configuration**:
 
-```bash
-# Load RPTC configuration
-if [ -f ".claude/settings.json" ] && command -v jq >/dev/null 2>&1; then
-  ARTIFACT_LOC=$(jq -r '.rptc.artifactLocation // ".rptc"' .claude/settings.json 2>/dev/null)
-  DOCS_LOC=$(jq -r '.rptc.docsLocation // "docs"' .claude/settings.json 2>/dev/null)
-else
-  ARTIFACT_LOC=".rptc"
-  DOCS_LOC="docs"
-fi
-```
+1. **Check if settings file exists**:
+   - Use Read tool to read `.claude/settings.json`
+   - If file doesn't exist or can't be read, use defaults (skip to step 3)
+
+2. **Parse configuration** (extract these fields):
+   - `rptc.artifactLocation` → ARTIFACT_LOC (default: ".rptc")
+   - `rptc.docsLocation` → DOCS_LOC (default: "docs")
+
+3. **Display loaded configuration**:
+   ```text
+   Configuration loaded:
+     Artifact location: [ARTIFACT_LOC value]
+     Docs location: [DOCS_LOC value]
+   ```
+
+**Use these values throughout the command execution.**
+
+**Note**: References to these variables appear throughout this command - use the actual loaded values from this step.
 
 ## Purpose
 

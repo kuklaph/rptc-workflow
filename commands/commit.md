@@ -54,18 +54,26 @@ Load SOPs using fallback chain (highest priority first):
 
 **Load Configuration**:
 
-```bash
-# Load RPTC configuration from settings.json (with fallbacks)
-if [ -f ".claude/settings.json" ] && command -v jq >/dev/null 2>&1; then
-  COVERAGE_TARGET=$(jq -r '.rptc.testCoverageTarget // 85' .claude/settings.json 2>/dev/null)
-  DOCS_LOC=$(jq -r '.rptc.docsLocation // "docs"' .claude/settings.json 2>/dev/null)
-  THINKING_MODE=$(jq -r '.rptc.defaultThinkingMode // "think"' .claude/settings.json 2>/dev/null)
-else
-  COVERAGE_TARGET=85
-  DOCS_LOC="docs"
-  THINKING_MODE="think"
-fi
-```
+1. **Check if settings file exists**:
+   - Use Read tool to read `.claude/settings.json`
+   - If file doesn't exist or can't be read, use defaults (skip to step 3)
+
+2. **Parse configuration** (extract these fields):
+   - `rptc.defaultThinkingMode` → THINKING_MODE (default: "think")
+   - `rptc.testCoverageTarget` → COVERAGE_TARGET (default: 85)
+   - `rptc.docsLocation` → DOCS_LOC (default: "docs")
+
+3. **Display loaded configuration**:
+   ```text
+   Configuration loaded:
+     Thinking mode: [THINKING_MODE value]
+     Coverage target: [COVERAGE_TARGET value]%
+     Docs location: [DOCS_LOC value]
+   ```
+
+**Use these values throughout the command execution.**
+
+**Note**: References to these variables appear throughout this command - use the actual loaded values from this step.
 
 #### 1. Test Suite Verification (NON-NEGOTIABLE)
 

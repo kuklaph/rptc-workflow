@@ -22,18 +22,24 @@ Act as an intelligent brainstorming partner who:
 
 ## Step 0a: Load Configuration
 
-Load RPTC configuration from settings.json (with fallbacks):
+**Load RPTC configuration from `.claude/settings.json`:**
 
-```bash
-# Load RPTC configuration
-if [ -f ".claude/settings.json" ] && command -v jq >/dev/null 2>&1; then
-  ARTIFACT_LOC=$(jq -r '.rptc.artifactLocation // ".rptc"' .claude/settings.json 2>/dev/null)
-  THINKING_MODE=$(jq -r '.rptc.defaultThinkingMode // "think"' .claude/settings.json 2>/dev/null)
-else
-  ARTIFACT_LOC=".rptc"
-  THINKING_MODE="think"
-fi
-```
+1. **Check if settings file exists**:
+   - Use Read tool to read `.claude/settings.json`
+   - If file doesn't exist or can't be read, use defaults (skip to step 3)
+
+2. **Parse configuration** (extract these fields):
+   - `rptc.defaultThinkingMode` → THINKING_MODE (default: "think")
+   - `rptc.artifactLocation` → ARTIFACT_LOC (default: ".rptc")
+
+3. **Display loaded configuration**:
+   ```text
+   Configuration loaded:
+     Artifact location: [ARTIFACT_LOC value]
+     Thinking mode: [THINKING_MODE value]
+   ```
+
+**Use these values throughout the command execution.**
 
 ## Step 0: Load Reference Materials
 
@@ -151,7 +157,7 @@ Once you understand WHAT we're building, search the codebase:
 
 1. **Use Configured Thinking Mode**:
 
-   Thinking mode already loaded in Step 0a configuration: `$THINKING_MODE`
+   Thinking mode already loaded in Step 0a configuration: [THINKING_MODE value]
 
 2. **Ask Permission**:
 
@@ -160,7 +166,7 @@ Once you understand WHAT we're building, search the codebase:
    Should I delegate to the Master Research Agent?
 
    💡 Thinking Mode:
-   Will use configured mode: "$THINKING_MODE"
+   Will use configured mode: "[THINKING_MODE value]"
 
    - Type "yes" or "approved" to proceed with configured mode
    - To override thinking mode, say: "yes, use ultrathink" (or "think hard")
@@ -173,7 +179,7 @@ Once you understand WHAT we're building, search the codebase:
 
 4. **Determine Final Thinking Mode**:
    - If user specified a mode override (e.g., "yes, use ultrathink"): Use user's choice
-   - Else: Use configured mode from $THINKING_MODE
+   - Else: Use configured mode from Step 0a (THINKING_MODE value)
 
 5. **If approved**: Use the Task tool to delegate to `master-research-agent`
 
@@ -270,15 +276,13 @@ Waiting for your sign-off...
 
 Once approved, check workspace structure first:
 
-```bash
-# Ensure directory exists
-if [ ! -d "$ARTIFACT_LOC/research" ]; then
-  echo "⚠️  Workspace not initialized. Creating $ARTIFACT_LOC/research/"
-  mkdir -p "$ARTIFACT_LOC/research"
-fi
-```
+1. **Check if research directory exists**:
+   - If `[ARTIFACT_LOC]/research/` doesn't exist, create it using Bash:
+     ```bash
+     mkdir -p [ARTIFACT_LOC value]/research
+     ```
 
-Save to: `$ARTIFACT_LOC/research/[topic-slug].md`
+2. **Save document to**: `[ARTIFACT_LOC]/research/[topic-slug].md`
 
 **Use template from plugin**:
 
@@ -401,10 +405,10 @@ _SOP References: [List SOPs consulted]_
 After saving:
 
 ```text
-✅ Research saved to $ARTIFACT_LOC/research/[topic-slug].md
+✅ Research saved to [ARTIFACT_LOC]/research/[topic-slug].md
 
 Next steps:
-- Review: cat $ARTIFACT_LOC/research/[topic-slug].md
+- Review: cat [ARTIFACT_LOC]/research/[topic-slug].md
 - Plan: /rptc:plan "@[topic-slug].md"
 - Or plan directly: /rptc:plan "[work item name]"
 ```
@@ -451,7 +455,7 @@ Use these if you need additional project context.
 - [ ] Listed all relevant files with line numbers
 - [ ] Presented clear findings with SOP references
 - [ ] Received explicit PM approval
-- [ ] Saved research document to `$ARTIFACT_LOC/research/`
+- [ ] Saved research document to `[ARTIFACT_LOC]/research/`
 - [ ] Ready for planning phase
 
 ---

@@ -63,20 +63,28 @@ Check for project-specific testing strategies or code style overrides.
 
 ## Step 0a: Load Configuration
 
-Load RPTC configuration from settings.json (with fallbacks):
+**Load RPTC configuration from `.claude/settings.json`:**
 
-```bash
-# Load RPTC configuration
-if [ -f ".claude/settings.json" ] && command -v jq >/dev/null 2>&1; then
-  ARTIFACT_LOC=$(jq -r '.rptc.artifactLocation // ".rptc"' .claude/settings.json 2>/dev/null)
-  MAX_ATTEMPTS=$(jq -r '.rptc.maxPlanningAttempts // 10' .claude/settings.json 2>/dev/null)
-  THINKING_MODE=$(jq -r '.rptc.defaultThinkingMode // "think"' .claude/settings.json 2>/dev/null)
-else
-  ARTIFACT_LOC=".rptc"
-  MAX_ATTEMPTS=10
-  THINKING_MODE="think"
-fi
-```
+1. **Check if settings file exists**:
+   - Use Read tool to read `.claude/settings.json`
+   - If file doesn't exist or can't be read, use defaults (skip to step 3)
+
+2. **Parse configuration** (extract these fields):
+   - `rptc.defaultThinkingMode` → THINKING_MODE (default: "think")
+   - `rptc.artifactLocation` → ARTIFACT_LOC (default: ".rptc")
+   - `rptc.maxPlanningAttempts` → MAX_ATTEMPTS (default: 10)
+
+3. **Display loaded configuration**:
+   ```text
+   Configuration loaded:
+     Artifact location: [ARTIFACT_LOC value]
+     Thinking mode: [THINKING_MODE value]
+     Max planning attempts: [MAX_ATTEMPTS value]
+   ```
+
+**Use these values throughout the command execution.**
+
+**Note**: References to these variables appear throughout this command as `$VARIABLE_NAME` or `[VARIABLE value]` - use the actual loaded values from this step.
 
 ### Phase 0: Load Plan (REQUIRED)
 

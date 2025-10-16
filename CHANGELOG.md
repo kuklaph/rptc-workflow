@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.10] - 2025-10-16
+
+### Fixed
+
+- **Configuration Loading Bug**: Fixed all workflow commands not reliably reading user settings from `.claude/settings.json`
+  - **Problem**: User reported setting `"defaultThinkingMode": "ultrathink"` but research command showed "think" mode
+  - **Root Cause**: Bash code blocks in command files were ambiguous - Claude didn't reliably execute them to read settings
+  - **Impact**: All configured values (thinking mode, artifact location, coverage target, max attempts) were being ignored, falling back to defaults
+  - **Solution**: Replaced bash/jq patterns with explicit Read tool instructions in all command configuration loading sections
+  - **Files Updated**:
+    - `commands/research.md` - Step 0a (ARTIFACT_LOC, THINKING_MODE)
+    - `commands/plan.md` - Step 0a (ARTIFACT_LOC, THINKING_MODE)
+    - `commands/tdd.md` - Step 0a (ARTIFACT_LOC, THINKING_MODE, MAX_ATTEMPTS)
+    - `commands/commit.md` - Phase 1 (COVERAGE_TARGET, DOCS_LOC, THINKING_MODE)
+    - `commands/helper-cleanup.md` - Step 0 (ARTIFACT_LOC, DOCS_LOC)
+  - **New Pattern**: Clear 3-step instructions: (1) Read settings.json with Read tool, (2) Parse JSON fields, (3) Display loaded config
+  - **User Impact**: Configuration now properly respected - ultrathink users get ultrathink, custom paths work, custom coverage targets work
+
+### Technical
+
+- **Architectural Change**: Moved from bash code execution pattern to explicit Read tool + JSON parsing instructions
+- **Reliability**: Read tool is deterministic and always executes; bash blocks were being interpreted inconsistently
+- **Security**: Read tool is non-destructive and less concerning for users than arbitrary bash execution
+- **Cross-Platform**: Read tool works identically on Windows/Mac/Linux; bash has platform quirks
+- **Transparency**: Configuration display step makes loaded values visible to users for verification
+
+### Notes
+
+- This was a critical bug - configuration system introduced in v1.0.7+ was non-functional
+- Fix maintains backward compatibility - same defaults, same settings.json structure
+- Variable references throughout commands remain as `$VARIABLE` or `[VARIABLE value]` placeholders - Claude interprets based on Step 0a loaded values
+
+---
+
 ## [1.1.9] - 2025-10-16
 
 ### Fixed

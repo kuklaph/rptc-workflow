@@ -47,18 +47,24 @@ Load SOPs using fallback chain (highest priority first):
 
 ## Step 0a: Load Configuration
 
-Load RPTC configuration from settings.json (with fallbacks):
+**Load RPTC configuration from `.claude/settings.json`:**
 
-```bash
-# Load RPTC configuration
-if [ -f ".claude/settings.json" ] && command -v jq >/dev/null 2>&1; then
-  ARTIFACT_LOC=$(jq -r '.rptc.artifactLocation // ".rptc"' .claude/settings.json 2>/dev/null)
-  THINKING_MODE=$(jq -r '.rptc.defaultThinkingMode // "think"' .claude/settings.json 2>/dev/null)
-else
-  ARTIFACT_LOC=".rptc"
-  THINKING_MODE="think"
-fi
-```
+1. **Check if settings file exists**:
+   - Use Read tool to read `.claude/settings.json`
+   - If file doesn't exist or can't be read, use defaults (skip to step 3)
+
+2. **Parse configuration** (extract these fields):
+   - `rptc.defaultThinkingMode` → THINKING_MODE (default: "think")
+   - `rptc.artifactLocation` → ARTIFACT_LOC (default: ".rptc")
+
+3. **Display loaded configuration**:
+   ```text
+   Configuration loaded:
+     Artifact location: [ARTIFACT_LOC value]
+     Thinking mode: [THINKING_MODE value]
+   ```
+
+**Use these values throughout the command execution.**
 
 ## Planning Process
 
@@ -68,7 +74,7 @@ fi
 
 1. **Check for Research Document**
 
-   - If user provides `@research-doc.md`, check `$ARTIFACT_LOC/research/[name].md`
+   - If user provides `@research-doc.md`, check `[ARTIFACT_LOC]/research/[name].md`
    - Extract key findings and recommendations
    - Note relevant files and patterns
 
@@ -96,7 +102,7 @@ fi
 ```text
 📚 Context Loaded:
 
-Research: [Summary if research doc provided from $ARTIFACT_LOC/research/]
+Research: [Summary if research doc provided from [ARTIFACT_LOC]/research/]
 Tech Stack: [From CLAUDE.md]
 Related Files: [Relevant existing code]
 Patterns: [Identified patterns from architecture SOP]
@@ -187,7 +193,7 @@ This is just a starting point. Let's refine it together...
 
 **Step 1: Use Configured Thinking Mode**:
 
-Thinking mode already loaded in Step 0a configuration: `$THINKING_MODE`
+Thinking mode already loaded in Step 0a configuration: [THINKING_MODE value]
 
 **FORMATTING NOTE:** Each list item must be on its own line with proper newlines.
 
@@ -211,7 +217,7 @@ The Master Feature Planner will create a comprehensive, detailed plan including:
 - Risk assessment
 
 💡 Thinking Mode:
-Will use configured mode: "$THINKING_MODE"
+Will use configured mode: "[THINKING_MODE value]"
 
 Ready to delegate to Master Feature Planner?
 - Type "yes" or "approved" to proceed with configured mode
@@ -230,7 +236,7 @@ Waiting for your sign-off...
 
 **Step 1: Determine Final Thinking Mode**:
    - If user specified a mode override (e.g., "yes, use ultrathink"): Use user's choice
-   - Else: Use configured mode from $THINKING_MODE
+   - Else: Use configured mode from Step 0a (THINKING_MODE value)
 
 **Step 2: Analyze Scaffold Complexity**:
    - Count the number of steps in the approved scaffold
@@ -250,7 +256,7 @@ You are the MASTER FEATURE PLANNER - create a comprehensive, TDD-ready implement
 
 Context:
 - Feature: [feature description]
-- Research findings: [if applicable, from $ARTIFACT_LOC/research/]
+- Research findings: [if applicable, from [ARTIFACT_LOC]/research/]
 - Tech stack: [project tech from CLAUDE.md]
 - Scaffold: [initial plan structure]
 - PM input: [clarifications from PM]
@@ -585,7 +591,7 @@ All modifications incorporated.
 - Type "modify" to make additional changes
 - Provide specific feedback for adjustments
 
-This plan will be saved to: $ARTIFACT_LOC/plans/[name-slug].md
+This plan will be saved to: [ARTIFACT_LOC]/plans/[name-slug].md
 
 Waiting for your final sign-off...
 ```
@@ -596,15 +602,13 @@ Waiting for your final sign-off...
 
 Check workspace structure first:
 
-```bash
-# Ensure directory exists
-if [ ! -d "$ARTIFACT_LOC/plans" ]; then
-  echo "⚠️  Workspace not initialized. Creating $ARTIFACT_LOC/plans/"
-  mkdir -p "$ARTIFACT_LOC/plans"
-fi
-```
+1. **Check if plans directory exists**:
+   - If `[ARTIFACT_LOC]/plans/` doesn't exist, create it using Bash:
+     ```bash
+     mkdir -p [ARTIFACT_LOC value]/plans
+     ```
 
-Save to: `$ARTIFACT_LOC/plans/[name-slug].md`
+2. **Save document to**: `[ARTIFACT_LOC]/plans/[name-slug].md`
 
 **Use template from plugin**:
 
@@ -613,7 +617,7 @@ Save to: `$ARTIFACT_LOC/plans/[name-slug].md`
 TEMPLATE=$(cat "${CLAUDE_PLUGIN_ROOT}/templates/plan.md")
 
 # Fill in with plan content from Master Planner
-# Save to $ARTIFACT_LOC/plans/[sanitized-feature-name].md
+# Save to [ARTIFACT_LOC]/plans/[sanitized-feature-name].md
 ```
 
 **Format** (based on template + Master Planner output):
@@ -631,7 +635,7 @@ TEMPLATE=$(cat "${CLAUDE_PLUGIN_ROOT}/templates/plan.md")
 
 [What we're building and why]
 
-**Related Research**: `$ARTIFACT_LOC/research/[topic].md` (if applicable)
+**Related Research**: `[ARTIFACT_LOC]/research/[topic].md` (if applicable)
 
 ---
 
@@ -768,10 +772,10 @@ _SOP References: [List SOPs consulted]_
 After saving:
 
 ```text
-✅ Plan saved to $ARTIFACT_LOC/plans/[name-slug].md
+✅ Plan saved to [ARTIFACT_LOC]/plans/[name-slug].md
 
 Next steps:
-- Review: cat $ARTIFACT_LOC/plans/[name-slug].md
+- Review: cat [ARTIFACT_LOC]/plans/[name-slug].md
 - Implement: /rptc:tdd "@[name-slug].md"
 ```
 
@@ -811,7 +815,7 @@ Next steps:
 - [ ] Plan reviewed by PM
 - [ ] Modifications incorporated (if needed)
 - [ ] PM explicitly approved final plan
-- [ ] Plan document saved to `$ARTIFACT_LOC/plans/`
+- [ ] Plan document saved to `[ARTIFACT_LOC]/plans/`
 - [ ] Ready for TDD implementation
 
 ---
