@@ -67,10 +67,11 @@ Before copying files, we need to find where the RPTC plugin is installed:
 # Search in common Claude Code plugin installation locations
 PLUGIN_ROOT=""
 
-# Check user plugins directory
+# Check user plugins directory (including marketplaces subdirectory)
 if [ -d "$HOME/.claude/plugins" ]; then
   FOUND=$(find "$HOME/.claude/plugins" -name "plugin.json" -path "*/.claude-plugin/plugin.json" 2>/dev/null | while read manifest; do
-    if grep -q '"name".*"rptc-workflow"' "$manifest" 2>/dev/null; then
+    # Check for either "rptc-workflow" or "rptc" as plugin name
+    if grep -q '"name".*"rptc' "$manifest" 2>/dev/null; then
       dirname "$(dirname "$manifest")"
       break
     fi
@@ -83,7 +84,8 @@ fi
 # If not found, check system plugins directory
 if [ -z "$PLUGIN_ROOT" ] && [ -d "/opt/claude/plugins" ]; then
   FOUND=$(find "/opt/claude/plugins" -name "plugin.json" -path "*/.claude-plugin/plugin.json" 2>/dev/null | while read manifest; do
-    if grep -q '"name".*"rptc-workflow"' "$manifest" 2>/dev/null; then
+    # Check for either "rptc-workflow" or "rptc" as plugin name
+    if grep -q '"name".*"rptc' "$manifest" 2>/dev/null; then
       dirname "$(dirname "$manifest")"
       break
     fi
@@ -95,8 +97,9 @@ fi
 
 # If still not found, try alternative search in home directory
 if [ -z "$PLUGIN_ROOT" ]; then
-  FOUND=$(find "$HOME" -type f -name "plugin.json" -path "*rptc-workflow*/.claude-plugin/plugin.json" 2>/dev/null | while read manifest; do
-    if grep -q '"name".*"rptc-workflow"' "$manifest" 2>/dev/null; then
+  FOUND=$(find "$HOME" -type f -name "plugin.json" -path "*rptc*/.claude-plugin/plugin.json" 2>/dev/null | while read manifest; do
+    # Check for either "rptc-workflow" or "rptc" as plugin name
+    if grep -q '"name".*"rptc' "$manifest" 2>/dev/null; then
       dirname "$(dirname "$manifest")"
       break
     fi
@@ -266,7 +269,7 @@ if [ ! -f ".claude/settings.json" ]; then
   cat > .claude/settings.json <<'EOF'
 {
   "rptc": {
-    "_rptcVersion": "1.1.7",
+    "_rptcVersion": "1.1.8",
     "defaultThinkingMode": "think",
     "artifactLocation": ".rptc",
     "docsLocation": "docs",
@@ -289,7 +292,7 @@ else
     if command -v jq >/dev/null 2>&1; then
       # Use jq for safe merging
       TEMP_FILE=$(mktemp)
-      jq '. + {"rptc": {"_rptcVersion": "1.1.7"
+      jq '. + {"rptc": {"_rptcVersion": "1.1.8"
       mv "$TEMP_FILE" .claude/settings.json
       echo "✓ Added RPTC configuration to existing .claude/settings.json"
     else
@@ -299,7 +302,7 @@ else
       echo "  Please add the following to your .claude/settings.json:"
       echo ""
       echo '  "rptc": {'
-      echo '    "_rptcVersion": "1.1.7",'
+      echo '    "_rptcVersion": "1.1.8",'
       echo '    "defaultThinkingMode": "think",'
       echo '    "artifactLocation": ".rptc",'
       echo '    "docsLocation": "docs",'

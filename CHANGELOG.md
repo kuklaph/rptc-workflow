@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.8] - 2025-10-16
+
+### Fixed
+
+- **Marketplace Plugin Detection**: Fixed `/rptc:admin-init` failing to detect marketplace-installed plugins
+  - **Problem**: Plugin detection search pattern was too restrictive, missing marketplace-installed plugins
+  - **Root Cause**: Search looked for exact plugin name `"rptc-workflow"` but marketplace plugin uses shortened name `"rptc"`
+  - **Impact**: Users installing via marketplace would get "Could not locate RPTC plugin installation directory" error
+  - **Solution**: Broadened search pattern to match any plugin with `"rptc"` in name
+  - **Files Updated**: `commands/admin-init.md` - Updated all three plugin search locations (user plugins, system plugins, home fallback)
+  - **Backward Compatible**: Still works with direct installs (`rptc-workflow`) and marketplace installs (`rptc` or `rptc-workflow-marketplace`)
+  - **Detection Now Covers**:
+    - Direct installs: `~/.claude/plugins/rptc-workflow/`
+    - Marketplace installs: `~/.claude/plugins/marketplaces/rptc-workflow-marketplace/`
+    - Development installs: Any path with `rptc` in the name
+
+---
+
+
 ## [1.1.7] - 2025-10-15
 
 ### Added

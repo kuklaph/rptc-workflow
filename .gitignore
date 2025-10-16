@@ -6,6 +6,7 @@ CLAUDE.md
 README-Old.md
 scripts/
 scripts/**
+.version-backup-*/
 
 # Version control
 .git/
