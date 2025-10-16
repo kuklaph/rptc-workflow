@@ -319,11 +319,12 @@ The Master Efficiency Agent will:
 
 Ready to delegate to Master Efficiency Agent?
 - Type "yes" or "approved" to proceed with configured mode
-- Type "skip" to proceed without efficiency review
 - To override thinking mode, say: "yes, use ultrathink" (or "think hard")
 
 Available modes: "think" (~4K), "think hard" (~10K), "ultrathink" (~32K)
 Configure default in .claude/settings.json: "rptc.defaultThinkingMode"
+
+**IMPORTANT**: Efficiency review is a NON-NEGOTIABLE quality gate.
 
 Waiting for your sign-off...
 ```
@@ -453,11 +454,12 @@ The Master Security Agent will:
 
 Ready to delegate to Master Security Agent?
 - Type "yes" or "approved" to proceed with configured mode
-- Type "skip" to proceed without security review
 - To override thinking mode, say: "yes, use ultrathink" (or "think hard")
 
 Available modes: "think" (~4K), "think hard" (~10K), "ultrathink" (~32K)
 Configure default in .claude/settings.json: "rptc.defaultThinkingMode"
+
+**IMPORTANT**: Security review is a NON-NEGOTIABLE quality gate.
 
 Waiting for your sign-off...
 ```
@@ -804,9 +806,9 @@ Next step: `/rptc:commit pr`
 - [ ] All steps implemented using TDD cycle
 - [ ] All tests passing (no failures)
 - [ ] Coverage meets targets (80%+)
-- [ ] PM approved Efficiency Agent review (or skipped)
+- [ ] PM approved Efficiency Agent review (NON-NEGOTIABLE)
 - [ ] Efficiency improvements applied
-- [ ] PM approved Security Agent review (or skipped)
+- [ ] PM approved Security Agent review (NON-NEGOTIABLE)
 - [ ] Security issues fixed
 - [ ] PM gave final sign-off
 - [ ] Plan status updated to Complete
@@ -814,4 +816,4 @@ Next step: `/rptc:commit pr`
 
 ---
 
-_Remember: TDD is non-negotiable. Tests first, always. PM approves quality gates._
+_Remember: TDD is non-negotiable. Tests first, always. Quality gates (Efficiency & Security) are MANDATORY - PM approval required, no skipping allowed._

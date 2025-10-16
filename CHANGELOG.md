@@ -7,6 +7,82 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.7] - 2025-10-15
+
+### Added
+
+- **Automated Version Management (Phase 1 & 2)**: Comprehensive version synchronization automation to prevent desync issues
+  - **Pre-commit Hook**: Git pre-commit hook now automatically verifies all 9 version locations before every commit
+    - Creates `.git/hooks/pre-commit` script that blocks commits if versions don't match
+    - Shows clear error messages indicating which locations are out of sync
+    - Provides fix suggestions (`./scripts/sync-version.sh <version>`)
+    - Prevents accidental version desynchronization that causes plugin installation failures
+  - **Version Sync Script** (`scripts/sync-version.sh`): One-command version updates across all locations
+    - Updates all 9 version locations atomically: `plugin.json`, `marketplace.json` (2×), `README.md`, `CHANGELOG.md`, `CLAUDE.md` (2×), `admin-init.md`, `admin-upgrade.md`
+    - Creates automatic backups before changes (`.version-backup-YYYYMMDD-HHMMSS/`)
+    - Works with or without `jq` (falls back to `sed`)
+    - Validates semantic versioning format (X.Y.Z)
+    - Verifies synchronization after update
+    - Provides clear next steps for commit and tag creation
+  - **Benefits**:
+    - ✅ One command updates all 9 locations (was: 9 manual edits)
+    - ✅ Pre-commit hook prevents accidental desync (was: manual check)
+    - ✅ Automatic backups before changes (was: none)
+    - ✅ Post-update verification (was: manual)
+    - ✅ Impossible to commit with version mismatch
+  - **Historical Context**: v1.0.9 was a patch release created solely because v1.0.8 forgot to update `plugin.json`. This automation prevents that class of errors entirely.
+  - **Files Created**:
+    - `scripts/sync-version.sh` - Automated version synchronization script (gitignored, maintainer-only)
+    - `.git/hooks/pre-commit` - Git hook for version verification (gitignored, auto-created per clone)
+
+### Changed
+
+- **Quality Gates Now Mandatory**: Removed skip options from efficiency and security reviews to enforce RPTC quality principles
+  - **Problem**: Users could skip Efficiency and Security Agent reviews, bypassing quality gates
+  - **Philosophy Violation**: "Never skip quality gates" is a core RPTC principle, but skip was allowed
+  - **Solution**: Removed all skip options, made quality gates NON-NEGOTIABLE
+  - **Impact**: Users must approve agent delegation (maintaining PM control) but cannot skip quality gates entirely
+  - **Changed Prompts** (commands/tdd.md):
+    - Master Efficiency Agent (Phase 2): Removed `- Type "skip" to proceed without efficiency review`
+    - Master Security Agent (Phase 3): Removed `- Type "skip" to proceed without security review`
+    - Added explicit warning: `**IMPORTANT**: [Agent] review is a NON-NEGOTIABLE quality gate.`
+  - **Success Criteria Updated**: Changed "(or skipped)" to "(NON-NEGOTIABLE)" for both quality gates
+  - **Documentation Updated**: Footer now states: "Quality gates (Efficiency & Security) are MANDATORY - PM approval required, no skipping allowed."
+  - **Agent Status**:
+    - Research Agent: ✅ Correctly OPTIONAL (web research only when needed)
+    - Feature Planner: ✅ Already REQUIRED (marked "REQUIRED" & "CRITICAL")
+    - Efficiency Agent: ✅ NOW MANDATORY (skip option removed)
+    - Security Agent: ✅ NOW MANDATORY (skip option removed)
+    - Documentation Specialist: ✅ Already MANDATORY (marked "CRITICAL", auto-executes)
+
+### Fixed
+
+- **Version Script Line Number References**: Updated all hardcoded line number references after CLAUDE.md documentation additions shifted line numbers
+  - **Problem**: Sync script and pre-commit hook referenced line 186 for `_rptcVersion` example, but actual location is now line 253
+  - **Root Cause**: Documentation additions in v1.1.6 shifted line numbers in CLAUDE.md
+  - **Impact**: Version verification was checking wrong line, causing false negatives
+  - **Solution**: Updated all references from line 186 → line 253
+  - **Files Updated**:
+    - `scripts/sync-version.sh`: Updated version check and output messages
+    - `.git/hooks/pre-commit`: Updated version extraction command
+    - `CLAUDE.md`: Updated documentation references (2 locations)
+  - **Verification**: Line 253 now correctly contains `"_rptcVersion": "1.1.7"`
+
+### Improved
+
+- **Version Management Documentation**: Complete documentation of new automated workflow in CLAUDE.md
+  - Documented pre-commit hook setup instructions
+  - Documented sync script usage and benefits
+  - Updated "Creating a New Release" section with streamlined workflow
+  - Comparison table showing before/after for version management
+- **Maintainer Experience**: Streamlined release process significantly reduces human error
+  - Previous: 9 manual edits + manual verification
+  - Current: 1 command + automatic verification on commit
+  - Release time reduced from ~5 minutes to ~30 seconds
+
+---
+
+
 ## [1.1.6] - 2025-10-15
 
 ### Fixed
