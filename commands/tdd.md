@@ -70,9 +70,11 @@ Load RPTC configuration from settings.json (with fallbacks):
 if [ -f ".claude/settings.json" ] && command -v jq >/dev/null 2>&1; then
   ARTIFACT_LOC=$(jq -r '.rptc.artifactLocation // ".rptc"' .claude/settings.json 2>/dev/null)
   MAX_ATTEMPTS=$(jq -r '.rptc.maxPlanningAttempts // 10' .claude/settings.json 2>/dev/null)
+  THINKING_MODE=$(jq -r '.rptc.defaultThinkingMode // "think"' .claude/settings.json 2>/dev/null)
 else
   ARTIFACT_LOC=".rptc"
   MAX_ATTEMPTS=10
+  THINKING_MODE="think"
 fi
 ```
 
@@ -286,16 +288,9 @@ All implementation steps complete! Proceeding to quality gates...
 
 **CRITICAL**: After ALL tests passing, request efficiency review.
 
-**Step 1: Check for Global Thinking Mode Configuration**:
+**Step 1: Use Configured Thinking Mode**:
 
-```bash
-# Check .claude/settings.json for rptc.defaultThinkingMode
-if [ -f ".claude/settings.json" ]; then
-  cat .claude/settings.json
-fi
-```
-
-Extract `rptc.defaultThinkingMode` if it exists (e.g., "think", "think hard", "ultrathink")
+Thinking mode already loaded in Step 0a configuration: `$THINKING_MODE`
 
 **Step 2: Ask PM for Permission**:
 
@@ -432,16 +427,9 @@ Proceeding to security review...
 
 ### Phase 3: Master Security Agent Review (WITH PERMISSION)
 
-**Step 1: Check for Global Thinking Mode Configuration**:
+**Step 1: Use Configured Thinking Mode**:
 
-```bash
-# Check .claude/settings.json for rptc.defaultThinkingMode
-if [ -f ".claude/settings.json" ]; then
-  cat .claude/settings.json
-fi
-```
-
-Extract `rptc.defaultThinkingMode` if it exists (e.g., "think", "think hard", "ultrathink")
+Thinking mode already loaded in Step 0a configuration: `$THINKING_MODE`
 
 **Step 2: Ask PM for Permission**:
 

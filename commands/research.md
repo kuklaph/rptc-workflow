@@ -28,8 +28,10 @@ Load RPTC configuration from settings.json (with fallbacks):
 # Load RPTC configuration
 if [ -f ".claude/settings.json" ] && command -v jq >/dev/null 2>&1; then
   ARTIFACT_LOC=$(jq -r '.rptc.artifactLocation // ".rptc"' .claude/settings.json 2>/dev/null)
+  THINKING_MODE=$(jq -r '.rptc.defaultThinkingMode // "think"' .claude/settings.json 2>/dev/null)
 else
   ARTIFACT_LOC=".rptc"
+  THINKING_MODE="think"
 fi
 ```
 
@@ -147,18 +149,9 @@ Once you understand WHAT we're building, search the codebase:
 
 **If web research is needed**:
 
-1. **Determine Thinking Mode**:
+1. **Use Configured Thinking Mode**:
 
-   First, check for global thinking mode configuration:
-
-   ```bash
-   # Check .claude/settings.json for rptc.defaultThinkingMode
-   if [ -f ".claude/settings.json" ]; then
-     cat .claude/settings.json
-   fi
-   ```
-
-   Extract `rptc.defaultThinkingMode` if it exists (e.g., "think", "think hard", "ultrathink")
+   Thinking mode already loaded in Step 0a configuration: `$THINKING_MODE`
 
 2. **Ask Permission**:
 
@@ -167,22 +160,20 @@ Once you understand WHAT we're building, search the codebase:
    Should I delegate to the Master Research Agent?
 
    💡 Thinking Mode:
-   [If global default exists: Will use configured mode: "[mode]" (~[X]K tokens)]
-   [If no global default: Will use default mode: "think" (~4K tokens)]
+   Will use configured mode: "$THINKING_MODE"
 
    - Type "yes" or "approved" to proceed with configured mode
    - To override thinking mode, say: "yes, use ultrathink" (or "think hard")
 
    Available modes: "think" (~4K), "think hard" (~10K), "ultrathink" (~32K)
-   Configure default in .claude/settings.json: "rptc.defaultThinkingMode"
+   To change default: Edit .claude/settings.json → "rptc.defaultThinkingMode"
 ```
 
 3. **Wait for explicit approval**
 
 4. **Determine Final Thinking Mode**:
    - If user specified a mode override (e.g., "yes, use ultrathink"): Use user's choice
-   - Else if global default exists in .claude/settings.json: Use that mode
-   - Else: Use default "think" mode
+   - Else: Use configured mode from $THINKING_MODE
 
 5. **If approved**: Use the Task tool to delegate to `master-research-agent`
 
