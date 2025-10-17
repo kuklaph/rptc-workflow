@@ -66,9 +66,115 @@ Load SOPs using fallback chain (highest priority first):
 
 **Use these values throughout the command execution.**
 
+## Step 0b: Initialize TODO Tracking
+
+**Initialize TodoWrite to track planning progress.**
+
+**IMPORTANT**: TodoWrite list depends on feature complexity determined after initial scaffolding.
+
+### Complexity Assessment
+
+After creating initial plan scaffold (Phase 2), determine:
+- **Simple feature**: ≤3 implementation steps → Use 4-phase TodoWrite
+- **Complex feature**: >3 implementation steps → Use 9-phase TodoWrite
+
+### TodoWrite for Simple Features (≤3 steps)
+
+```json
+{
+  "tool": "TodoWrite",
+  "todos": [
+    {
+      "content": "Load configuration and context",
+      "status": "pending",
+      "activeForm": "Loading configuration"
+    },
+    {
+      "content": "Create plan scaffold",
+      "status": "pending",
+      "activeForm": "Creating plan"
+    },
+    {
+      "content": "Get PM approval",
+      "status": "pending",
+      "activeForm": "Requesting PM approval"
+    },
+    {
+      "content": "Save plan document",
+      "status": "pending",
+      "activeForm": "Saving plan"
+    }
+  ]
+}
+```
+
+### TodoWrite for Complex Features (>3 steps)
+
+```json
+{
+  "tool": "TodoWrite",
+  "todos": [
+    {
+      "content": "Load configuration and context",
+      "status": "pending",
+      "activeForm": "Loading configuration"
+    },
+    {
+      "content": "Create initial plan scaffold with PM",
+      "status": "pending",
+      "activeForm": "Creating plan scaffold"
+    },
+    {
+      "content": "Ask clarifying questions to PM",
+      "status": "pending",
+      "activeForm": "Asking clarifying questions"
+    },
+    {
+      "content": "Get PM approval for Master Feature Planner delegation",
+      "status": "pending",
+      "activeForm": "Requesting Master Feature Planner approval"
+    },
+    {
+      "content": "Delegate to Master Feature Planner Agent",
+      "status": "pending",
+      "activeForm": "Delegating to Master Feature Planner"
+    },
+    {
+      "content": "Present comprehensive plan to PM",
+      "status": "pending",
+      "activeForm": "Presenting plan to PM"
+    },
+    {
+      "content": "Support iterative refinement if needed",
+      "status": "pending",
+      "activeForm": "Supporting plan refinement"
+    },
+    {
+      "content": "Get final PM sign-off",
+      "status": "pending",
+      "activeForm": "Getting final PM approval"
+    },
+    {
+      "content": "Save plan document to .rptc/plans/",
+      "status": "pending",
+      "activeForm": "Saving plan document"
+    }
+  ]
+}
+```
+
+**TodoWrite Rules**:
+- Assess complexity AFTER creating scaffold (Phase 2)
+- Initialize appropriate list (simple vs complex) based on step count
+- Update status as phases progress
+- Only ONE task "in_progress" at a time
+- Update frequently to prevent system reminders
+
 ## Planning Process
 
 ### Phase 1: Context Loading (REQUIRED)
+
+**Update TodoWrite**: Mark "Load configuration and context" as in_progress
 
 **Load relevant context**:
 
@@ -110,7 +216,11 @@ Patterns: [Identified patterns from architecture SOP]
 Ready to proceed with planning.
 ```
 
+**Update TodoWrite**: Mark "Load configuration and context" as completed
+
 ### Phase 2: Initial Plan Scaffolding (REQUIRED)
+
+**NOTE**: TodoWrite will be initialized in this phase after complexity assessment.
 
 Create high-level plan structure:
 
@@ -156,7 +266,123 @@ Initial Test Strategy (from testing SOP):
 This is just a starting point. Let's refine it together...
 ```
 
+**Assess Complexity and Initialize TodoWrite**:
+
+After presenting the scaffold, count the implementation steps:
+
+```bash
+# Count steps in the scaffold (typically 3-7 steps)
+# Determine complexity:
+#   - Simple: ≤3 steps (use streamlined 4-phase path)
+#   - Complex: >3 steps (use Master Planner 9-phase path)
+```
+
+**If ≤3 steps (Simple Feature)**:
+
+```text
+📊 Complexity Assessment: Simple feature (≤3 steps)
+
+Using streamlined planning path (4 phases).
+```
+
+Initialize TodoWrite with simple structure:
+
+```json
+{
+  "tool": "TodoWrite",
+  "todos": [
+    {
+      "content": "Load configuration and context",
+      "status": "completed",
+      "activeForm": "Loading configuration"
+    },
+    {
+      "content": "Create plan scaffold",
+      "status": "in_progress",
+      "activeForm": "Creating plan"
+    },
+    {
+      "content": "Get PM approval",
+      "status": "pending",
+      "activeForm": "Requesting PM approval"
+    },
+    {
+      "content": "Save plan document",
+      "status": "pending",
+      "activeForm": "Saving plan"
+    }
+  ]
+}
+```
+
+**If >3 steps (Complex Feature)**:
+
+```text
+📊 Complexity Assessment: Complex feature (>3 steps)
+
+Using Master Feature Planner delegation path (9 phases) to prevent timeout.
+```
+
+Initialize TodoWrite with complex structure:
+
+```json
+{
+  "tool": "TodoWrite",
+  "todos": [
+    {
+      "content": "Load configuration and context",
+      "status": "completed",
+      "activeForm": "Loading configuration"
+    },
+    {
+      "content": "Create initial plan scaffold with PM",
+      "status": "in_progress",
+      "activeForm": "Creating plan scaffold"
+    },
+    {
+      "content": "Ask clarifying questions to PM",
+      "status": "pending",
+      "activeForm": "Asking clarifying questions"
+    },
+    {
+      "content": "Get PM approval for Master Feature Planner delegation",
+      "status": "pending",
+      "activeForm": "Requesting Master Feature Planner approval"
+    },
+    {
+      "content": "Delegate to Master Feature Planner Agent",
+      "status": "pending",
+      "activeForm": "Delegating to Master Feature Planner"
+    },
+    {
+      "content": "Present comprehensive plan to PM",
+      "status": "pending",
+      "activeForm": "Presenting plan to PM"
+    },
+    {
+      "content": "Support iterative refinement if needed",
+      "status": "pending",
+      "activeForm": "Supporting plan refinement"
+    },
+    {
+      "content": "Get final PM sign-off",
+      "status": "pending",
+      "activeForm": "Getting final PM approval"
+    },
+    {
+      "content": "Save plan document to .rptc/plans/",
+      "status": "pending",
+      "activeForm": "Saving plan document"
+    }
+  ]
+}
+```
+
+**Update TodoWrite**: Mark scaffold task as completed (simple: "Create plan scaffold", complex: "Create initial plan scaffold with PM")
+
 ### Phase 3: Clarifying Questions (REQUIRED)
+
+**Update TodoWrite**: Mark "Ask clarifying questions to PM" as in_progress (complex path only)
 
 **Ask PM to refine the plan**:
 
@@ -187,7 +413,11 @@ This is just a starting point. Let's refine it together...
 
 **KEEP ASKING** until PM is satisfied with the scaffold.
 
+**Update TodoWrite**: Mark "Ask clarifying questions to PM" as completed (complex path only)
+
 ### Phase 4: PM Sign-Off for Master Planner (REQUIRED)
+
+**Update TodoWrite**: Mark appropriate task as in_progress (complex: "Get PM approval for Master Feature Planner delegation", simple: "Get PM approval")
 
 **CRITICAL**: Get explicit permission to delegate to Master Feature Planner.
 
@@ -232,7 +462,37 @@ Waiting for your sign-off...
 
 **DO NOT create agent** until PM gives explicit approval.
 
+**Update TodoWrite**: Mark appropriate task as completed (complex: "Get PM approval for Master Feature Planner delegation", simple: "Get PM approval")
+
+---
+
+**CRITICAL VALIDATION CHECKPOINT - DO NOT SKIP**
+
+Before delegating to Master Feature Planner:
+
+**TodoWrite Check**: "Get PM approval for Master Feature Planner delegation" MUST be completed
+
+**Verification**:
+1. Check TodoWrite status for delegation approval
+2. If status is NOT "completed", you MUST NOT create Master Feature Planner agent
+
+❌ **PHASE 5 BLOCKED** - Cannot delegate without PM authorization
+
+**Required**: PM must explicitly approve agent creation
+
+**ENFORCEMENT**: If PM has NOT approved:
+1. Present plan scaffold clearly
+2. Ask: "Ready to delegate to Master Feature Planner?"
+3. Wait for explicit "yes" or "approved"
+4. NEVER create agent without permission
+
+**This is a NON-NEGOTIABLE gate. Master Feature Planner is a resource-intensive operation requiring explicit PM authorization.**
+
+---
+
 ### Phase 5: Master Feature Planner Delegation (Only After Approval)
+
+**Update TodoWrite**: Mark "Delegate to Master Feature Planner Agent" as in_progress (complex path only)
 
 **Step 1: Determine Final Thinking Mode**:
    - If user specified a mode override (e.g., "yes, use ultrathink"): Use user's choice
@@ -522,7 +782,11 @@ Use template from: ${CLAUDE_PLUGIN_ROOT}/templates/plan.md
 
 **Wait for final coordination agent to complete unified plan.**
 
+**Update TodoWrite**: Mark "Delegate to Master Feature Planner Agent" as completed (complex path only)
+
 ### Phase 6: Present Plan to PM (REQUIRED)
+
+**Update TodoWrite**: Mark "Present comprehensive plan to PM" as in_progress (complex path only)
 
 **CRITICAL FORMATTING NOTE:** Each section and list item MUST be on its own line. Never concatenate items (e.g., `Install: pkg1Migrations: Yes` is WRONG).
 
@@ -564,7 +828,11 @@ Would you like to:
 Let me know how to proceed...
 ```
 
+**Update TodoWrite**: Mark "Present comprehensive plan to PM" as completed (complex path only)
+
 ### Phase 7: PM Review & Modifications (INTERACTIVE)
+
+**Update TodoWrite**: Mark "Support iterative refinement if needed" as in_progress (complex path only)
 
 **Support iterative refinement**:
 
@@ -575,7 +843,11 @@ Let me know how to proceed...
 
 **Keep iterating until PM explicitly approves.**
 
+**Update TodoWrite**: Mark "Support iterative refinement if needed" as completed (complex path only)
+
 ### Phase 8: Final PM Sign-Off (REQUIRED)
+
+**Update TodoWrite**: Mark appropriate task as in_progress (complex: "Get final PM sign-off", simple: begins save preparation)
 
 **FORMATTING NOTE:** Each option line must be on its own line with proper newlines.
 
@@ -598,7 +870,38 @@ Waiting for your final sign-off...
 
 **DO NOT SAVE** until PM gives explicit approval.
 
+**Update TodoWrite**: Mark appropriate task as completed (complex: "Get final PM sign-off", simple: approval phase complete)
+
+---
+
+**CRITICAL VALIDATION CHECKPOINT - DO NOT SKIP**
+
+Before saving plan document:
+
+**TodoWrite Check**: "Get final PM sign-off" MUST be completed
+
+**Verification**:
+1. Check TodoWrite status for final plan approval
+2. If status is NOT "completed", you MUST NOT save plan document
+
+❌ **PHASE 9 BLOCKED** - Cannot save plan without PM approval
+
+**Required**: PM must review comprehensive plan and explicitly approve
+
+**ENFORCEMENT**: If PM has NOT approved:
+1. Present complete plan clearly
+2. Ask: "Do you approve this plan for implementation?"
+3. Wait for explicit "yes" or "approved"
+4. Support modifications if PM says "modify"
+5. NEVER save without explicit approval
+
+**This is a NON-NEGOTIABLE gate. Plans define implementation approach and must be reviewed by PM before execution.**
+
+---
+
 ### Phase 9: Save Plan Document (Only After Approval)
+
+**Update TodoWrite**: Mark appropriate task as in_progress (complex: "Save plan document to .rptc/plans/", simple: "Save plan document")
 
 Check workspace structure first:
 
@@ -778,6 +1081,8 @@ Next steps:
 - Review: cat [ARTIFACT_LOC]/plans/[name-slug].md
 - Implement: /rptc:tdd "@[name-slug].md"
 ```
+
+**Update TodoWrite**: Mark appropriate task as completed (complex: "Save plan document to .rptc/plans/", simple: "Save plan document")
 
 ## Interaction Guidelines
 

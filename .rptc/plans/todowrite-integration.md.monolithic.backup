@@ -1,0 +1,2167 @@
+# TodoWrite Integration - Priority 1 Implementation Plan
+
+**Date**: 2025-10-16
+**Status**: ✅ Approved by PM
+**Thinking Mode**: Ultrathink
+**Planning Approach**: Sequential step-specific agents + Final coordination
+
+---
+
+## Executive Summary
+
+**Mission**: Integrate TodoWrite state persistence across all 4 RPTC commands (research, plan, tdd, commit) to achieve **60% reduction in step-skipping** while preserving PM-centric approval patterns.
+
+**Context**: This is Iteration 1 of Priority 1 improvements. Evidence from research shows:
+- Spec-Flow achieved 60% step-skipping reduction with TodoWrite
+- Pimzino workflow achieved 80% reduction with imperative language
+- Every Marketplace demonstrates TodoWrite survives compaction
+- TodoWrite is built into Claude Code system prompt (persists across sessions)
+
+**Approach**: 7 coordinated implementation steps with sequential agent planning to prevent timeout on complex features.
+
+**Timeline**:
+- Sequential execution: 17-24 hours
+- Parallel execution (recommended): 11-16 hours (40% time savings)
+
+**Success Metrics**:
+- 60%+ reduction in step-skipping (validated in testing)
+- 100% quality gate enforcement (Efficiency/Security never accidentally skipped)
+- 100% compaction survival (TodoWrite persists)
+- Zero regressions in existing functionality
+
+**Deliverables**:
+- 4 modified command files (research, plan, tdd, commit)
+- 6 new files (SOP, patterns, tests)
+- ~1,660-2,070 total new lines of code
+
+---
+
+## Table of Contents
+
+1. [Step 1: Add TodoWrite to Research Command](#step-1-add-todowrite-to-research-command)
+2. [Step 2: Add TodoWrite to Plan Command](#step-2-add-todowrite-to-plan-command)
+3. [Step 3: Add TodoWrite to TDD Command](#step-3-add-todowrite-to-tdd-command)
+4. [Step 4: Add TodoWrite to Commit Command](#step-4-add-todowrite-to-commit-command)
+5. [Step 5: Implement Phase Transition Blocking](#step-5-implement-phase-transition-blocking)
+6. [Step 6: Create TodoWrite SOP Documentation](#step-6-create-todowrite-sop-documentation)
+7. [Step 7: Testing & Validation](#step-7-testing--validation)
+8. [Final Coordination Plan](#final-coordination-plan)
+9. [Appendices](#appendices)
+
+---
+
+# Step 1: Add TodoWrite to Research Command
+
+## Overview
+
+**Purpose**: Integrate TodoWrite state tracking into the research command to prevent phase skipping during discovery.
+
+**Implementation Location**: `commands/research.md` - After "Step 0a: Load Configuration" section
+
+**Estimated Time**: 2-3 hours
+
+## Research Command Phases
+
+The research command has 6 phases that need TodoWrite tracking:
+
+1. **Phase 1**: Interactive Discovery
+2. **Phase 2**: Codebase Exploration
+3. **Phase 3**: Web Research (optional, only if needed)
+4. **Phase 4**: Findings Presentation
+5. **Phase 5**: PM Sign-Off
+6. **Phase 6**: Save Research Document
+
+## Implementation Plan
+
+### Step 1.1: Create TodoWrite Initialization Section
+
+**Location**: After "Step 0a: Load Configuration" (currently line ~88)
+
+**Add new section**:
+
+```markdown
+## Step 0b: Initialize TODO Tracking
+
+**Initialize TodoWrite to track research progress across all phases.**
+
+Use the TodoWrite tool to create task list:
+
+{
+  "tool": "TodoWrite",
+  "todos": [
+    {
+      "content": "Complete interactive discovery",
+      "status": "pending",
+      "activeForm": "Conducting interactive discovery"
+    },
+    {
+      "content": "Complete codebase exploration",
+      "status": "pending",
+      "activeForm": "Exploring codebase"
+    },
+    {
+      "content": "Complete web research (if needed)",
+      "status": "pending",
+      "activeForm": "Conducting web research"
+    },
+    {
+      "content": "Present findings to PM",
+      "status": "pending",
+      "activeForm": "Presenting findings"
+    },
+    {
+      "content": "Get PM sign-off on research",
+      "status": "pending",
+      "activeForm": "Requesting PM approval"
+    },
+    {
+      "content": "Save research document",
+      "status": "pending",
+      "activeForm": "Saving research document"
+    }
+  ]
+}
+
+**Important TodoWrite Rules**:
+- Mark tasks "in_progress" when starting
+- Mark tasks "completed" immediately after finishing
+- Only ONE task should be "in_progress" at a time
+- Update frequently to prevent system reminders
+```
+
+### Step 1.2: Add TodoWrite Updates to Phase 1
+
+**Location**: Beginning of "Phase 1: Interactive Discovery"
+
+**Add instruction**:
+
+```markdown
+**Update TodoWrite**: Mark "Complete interactive discovery" as in_progress
+
+[Existing Phase 1 content...]
+
+**Update TodoWrite**: Mark "Complete interactive discovery" as completed
+```
+
+### Step 1.3: Add TodoWrite Updates to Phase 2
+
+**Location**: Beginning and end of "Phase 2: Codebase Exploration"
+
+**Add instructions**:
+
+```markdown
+**Update TodoWrite**: Mark "Complete codebase exploration" as in_progress
+
+[Existing Phase 2 content...]
+
+**Update TodoWrite**: Mark "Complete codebase exploration" as completed
+```
+
+### Step 1.4: Add TodoWrite Updates to Phase 3
+
+**Location**: Beginning and end of "Phase 3: Web Research"
+
+**Add instructions**:
+
+```markdown
+**Update TodoWrite**: If web research needed, mark "Complete web research (if needed)" as in_progress
+
+[Existing Phase 3 content...]
+
+**Update TodoWrite**: Mark "Complete web research (if needed)" as completed
+```
+
+### Step 1.5: Add TodoWrite Updates to Phase 4
+
+**Location**: Beginning and end of "Phase 4: Findings Presentation"
+
+**Add instructions**:
+
+```markdown
+**Update TodoWrite**: Mark "Present findings to PM" as in_progress
+
+[Existing Phase 4 content...]
+
+**Update TodoWrite**: Mark "Present findings to PM" as completed
+```
+
+### Step 1.6: Add TodoWrite Updates to Phase 5
+
+**Location**: Beginning and end of "Phase 5: PM Sign-Off"
+
+**Add instructions**:
+
+```markdown
+**Update TodoWrite**: Mark "Get PM sign-off on research" as in_progress
+
+**CRITICAL**: You MUST get explicit approval before creating research document.
+
+[Existing Phase 5 content...]
+
+**Update TodoWrite**: After PM approval, mark "Get PM sign-off on research" as completed
+```
+
+### Step 1.7: Add TodoWrite Updates to Phase 6
+
+**Location**: Beginning and end of "Phase 6: Save Research Document"
+
+**Add instructions**:
+
+```markdown
+**Update TodoWrite**: Mark "Save research document" as in_progress
+
+[Existing Phase 6 content...]
+
+**Update TodoWrite**: Mark "Save research document" as completed
+
+✅ All research phases complete. TodoWrite list should show all tasks completed.
+```
+
+### Step 1.8: Manual Workflow Testing
+
+**Test the integration**:
+
+1. Run `/rptc:research "test topic"`
+2. Verify TodoWrite creates 6-item list
+3. As you progress through phases, verify:
+   - Tasks marked "in_progress" when starting
+   - Tasks marked "completed" when finishing
+   - Only ONE task "in_progress" at a time
+4. Complete research and verify all 6 tasks show "completed"
+
+## Acceptance Criteria
+
+- [ ] TodoWrite initializes at command start with 6 phases
+- [ ] Each phase marks task "in_progress" before work
+- [ ] Each phase marks task "completed" after work
+- [ ] Only one task "in_progress" at a time
+- [ ] PM approval gate enforced at Phase 5
+- [ ] Manual workflow test passes
+
+## Dependencies
+
+- **Requires**: Step 6 (SOP) complete first (defines TodoWrite JSON structure)
+- **Enables**: Step 5 (can add blocking validation to research gate)
+- **Integrates with**: Step 7 (testing validates research integration)
+
+---
+
+# Step 2: Add TodoWrite to Plan Command
+
+## Overview
+
+**Purpose**: Integrate TodoWrite state tracking into the plan command with routing for simple vs complex features.
+
+**Implementation Location**: `commands/plan.md` - After "Step 0a: Load Configuration" section
+
+**Estimated Time**: 2-3 hours
+
+## Plan Command Phases
+
+The plan command has **two paths** depending on feature complexity:
+
+**Simple Path** (≤3 steps):
+1. Load configuration
+2. Create quick plan scaffold
+3. PM approval
+4. Save plan
+
+**Complex Path** (>3 steps):
+1. Load configuration
+2. Determine complexity
+3. Create plan scaffold
+4. PM clarifications
+5. Request Master Feature Planner delegation (APPROVAL GATE)
+6. Execute Master Feature Planner (AUTOMATIC)
+7. Present plan for PM review (APPROVAL GATE)
+8. Save plan document
+
+## Implementation Plan
+
+### Step 2.1: Create TodoWrite Initialization Section
+
+**Location**: After "Step 0a: Load Configuration" (currently line ~67)
+
+**Add new section**:
+
+```markdown
+## Step 0b: Initialize TODO Tracking
+
+**Initialize TodoWrite to track planning progress.**
+
+**IMPORTANT**: TodoWrite list depends on feature complexity.
+
+### Complexity Assessment
+
+After analyzing work item, determine:
+- **Simple feature**: ≤3 implementation steps
+- **Complex feature**: >3 implementation steps
+
+### TodoWrite for Simple Features (≤3 steps)
+
+{
+  "tool": "TodoWrite",
+  "todos": [
+    {
+      "content": "Load configuration and context",
+      "status": "pending",
+      "activeForm": "Loading configuration"
+    },
+    {
+      "content": "Create plan scaffold",
+      "status": "pending",
+      "activeForm": "Creating plan"
+    },
+    {
+      "content": "Get PM approval",
+      "status": "pending",
+      "activeForm": "Requesting PM approval"
+    },
+    {
+      "content": "Save plan document",
+      "status": "pending",
+      "activeForm": "Saving plan"
+    }
+  ]
+}
+
+### TodoWrite for Complex Features (>3 steps)
+
+{
+  "tool": "TodoWrite",
+  "todos": [
+    {
+      "content": "Load configuration and context",
+      "status": "pending",
+      "activeForm": "Loading configuration"
+    },
+    {
+      "content": "Create initial plan scaffold with PM",
+      "status": "pending",
+      "activeForm": "Creating plan scaffold"
+    },
+    {
+      "content": "Ask clarifying questions to PM",
+      "status": "pending",
+      "activeForm": "Asking clarifying questions"
+    },
+    {
+      "content": "Get PM approval for Master Feature Planner delegation",
+      "status": "pending",
+      "activeForm": "Requesting Master Feature Planner approval"
+    },
+    {
+      "content": "Delegate to Master Feature Planner Agent",
+      "status": "pending",
+      "activeForm": "Delegating to Master Feature Planner"
+    },
+    {
+      "content": "Present comprehensive plan to PM",
+      "status": "pending",
+      "activeForm": "Presenting plan to PM"
+    },
+    {
+      "content": "Support iterative refinement if needed",
+      "status": "pending",
+      "activeForm": "Supporting plan refinement"
+    },
+    {
+      "content": "Get final PM sign-off",
+      "status": "pending",
+      "activeForm": "Getting final PM approval"
+    },
+    {
+      "content": "Save plan document to .rptc/plans/",
+      "status": "pending",
+      "activeForm": "Saving plan document"
+    }
+  ]
+}
+
+**TodoWrite Rules**:
+- Assess complexity FIRST before creating TodoWrite list
+- Use appropriate list (simple vs complex)
+- Update status as phases progress
+- Only ONE task "in_progress" at a time
+```
+
+### Step 2.2: Add Complexity Assessment Logic
+
+**Location**: After TodoWrite initialization
+
+**Add logic**:
+
+```markdown
+## Phase 1: Assess Feature Complexity
+
+**Analyze the work item to determine planning approach.**
+
+1. Review the work item description
+2. Estimate implementation steps required
+3. Determine complexity:
+   - **≤3 steps**: Simple feature (single Master Planner agent)
+   - **>3 steps**: Complex feature (sequential planning agents)
+
+**Update TodoWrite**:
+- If simple: Use 4-item TodoWrite list
+- If complex: Use 9-item TodoWrite list
+
+**Rationale**: Complex features (>3 steps) risk Master Planner timeout. Sequential agents prevent timeout while maintaining coordination.
+```
+
+### Step 2.3: Add TodoWrite Updates for Simple Path
+
+**For each simple path phase**, add TodoWrite updates:
+
+```markdown
+### Simple Path Implementation
+
+**Phase 1**: Mark "Create plan scaffold" as in_progress
+[Create plan content...]
+Mark "Create plan scaffold" as completed
+
+**Phase 2**: Mark "Get PM approval" as in_progress
+[Request approval...]
+Mark "Get PM approval" as completed
+
+**Phase 3**: Mark "Save plan document" as in_progress
+[Save plan...]
+Mark "Save plan document" as completed
+```
+
+### Step 2.4: Add TodoWrite Updates for Complex Path
+
+**For each complex path phase**, add TodoWrite updates (see executive summary example):
+
+- Load configuration → completed
+- Create scaffold → in_progress → completed
+- Clarifying questions → in_progress → completed
+- Request Master Planner approval → in_progress → completed (BLOCKING GATE)
+- Delegate to Master Planner → in_progress → completed
+- Present plan → in_progress → completed
+- Support refinement → in_progress → completed (if needed)
+- Get final sign-off → in_progress → completed (BLOCKING GATE)
+- Save document → in_progress → completed
+
+### Step 2.5: Add Sequential Agent Context Handoff
+
+**For complex features >3 steps**, document sequential planning:
+
+```markdown
+### Complex Path: Sequential Planning Agents
+
+**When feature has >3 implementation steps**, use sequential agents:
+
+1. **Step-Specific Agents**: Create one agent per step
+   - Agent 1 plans Step 1
+   - Agent 2 receives Step 1 context, plans Step 2
+   - Agent N receives Steps 1-(N-1) context, plans Step N
+
+2. **Final Coordination Agent**: Aggregates all step plans
+   - Resolves conflicts between steps
+   - Creates integration tests
+   - Provides unified timeline
+   - Ensures consistency
+
+**TodoWrite Tracking**:
+- "Delegate to Master Feature Planner" tracks ENTIRE sequential process
+- Mark in_progress at start of first agent
+- Mark completed after final coordination agent delivers
+
+**Benefit**: Prevents timeout on large features while maintaining coordination
+```
+
+### Step 2.6: Add Blocking Gate Documentation
+
+**At Master Planner delegation point**:
+
+```markdown
+**CRITICAL - CANNOT PROCEED WITHOUT PM APPROVAL**
+
+Before delegating to Master Feature Planner:
+
+**TodoWrite Check**: "Get PM approval for Master Feature Planner delegation" must be in_progress
+
+**Ask PM**:
+```
+📋 Plan scaffold complete!
+
+Ready to delegate to Master Feature Planner for comprehensive planning?
+- Type "yes" or "approved" to proceed
+- Type "modify" to make changes first
+
+Waiting for your approval...
+```
+
+**DO NOT PROCEED** until PM gives explicit approval.
+
+**After approval**: Mark "Get PM approval for Master Feature Planner delegation" as completed
+```
+
+**At final plan save**:
+
+```markdown
+**CRITICAL - CANNOT SAVE PLAN WITHOUT PM APPROVAL**
+
+**TodoWrite Check**: "Get final PM sign-off" must be in_progress
+
+**Ask PM**:
+```
+📋 Plan complete!
+
+Do you approve this plan for implementation?
+- Type "yes" or "approved" to save plan
+- Type "modify" to make changes
+
+Waiting for your approval...
+```
+
+**DO NOT PROCEED** until PM gives explicit approval.
+```
+
+### Step 2.7: Manual Workflow Testing - Simple Path
+
+**Test simple feature planning**:
+
+1. Run `/rptc:plan "simple feature with 2-3 steps"`
+2. Verify TodoWrite creates 4-item list (simple path)
+3. Progress through phases, verify task updates
+4. Verify PM approval gate at save
+5. Complete and verify all 4 tasks "completed"
+
+### Step 2.8: Manual Workflow Testing - Complex Path
+
+**Test complex feature planning**:
+
+1. Run `/rptc:plan "complex feature with 5+ steps"`
+2. Verify TodoWrite creates 9-item list (complex path)
+3. Progress through phases, verify task updates
+4. Verify PM approval gate at Master Planner delegation
+5. Verify Master Planner executes (sequential agents if >3 steps)
+6. Verify PM approval gate at final save
+7. Complete and verify all 9 tasks "completed"
+
+### Step 2.9: Integration Testing with Research
+
+**Test research → plan workflow**:
+
+1. Complete research phase with TodoWrite
+2. Run plan using research document reference
+3. Verify TodoWrite creates new list (independent from research)
+4. Verify no cross-contamination of TODO items
+
+## Acceptance Criteria
+
+- [ ] TodoWrite initializes with correct list (simple vs complex)
+- [ ] Complexity assessment logic works (≤3 vs >3 steps)
+- [ ] Simple path: 4 phases tracked correctly
+- [ ] Complex path: 9 phases tracked correctly
+- [ ] Sequential agents documented for >3 step features
+- [ ] Two PM approval gates enforced (delegation and save)
+- [ ] Manual workflow tests pass (both paths)
+- [ ] Integration test with research passes
+
+## Dependencies
+
+- **Requires**: Step 6 (SOP) complete first
+- **Enables**: Step 5 (blocking validation at 2 gates)
+- **Integrates with**: Step 1 (research → plan workflow), Step 7 (testing)
+
+---
+
+# Step 3: Add TodoWrite to TDD Command
+
+## Overview
+
+**Purpose**: Integrate TodoWrite state tracking into the TDD command with dynamic TODO generation from plan steps and quality gate tracking.
+
+**Implementation Location**: `commands/tdd.md` - After "Phase 0: Load Plan" section
+
+**Estimated Time**: 2-3 hours
+
+## TDD Command Phases
+
+The TDD command has **dynamic phases** based on plan steps:
+
+**For each plan step**:
+1. RED: Write failing tests
+2. GREEN: Implement to pass tests
+3. REFACTOR: Improve code quality
+4. SYNC: Update plan document
+
+**After all steps complete**:
+5. REQUEST PM: Efficiency Agent approval (BLOCKING GATE)
+6. EXECUTE: Efficiency Agent review
+7. REQUEST PM: Security Agent approval (BLOCKING GATE)
+8. EXECUTE: Security Agent review
+9. REQUEST PM: Final TDD sign-off (BLOCKING GATE)
+10. UPDATE: Mark plan status Complete
+
+## Implementation Plan
+
+### Step 3.1: Create Dynamic TodoWrite Generation
+
+**Location**: After "Phase 0: Load Plan" (currently line ~88)
+
+**Add new section**:
+
+```markdown
+## Step 0b: Initialize TODO Tracking
+
+**Generate TodoWrite list dynamically from plan steps.**
+
+### Parse Plan Document
+
+1. Read plan document specified in command argument
+2. Extract all implementation steps (look for numbered steps or checklist items)
+3. Count total steps: N
+
+### Generate TodoWrite List
+
+For each of N plan steps, create 4 TODOs:
+- Step X: RED phase
+- Step X: GREEN phase
+- Step X: REFACTOR phase
+- Step X: SYNC plan
+
+After all N steps, add quality gate TODOs:
+- REQUEST PM: Efficiency Agent approval
+- EXECUTE: Efficiency Agent review
+- REQUEST PM: Security Agent approval
+- EXECUTE: Security Agent review
+- REQUEST PM: Final TDD sign-off
+- UPDATE: Mark plan status Complete
+
+### Example TodoWrite (3-step plan)
+
+{
+  "tool": "TodoWrite",
+  "todos": [
+    {"content": "Step 1: RED - Write failing tests", "status": "pending", "activeForm": "Writing tests for Step 1"},
+    {"content": "Step 1: GREEN - Implement to pass", "status": "pending", "activeForm": "Implementing Step 1"},
+    {"content": "Step 1: REFACTOR - Improve quality", "status": "pending", "activeForm": "Refactoring Step 1"},
+    {"content": "Step 1: SYNC - Update plan", "status": "pending", "activeForm": "Syncing plan for Step 1"},
+
+    {"content": "Step 2: RED - Write failing tests", "status": "pending", "activeForm": "Writing tests for Step 2"},
+    {"content": "Step 2: GREEN - Implement to pass", "status": "pending", "activeForm": "Implementing Step 2"},
+    {"content": "Step 2: REFACTOR - Improve quality", "status": "pending", "activeForm": "Refactoring Step 2"},
+    {"content": "Step 2: SYNC - Update plan", "status": "pending", "activeForm": "Syncing plan for Step 2"},
+
+    {"content": "Step 3: RED - Write failing tests", "status": "pending", "activeForm": "Writing tests for Step 3"},
+    {"content": "Step 3: GREEN - Implement to pass", "status": "pending", "activeForm": "Implementing Step 3"},
+    {"content": "Step 3: REFACTOR - Improve quality", "status": "pending", "activeForm": "Refactoring Step 3"},
+    {"content": "Step 3: SYNC - Update plan", "status": "pending", "activeForm": "Syncing plan for Step 3"},
+
+    {"content": "REQUEST PM: Efficiency Agent approval", "status": "pending", "activeForm": "Requesting Efficiency Agent approval"},
+    {"content": "EXECUTE: Efficiency Agent review", "status": "pending", "activeForm": "Running Efficiency Agent"},
+    {"content": "REQUEST PM: Security Agent approval", "status": "pending", "activeForm": "Requesting Security Agent approval"},
+    {"content": "EXECUTE: Security Agent review", "status": "pending", "activeForm": "Running Security Agent"},
+    {"content": "REQUEST PM: Final TDD sign-off", "status": "pending", "activeForm": "Requesting final sign-off"},
+    {"content": "UPDATE: Mark plan status Complete", "status": "pending", "activeForm": "Updating plan status"}
+  ]
+}
+
+**TodoWrite Rules**:
+- Parse plan to determine N (number of steps)
+- Create 4 TODOs per step (RED/GREEN/REFACTOR/SYNC)
+- Add 6 quality gate TODOs at end
+- Total TODOs = (N × 4) + 6
+```
+
+### Step 3.2: Add TodoWrite Updates for TDD Cycles
+
+**For each step's RED phase**:
+
+```markdown
+**Update TodoWrite**: Mark "Step X: RED - Write failing tests" as in_progress
+
+[Write tests first...]
+
+**Update TodoWrite**: Mark "Step X: RED - Write failing tests" as completed
+```
+
+**For each step's GREEN phase**:
+
+```markdown
+**Update TodoWrite**: Mark "Step X: GREEN - Implement to pass" as in_progress
+
+[Implement minimal code...]
+
+**Auto-iteration**: If tests fail, iterate up to 10 times:
+- Analyze failure
+- Make targeted fix
+- Re-run tests
+- DO NOT create separate TODOs per iteration (aggregate in GREEN phase)
+
+**Update TodoWrite**: Mark "Step X: GREEN - Implement to pass" as completed (when all tests pass)
+```
+
+**For each step's REFACTOR phase**:
+
+```markdown
+**Update TodoWrite**: Mark "Step X: REFACTOR - Improve quality" as in_progress
+
+[Refactor code while keeping tests green...]
+
+**Update TodoWrite**: Mark "Step X: REFACTOR - Improve quality" as completed
+```
+
+**For each step's SYNC phase**:
+
+```markdown
+**Update TodoWrite**: Mark "Step X: SYNC - Update plan" as in_progress
+
+[Update plan document: mark step complete, add notes...]
+
+**Update TodoWrite**: Mark "Step X: SYNC - Update plan" as completed
+```
+
+### Step 3.3: Add Quality Gate TodoWrite Tracking - Efficiency Agent
+
+**Location**: After all implementation steps complete
+
+**Add section**:
+
+```markdown
+## Phase 2: Efficiency Review
+
+**CRITICAL - NON-NEGOTIABLE QUALITY GATE**
+
+**TodoWrite Check**: All implementation steps must be completed before requesting Efficiency Agent
+
+**Update TodoWrite**: Mark "REQUEST PM: Efficiency Agent approval" as in_progress
+
+Ready for Master Efficiency Agent review?
+
+**MUST** get PM approval - CANNOT PROCEED without efficiency review.
+
+**Targets**:
+- Cyclomatic complexity <10 per function
+- Cognitive complexity <15
+- Remove dead code and unused imports
+- Simplify overly complex logic
+- Ensure KISS and YAGNI principles
+
+**Override**: PM may skip by saying "SKIP EFFICIENCY REVIEW - I ACCEPT THE RISKS"
+
+Type "yes" or "approved" to proceed with efficiency review.
+
+**After PM approval**:
+- Mark "REQUEST PM: Efficiency Agent approval" as completed
+- Mark "EXECUTE: Efficiency Agent review" as in_progress
+
+**Delegate to Master Efficiency Agent**:
+[Use Task tool with rptc:master-efficiency-agent...]
+
+**After Efficiency Agent completes**:
+- Mark "EXECUTE: Efficiency Agent review" as completed
+```
+
+### Step 3.4: Add Quality Gate TodoWrite Tracking - Security Agent
+
+**Similar pattern for Security Agent**:
+
+```markdown
+## Phase 3: Security Review
+
+**CRITICAL - NON-NEGOTIABLE QUALITY GATE**
+
+**TodoWrite Check**: Efficiency review must be completed before requesting Security Agent
+
+**Update TodoWrite**: Mark "REQUEST PM: Security Agent approval" as in_progress
+
+Ready for Master Security Agent review?
+
+**MUST** get PM approval - CANNOT PROCEED without security review.
+
+**Coverage**:
+- OWASP Top 10 vulnerabilities
+- Input validation and sanitization
+- Authentication/authorization checks
+- Dependency vulnerabilities
+
+**Override**: PM may skip by saying "SKIP SECURITY REVIEW - I ACCEPT THE RISKS"
+
+Type "yes" or "approved" to proceed with security review.
+
+**After PM approval**:
+- Mark "REQUEST PM: Security Agent approval" as completed
+- Mark "EXECUTE: Security Agent review" as in_progress
+
+**Delegate to Master Security Agent**:
+[Use Task tool with rptc:master-security-agent...]
+
+**After Security Agent completes**:
+- Mark "EXECUTE: Security Agent review" as completed
+```
+
+### Step 3.5: Add Final Sign-Off TodoWrite Tracking
+
+**After both quality gates**:
+
+```markdown
+## Phase 4: Final Sign-Off
+
+**CRITICAL - CANNOT MARK TDD COMPLETE WITHOUT PM APPROVAL**
+
+**TodoWrite Check**: Both quality gates must be completed
+
+**Update TodoWrite**: Mark "REQUEST PM: Final TDD sign-off" as in_progress
+
+TDD Phase Complete - Ready for commit?
+
+All tests passing ✓
+Efficiency review complete ✓
+Security review complete ✓
+
+**MUST** get final PM approval before marking implementation complete.
+
+Type "yes" or "approved" to mark TDD complete.
+
+**After PM approval**:
+- Mark "REQUEST PM: Final TDD sign-off" as completed
+- Mark "UPDATE: Mark plan status Complete" as in_progress
+
+**Update plan document**:
+[Change plan header: Status: Complete]
+
+**Update TodoWrite**: Mark "UPDATE: Mark plan status Complete" as completed
+
+✅ All TDD phases complete. TodoWrite list should show all tasks completed.
+```
+
+## Acceptance Criteria
+
+- [ ] TodoWrite dynamically generated from plan steps (N × 4 + 6 items)
+- [ ] Each TDD cycle (RED/GREEN/REFACTOR/SYNC) tracked per step
+- [ ] Auto-iteration in GREEN phase doesn't create duplicate TODOs
+- [ ] Three PM approval gates enforced (Efficiency, Security, Final)
+- [ ] Plan synchronization enforced (mark steps complete)
+- [ ] Manual workflow test passes (3-step plan)
+- [ ] Quality gates never accidentally skipped
+
+## Dependencies
+
+- **Requires**: Step 6 (SOP) complete first, Step 2 (plan command) for plan document input
+- **Enables**: Step 5 (blocking validation at 3 gates)
+- **Integrates with**: Step 7 (testing validates quality gate enforcement)
+
+---
+
+# Step 4: Add TodoWrite to Commit Command
+
+## Overview
+
+**Purpose**: Integrate TodoWrite state tracking into the commit command to ensure verification phases complete before commit.
+
+**Implementation Location**: `commands/commit.md` - After configuration load section
+
+**Estimated Time**: 2-3 hours
+
+## Commit Command Phases
+
+The commit command has 6 verification phases plus optional PR:
+
+1. **Phase 1**: Pre-Commit Verification (tests, linting, coverage)
+2. **Phase 2**: Generate Commit Message
+3. **Phase 3**: Verification Summary
+4. **Phase 4**: Documentation Specialist Review (AUTOMATIC - no PM approval)
+5. **Phase 5**: Execute Commit
+6. **Phase 6**: Create PR (if `pr` flag passed)
+7. **Phase 7**: Final Summary
+
+## Implementation Plan
+
+### Step 4.1: Create TodoWrite Initialization Section
+
+**Location**: After configuration load (currently line ~77)
+
+**Add new section**:
+
+```markdown
+## Step 0b: Initialize TODO Tracking
+
+**Initialize TodoWrite to track commit verification phases.**
+
+{
+  "tool": "TodoWrite",
+  "todos": [
+    {
+      "content": "Pre-commit verification (tests, linting, coverage)",
+      "status": "pending",
+      "activeForm": "Running pre-commit checks"
+    },
+    {
+      "content": "Generate commit message",
+      "status": "pending",
+      "activeForm": "Generating commit message"
+    },
+    {
+      "content": "Verification summary",
+      "status": "pending",
+      "activeForm": "Presenting verification summary"
+    },
+    {
+      "content": "Documentation Specialist review (automatic)",
+      "status": "pending",
+      "activeForm": "Running Documentation Specialist"
+    },
+    {
+      "content": "Execute git commit",
+      "status": "pending",
+      "activeForm": "Creating commit"
+    },
+    {
+      "content": "Create pull request",
+      "status": "pending",
+      "activeForm": "Creating pull request"
+    },
+    {
+      "content": "Final summary",
+      "status": "pending",
+      "activeForm": "Presenting final summary"
+    }
+  ]
+}
+
+**Note**: "Create pull request" only applies if `pr` flag passed. Mark as completed immediately if not creating PR.
+
+**TodoWrite Rules**:
+- Update status as verification progresses
+- Documentation Specialist runs AUTOMATICALLY (no PM approval needed)
+- Only ONE task "in_progress" at a time
+```
+
+### Step 4.2: Add TodoWrite Updates to Pre-Commit Verification
+
+**Location**: Beginning of pre-commit checks
+
+**Add instruction**:
+
+```markdown
+**Update TodoWrite**: Mark "Pre-commit verification" as in_progress
+
+## Phase 1: Pre-Commit Verification
+
+Run comprehensive verification checks:
+
+1. **Test Suite**: Run all tests
+   ```bash
+   [test command]
+   ```
+
+   **BLOCKING**: If ANY tests fail:
+   - ❌ COMMIT BLOCKED - TESTS FAILING
+   - List failed tests
+   - CANNOT PROCEED until tests pass
+   - Exit with error code
+
+2. **Code Quality**: Run linting
+   ```bash
+   [lint command]
+   ```
+
+   **BLOCKING**: If linting errors found:
+   - ❌ COMMIT BLOCKED - CODE QUALITY ISSUES
+   - List quality issues (debug code, unused imports, etc.)
+   - CANNOT PROCEED until issues fixed
+   - Exit with error code
+
+3. **Coverage Check**: Verify coverage targets
+   ```bash
+   [coverage command]
+   ```
+
+   **Warning**: If coverage below 80%, warn but don't block
+
+**Update TodoWrite**: Mark "Pre-commit verification" as completed (only if all checks pass)
+```
+
+### Step 4.3: Add TodoWrite Updates to Commit Message Generation
+
+**Add instructions**:
+
+```markdown
+**Update TodoWrite**: Mark "Generate commit message" as in_progress
+
+## Phase 2: Generate Commit Message
+
+[Existing commit message generation logic...]
+
+**Update TodoWrite**: Mark "Generate commit message" as completed
+```
+
+### Step 4.4: Add TodoWrite Updates to Verification Summary
+
+**Add instructions**:
+
+```markdown
+**Update TodoWrite**: Mark "Verification summary" as in_progress
+
+## Phase 3: Verification Summary
+
+Present summary to PM:
+- Tests: ✓ Passing
+- Linting: ✓ Clean
+- Coverage: X% (target: 80%+)
+- Files changed: N files
+- Proposed commit message: [message]
+
+**Update TodoWrite**: Mark "Verification summary" as completed
+```
+
+### Step 4.5: Add TodoWrite Updates to Documentation Specialist (AUTOMATIC)
+
+**Key distinction: NO PM approval gate**
+
+**Add instructions**:
+
+```markdown
+**Update TodoWrite**: Mark "Documentation Specialist review (automatic)" as in_progress
+
+## Phase 4: Documentation Specialist Review
+
+**IMPORTANT**: Documentation Specialist runs AUTOMATICALLY (no PM approval required)
+
+**Rationale**: Documentation sync is operational (keeps docs current), not a decision gate. PM reviews generated docs in final summary but doesn't need to pre-approve the sync.
+
+**Delegate to Master Documentation Specialist**:
+[Use Task tool with rptc:master-documentation-specialist-agent...]
+
+**Doc Specialist analyzes**:
+- Diff-driven documentation impacts
+- Which docs need updating
+- Confidence-based routing (auto-update high confidence, request approval for medium)
+
+**Update TodoWrite**: Mark "Documentation Specialist review (automatic)" as completed
+```
+
+### Step 4.6: Add TodoWrite Updates to Commit Execution
+
+**Add instructions**:
+
+```markdown
+**Update TodoWrite**: Mark "Execute git commit" as in_progress
+
+## Phase 5: Execute Commit
+
+**CRITICAL - FINAL CONFIRMATION**
+
+Present final commit summary to PM:
+- All verification checks passed
+- Documentation updates (if any)
+- Commit message: [message]
+
+**Ask PM**: "Proceed with commit?"
+
+**DO NOT PROCEED** without final confirmation.
+
+**After confirmation**:
+```bash
+git commit -m "$(cat <<'EOF'
+[commit message with co-authorship]
+EOF
+)"
+```
+
+**Update TodoWrite**: Mark "Execute git commit" as completed
+```
+
+### Step 4.7: Add TodoWrite Updates to PR Creation (Conditional)
+
+**Add instructions**:
+
+```markdown
+## Phase 6: Create Pull Request (Conditional)
+
+**Check**: Was `pr` flag passed in command?
+
+**If NO `pr` flag**:
+- **Update TodoWrite**: Mark "Create pull request" as completed (skipped)
+- Skip to Phase 7
+
+**If `pr` flag present**:
+- **Update TodoWrite**: Mark "Create pull request" as in_progress
+
+**Create PR**:
+```bash
+gh pr create --title "[title]" --body "$(cat <<'EOF'
+[PR body with summary]
+EOF
+)"
+```
+
+- **Update TodoWrite**: Mark "Create pull request" as completed
+```
+
+### Step 4.8: Add TodoWrite Updates to Final Summary
+
+**Add instructions**:
+
+```markdown
+**Update TodoWrite**: Mark "Final summary" as in_progress
+
+## Phase 7: Final Summary
+
+✅ Commit successful!
+
+**Summary**:
+- Commit: [hash]
+- Files changed: [N]
+- Tests: All passing
+- Documentation: [Updated/No changes]
+- PR: [URL if created, "Not created" if no pr flag]
+
+**Update TodoWrite**: Mark "Final summary" as completed
+
+✅ All commit phases complete. TodoWrite list should show all tasks completed.
+```
+
+## Acceptance Criteria
+
+- [ ] TodoWrite initializes with 7 phases (including conditional PR)
+- [ ] Pre-commit blocking enforced (tests, linting)
+- [ ] Documentation Specialist runs automatically (no PM gate)
+- [ ] Final commit confirmation required (PM gate)
+- [ ] PR creation conditional on flag (mark skipped if not needed)
+- [ ] Manual workflow test passes (with and without PR)
+- [ ] Integration test with TDD passes (tdd → commit workflow)
+
+## Dependencies
+
+- **Requires**: Step 6 (SOP) complete first, Step 3 (TDD) for workflow integration
+- **Enables**: Step 5 (blocking validation at 2 gates: tests, quality)
+- **Integrates with**: Step 7 (testing validates commit integration)
+
+---
+
+# Step 5: Implement Phase Transition Blocking
+
+## Overview
+
+**Purpose**: Add explicit blocking validation at 8 critical phase transitions with imperative language to prevent accidental step-skipping.
+
+**Estimated Time**: 2-3 hours
+
+## 8 Blocking Locations
+
+1. **Research** (Line ~275): Block save without PM approval
+2. **Plan** (Line ~234): Block Master Planner delegation without PM approval
+3. **Plan** (Line ~599): Block plan save without PM approval
+4. **TDD** (Line ~340): Block Efficiency Agent without PM approval
+5. **TDD** (Line ~475): Block Security Agent without PM approval
+6. **TDD** (Line ~624): Block TDD completion without PM approval
+7. **Commit** (Line ~89): Block commit if tests failing
+8. **Commit** (Line ~160): Block commit if code quality issues
+
+## Implementation Plan
+
+### Step 5.1: Research Command - Block Save Without PM Approval
+
+**Location**: `commands/research.md` - Before Phase 6 (save)
+
+**Add blocking checkpoint**:
+
+```markdown
+---
+
+**CRITICAL VALIDATION CHECKPOINT - DO NOT SKIP**
+
+Before proceeding to Phase 6 (Save Research Document):
+
+**TodoWrite Check**: "Get PM sign-off on research" MUST be completed
+
+**Verification**:
+1. Check TodoWrite status for "Get PM sign-off on research"
+2. If status is NOT "completed", you MUST NOT save research document
+
+❌ **PHASE 6 BLOCKED** - Cannot save research without PM approval
+
+**Required**: PM must explicitly say "yes" or "approved" in Phase 5
+
+**ENFORCEMENT**: If PM has NOT approved:
+1. Re-present findings clearly
+2. Ask: "Do you approve this research?"
+3. Wait for explicit "yes" or "approved"
+4. NEVER assume approval or skip this gate
+
+**This is a NON-NEGOTIABLE gate. Research documents capture critical decisions and must be reviewed by PM before saving.**
+
+---
+```
+
+### Step 5.2: Plan Command - Block Master Planner Delegation Without Approval
+
+**Location**: `commands/plan.md` - Before Phase 5 (Master Planner delegation)
+
+**Add blocking checkpoint**:
+
+```markdown
+---
+
+**CRITICAL VALIDATION CHECKPOINT - DO NOT SKIP**
+
+Before delegating to Master Feature Planner:
+
+**TodoWrite Check**: "Get PM approval for Master Feature Planner delegation" MUST be completed
+
+**Verification**:
+1. Check TodoWrite status for delegation approval
+2. If status is NOT "completed", you MUST NOT create Master Feature Planner agent
+
+❌ **PHASE 5 BLOCKED** - Cannot delegate without PM authorization
+
+**Required**: PM must explicitly approve agent creation
+
+**ENFORCEMENT**: If PM has NOT approved:
+1. Present plan scaffold clearly
+2. Ask: "Ready to delegate to Master Feature Planner?"
+3. Wait for explicit "yes" or "approved"
+4. NEVER create agent without permission
+
+**This is a NON-NEGOTIABLE gate. Master Feature Planner is a resource-intensive operation requiring explicit PM authorization.**
+
+---
+```
+
+### Step 5.3: Plan Command - Block Plan Save Without PM Approval
+
+**Location**: `commands/plan.md` - Before Phase 9 (save plan)
+
+**Add blocking checkpoint**:
+
+```markdown
+---
+
+**CRITICAL VALIDATION CHECKPOINT - DO NOT SKIP**
+
+Before saving plan document:
+
+**TodoWrite Check**: "Get final PM sign-off" MUST be completed
+
+**Verification**:
+1. Check TodoWrite status for final plan approval
+2. If status is NOT "completed", you MUST NOT save plan document
+
+❌ **PHASE 9 BLOCKED** - Cannot save plan without PM approval
+
+**Required**: PM must review comprehensive plan and explicitly approve
+
+**ENFORCEMENT**: If PM has NOT approved:
+1. Present complete plan clearly
+2. Ask: "Do you approve this plan for implementation?"
+3. Wait for explicit "yes" or "approved"
+4. Support modifications if PM says "modify"
+5. NEVER save without explicit approval
+
+**This is a NON-NEGOTIABLE gate. Plans define implementation approach and must be reviewed by PM before execution.**
+
+---
+```
+
+### Step 5.4: TDD Command - Block Efficiency Agent Without PM Approval
+
+**Location**: `commands/tdd.md` - Before Phase 2 (Efficiency Agent)
+
+**Add blocking checkpoint**:
+
+```markdown
+---
+
+**CRITICAL VALIDATION CHECKPOINT - NON-NEGOTIABLE QUALITY GATE**
+
+Before executing Master Efficiency Agent:
+
+**TodoWrite Check**: "REQUEST PM: Efficiency Agent approval" MUST be completed
+
+**Verification**:
+1. All implementation steps MUST be completed
+2. All tests MUST be passing
+3. PM approval MUST be obtained
+
+❌ **QUALITY GATE BLOCKED** - Cannot proceed to Efficiency review without PM approval
+
+**Required**: PM must explicitly approve efficiency review
+
+**ENFORCEMENT**: If PM has NOT approved:
+1. Verify all tests passing
+2. Present implementation summary
+3. Ask: "Ready for Master Efficiency Agent review?"
+4. Explain: "MUST get PM approval - CANNOT PROCEED without efficiency review"
+5. Wait for explicit "yes" or "approved"
+6. NEVER skip this gate without explicit override
+
+**Override Phrase**: PM may say "SKIP EFFICIENCY REVIEW - I ACCEPT THE RISKS"
+
+**This is a NON-NEGOTIABLE quality gate. Efficiency review ensures code maintainability and follows KISS/YAGNI principles.**
+
+---
+```
+
+### Step 5.5: TDD Command - Block Security Agent Without PM Approval
+
+**Location**: `commands/tdd.md` - Before Phase 3 (Security Agent)
+
+**Add blocking checkpoint** (similar pattern to Efficiency):
+
+```markdown
+---
+
+**CRITICAL VALIDATION CHECKPOINT - NON-NEGOTIABLE QUALITY GATE**
+
+Before executing Master Security Agent:
+
+**TodoWrite Check**: "REQUEST PM: Security Agent approval" MUST be completed
+
+**Verification**:
+1. Efficiency review MUST be completed
+2. PM approval MUST be obtained for Security review
+
+❌ **QUALITY GATE BLOCKED** - Cannot proceed to Security review without PM approval
+
+**Required**: PM must explicitly approve security review
+
+**ENFORCEMENT**: If PM has NOT approved:
+1. Verify Efficiency review complete
+2. Present implementation summary
+3. Ask: "Ready for Master Security Agent review?"
+4. Explain: "MUST get PM approval - CANNOT PROCEED without security review"
+5. Wait for explicit "yes" or "approved"
+6. NEVER skip this gate without explicit override
+
+**Override Phrase**: PM may say "SKIP SECURITY REVIEW - I ACCEPT THE RISKS"
+
+**This is a NON-NEGOTIABLE quality gate. Security review identifies vulnerabilities and ensures OWASP compliance.**
+
+---
+```
+
+### Step 5.6: TDD Command - Block TDD Completion Without PM Approval
+
+**Location**: `commands/tdd.md` - Before Phase 5 (plan update)
+
+**Add blocking checkpoint**:
+
+```markdown
+---
+
+**CRITICAL VALIDATION CHECKPOINT - CANNOT MARK COMPLETE WITHOUT PM APPROVAL**
+
+Before marking TDD phase complete:
+
+**TodoWrite Check**: "REQUEST PM: Final TDD sign-off" MUST be completed
+
+**Verification**:
+1. All implementation steps completed
+2. Efficiency review completed
+3. Security review completed
+4. All tests passing
+
+❌ **COMPLETION BLOCKED** - Cannot mark TDD complete without PM sign-off
+
+**Required**: PM must confirm implementation is ready for commit
+
+**ENFORCEMENT**: If PM has NOT approved:
+1. Present completion summary (all checks passed)
+2. Ask: "TDD Phase Complete - Ready for commit?"
+3. Wait for explicit "yes" or "approved"
+4. NEVER update plan status without PM confirmation
+
+**This is a NON-NEGOTIABLE gate. TDD completion marks implementation ready for commit - PM must verify this.**
+
+---
+```
+
+### Step 5.7: Commit Command - Block Commit if Tests Failing
+
+**Location**: `commands/commit.md` - After test execution (line ~89)
+
+**Upgrade existing check to imperative language**:
+
+```markdown
+---
+
+**CRITICAL VALIDATION CHECKPOINT - CANNOT COMMIT WITH FAILING TESTS**
+
+After running test suite:
+
+**Test Status Check**: ALL tests MUST pass
+
+**Verification**:
+```bash
+[test command]
+EXIT_CODE=$?
+```
+
+**If EXIT_CODE ≠ 0**:
+
+❌ **COMMIT BLOCKED - TESTS FAILING**
+
+**ENFORCEMENT**:
+1. List all failing tests
+2. Show failure details
+3. Display: "CANNOT PROCEED - FIX FAILING TESTS FIRST"
+4. Exit with error code 1
+5. NEVER commit with failing tests under ANY circumstances
+
+**This is a NON-NEGOTIABLE gate. Failing tests indicate broken functionality - MUST be fixed before commit.**
+
+**To fix**:
+1. Review failed test output
+2. Fix implementation or tests
+3. Re-run verification
+4. Only proceed when all tests pass
+
+---
+```
+
+### Step 5.8: Commit Command - Block Commit if Code Quality Issues
+
+**Location**: `commands/commit.md` - After linting/quality checks (line ~160)
+
+**Upgrade existing check to imperative language**:
+
+```markdown
+---
+
+**CRITICAL VALIDATION CHECKPOINT - CANNOT COMMIT WITH QUALITY ISSUES**
+
+After running code quality checks:
+
+**Quality Check**: NO debug code, NO quality violations
+
+**Verification**:
+```bash
+# Check for debug code
+grep -r "console\.log\|debugger\|print(" src/
+
+# Run linter
+[lint command]
+```
+
+**If quality issues found**:
+
+❌ **COMMIT BLOCKED - CODE QUALITY ISSUES**
+
+**Common violations**:
+- Debug code (console.log, debugger statements)
+- Unused imports
+- Unused variables
+- Linting violations
+
+**ENFORCEMENT**:
+1. List all quality issues
+2. Display: "NEVER commit debug code or quality violations"
+3. Exit with error code 1
+4. MUST fix all issues before proceeding
+
+**This is a NON-NEGOTIABLE gate. Code quality issues pollute codebase and must be cleaned before commit.**
+
+**To fix**:
+1. Remove debug code
+2. Clean unused imports/variables
+3. Fix linting violations
+4. Re-run verification
+5. Only proceed when quality checks pass
+
+---
+```
+
+### Step 5.9: Document Blocking Pattern
+
+**Create new file**: `.rptc/patterns/blocking-validation.md`
+
+```markdown
+# Phase Transition Blocking Pattern
+
+## Purpose
+
+Prevent accidental step-skipping by adding explicit blocking validation at critical phase transitions.
+
+## Pattern Template
+
+```markdown
+---
+
+**CRITICAL VALIDATION CHECKPOINT - [CONSEQUENCE IF SKIPPED]**
+
+Before [NEXT PHASE]:
+
+**TodoWrite Check**: "[TODO ITEM]" MUST be [completed/passed/approved]
+
+**Verification**:
+1. [Check 1]
+2. [Check 2]
+
+❌ **[PHASE] BLOCKED** - [Reason cannot proceed]
+
+**Required**: [What PM must do]
+
+**ENFORCEMENT**: If [condition NOT met]:
+1. [Action 1]
+2. [Action 2]
+3. [Never do this]
+
+**This is a NON-NEGOTIABLE gate. [Rationale explaining why this gate exists]**
+
+---
+```
+
+## Imperative Language Keywords
+
+**Use these keywords** in blocking checkpoints:
+
+- **CRITICAL**: Highest priority, cannot be ignored
+- **MUST**: Required action, no alternatives
+- **NEVER**: Prohibited action, never bypass
+- **ALWAYS**: Invariant rule, every time
+- **NON-NEGOTIABLE**: Not subject to debate
+- **MANDATORY**: Required by system design
+- **CANNOT PROCEED**: Blocks forward progress
+
+**Avoid soft language** (eliminates rationalization):
+
+- ❌ "should" → ✅ "MUST"
+- ❌ "remember to" → ✅ "ALWAYS"
+- ❌ "consider" → ✅ "MANDATORY"
+- ❌ "recommended" → ✅ "REQUIRED"
+- ❌ "try to" → ✅ "MUST"
+
+## Evidence
+
+Research shows **80% reduction in step-skipping** when using imperative language (Pimzino workflow pattern).
+
+## All Blocking Locations
+
+See [Final Coordination Plan - Section 5.6: 8 Blocking Locations](#8-blocking-locations) for complete list.
+```
+
+### Step 5.10: Validation Testing
+
+**Manual testing**:
+
+1. Test each of 8 blocking locations
+2. Attempt to bypass without approval
+3. Verify blocking checkpoint enforces
+4. Verify imperative error message displays
+5. Provide approval and verify progression
+
+## Acceptance Criteria
+
+- [ ] All 8 blocking checkpoints implemented
+- [ ] Each uses imperative language (CRITICAL, MUST, NEVER)
+- [ ] No soft language ("should", "consider") at any gate
+- [ ] Blocking pattern documented in `.rptc/patterns/`
+- [ ] Manual validation tests pass (all 8 locations)
+- [ ] TodoWrite integration verified at each gate
+
+## Dependencies
+
+- **Requires**: Steps 1-4 complete (TodoWrite integrated in all commands)
+- **Enables**: Step 7 (blocking validation tests)
+- **Integrates with**: Step 6 (SOP documents blocking pattern)
+
+---
+
+# Step 6: Create TodoWrite SOP Documentation
+
+## Overview
+
+**Purpose**: Create comprehensive TodoWrite usage guide in `.rptc/sop/todowrite-guide.md` documenting JSON structure, state management, integration patterns, and blocking validation.
+
+**Estimated Time**: 3-4 hours
+
+## SOP Sections
+
+1. **TodoWrite JSON Structure**: Canonical definition (content, status, activeForm)
+2. **State Management Rules**: One in_progress, immediate completion, transitions
+3. **Integration Patterns Per Command**: Research, Plan, TDD, Commit examples
+4. **Phase Transition Blocking**: 8 blocking locations with imperative language
+5. **PM-Centric Approval Pattern**: Distinguish automatic vs approval-gated phases
+6. **Compaction Persistence**: How TodoWrite survives compaction
+7. **Anti-Patterns and Gotchas**: Common mistakes to avoid
+8. **Testing & Validation**: How to verify TodoWrite integration
+
+## Implementation Plan
+
+### Step 6.1: Create SOP File Structure
+
+**Create file**: `.rptc/sop/todowrite-guide.md`
+
+**Add metadata**:
+
+```markdown
+# TodoWrite Integration Guide
+
+**Purpose**: Document TodoWrite patterns for RPTC workflow state persistence
+
+**Version**: 1.0.0
+**Created**: 2025-10-16
+**Last Updated**: 2025-10-16
+
+**Applies To**: All RPTC commands (research, plan, tdd, commit)
+
+---
+
+## Table of Contents
+
+1. [TodoWrite JSON Structure](#todowrite-json-structure)
+2. [State Management Rules](#state-management-rules)
+3. [Integration Patterns Per Command](#integration-patterns-per-command)
+4. [Phase Transition Blocking](#phase-transition-blocking)
+5. [PM-Centric Approval Pattern](#pm-centric-approval-pattern)
+6. [Compaction Persistence](#compaction-persistence)
+7. [Anti-Patterns and Gotchas](#anti-patterns-and-gotchas)
+8. [Testing and Validation](#testing-and-validation)
+
+---
+```
+
+### Step 6.2: Document TodoWrite JSON Structure
+
+**Add section** (see Step 2 details from agent plan for full content):
+
+- Three required fields: content, status, activeForm
+- JSON schema example
+- Command-specific examples for all 4 commands
+- Field descriptions with rationale
+
+### Step 6.3: Document State Management Rules
+
+**Add section** (see Step 3 details from agent plan):
+
+- Rule 1: Single in-progress task
+- Rule 2: Immediate completion marking
+- Rule 3: Status transition rules
+- Rule 4: Error recovery patterns
+- State transition diagram
+
+### Step 6.4: Document Integration Patterns Per Command
+
+**Add section** (see Step 4 details from agent plan):
+
+- Research command: 6 phases
+- Plan command: Simple (4) vs Complex (9) phases
+- TDD command: Dynamic (N×4 + 6) phases
+- Commit command: 6-7 phases (conditional PR)
+- TodoWrite JSON examples for each
+
+### Step 6.5: Document Phase Transition Blocking
+
+**Add section** (see Step 5 details from agent plan):
+
+- Blocking template pattern
+- All 8 blocking locations with examples
+- Imperative language keywords
+- Override patterns
+
+### Step 6.6: Document PM-Centric Approval Pattern
+
+**Add section** (see Step 6 details from agent plan):
+
+- Approval matrix (which phases require PM approval)
+- Quality gates explanation (Efficiency/Security require approval)
+- Doc Specialist automatic execution
+- Rationale for each decision
+
+### Step 6.7: Document Compaction Persistence & Anti-Patterns
+
+**Add section** (see Step 7 details from agent plan):
+
+- How TodoWrite survives compaction
+- System reminder format
+- Recovery from interruption
+- Anti-pattern 1: Batching completions
+- Anti-pattern 2: Skipping in_progress transition
+- Anti-pattern 3: Creating duplicate TODOs
+- Anti-pattern 4: Using soft language
+
+### Step 6.8: Document Testing & Validation
+
+**Add section** (see Step 8 details from agent plan):
+
+- Manual workflow testing approach
+- Test 1: Complete RPTC workflow
+- Test 2: Compaction survival
+- Test 3: Interruption recovery
+- Success criteria checklist
+
+## Acceptance Criteria
+
+- [ ] All 8 sections present and complete
+- [ ] JSON examples valid (pass linter)
+- [ ] All 4 commands documented with integration patterns
+- [ ] All 8 blocking locations documented
+- [ ] Anti-patterns with DO/DON'T examples
+- [ ] Cross-references to command files accurate
+- [ ] SOP follows existing SOP structure/format
+
+## Dependencies
+
+- **Requires**: None (can be done first in execution sequence)
+- **Enables**: Steps 1-4 (commands reference SOP for TodoWrite structure)
+- **Integrates with**: Step 5 (blocking pattern documented), Step 7 (testing references SOP)
+
+---
+
+# Step 7: Testing & Validation
+
+## Overview
+
+**Purpose**: Comprehensive manual testing of TodoWrite integration across all 4 commands to validate 60% step-skipping reduction and 100% quality gate enforcement.
+
+**Estimated Time**: 4-6 hours (includes test execution and documentation)
+
+## Test Categories
+
+1. **Unit Tests** (4): Individual command TodoWrite creation
+2. **Integration Tests** (3): Complete workflow end-to-end
+3. **Compaction Tests** (3): TodoWrite survival
+4. **Blocking Tests** (8): All 8 gates enforce correctly
+5. **Performance Tests** (3): Step-skipping reduction, quality gate compliance
+
+**Total**: 21+ test cases
+
+## Implementation Plan
+
+### Step 7.1: Create Test Documentation Structure
+
+**Create directory**: `.rptc/tests/`
+
+**Create files**:
+- `todowrite-integration-tests.md` - Master test checklist
+- `compaction-survival-tests.md` - Compaction-specific tests
+- `blocking-validation-tests.md` - Blocking checkpoint tests
+- `performance-measurement.md` - Performance metrics
+
+(Full test templates provided in Step 7 agent plan - see comprehensive checklists)
+
+### Step 7.2: Execute Unit Tests (Command-Level)
+
+**Test each command**:
+
+1. Run `/rptc:research "test topic"`
+   - Verify TodoWrite creates 6-item list
+   - Verify phase transitions tracked
+2. Run `/rptc:plan "test feature"`
+   - Verify TodoWrite creates correct list (simple vs complex)
+3. Run `/rptc:tdd "@test-plan.md"`
+   - Verify dynamic TodoWrite generation (N×4 + 6 items)
+4. Run `/rptc:commit`
+   - Verify TodoWrite creates 7-item list
+
+### Step 7.3: Execute Integration Tests (Cross-Command)
+
+**Test complete workflow**:
+
+1. Start fresh session
+2. Run `/rptc:research "user authentication"`
+3. Run `/rptc:plan "@user-authentication.md"`
+4. Run `/rptc:tdd "@user-authentication.md"`
+5. Run `/rptc:commit pr`
+
+**Verify at each step**:
+- TodoWrite state persists
+- Blocking checkpoints enforce
+- Quality gates work correctly
+
+### Step 7.4: Execute Compaction Survival Tests
+
+**Test TodoWrite persistence**:
+
+1. Start workflow with 10-step plan
+2. Complete 2 steps
+3. Take screenshot of TodoWrite list
+4. Execute `/compact`
+5. Take screenshot after compaction
+6. Verify: All pending items remain, no data loss
+
+### Step 7.5: Execute Blocking Validation Tests
+
+**Test all 8 blocking locations**:
+
+For each blocking gate:
+1. Reach the checkpoint
+2. Attempt to bypass (don't say "yes")
+3. Verify blocking message appears
+4. Verify command STOPS
+5. Provide approval
+6. Verify command PROCEEDS
+
+### Step 7.6: Execute Performance & Reliability Tests
+
+**Measure step-skipping reduction**:
+
+1. Collect baseline data (without TodoWrite if possible)
+2. Run 3 complete features WITH TodoWrite
+3. Count skipped steps: Before vs After
+4. Calculate reduction: ((Baseline - WithTodoWrite) / Baseline) × 100
+5. Verify: ≥60% reduction achieved
+
+**Measure quality gate enforcement**:
+
+1. Run 5 complete workflows through TDD
+2. Count Efficiency Agent invocations: X / 5
+3. Count Security Agent invocations: Y / 5
+4. Target: 5/5 for both (100% compliance)
+
+### Step 7.7: Create Bug Reporting Template
+
+**Create file**: `.rptc/tests/bug-report-template.md`
+
+(Full template provided in Step 7 agent plan)
+
+### Step 7.8: Create Regression Prevention Strategy
+
+**Create file**: `.rptc/tests/regression-prevention.md`
+
+**Document**:
+- Cross-command impact matrix
+- When to run regression tests
+- Known integration points
+- Rollback procedures
+
+## Acceptance Criteria
+
+- [ ] All 4 test files created
+- [ ] All 21+ tests executed
+- [ ] 100% unit test pass rate (4/4)
+- [ ] 100% integration test pass rate (3/3)
+- [ ] 100% compaction survival (3/3)
+- [ ] 100% blocking validation (8/8)
+- [ ] 60%+ step-skipping reduction validated
+- [ ] Bug template and regression strategy documented
+- [ ] All results recorded in test checklists
+
+## Dependencies
+
+- **Requires**: Steps 1-6 complete (full TodoWrite integration implemented)
+- **Validates**: All previous steps working correctly as integrated system
+
+---
+
+# Final Coordination Plan
+
+## Section 1: Execution Strategy
+
+### Recommended Implementation Order
+
+```
+Phase 1: Foundation (3-4 hours)
+  └─ Step 6: SOP Documentation
+
+Phase 2: Command Integration (2-3 hours each, parallel possible)
+  ├─ Step 1: Research Command
+  ├─ Step 2: Plan Command
+  ├─ Step 3: TDD Command
+  └─ Step 4: Commit Command
+
+Phase 3: Validation (6-9 hours)
+  ├─ Step 5: Blocking Implementation (2-3 hours)
+  └─ Step 7: Testing & Validation (4-6 hours)
+```
+
+**Total Timeline**:
+- Sequential: 17-24 hours
+- Parallel (Phase 2): 11-16 hours (40% time savings)
+
+### Dependency Graph
+
+```
+                    Step 6: SOP Documentation
+                            ↓
+        ┌──────────────────┼──────────────────┐
+        ↓                  ↓                  ↓
+  Step 1: Research    Step 2: Plan    Step 3: TDD    Step 4: Commit
+        └──────────────────┼──────────────────┘
+                           ↓
+              Step 5: Phase Transition Blocking
+                           ↓
+                  Step 7: Testing & Validation
+```
+
+### Critical Path
+
+**Step 6 → Step 1 → Step 5 → Step 7** (cannot be parallelized)
+
+**Bottleneck**: Step 7 (4-6 hours) - longest single step
+
+**Risk Point**: Step 6 defines JSON structure - errors cascade
+
+## Section 2: Conflicts Resolved
+
+### Conflict 1: TodoWrite JSON Structure Consistency
+
+**Resolution**: SOP (Step 6) defines canonical structure, all commands reference it
+
+**Standard Fields**: content, status, activeForm (same across all commands)
+
+### Conflict 2: Blocking Location Counts
+
+**Resolution**: Exactly 8 blocking locations identified:
+1. Research - save gate
+2. Plan - Master Planner delegation gate
+3. Plan - final save gate
+4. TDD - Efficiency Agent gate
+5. TDD - Security Agent gate
+6. TDD - completion gate
+7. Commit - test failure gate
+8. Commit - code quality gate
+
+**Note**: Doc Specialist is AUTOMATIC (not a blocking gate)
+
+### Conflict 3: PM Approval Pattern vs Automatic Execution
+
+**Resolution**:
+- **PM Approval Required**: Research save, Plan delegation, Plan save, Efficiency, Security, TDD completion
+- **Automatic**: Doc Specialist, pre-commit verification checks
+
+### Conflict 4: Line Number References
+
+**Resolution**: Use section headers as anchors, not hardcoded line numbers
+
+## Section 3: Unified Timeline
+
+**Phase 1 (Foundation)**: 3-4 hours
+- Step 6: SOP Documentation
+
+**Phase 2 (Command Integration)**: 2-3 hours each
+- Steps 1-4 can run in parallel (8-12h sequential, 2-3h parallel)
+
+**Phase 3 (Validation)**: 6-9 hours
+- Step 5: Blocking (2-3h)
+- Step 7: Testing (4-6h)
+
+**Total**: 17-24h sequential, 11-16h parallel
+
+## Section 4: Integration Validation
+
+### Scenario 1: Complete Workflow with TodoWrite Persistence
+
+1. Run research → plan → tdd → commit
+2. Trigger `/compact` during workflow
+3. Verify TodoWrite survives compaction
+4. Verify no steps skipped
+
+**Expected**: 100% phase completion, TodoWrite persists
+
+### Scenario 2: Blocking Gate Enforcement
+
+Test all 8 blocking gates:
+- Attempt bypass without approval
+- Verify blocking message appears
+- Provide approval
+- Verify progression
+
+**Expected**: 100% blocking enforcement
+
+### Scenario 3: PM Approval Pattern Consistency
+
+Verify 6 PM gates require approval, Doc Specialist automatic
+
+**Expected**: Clear distinction between approval and automatic phases
+
+### Scenario 4: Complex Feature Planning (Sequential Agents)
+
+Create 8+ step feature, verify sequential agents coordinate without timeout
+
+**Expected**: No timeout, context handoff maintains coordination
+
+## Section 5: Top 10 Risks
+
+1. **JSON Structure Inconsistency** (CRITICAL) - SOP defines first, commands reference
+2. **Blocking Gates Bypassed** (CRITICAL) - Imperative language upgrade
+3. **Line Number Shifts** (HIGH) - Use section anchors
+4. **Complex Feature Timeout** (HIGH) - Sequential agents (>3 steps)
+5. **Compaction Failure** (HIGH) - Follow system prompt rules
+6. **60% Reduction Target Not Met** (MEDIUM) - Baseline measurement + testing
+7. **Doc Specialist UX** (MEDIUM) - Clear automatic messaging
+8. **Testing Insufficient** (MEDIUM) - 21+ comprehensive tests
+9. **System Reminders Don't Trigger** (LOW) - Update frequently
+10. **Token Overhead** (LOW) - TodoWrite lightweight
+
+## Section 6: Master Acceptance Criteria
+
+**Functional Requirements**:
+- [ ] TodoWrite integration complete (all 4 commands)
+- [ ] JSON schema consistency (all commands)
+- [ ] Compaction survival (100%)
+- [ ] Status management (only ONE in_progress)
+- [ ] Blocking gates enforced (all 8)
+- [ ] Imperative language (0% soft language)
+- [ ] PM approval pattern preserved (6 gates)
+- [ ] Sequential planning (>3 steps)
+
+**Quality Requirements**:
+- [ ] 60%+ step-skipping reduction validated
+- [ ] 100% quality gate enforcement
+- [ ] SOP documentation complete
+- [ ] Pattern documentation complete
+- [ ] Integration tests pass (21+ tests)
+- [ ] No regressions
+
+## Section 7: Deliverables Summary
+
+**New Files** (6):
+1. `.rptc/sop/todowrite-guide.md` - SOP documentation
+2. `.rptc/patterns/blocking-validation.md` - Blocking pattern
+3. `.rptc/tests/todowrite-integration-tests.md` - Master test checklist
+4. `.rptc/tests/compaction-survival-tests.md` - Compaction tests
+5. `.rptc/tests/blocking-validation-tests.md` - Blocking tests
+6. `.rptc/tests/performance-measurement.md` - Performance metrics
+
+**Modified Files** (4):
+1. `commands/research.md` - +50-70 lines (TodoWrite integration)
+2. `commands/plan.md` - +80-100 lines (TodoWrite + routing)
+3. `commands/tdd.md` - +60-80 lines (Dynamic TodoWrite)
+4. `commands/commit.md` - +40-50 lines (TodoWrite + Doc Specialist)
+
+**Blocking Upgrades** (8 locations):
+- Research: 1 location
+- Plan: 2 locations
+- TDD: 3 locations
+- Commit: 2 locations
+
+**Total New LoC**: ~1,660-2,070 lines
+
+## Section 8: PM Recommendations
+
+### Critical Decision 1: Execution Strategy
+
+**Recommendation**: **Parallel execution** (Phase 2) if resources available
+
+**Benefit**: 40% time savings (11-16h vs 17-24h)
+
+**Requirement**: Clear communication that Step 6 must complete before Steps 1-4 start
+
+### Critical Decision 2: Complex Feature Threshold
+
+**Recommendation**: **≤3 steps** triggers simple path, **>3 steps** triggers sequential agents
+
+**Rationale**: Conservative threshold prevents timeout, easy to adjust
+
+### Critical Decision 3: Documentation Specialist Gate
+
+**Recommendation**: **Automatic** (no PM approval)
+
+**Rationale**: Doc sync is operational, not a decision gate. PM reviews generated docs in commit summary.
+
+### Optional Enhancements (Out of Scope)
+
+1. **File-Based State Tracking** (Spec-Flow pattern) - +5-8 hours
+2. **Work Tree Integration** - +1-2 hours
+3. **Performance Metrics Dashboard** - +3-4 hours
+
+**Recommendation**: Implement if TodoWrite alone doesn't achieve 60% reduction
+
+### Post-Implementation Monitoring
+
+**Week 1-2**:
+- Monitor actual step-skipping rate
+- Track user feedback on imperative language
+- Verify compaction survival
+- Check for timeout issues
+
+**Week 3-4**:
+- Analyze quality gate compliance
+- Gather PM feedback
+- Identify missed edge cases
+- Consider optional enhancements
+
+**Red Flags**:
+- Step-skipping reduction <40%
+- Quality gates skipped >5%
+- Complex features timeout
+- PM approval fatigue
+
+---
+
+# Appendices
+
+## Appendix A: TodoWrite JSON Structure (Canonical)
+
+```json
+{
+  "tool": "TodoWrite",
+  "todos": [
+    {
+      "content": "[Task description in imperative form]",
+      "status": "pending" | "in_progress" | "completed",
+      "activeForm": "[Human-readable description during work]"
+    }
+  ]
+}
+```
+
+**Rules**:
+- Only ONE task "in_progress" at a time
+- Update frequently (prevents system reminders)
+- Lowercase status values always
+- Descriptive activeForm for context
+
+## Appendix B: Imperative Keywords (Blocking Gates)
+
+**Use these keywords**:
+- **CRITICAL**: Highest priority
+- **MUST**: Required action
+- **NEVER**: Prohibited action
+- **ALWAYS**: Invariant rule
+- **NON-NEGOTIABLE**: Not subject to debate
+- **MANDATORY**: Required by design
+- **CANNOT PROCEED**: Blocks progress
+
+**Avoid soft language**:
+- ❌ "should" → ✅ "MUST"
+- ❌ "consider" → ✅ "MANDATORY"
+- ❌ "recommended" → ✅ "REQUIRED"
+
+## Appendix C: 8 Blocking Locations
+
+1. **Research** (commands/research.md): Save without PM approval
+2. **Plan** (commands/plan.md): Master Planner delegation without PM approval
+3. **Plan** (commands/plan.md): Plan save without PM approval
+4. **TDD** (commands/tdd.md): Efficiency Agent without PM approval
+5. **TDD** (commands/tdd.md): Security Agent without PM approval
+6. **TDD** (commands/tdd.md): TDD completion without PM approval
+7. **Commit** (commands/commit.md): Commit with failing tests
+8. **Commit** (commands/commit.md): Commit with quality issues
+
+**Automatic** (no PM gate):
+- Commit → Documentation Specialist
+
+## Appendix D: Sequential Execution Summary
+
+```
+Phase 1 (Foundation):    Step 6: SOP (3-4h)
+Phase 2 (Parallel):      Steps 1-4: Commands (2-3h each)
+Phase 3 (Validation):    Step 5: Blocking (2-3h) → Step 7: Testing (4-6h)
+
+Total: 17-24h sequential, 11-16h parallel
+```
+
+## Appendix E: Success Metrics
+
+**Primary**: 60%+ step-skipping reduction (validated in Step 7)
+
+**Secondary**:
+- 100% quality gate enforcement
+- 100% compaction survival
+- 100% blocking gate success
+- 100% plan synchronization
+
+---
+
+# Final Approval
+
+**Status**: ✅ Approved by PM on 2025-10-16
+
+**Next Step**: Begin implementation with `/rptc:tdd "@todowrite-integration.md"`
+
+**Quality Gates**: After implementation complete, approve Efficiency and Security reviews
+
+---
+
+_Plan created using Sequential Planning Architecture_
+_7 step-specific agents + Final coordination agent_
+_Thinking mode: Ultrathink_
+_Total planning tokens: ~80,000_

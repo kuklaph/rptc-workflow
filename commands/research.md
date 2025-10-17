@@ -41,6 +41,56 @@ Act as an intelligent brainstorming partner who:
 
 **Use these values throughout the command execution.**
 
+## Step 0b: Initialize TODO Tracking
+
+**Initialize TodoWrite to track research progress across all phases.**
+
+Use the TodoWrite tool to create task list:
+
+```json
+{
+  "tool": "TodoWrite",
+  "todos": [
+    {
+      "content": "Complete interactive discovery",
+      "status": "pending",
+      "activeForm": "Conducting interactive discovery"
+    },
+    {
+      "content": "Complete codebase exploration",
+      "status": "pending",
+      "activeForm": "Exploring codebase"
+    },
+    {
+      "content": "Complete web research (if needed)",
+      "status": "pending",
+      "activeForm": "Conducting web research"
+    },
+    {
+      "content": "Present findings to PM",
+      "status": "pending",
+      "activeForm": "Presenting findings"
+    },
+    {
+      "content": "Get PM sign-off on research",
+      "status": "pending",
+      "activeForm": "Requesting PM approval"
+    },
+    {
+      "content": "Save research document",
+      "status": "pending",
+      "activeForm": "Saving research document"
+    }
+  ]
+}
+```
+
+**Important TodoWrite Rules**:
+- Mark tasks "in_progress" when starting each phase
+- Mark tasks "completed" immediately after finishing each phase
+- Only ONE task should be "in_progress" at a time
+- Update frequently to prevent system reminders
+
 ## Step 0: Load Reference Materials
 
 Load SOPs using fallback chain (highest priority first):
@@ -74,6 +124,8 @@ Load SOPs using fallback chain (highest priority first):
 ## Research Process
 
 ### Phase 1: Interactive Discovery (REQUIRED)
+
+**Update TodoWrite**: Mark "Complete interactive discovery" as in_progress
 
 **Goal**: Understand the problem space through dialogue
 
@@ -118,7 +170,11 @@ Load SOPs using fallback chain (highest priority first):
 
 **KEEP ASKING** until the PM says they're satisfied or you genuinely understand the full scope.
 
+**Update TodoWrite**: Mark "Complete interactive discovery" as completed
+
 ### Phase 2: Codebase Exploration (REQUIRED)
+
+**Update TodoWrite**: Mark "Complete codebase exploration" as in_progress
 
 Once you understand WHAT we're building, search the codebase:
 
@@ -146,6 +202,8 @@ Once you understand WHAT we're building, search the codebase:
    - Note purpose of each file
    - Identify key integration points
 
+**Update TodoWrite**: Mark "Complete codebase exploration" as completed
+
 ### Phase 3: Web Research (OPTIONAL - Only When Needed)
 
 **IMPORTANT**: Only do web research if:
@@ -154,6 +212,8 @@ Once you understand WHAT we're building, search the codebase:
 - You identify a knowledge gap that requires external information
 
 **If web research is needed**:
+
+**Update TodoWrite**: If web research needed, mark "Complete web research (if needed)" as in_progress
 
 1. **Use Configured Thinking Mode**:
 
@@ -200,7 +260,11 @@ Once you understand WHAT we're building, search the codebase:
    - Real-world examples
    - Performance/security considerations
 
+**Update TodoWrite**: Mark "Complete web research (if needed)" as completed
+
 ### Phase 4: Findings Presentation (REQUIRED)
+
+**Update TodoWrite**: Mark "Present findings to PM" as in_progress
 
 Present your findings clearly:
 
@@ -251,7 +315,11 @@ Present your findings clearly:
 3. [Test strategy recommendation]
 ```
 
+**Update TodoWrite**: Mark "Present findings to PM" as completed
+
 ### Phase 5: Project Manager Sign-Off (REQUIRED)
+
+**Update TodoWrite**: Mark "Get PM sign-off on research" as in_progress
 
 **CRITICAL**: You MUST get explicit approval before creating research document.
 
@@ -272,7 +340,37 @@ Waiting for your sign-off...
 
 **DO NOT PROCEED** until PM gives explicit approval.
 
+**Update TodoWrite**: After PM approval, mark "Get PM sign-off on research" as completed
+
+---
+
+**CRITICAL VALIDATION CHECKPOINT - DO NOT SKIP**
+
+Before proceeding to Phase 6 (Save Research Document):
+
+**TodoWrite Check**: "Get PM sign-off on research" MUST be completed
+
+**Verification**:
+1. Check TodoWrite status for "Get PM sign-off on research"
+2. If status is NOT "completed", you MUST NOT save research document
+
+❌ **PHASE 6 BLOCKED** - Cannot save research without PM approval
+
+**Required**: PM must explicitly say "yes" or "approved" in Phase 5
+
+**ENFORCEMENT**: If PM has NOT approved:
+1. Re-present findings clearly
+2. Ask: "Do you approve this research?"
+3. Wait for explicit "yes" or "approved"
+4. NEVER assume approval or skip this gate
+
+**This is a NON-NEGOTIABLE gate. Research documents capture critical decisions and must be reviewed by PM before saving.**
+
+---
+
 ### Phase 6: Save Research Document (Only After Approval)
+
+**Update TodoWrite**: Mark "Save research document" as in_progress
 
 Once approved, check workspace structure first:
 
@@ -412,6 +510,10 @@ Next steps:
 - Plan: /rptc:plan "@[topic-slug].md"
 - Or plan directly: /rptc:plan "[work item name]"
 ```
+
+**Update TodoWrite**: Mark "Save research document" as completed
+
+✅ All research phases complete. TodoWrite list should show all tasks completed.
 
 ## Interaction Guidelines
 
