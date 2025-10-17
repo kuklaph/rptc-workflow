@@ -130,11 +130,78 @@ Throughout implementation, you MUST keep the plan document synchronized:
 - Update plan status from "Planned" to "In Progress" when starting
 - This keeps the living document in sync with actual progress
 
+## Step 0b: Initialize TODO Tracking
+
+**Generate TodoWrite list dynamically from plan steps.**
+
+### Parse Plan Document
+
+1. Read plan document specified in command argument
+2. Extract all implementation steps (look for numbered steps or checklist items)
+3. Count total steps: N
+
+### Generate TodoWrite List
+
+For each of N plan steps, create 4 TODOs:
+- Step X: RED phase
+- Step X: GREEN phase
+- Step X: REFACTOR phase
+- Step X: SYNC plan
+
+After all N steps, add quality gate TODOs:
+- REQUEST PM: Efficiency Agent approval
+- EXECUTE: Efficiency Agent review
+- REQUEST PM: Security Agent approval
+- EXECUTE: Security Agent review
+- REQUEST PM: Final TDD sign-off
+- UPDATE: Mark plan status Complete
+
+### Example TodoWrite (3-step plan)
+
+```json
+{
+  "tool": "TodoWrite",
+  "todos": [
+    {"content": "Step 1: RED - Write failing tests", "status": "pending", "activeForm": "Writing tests for Step 1"},
+    {"content": "Step 1: GREEN - Implement to pass", "status": "pending", "activeForm": "Implementing Step 1"},
+    {"content": "Step 1: REFACTOR - Improve quality", "status": "pending", "activeForm": "Refactoring Step 1"},
+    {"content": "Step 1: SYNC - Update plan", "status": "pending", "activeForm": "Syncing plan for Step 1"},
+
+    {"content": "Step 2: RED - Write failing tests", "status": "pending", "activeForm": "Writing tests for Step 2"},
+    {"content": "Step 2: GREEN - Implement to pass", "status": "pending", "activeForm": "Implementing Step 2"},
+    {"content": "Step 2: REFACTOR - Improve quality", "status": "pending", "activeForm": "Refactoring Step 2"},
+    {"content": "Step 2: SYNC - Update plan", "status": "pending", "activeForm": "Syncing plan for Step 2"},
+
+    {"content": "Step 3: RED - Write failing tests", "status": "pending", "activeForm": "Writing tests for Step 3"},
+    {"content": "Step 3: GREEN - Implement to pass", "status": "pending", "activeForm": "Implementing Step 3"},
+    {"content": "Step 3: REFACTOR - Improve quality", "status": "pending", "activeForm": "Refactoring Step 3"},
+    {"content": "Step 3: SYNC - Update plan", "status": "pending", "activeForm": "Syncing plan for Step 3"},
+
+    {"content": "REQUEST PM: Efficiency Agent approval", "status": "pending", "activeForm": "Requesting Efficiency Agent approval"},
+    {"content": "EXECUTE: Efficiency Agent review", "status": "pending", "activeForm": "Running Efficiency Agent"},
+    {"content": "REQUEST PM: Security Agent approval", "status": "pending", "activeForm": "Requesting Security Agent approval"},
+    {"content": "EXECUTE: Security Agent review", "status": "pending", "activeForm": "Running Security Agent"},
+    {"content": "REQUEST PM: Final TDD sign-off", "status": "pending", "activeForm": "Requesting final sign-off"},
+    {"content": "UPDATE: Mark plan status Complete", "status": "pending", "activeForm": "Updating plan status"}
+  ]
+}
+```
+
+**TodoWrite Rules**:
+- Parse plan to determine N (number of steps)
+- Create 4 TODOs per step (RED/GREEN/REFACTOR/SYNC)
+- Add 6 quality gate TODOs at end
+- Total TODOs = (N × 4) + 6
+- Only ONE task "in_progress" at a time
+- Mark tasks "completed" immediately after finishing each phase
+
 ### Phase 1: TDD Cycle for Each Step (REQUIRED)
 
 **For EACH implementation step, follow this cycle**:
 
 #### RED Phase: Write Tests First ❌
+
+**Update TodoWrite**: Mark "Step X: RED - Write failing tests" as in_progress
 
 **CRITICAL**: Write tests BEFORE any implementation code.
 
@@ -174,7 +241,11 @@ All tests failing as expected (no implementation yet).
 Proceeding to GREEN phase...
 ```
 
+**Update TodoWrite**: Mark "Step X: RED - Write failing tests" as completed
+
 #### GREEN Phase: Minimal Implementation ✅
+
+**Update TodoWrite**: Mark "Step X: GREEN - Implement to pass" as in_progress
 
 **Write ONLY enough code to pass current tests.**
 
@@ -197,6 +268,7 @@ Proceeding to GREEN phase...
      - Make targeted fix
      - Re-run tests
      - Report progress
+   - **DO NOT create separate TODOs per iteration** (aggregate in GREEN phase)
 
 **Report Each Iteration**:
 
@@ -220,7 +292,11 @@ Tests: [X] passing, [Y] failing
 Proceeding to REFACTOR phase...
 ```
 
+**Update TodoWrite**: Mark "Step X: GREEN - Implement to pass" as completed
+
 #### REFACTOR Phase: Improve Quality 🔧
+
+**Update TodoWrite**: Mark "Step X: REFACTOR - Improve quality" as in_progress
 
 **Now that tests are green, improve the code.**
 
@@ -260,7 +336,11 @@ Improvements made:
 Step [N] complete!
 ```
 
+**Update TodoWrite**: Mark "Step X: REFACTOR - Improve quality" as completed
+
 #### Verify Step Complete & Sync Plan
+
+**Update TodoWrite**: Mark "Step X: SYNC - Update plan" as in_progress
 
 **After each step**:
 
@@ -290,9 +370,46 @@ Next: Step [N+1] - [Next step name]
 All implementation steps complete! Proceeding to quality gates...
 ```
 
+**Update TodoWrite**: Mark "Step X: SYNC - Update plan" as completed
+
 **CRITICAL**: Never skip plan synchronization. The plan is a living document that must reflect actual progress.
 
+---
+
+**CRITICAL VALIDATION CHECKPOINT - NON-NEGOTIABLE QUALITY GATE**
+
+Before executing Master Efficiency Agent:
+
+**TodoWrite Check**: "REQUEST PM: Efficiency Agent approval" MUST be completed
+
+**Verification**:
+1. All implementation steps MUST be completed
+2. All tests MUST be passing
+3. PM approval MUST be obtained
+
+❌ **QUALITY GATE BLOCKED** - Cannot proceed to Efficiency review without PM approval
+
+**Required**: PM must explicitly approve efficiency review
+
+**ENFORCEMENT**: If PM has NOT approved:
+1. Verify all tests passing
+2. Present implementation summary
+3. Ask: "Ready for Master Efficiency Agent review?"
+4. Explain: "MUST get PM approval - CANNOT PROCEED without efficiency review"
+5. Wait for explicit "yes" or "approved"
+6. NEVER skip this gate without explicit override
+
+**Override Phrase**: PM may say "SKIP EFFICIENCY REVIEW - I ACCEPT THE RISKS"
+
+**This is a NON-NEGOTIABLE quality gate. Efficiency review ensures code maintainability and follows KISS/YAGNI principles.**
+
+---
+
 ### Phase 2: Master Efficiency Agent Review (WITH PERMISSION)
+
+**CRITICAL - NON-NEGOTIABLE QUALITY GATE**
+
+**TodoWrite Check**: All implementation steps must be completed before requesting Efficiency Agent
 
 **CRITICAL**: After ALL tests passing, request efficiency review.
 
@@ -301,6 +418,8 @@ All implementation steps complete! Proceeding to quality gates...
 Thinking mode already loaded in Step 0a configuration: `$THINKING_MODE`
 
 **Step 2: Ask PM for Permission**:
+
+**Update TodoWrite**: Mark "REQUEST PM: Efficiency Agent approval" as in_progress
 
 **FORMATTING NOTE:** Each list item must be on its own line with proper newlines.
 
@@ -338,6 +457,10 @@ Waiting for your sign-off...
 ```
 
 **DO NOT create sub-agent** until PM approves.
+
+**After PM approval**:
+- Mark "REQUEST PM: Efficiency Agent approval" as completed
+- Mark "EXECUTE: Efficiency Agent review" as in_progress
 
 #### Efficiency Agent Delegation (If Approved)
 
@@ -434,13 +557,51 @@ Code quality metrics:
 Proceeding to security review...
 ```
 
+**Update TodoWrite**: Mark "EXECUTE: Efficiency Agent review" as completed
+
+---
+
+**CRITICAL VALIDATION CHECKPOINT - NON-NEGOTIABLE QUALITY GATE**
+
+Before executing Master Security Agent:
+
+**TodoWrite Check**: "REQUEST PM: Security Agent approval" MUST be completed
+
+**Verification**:
+1. Efficiency review MUST be completed
+2. PM approval MUST be obtained for Security review
+
+❌ **QUALITY GATE BLOCKED** - Cannot proceed to Security review without PM approval
+
+**Required**: PM must explicitly approve security review
+
+**ENFORCEMENT**: If PM has NOT approved:
+1. Verify Efficiency review complete
+2. Present implementation summary
+3. Ask: "Ready for Master Security Agent review?"
+4. Explain: "MUST get PM approval - CANNOT PROCEED without security review"
+5. Wait for explicit "yes" or "approved"
+6. NEVER skip this gate without explicit override
+
+**Override Phrase**: PM may say "SKIP SECURITY REVIEW - I ACCEPT THE RISKS"
+
+**This is a NON-NEGOTIABLE quality gate. Security review identifies vulnerabilities and ensures OWASP compliance.**
+
+---
+
 ### Phase 3: Master Security Agent Review (WITH PERMISSION)
+
+**CRITICAL - NON-NEGOTIABLE QUALITY GATE**
+
+**TodoWrite Check**: Efficiency review must be completed before requesting Security Agent
 
 **Step 1: Use Configured Thinking Mode**:
 
 Thinking mode already loaded in Step 0a configuration: `$THINKING_MODE`
 
 **Step 2: Ask PM for Permission**:
+
+**Update TodoWrite**: Mark "REQUEST PM: Security Agent approval" as in_progress
 
 **FORMATTING NOTE:** Keep all list items on separate lines.
 
@@ -473,6 +634,10 @@ Waiting for your sign-off...
 ```
 
 **DO NOT create sub-agent** until PM approves.
+
+**After PM approval**:
+- Mark "REQUEST PM: Security Agent approval" as completed
+- Mark "EXECUTE: Security Agent review" as in_progress
 
 #### Security Agent Delegation (If Approved)
 
@@ -591,7 +756,43 @@ New security tests added: [N]
 TDD implementation complete with quality gates passed!
 ```
 
+**Update TodoWrite**: Mark "EXECUTE: Security Agent review" as completed
+
+---
+
+**CRITICAL VALIDATION CHECKPOINT - CANNOT MARK COMPLETE WITHOUT PM APPROVAL**
+
+Before marking TDD phase complete:
+
+**TodoWrite Check**: "REQUEST PM: Final TDD sign-off" MUST be completed
+
+**Verification**:
+1. All implementation steps completed
+2. Efficiency review completed
+3. Security review completed
+4. All tests passing
+
+❌ **COMPLETION BLOCKED** - Cannot mark TDD complete without PM sign-off
+
+**Required**: PM must confirm implementation is ready for commit
+
+**ENFORCEMENT**: If PM has NOT approved:
+1. Present completion summary (all checks passed)
+2. Ask: "TDD Phase Complete - Ready for commit?"
+3. Wait for explicit "yes" or "approved"
+4. NEVER update plan status without PM confirmation
+
+**This is a NON-NEGOTIABLE gate. TDD completion marks implementation ready for commit - PM must verify this.**
+
+---
+
 ### Phase 4: Final PM Sign-Off (REQUIRED)
+
+**CRITICAL - CANNOT MARK TDD COMPLETE WITHOUT PM APPROVAL**
+
+**TodoWrite Check**: Both quality gates must be completed
+
+**Update TodoWrite**: Mark "REQUEST PM: Final TDD sign-off" as in_progress
 
 **Get explicit approval to complete TDD phase**:
 
@@ -622,6 +823,10 @@ Waiting for your final sign-off...
 
 **DO NOT update plan status** until PM approves.
 
+**After PM approval**:
+- Mark "REQUEST PM: Final TDD sign-off" as completed
+- Mark "UPDATE: Mark plan status Complete" as in_progress
+
 ### Phase 5: Update Plan Status (Only After Approval)
 
 Once approved:
@@ -648,6 +853,10 @@ Plan updated: `$ARTIFACT_LOC/plans/[plan-name].md`
 
 Next step: `/rptc:commit` or `/rptc:commit pr` to verify and ship!
 ```
+
+**Update TodoWrite**: Mark "UPDATE: Mark plan status Complete" as completed
+
+✅ All TDD phases complete. TodoWrite list should show all tasks completed.
 
 ## Auto-Iteration Rules
 

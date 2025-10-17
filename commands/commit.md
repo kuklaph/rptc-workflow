@@ -75,6 +75,66 @@ Load SOPs using fallback chain (highest priority first):
 
 **Note**: References to these variables appear throughout this command - use the actual loaded values from this step.
 
+## Step 0b: Initialize TODO Tracking
+
+**Initialize TodoWrite to track commit verification phases.**
+
+Use the TodoWrite tool to create task list:
+
+```json
+{
+  "tool": "TodoWrite",
+  "todos": [
+    {
+      "content": "Pre-commit verification (tests, linting, coverage)",
+      "status": "pending",
+      "activeForm": "Running pre-commit checks"
+    },
+    {
+      "content": "Generate commit message",
+      "status": "pending",
+      "activeForm": "Generating commit message"
+    },
+    {
+      "content": "Verification summary",
+      "status": "pending",
+      "activeForm": "Presenting verification summary"
+    },
+    {
+      "content": "Documentation Specialist review (automatic)",
+      "status": "pending",
+      "activeForm": "Running Documentation Specialist"
+    },
+    {
+      "content": "Execute git commit",
+      "status": "pending",
+      "activeForm": "Creating commit"
+    },
+    {
+      "content": "Create pull request",
+      "status": "pending",
+      "activeForm": "Creating pull request"
+    },
+    {
+      "content": "Final summary",
+      "status": "pending",
+      "activeForm": "Presenting final summary"
+    }
+  ]
+}
+```
+
+**Note**: "Create pull request" only applies if `pr` flag passed. Mark as completed immediately if not creating PR.
+
+**Important TodoWrite Rules**:
+- Mark tasks "in_progress" when starting each phase
+- Mark tasks "completed" immediately after finishing each phase
+- Only ONE task should be "in_progress" at a time
+- Documentation Specialist runs AUTOMATICALLY (no PM approval needed)
+- Update frequently to track commit progress
+
+**Update TodoWrite**: Mark "Pre-commit verification (tests, linting, coverage)" as in_progress
+
 #### 1. Test Suite Verification (NON-NEGOTIABLE)
 
 **Run FULL test suite**:
@@ -96,7 +156,16 @@ npm test || npm run test || pytest || go test ./... || cargo test
 Test failures detected:
 [Show specific failures]
 
-TDD Rule: Never commit with failing tests!
+❌ **CANNOT PROCEED - FIX FAILING TESTS FIRST**
+
+**ENFORCEMENT**:
+1. List all failing tests above
+2. Show failure details
+3. Display: "NEVER commit with failing tests under ANY circumstances"
+4. Exit with error code 1
+5. MUST fix all test failures before proceeding
+
+**This is a NON-NEGOTIABLE gate. Failing tests indicate broken functionality - MUST be fixed before commit.**
 
 To fix:
 1. Review the test failures above
@@ -146,16 +215,38 @@ fi
 
 #### 3. Code Quality Checks
 
-**Check for common issues in staged files**:
+---
 
-For each staged file:
+**CRITICAL VALIDATION CHECKPOINT - CANNOT COMMIT WITH QUALITY ISSUES**
 
-- ❌ `.env` files staged? → Block commit
-- ❌ `console.log()` in non-test files? → Block commit
-- ❌ `debugger` statements? → Block commit
+After running code quality checks:
+
+**Quality Check**: NO debug code, NO quality violations
+
+**Verification**:
+
+```bash
+# Check for debug code in staged files
+git diff --staged --name-only | while read file; do
+  # Check for console.log (non-test files)
+  grep -n "console\.log\|console\.debug\|console\.warn" "$file" 2>/dev/null
+
+  # Check for debugger statements
+  grep -n "debugger" "$file" 2>/dev/null
+
+  # Check for .env files
+  echo "$file" | grep "\.env" 2>/dev/null
+done
+```
+
+**For each staged file check**:
+
+- ❌ `.env` files staged? → BLOCK COMMIT
+- ❌ `console.log()` in non-test files? → BLOCK COMMIT
+- ❌ `debugger` statements? → BLOCK COMMIT
 - ⚠️ `TODO`/`FIXME` comments? → Warn but allow
 
-**If blocking issues found**:
+**If quality issues found**:
 
 **CRITICAL FORMATTING NOTE:** Each issue MUST be on its own line with proper newlines. Never concatenate issues together.
 
@@ -168,10 +259,32 @@ Issues found:
 - [Issue 1]
 - [Issue 2]
 
-Fix these issues before committing.
+❌ **CANNOT PROCEED - FIX QUALITY ISSUES FIRST**
+
+**ENFORCEMENT**:
+1. List all quality violations above
+2. Display: "NEVER commit debug code or quality violations"
+3. Exit with error code 1
+4. MUST fix all issues before proceeding
+
+**Common violations**:
+- Debug code (console.log, debugger statements)
+- Sensitive files (.env, credentials)
+- Unused imports (if linter detects)
+- Linting violations (if critical)
+
+**This is a NON-NEGOTIABLE gate. Code quality issues pollute codebase and must be cleaned before commit.**
+
+To fix:
+1. Review quality issues above
+2. Remove debug code
+3. Unstage sensitive files
+4. When clean, commit again
 ```
 
-**STOP** - do not proceed.
+**STOP IMMEDIATELY** - do not proceed with any other checks.
+
+---
 
 **If no blocking issues**:
 
@@ -225,7 +338,11 @@ git diff --staged
 - Ready to commit
 ```
 
+**Update TodoWrite**: Mark "Pre-commit verification (tests, linting, coverage)" as completed (only if all checks pass)
+
 ### Phase 2: Generate Commit Message
+
+**Update TodoWrite**: Mark "Generate commit message" as in_progress
 
 **Analyze the diff and create conventional commit**:
 
@@ -270,7 +387,11 @@ feat(auth): add Google OAuth2 authentication
 Closes #124
 ```
 
+**Update TodoWrite**: Mark "Generate commit message" as completed
+
 ### Phase 3: Verification Summary
+
+**Update TodoWrite**: Mark "Verification summary" as in_progress
 
 **Present comprehensive summary**:
 
@@ -301,7 +422,11 @@ Files: [N] files changed, [X] insertions(+), [Y] deletions(-)
 Proceed with commit? (auto-continuing...)
 ```
 
+**Update TodoWrite**: Mark "Verification summary" as completed
+
 ### Phase 4: Master Documentation Specialist Agent (CRITICAL)
+
+**Update TodoWrite**: Mark "Documentation Specialist review (automatic)" as in_progress
 
 **Review and update documentation to stay in sync with code changes.**
 
@@ -434,7 +559,11 @@ Code changes don't affect existing documentation.
 Proceeding to commit...
 ```
 
+**Update TodoWrite**: Mark "Documentation Specialist review (automatic)" as completed
+
 ### Phase 5: Execute Commit
+
+**Update TodoWrite**: Mark "Execute git commit" as in_progress
 
 **Create commit**:
 
@@ -458,7 +587,18 @@ COMMIT_MSG
 🚀 Ready to ship!
 ```
 
+**Update TodoWrite**: Mark "Execute git commit" as completed
+
 ### Phase 6: Create PR (Optional - If "pr" Argument)
+
+**Check**: Was `pr` flag passed in command?
+
+**If NO `pr` flag**:
+- **Update TodoWrite**: Mark "Create pull request" as completed (skipped)
+- Skip to Phase 7
+
+**If `pr` flag present**:
+- **Update TodoWrite**: Mark "Create pull request" as in_progress
 
 **If user provided `/rptc:commit pr`**:
 
@@ -512,7 +652,11 @@ COMMIT_MSG
    ✅ Ready for review!
 ```
 
+- **Update TodoWrite**: Mark "Create pull request" as completed
+
 ### Phase 7: Final Summary
+
+**Update TodoWrite**: Mark "Final summary" as in_progress
 
 **Complete workflow summary**:
 
@@ -540,6 +684,10 @@ To continue:
 Great work! 🚀
 ════════════════════════════════════════
 ```
+
+**Update TodoWrite**: Mark "Final summary" as completed
+
+✅ All commit phases complete. TodoWrite list should show all tasks completed.
 
 ## Verification Failure Handling
 

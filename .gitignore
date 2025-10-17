@@ -1,4 +1,5 @@
 # Development artifacts (don't distribute with plugin)
+tests
 legacy
 PLUGIN_CONVERSION_STATUS.md
 .claude
