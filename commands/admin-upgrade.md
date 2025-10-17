@@ -113,7 +113,7 @@ echo ""
 
 ```bash
 # Plugin version (update this with each release)
-PLUGIN_VERSION="1.1.10"
+PLUGIN_VERSION="1.2.0"
 
 # Load workspace version
 if command -v jq >/dev/null 2>&1; then
