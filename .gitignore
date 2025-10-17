@@ -8,6 +8,7 @@ README-Old.md
 scripts/
 scripts/**
 .version-backup-*/
+.rptc
 
 # Version control
 .git/
