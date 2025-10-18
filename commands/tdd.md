@@ -9,7 +9,8 @@ The user is the **project manager** - they approve quality gates and final compl
 
 Arguments:
 
-- Plan reference: `/rptc:tdd "@plan-name.md"`
+- Directory plan: `/rptc:tdd "@plan-name/"` (new directory structure)
+- Monolithic plan: `/rptc:tdd "@plan-name.md"` (legacy single file)
 - Work item (no plan): `/rptc:tdd "simple calculator"`
 
 ## Core Mission
@@ -88,19 +89,90 @@ Check for project-specific testing strategies or code style overrides.
 
 ### Phase 0: Load Plan (REQUIRED)
 
-**If plan document provided**:
+**Step 1: Detect Plan Format**
+
+The plan can be in two formats:
+1. **Directory format**: Argument ends with `/` (e.g., `@feature-name/`)
+   - New structure created by `/rptc:plan` (v1.2.0+)
+   - Enables token-efficient sub-agent delegation
+   - Plan stored as directory with `overview.md` + `step-*.md` files
+
+2. **Monolithic format**: Argument ends with `.md` (e.g., `@feature-name.md`)
+   - Legacy structure (pre-v1.2.0)
+   - Backward compatible with existing plans
+   - Entire plan in single markdown file
+
+**Detection Logic**:
+
+```text
+If plan argument ends with "/":
+  → Directory format (new structure)
+  → Load overview + delegate steps to sub-agents
+
+Else if plan argument ends with ".md":
+  → Monolithic format (legacy structure)
+  → Load entire plan + execute directly
+
+Else:
+  → Error: Invalid format
+  → Show usage examples
+```
+
+**Step 2a: Load Directory Format Plan**
+
+If directory format detected:
+
+1. **Verify overview file exists**: `$ARTIFACT_LOC/plans/[plan-name]/overview.md`
+   - If missing: Error with clear message
+   - Suggestion: "Run `/rptc:plan` to regenerate plan"
+
+2. **Load overview content**:
+   - Read overview file using Read tool
+   - Extract: Feature summary, test strategy, acceptance criteria
+
+3. **Count step files**:
+   - List all `step-*.md` files in directory
+   - Count total steps: N
+
+4. **Present Plan Summary** (Directory Format):
+
+**FORMATTING NOTE:** Ensure each list item is on its own line with proper newlines.
+
+```text
+📋 Plan Loaded (Directory Format): [Feature Name]
+
+Overview:
+[First paragraph of overview.md]
+
+Steps to implement: [N]
+(Step details will be loaded per-step during Phase 1)
+
+Test Strategy:
+[From overview.md]
+
+Architecture:
+Directory-based plan with sub-agent delegation per step.
+Quality gates (Efficiency/Security) execute after ALL steps complete.
+
+Ready to begin TDD implementation with sub-agent delegation.
+I will delegate each step to a TDD sub-agent that executes RED → GREEN → REFACTOR.
+```
+
+**Step 2b: Load Monolithic Format Plan** (Backward Compatibility)
+
+If monolithic format detected:
 
 1. Read `$ARTIFACT_LOC/plans/[plan-name].md`
 2. Extract implementation steps (look for checkbox items `- [ ]`)
 3. Note test strategy
 4. Confirm understanding
 
-**Present Plan Summary**:
+**Present Plan Summary** (Monolithic Format):
 
 **FORMATTING NOTE:** Ensure each list item is on its own line with proper newlines.
 
 ```text
-📋 Plan Loaded: [Work Item Name]
+📋 Plan Loaded (Monolithic Format): [Work Item Name]
 
 Steps to implement: [N]
 1. [ ] [Step 1] - [Brief description]
@@ -111,8 +183,24 @@ Test Strategy:
 - Coverage target: 80%+
 - Test files: [list]
 
-Ready to begin TDD implementation.
+Ready to begin TDD implementation (direct execution).
 I will keep the plan synchronized by marking tasks complete `- [x]` as I progress.
+```
+
+**Step 3: Handle Invalid Format**
+
+If plan argument doesn't match expected patterns:
+
+```text
+❌ Error: Invalid plan argument format
+
+Expected formats:
+- Directory: /rptc:tdd "@plan-name/"
+- Monolithic: /rptc:tdd "@plan-name.md"
+
+Your input: "@[user's input]"
+
+Please specify plan format explicitly.
 ```
 
 **If no plan provided** (simple work item):
@@ -120,11 +208,16 @@ I will keep the plan synchronized by marking tasks complete `- [x]` as I progres
 1. Create quick implementation plan
 2. Define test scenarios
 3. List steps
-4. Proceed with TDD
+4. Proceed with TDD (direct execution, monolithic approach)
 
 **CRITICAL - Plan Synchronization**:
-Throughout implementation, you MUST keep the plan document synchronized:
 
+**For Directory Format**:
+- Update step status in individual `step-NN.md` files
+- Mark step complete after sub-agent finishes
+- Update overview with progress
+
+**For Monolithic Format**:
 - Mark tests complete `- [x]` as they pass
 - Mark implementation steps complete `- [x]` as they finish
 - Update plan status from "Planned" to "In Progress" when starting
@@ -197,7 +290,228 @@ After all N steps, add quality gate TODOs:
 
 ### Phase 1: TDD Cycle for Each Step (REQUIRED)
 
-**For EACH implementation step, follow this cycle**:
+**Execution Strategy Based on Plan Format**:
+
+- **Directory Format**: Delegate each step to TDD sub-agent
+- **Monolithic Format**: Execute directly (existing workflow)
+
+**For EACH implementation step, choose execution path**:
+
+---
+
+## Phase 1a: Directory Format - Sub-Agent Delegation
+
+**If using directory format, follow this process for each step**:
+
+### For Each Step (1 through N):
+
+#### Step N: Load Step File
+
+**Update TodoWrite**: Mark "Step N: RED - Write failing tests" as in_progress
+
+1. **Load step file**: `$ARTIFACT_LOC/plans/[plan-name]/step-0N.md`
+   - If missing: Error with message: "Step N file not found: step-0N.md"
+   - Suggestion: "Run `/rptc:helper-update-plan` to regenerate"
+
+2. **Extract step details**:
+   - Step name/title
+   - Purpose and requirements
+   - Test scenarios
+   - Expected outcome
+   - Acceptance criteria
+
+3. **Prepare sub-agent context**:
+   - Overall feature context (from overview.md)
+   - Current step details (from step-0N.md)
+   - Cumulative file changes (from Steps 1 through N-1)
+   - Configuration values (ARTIFACT_LOC, THINKING_MODE, MAX_ATTEMPTS)
+
+#### Step N: Delegate to TDD Sub-Agent
+
+**Create TDD Sub-Agent** with this prompt:
+
+```text
+Use $THINKING_MODE thinking mode for this TDD implementation step.
+
+You are a TDD EXECUTION SUB-AGENT for a single implementation step.
+
+Your mission: Execute RED → GREEN → REFACTOR cycle for Step $STEP_NUM ONLY.
+
+## Overall Feature Context (from overview)
+
+[Pass entire OVERVIEW content from overview.md]
+
+## Your Step (Step $STEP_NUM)
+
+[Pass entire STEP_CONTENT from step-0N.md]
+
+## Cumulative File Changes (from prior steps)
+
+Files modified/created in Steps 1 through $STEP_NUM-1:
+[Pass list of files with brief description of changes]
+
+If this is Step 1: "No prior changes (first step)"
+
+## Execute TDD Cycle
+
+**CRITICAL**: Follow TDD methodology strictly.
+
+### 1. RED Phase: Write ALL Tests First
+
+**BEFORE any implementation code**:
+
+1. Review test scenarios from step file
+2. Write ALL tests for this step:
+   - Happy path tests
+   - Edge case tests
+   - Error condition tests
+   - Follow project's test conventions
+3. Verify tests FAIL for right reasons
+4. Show failure output
+
+**Report RED State**:
+```text
+🔴 RED Phase Complete - Step $STEP_NUM
+
+Tests written: [X] tests
+- ❌ [test 1 name]
+- ❌ [test 2 name]
+- ❌ [test 3 name]
+
+All tests failing as expected (no implementation yet).
+```
+
+### 2. GREEN Phase: Minimal Implementation to Pass Tests
+
+Write ONLY enough code to pass current tests.
+
+1. **Implement minimal solution**:
+   - Focus on correctness, not elegance
+   - No premature optimization
+   - Just make tests pass
+
+2. **Auto-iterate if tests fail** (max $MAX_ATTEMPTS attempts):
+   - Each iteration:
+     - Analyze specific failure
+     - Make targeted fix
+     - Re-run tests
+     - Report progress
+
+**Report Each Iteration**:
+```text
+Iteration [N]: [What was fixed]
+Tests: [X] passing, [Y] failing
+```
+
+**If still failing after $MAX_ATTEMPTS iterations**:
+```text
+❌ Auto-iteration limit reached ($MAX_ATTEMPTS attempts)
+
+Persistent failure: [test name]
+Error: [error message]
+
+Requesting guidance from main TDD executor...
+```
+
+**Report GREEN State**:
+```text
+🟢 GREEN Phase Complete - Step $STEP_NUM
+
+✅ All tests passing ([X] tests)
+```
+
+### 3. REFACTOR Phase: Improve Code Quality
+
+Now that tests are green, improve the code.
+
+1. **Code improvements**:
+   - Remove duplication
+   - Improve naming
+   - Extract functions
+   - Add clarifying comments
+   - Simplify complex logic
+
+2. **Run tests after EACH refactor**:
+   - Ensure tests still pass
+   - If tests fail, fix and continue
+
+**Report REFACTOR Complete**:
+```text
+🔧 REFACTOR Phase Complete - Step $STEP_NUM
+
+Improvements made:
+- [Improvement 1]
+- [Improvement 2]
+
+✅ All tests still passing
+✅ Code quality improved
+```
+
+## Return Summary
+
+Provide this summary when returning control to main TDD executor:
+
+**Step $STEP_NUM Completion Report**:
+- Tests written: [X] tests
+- Tests passing: [X] tests (MUST be 100%)
+- Files modified: [list with brief descriptions]
+- Files created: [list with brief descriptions]
+- Coverage for this step: [Y]%
+- Refactorings applied: [list]
+- Blockers or notes: [any issues or important notes]
+
+**CRITICAL**: All tests MUST pass before returning. If blocked after $MAX_ATTEMPTS iterations, explain blocker and request guidance.
+```
+
+#### Step N: Process Sub-Agent Results
+
+1. **Verify completion**:
+   - All tests passing? (CRITICAL)
+   - Step requirements met?
+   - Acceptance criteria satisfied?
+
+2. **Update cumulative file list**:
+   - Add files modified in this step
+   - Add files created in this step
+   - Track for next step's context
+
+3. **Mark step complete**:
+   - Update TodoWrite: "Step N: RED" → completed
+   - Update TodoWrite: "Step N: GREEN" → completed
+   - Update TodoWrite: "Step N: REFACTOR" → completed
+
+4. **Sync plan**:
+   - Update TodoWrite: Mark "Step N: SYNC - Update plan" as in_progress
+   - Mark step complete in step-0N.md file (if using checklist format)
+   - Update overview.md progress section (if exists)
+   - Update TodoWrite: Mark "Step N: SYNC - Update plan" as completed
+
+5. **Report step completion**:
+
+```text
+✅ Step $STEP_NUM Complete: [Step Name]
+
+Tests: [X] passing
+Files modified: [list]
+Files created: [list]
+Coverage: [Y]% (for this step)
+
+📝 Plan synchronized: Step $STEP_NUM marked complete
+
+[If more steps remaining:]
+Next: Step [N+1] - [Next step name]
+
+[If all steps complete:]
+All implementation steps complete! Proceeding to quality gates...
+```
+
+**Repeat for all N steps**, then proceed to Phase 2 (Quality Gates).
+
+---
+
+## Phase 1b: Monolithic Format - Direct Execution (Backward Compatibility)
+
+**If using monolithic format, follow this process for each step**:
 
 #### RED Phase: Write Tests First ❌
 
@@ -915,10 +1229,47 @@ What would you like to do?
 
 ## Example Interaction Flow
 
+**Example 1: Directory Format (Recommended)**
+
+```text
+User: /rptc:tdd "@user-authentication/"
+
+Agent: 📋 Plan Loaded (Directory Format): User Authentication System
+
+Overview:
+Implement OAuth-based authentication system with JWT tokens,
+password reset flow, and security hardening.
+
+Steps to implement: 5
+(Step details will be loaded per-step during Phase 1)
+
+Test Strategy:
+- Coverage target: 85%
+- Test files: tests/auth/*.test.js
+- Focus: Security, token validation, error handling
+
+Architecture:
+Directory-based plan with sub-agent delegation per step.
+Quality gates (Efficiency/Security) execute after ALL steps complete.
+
+Ready to begin TDD implementation with sub-agent delegation.
+
+---
+
+[For each step, TDD delegates to sub-agent with context...]
+
+---
+
+✅ Implementation Complete - All Tests Passing!
+[Proceeds to quality gates...]
+```
+
+**Example 2: Monolithic Format (Backward Compatibility)**
+
 ```text
 User: /rptc:tdd "@user-authentication.md"
 
-Agent: 📋 Plan Loaded: User Authentication System
+Agent: 📋 Plan Loaded (Monolithic Format): User Authentication System
 
 Steps to implement: 5
 1. OAuth Strategy Setup

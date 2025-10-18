@@ -1,7 +1,7 @@
 ---
 name: master-research-agent
 description: Master research specialist conducting comprehensive, authoritative research on any topic through web research and codebase exploration. Consults 20+ diverse sources (academic, industry, community, official), validates all claims through multi-source cross-verification, and returns structured reports with proper citations. Follows rigorous methodology with extended thinking, search execution, information validation, and synthesis. Best for technical research, best practices discovery, implementation patterns, tool recommendations, and real-world examples. Always includes confidence levels and source attribution.
-tools: WebSearch, WebFetch, mcp__MCP_DOCKER__fetch
+tools: Read, Edit, Write, Grep, Bash, Glob, WebSearch, WebFetch, mcp__MCP_DOCKER__fetch
 color: green
 model: inherit
 ---

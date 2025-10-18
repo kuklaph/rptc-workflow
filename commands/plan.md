@@ -490,7 +490,7 @@ Before delegating to Master Feature Planner:
 
 ---
 
-### Phase 5: Master Feature Planner Delegation (Only After Approval)
+### Phase 5: Incremental Plan Generation with Sub-Agent Delegation (Only After Approval)
 
 **Update TodoWrite**: Mark "Delegate to Master Feature Planner Agent" as in_progress (complex path only)
 
@@ -500,10 +500,14 @@ Before delegating to Master Feature Planner:
 
 **Step 2: Analyze Scaffold Complexity**:
    - Count the number of steps in the approved scaffold
-   - **Simple Feature**: ≤3 steps → Use Step 3a (Single Master Feature Planner)
-   - **Complex Feature**: >3 steps → Use Step 3b (Sequential Planning Agents)
+   - **Simple Feature**: ≤2 steps → Use Step 3a (Monolithic - Legacy Master Feature Planner)
+   - **Complex Feature**: >2 steps → Use Step 3b (Incremental Sub-Agent Delegation)
 
-**Step 3a: Simple Route - Single Master Feature Planner** (if ≤3 steps):
+---
+
+**Step 3a: Monolithic Route - Single Master Feature Planner** (if ≤2 steps):
+
+**Purpose**: For simple features, use traditional monolithic plan generation for simplicity.
 
 Delegate using Task tool to `master-feature-planner-agent`:
 
@@ -512,7 +516,7 @@ Delegate using Task tool to `master-feature-planner-agent`:
 ```text
 Use [determined thinking mode] thinking mode for this planning task.
 
-You are the MASTER FEATURE PLANNER - create a comprehensive, TDD-ready implementation plan.
+You are the MASTER FEATURE PLANNER - create a comprehensive, TDD-ready implementation plan in MONOLITHIC format.
 
 Context:
 - Feature: [feature description]
@@ -535,255 +539,466 @@ Fallback locations:
 
 **Project Overrides**: Check `.context/` for project-specific requirements.
 
-Create detailed plan following this structure:
+**Output Format**: MONOLITHIC (single document)
 
-## 1. Implementation Steps (Task-Based - CRITICAL FORMAT)
-For EACH step:
-- **Step name and purpose**
-- **Tests to Write First** - Checkbox format `- [ ]` for each test
-- **Files to Create/Modify** (exact paths)
-- **Implementation Details** (what code to write)
-- **Expected Outcome** (what works after this step)
-
-**CRITICAL**: All steps and tests MUST use `- [ ]` format so TDD phase can mark `- [x]` as complete.
-
-## 2. Test Strategy (Comprehensive, from testing SOP)
-- **Happy Path Scenarios**: Normal usage flows
-- **Edge Cases**: Boundary conditions, unusual inputs
-- **Error Conditions**: What happens when things fail
-- **Integration Scenarios**: How components work together
-- **Coverage Goals**: Overall 80%+, critical paths 100%
-
-## 3. Test Files Structure
-- List all test files to create
-- Map tests to implementation steps
-- Define test data/fixtures needed
-
-## 4. Dependencies
-- New packages to install (with reasons)
-- Database migrations needed
-- Configuration changes required
-- External service integrations
-
-## 5. Acceptance Criteria
-- Specific, measurable success criteria
-- Each criterion must be testable
-- Define "done" clearly
-
-## 6. Risk Assessment
-- Technical risks and mitigation
-- Potential blockers
-- Complexity estimation
-- Assumptions made
-
-## 7. File Reference Map
-- Existing files relevant to this feature
-- New files to create
-- Purpose of each file
-
-Use template from: ${CLAUDE_PLUGIN_ROOT}/templates/plan.md
+Create detailed plan following legacy monolithic structure (see agent documentation for full template).
 
 Focus on TDD-readiness: tests clearly defined BEFORE implementation.
 Reference SOPs for standards and patterns.
 ```
 
-**Wait for agent to complete comprehensive plan.**
+**Wait for agent to complete monolithic plan.**
 
-**Step 3b: Complex Route - Sequential Planning Agents** (if >3 steps):
+**After completion, proceed to Phase 6 to present plan to PM.**
 
-**Purpose**: Prevent timeout on large features by distributing planning work across sequential agents with context handoff.
+---
 
-**Architecture**: Each agent plans one step and passes context to the next. Final coordination agent aggregates everything.
+**Step 3b: Incremental Route - Sub-Agent Delegation with Immediate Persistence** (if >2 steps):
 
-**Inform User**:
+**Purpose**: For complex features, use incremental generation to:
+- Create directory structure before content generation
+- Generate and save overview immediately
+- Generate and save each step incrementally
+- Review cohesiveness across all steps
+- Prevent timeout on large features
+- Enable immediate persistence
+
+**Architecture**: Directory scaffolding → Overview sub-agent → Step sub-agents (sequential) → Cohesiveness reviewer
+
+**Inform PM**:
 
 ```text
-🔀 Complex Feature Detected!
+🏗️ Complex Feature Detected - Using Incremental Plan Generation!
 
-Your feature has [N] steps, which could cause timeout with a single planning agent.
+Your feature has [N] steps. I'll use **Incremental Sub-Agent Delegation**:
 
-I'll use **Sequential Planning Architecture**:
-- [N] step-specific planning agents (one per step)
-- Each agent receives context from previous steps
-- Final coordination agent aggregates all plans
-- Maintains consistency and generates integration tests
+✅ Create directory structure first
+✅ Generate overview (test strategy, acceptance criteria, risks)
+✅ Generate each step incrementally with immediate save
+✅ Review cohesiveness across all steps
 
 This approach:
-✅ Prevents timeout on large features
-✅ Maintains coordination (agents see previous decisions)
-✅ Produces comprehensive, consistent plan
+- Prevents timeout on large features
+- Saves work immediately (recovery if interrupted)
+- Enables modular plan structure (TDD-optimized)
+- Produces comprehensive, consistent plan
 
-Starting sequential planning...
+Starting incremental planning...
 ```
 
-**Sequential Agent Execution**:
+---
 
-For each step in the scaffold (Step 1 through Step N):
+**Sub-Step 0: Create Directory Scaffolding**
 
-**Agent Prompt for Step [X]**:
+**Before any content generation**, create the plan directory structure:
+
+1. **Sanitize feature name to slug**:
+   - Convert to lowercase
+   - Replace spaces, special characters with hyphens
+   - Remove multiple consecutive hyphens
+   - Example: "User Authentication (OAuth 2.0)" → "user-authentication-oauth-2-0"
+
+2. **Check if plans directory exists**:
+   - If `[ARTIFACT_LOC]/plans/` doesn't exist, create it using Bash:
+     ```bash
+     mkdir -p "[ARTIFACT_LOC value]/plans"
+     ```
+
+3. **Check if feature directory already exists**:
+   - Path: `[ARTIFACT_LOC]/plans/[feature-slug]/`
+   - **If directory exists**, ask PM:
+     ```text
+     ⚠️ Plan Directory Already Exists
+
+     Directory: [ARTIFACT_LOC]/plans/[feature-slug]/
+
+     Options:
+     1. Overwrite - Delete existing directory and create new plan
+     2. Abort - Keep existing plan, cancel planning operation
+
+     What would you like to do? (type "overwrite" or "abort")
+     ```
+   - **If PM says "overwrite"**: Delete existing directory with Bash `rm -rf`, proceed
+   - **If PM says "abort"**: Exit Phase 5 without creating plan, inform PM operation cancelled
+   - **Wait for PM response before proceeding**
+
+4. **Create feature directory**:
+   ```bash
+   mkdir -p "[ARTIFACT_LOC]/plans/[feature-slug]/"
+   ```
+
+**Report scaffolding success**:
 
 ```text
-Use [determined thinking mode] thinking mode for this planning task.
+✅ Directory scaffolding complete: [ARTIFACT_LOC]/plans/[feature-slug]/
 
-You are a STEP-SPECIFIC PLANNING AGENT for Step [X] of [N].
-
-**Overall Feature Context**:
-- Feature: [feature description]
-- Research findings: [if applicable]
-- Tech stack: [from CLAUDE.md]
-- Scaffold overview: [summary]
-- PM input: [clarifications]
-
-**Previous Steps Context** (if X > 1):
-[Include detailed results from Steps 1 through X-1]:
-- Step [X-1] Summary:
-  - Files created/modified: [list]
-  - Key decisions: [decisions]
-  - Dependencies introduced: [deps]
-  - Test approach: [approach]
-
-**Your Task**: Create detailed plan for Step [X] ONLY.
-
-Step [X] Description: [from scaffold]
-
-**SOPs to Reference** (use fallback chain):
-1. .rptc/sop/[name].md
-2. ~/.claude/global/sop/[name].md
-3. ${CLAUDE_PLUGIN_ROOT}/sop/[name].md
-
-Reference: Architecture patterns, Testing guide, Languages & style, Security
-
-**Project Overrides**: Check `.context/` for project-specific requirements.
-
-Create detailed plan for Step [X]:
-
-## Step [X]: [Name]
-
-### What
-[What this step accomplishes]
-
-### Tests to Write First (from testing SOP)
-- [ ] Happy path: [description]
-- [ ] Edge case: [description]
-- [ ] Error handling: [description]
-[Continue with comprehensive test list]
-
-### Files to Create/Modify
-- `path/to/file1` - [What changes, why]
-- `path/to/file2` - [What changes, why]
-
-### Implementation Details
-[Specific code to write, algorithms, patterns from architecture SOP]
-
-### Dependencies
-- Packages: [if needed]
-- From previous steps: [what this step requires from earlier steps]
-
-### Expected Outcome
-[What works after this step completes]
-
-### Risks
-- [Risk 1]: [Mitigation]
-- [Risk 2]: [Mitigation]
-
-**CRITICAL**:
-- Use `- [ ]` checkbox format for all tests
-- Coordinate with previous steps (check file paths, naming, interfaces)
-- Reference SOPs for standards
+Proceeding with incremental plan generation...
 ```
 
-**Execute agents sequentially** (not parallel):
-1. Create Step 1 planning agent → Wait for completion → Store result
-2. Create Step 2 planning agent with Step 1 context → Wait → Store result
-3. Create Step 3 planning agent with Steps 1-2 context → Wait → Store result
-4. Continue for all N steps
+---
 
-**After All Step Agents Complete - Final Coordination Agent**:
+**Sub-Step 1: Generate Overview with Overview Generator Sub-Agent**
+
+**Delegate to Overview Generator** (inline sub-agent prompt):
+
+**Agent Configuration**:
+- Thinking mode: [determined thinking mode]
+- Role: Overview Generator for incremental planning
+- Output: Complete overview.md content
 
 **Agent Prompt**:
 
 ```text
 Use [determined thinking mode] thinking mode for this planning task.
 
-You are the FINAL COORDINATION AGENT - aggregate sequential step plans into unified, comprehensive plan.
+You are an OVERVIEW GENERATOR SUB-AGENT for incremental plan creation.
+
+**Overall Feature Context**:
+- Feature: [feature description]
+- Research findings: [if applicable, from [ARTIFACT_LOC]/research/]
+- Tech stack: [project tech from CLAUDE.md]
+- Scaffold: [initial plan structure with [N] steps]
+- PM input: [clarifications from PM]
+
+**Your Task**: Generate ONLY the overview.md content (NOT individual steps).
+
+**SOPs to Reference** (use fallback chain):
+1. .rptc/sop/architecture-patterns.md
+2. ~/.claude/global/sop/architecture-patterns.md
+3. ${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md
+
+Reference: Architecture patterns, Testing guide, Security, Performance
+
+**Project Overrides**: Check `.context/` for project-specific requirements.
+
+**Output Required**: Complete overview.md following this template:
+
+Use template structure from: ${CLAUDE_PLUGIN_ROOT}/templates/plan-overview.md
+
+Include:
+- Status Tracking (checkboxes for Planned, In Progress, Reviews, Complete)
+- Executive Summary (Feature, Purpose, Approach, Complexity, Timeline, Key Risks)
+- Test Strategy (Framework, Coverage Goals, Test Scenarios Summary)
+  - Note: "Detailed test scenarios are in each step file (step-01.md, step-02.md, etc.)"
+- Acceptance Criteria (Definition of Done for feature)
+- Risk Assessment (Top 3-5 risks with Category, Likelihood, Impact, Mitigation, Contingency)
+- Dependencies (New Packages, Configuration Changes, External Services)
+- File Reference Map (Existing Files to Modify, New Files to Create)
+- Coordination Notes (Step Dependencies, Integration Points)
+- Next Actions
+
+**Target Token Count**: ~450 tokens (±50)
+
+**Focus on**:
+- High-level strategy and approach
+- Overall test strategy summary (details in step files)
+- Key risks and mitigations
+- Feature-level acceptance criteria
+- Cross-step coordination needs
+
+**CRITICAL**:
+- Do NOT include individual step details (those come from Step Generator sub-agents)
+- Reference SOPs rather than duplicating content
+- Use checkbox format `- [ ]` for all trackable items
+- Keep concise - TDD sub-agent loads this once, not per step
+
+Output the complete overview.md content now.
+```
+
+**Wait for Overview Generator sub-agent to complete.**
+
+**Save overview.md immediately**:
+
+1. Capture the sub-agent's output
+2. Write to file: `[ARTIFACT_LOC]/plans/[feature-slug]/overview.md`
+3. Verify file created successfully
+
+**Report**:
+
+```text
+✅ Overview generated and saved: overview.md
+
+Proceeding to generate individual steps...
+```
+
+---
+
+**Sub-Step 2: Generate Steps with Step Generator Sub-Agents**
+
+**For each step in the scaffold** (Step 1 through Step N), execute sequentially:
+
+**Inform PM**:
+
+```text
+📝 Generating Step [X] of [N]: [Step Name from Scaffold]
+```
+
+**Delegate to Step Generator Sub-Agent [X]**:
+
+**Agent Configuration**:
+- Thinking mode: [determined thinking mode]
+- Role: Step [X] Generator for incremental planning
+- Output: Complete step-[0X].md content
+
+**Agent Prompt for Step [X]**:
+
+```text
+Use [determined thinking mode] thinking mode for this planning task.
+
+You are a STEP GENERATOR SUB-AGENT for incremental plan creation.
 
 **Overall Feature Context**:
 - Feature: [feature description]
 - Research findings: [if applicable]
-- Tech stack: [from CLAUDE.md]
+- Tech stack: [project tech from CLAUDE.md]
+- Total steps in feature: [N]
+- Overview: [Brief summary from overview.md that was just generated]
 - PM input: [clarifications]
 
-**All Step Plans**:
-[Include complete output from all N step planning agents]
+**Previous Steps Context** (if X > 1):
+[Include summaries from Steps 1 through X-1 that were already generated]:
 
-**Your Task**: Create final unified plan by:
+Step [X-1] Summary:
+- Purpose: [what Step X-1 accomplishes]
+- Files created/modified: [list from step-[X-1].md]
+- Key decisions: [major decisions from step-[X-1].md]
+- Dependencies introduced: [any new dependencies]
+- Tests defined: [count of tests in step-[X-1].md]
 
-1. **Resolve Conflicts**:
-   - Check for file naming conflicts
-   - Verify interface consistency across steps
-   - Ensure dependency order is correct
-   - Resolve any contradictory decisions
+[Repeat for all previous steps if needed for context]
 
-2. **Generate Integration Tests**:
-   - Identify integration points between steps
-   - Create integration test scenarios
-   - Define end-to-end test flows
+**Your Task**: Generate ONLY Step [X] content.
 
-3. **Aggregate Dependencies**:
-   - Consolidate all external dependencies
-   - Order by installation/migration sequence
-   - Note any conflicts
+**This Step's Details** (from scaffold):
+- Step number: [X]
+- Step name: [from scaffold]
+- Step description: [from scaffold]
 
-4. **Create Unified Plan**:
+**SOPs to Reference** (use fallback chain):
+1. .rptc/sop/testing-guide.md
+2. ~/.claude/global/sop/testing-guide.md
+3. ${CLAUDE_PLUGIN_ROOT}/sop/testing-guide.md
 
-Use template from: ${CLAUDE_PLUGIN_ROOT}/templates/plan.md
+Reference: Testing guide, Architecture patterns, Languages & style, Security
 
-## 1. Implementation Steps (Aggregated)
-[All steps from sequential agents, with conflicts resolved]
+**Project Overrides**: Check `.context/` for project-specific requirements.
 
-## 2. Test Strategy (Comprehensive)
-### Unit Tests (from step agents)
-[Aggregate all unit tests]
+**Output Required**: Complete step-[0X].md following this template:
 
-### Integration Tests (YOU GENERATE)
-- [ ] Integration test 1: [Steps X+Y interaction]
-- [ ] Integration test 2: [Steps Y+Z interaction]
-[Generate comprehensive integration tests]
+Use template structure from: ${CLAUDE_PLUGIN_ROOT}/templates/plan-step.md
 
-### E2E Tests
-- [ ] E2E test 1: [Full feature flow]
-[Generate end-to-end scenarios]
+Include:
+- Purpose (What this step accomplishes, why it's in this position)
+- Prerequisites (Previous step completion, required dependencies)
+- Tests to Write First (Happy Path, Edge Cases, Error Conditions)
+  - Use Given-When-Then format
+  - Specify test file paths
+  - Use `- [ ]` checkbox format
+- Files to Create/Modify (exact paths, purposes)
+- Implementation Details (RED, GREEN, REFACTOR phases)
+- Expected Outcome (what works after this step)
+- Acceptance Criteria (step-specific success criteria)
+- Dependencies from Other Steps (ONLY if this step depends on previous steps)
+- Estimated Time
 
-### Coverage Goals
-- Overall: 80%+
-- Critical paths: 100%
+**Target Token Count**: 150-240 tokens
 
-## 3. Test Files Structure
-[Aggregate from all step agents + add integration test files]
-
-## 4. Dependencies (Consolidated)
-[All dependencies in install order]
-
-## 5. Acceptance Criteria
-[Aggregate from steps + add feature-level criteria]
-
-## 6. Risk Assessment (Consolidated)
-[All risks + cross-step integration risks]
-
-## 7. File Reference Map (Complete)
-[All files from all steps, check for conflicts]
+**Coordination Requirements**:
+- If this step uses files/components from previous steps, document in "Dependencies from Other Steps"
+- Ensure file paths are consistent with previous steps
+- Ensure test strategy aligns with overview's test strategy
+- Check for interface compatibility with previous steps
 
 **CRITICAL**:
-- All tests use `- [ ]` checkbox format
-- Resolve all conflicts and document resolution
-- Integration tests are MANDATORY
-- Reference SOPs for standards
+- All tests MUST use `- [ ]` checkbox format
+- Self-contained (TDD sub-agent loads ONLY overview + this step file)
+- Reference SOPs rather than duplicating
+- Include dependencies from other steps ONLY if actually needed
+
+Output the complete step-[0X].md content now.
 ```
 
-**Wait for final coordination agent to complete unified plan.**
+**Wait for Step Generator sub-agent [X] to complete.**
+
+**Save step-[0X].md immediately**:
+
+1. Capture the sub-agent's output
+2. Format step number with zero-padding (step-01.md, step-02.md, etc.)
+3. Write to file: `[ARTIFACT_LOC]/plans/[feature-slug]/step-[0X].md`
+4. Verify file created successfully
+5. Store step summary for context in next step generation
+
+**Report**:
+
+```text
+✅ Step [X] generated and saved: step-[0X].md
+```
+
+**Repeat for all N steps.**
+
+**After all steps generated**:
+
+```text
+✅ All [N] steps generated and saved!
+
+Files created:
+- overview.md
+- step-01.md through step-[0N].md
+
+Proceeding to cohesiveness review...
+```
+
+---
+
+**Sub-Step 3: Cohesiveness Review with Reviewer Sub-Agent**
+
+**Purpose**: Validate that all generated files work together cohesively without conflicts.
+
+**Delegate to Cohesiveness Reviewer Sub-Agent**:
+
+**Agent Configuration**:
+- Thinking mode: [determined thinking mode]
+- Role: Plan Cohesiveness Reviewer
+- Input: All generated plan files
+- Output: Review report with issues and suggested fixes
+
+**Agent Prompt**:
+
+```text
+Use [determined thinking mode] thinking mode for this review task.
+
+You are a PLAN COHESIVENESS REVIEWER SUB-AGENT.
+
+**Your Mission**: Ensure all plan files work together without conflicts or gaps.
+
+**Files to Review**:
+
+Read these files from `[ARTIFACT_LOC]/plans/[feature-slug]/`:
+- overview.md
+- step-01.md
+- step-02.md
+- ... (through step-[0N].md)
+
+**Review Criteria**:
+
+1. **Conflicting Approaches**
+   - Do steps contradict each other in implementation approach?
+   - Are there inconsistent architectural decisions?
+   - Do steps use different patterns for similar problems?
+
+2. **Missing Dependencies**
+   - Are step prerequisites clearly stated?
+   - If Step Y uses output from Step X, is this documented in Step Y?
+   - Are dependency chains complete and valid?
+
+3. **File Reference Consistency**
+   - Do multiple steps reference the same files consistently?
+   - Are file paths uniform across steps?
+   - Are file modification sequences logical (create before modify)?
+
+4. **Test Strategy Alignment**
+   - Do step-level tests align with overview test strategy?
+   - Are there gaps in test coverage across steps?
+   - Do integration points between steps have integration tests?
+
+5. **Integration Points**
+   - Are cross-step integration points clearly defined?
+   - Where steps interact, are interfaces specified?
+   - Are there missing integration scenarios?
+
+6. **Token Budget Compliance**
+   - Overview: ~450 tokens (±50)
+   - Each step: 150-240 tokens
+   - Flag any files significantly over budget
+
+**Output Format**:
+
+For EACH issue found, provide:
+
+```markdown
+## Issue [N]: [Issue Title]
+
+- **Severity**: [Critical/Medium/Low]
+- **Category**: [Conflicting Approaches/Missing Dependencies/File Consistency/Test Alignment/Integration Points/Token Budget]
+- **Location**: [Which file(s) affected]
+- **Description**: [What's wrong and why it matters]
+- **Impact**: [How this affects plan quality/execution]
+- **Suggested Fix**: [Specific changes to make - exact file edits if possible]
+```
+
+**Summary Section**:
+
+```markdown
+## Review Summary
+
+**Issues Found**: [Total count by severity]
+- Critical: [count]
+- Medium: [count]
+- Low: [count]
+
+**Overall Cohesiveness Score**: [0-10]
+
+**Recommendation**:
+- Score ≥ 8: Plan is cohesive, ready for PM review
+- Score 6-7: Minor issues, fix before PM review
+- Score < 6: Significant issues, requires revision
+
+**Top Priority Fixes** (if score < 8):
+1. [Fix 1]
+2. [Fix 2]
+3. [Fix 3]
+```
+
+Perform comprehensive review now and output your findings.
+```
+
+**Wait for Cohesiveness Reviewer to complete.**
+
+**Process Review Results**:
+
+1. **If Overall Cohesiveness Score ≥ 8**:
+   ```text
+   ✅ Cohesiveness Review Passed!
+
+   Score: [X]/10
+   Issues found: [count by severity]
+
+   Plan is cohesive and ready for PM review.
+   ```
+
+   Proceed to Phase 6 (Present Plan to PM)
+
+2. **If Overall Cohesiveness Score < 8**:
+   ```text
+   ⚠️ Cohesiveness Issues Detected!
+
+   Score: [X]/10
+   Critical issues: [count]
+   Medium issues: [count]
+
+   Applying fixes automatically...
+   ```
+
+   **Apply suggested fixes**:
+   - For each Critical or Medium issue with a specific fix
+   - Read the affected file
+   - Apply the suggested edit using Edit tool
+   - Save the updated file
+   - Report fix applied
+
+   **After applying fixes**:
+   ```text
+   ✅ Cohesiveness issues resolved!
+
+   Updated files:
+   - [list of files modified]
+
+   Plan is now cohesive and ready for PM review.
+   ```
 
 **Update TodoWrite**: Mark "Delegate to Master Feature Planner Agent" as completed (complex path only)
 
+**Proceed to Phase 6.**
 ### Phase 6: Present Plan to PM (REQUIRED)
 
 **Update TodoWrite**: Mark "Present comprehensive plan to PM" as in_progress (complex path only)
@@ -899,31 +1114,88 @@ Before saving plan document:
 
 ---
 
-### Phase 9: Save Plan Document (Only After Approval)
+### Phase 9: Report Plan Status (Plan May Already Be Saved)
 
 **Update TodoWrite**: Mark appropriate task as in_progress (complex: "Save plan document to .rptc/plans/", simple: "Save plan document")
 
-Check workspace structure first:
+**Determine Planning Route Used**:
+
+Check which route was used in Phase 5:
+
+- **If Incremental Route (>2 steps)**: Plan files already saved during Phase 5 → Report success
+- **If Monolithic Route (≤2 steps)**: Plan not yet saved → Save now
+
+---
+
+**Route A: Incremental Plan Already Saved** (if >2 steps):
+
+**The plan was saved incrementally during Phase 5, so just report success**:
+
+```text
+✅ Plan Generation Complete!
+
+The plan was saved incrementally during generation in Phase 5.
+
+Location: [ARTIFACT_LOC]/plans/[feature-slug]/
+
+Files created:
+- overview.md (test strategy, acceptance criteria, risks)
+- step-01.md through step-[0N].md ([N] implementation steps)
+
+Total: [1 overview + N steps] files
+
+✨ All files passed cohesiveness review!
+
+Next steps:
+- Review plan: ls -la [ARTIFACT_LOC]/plans/[feature-slug]/
+- Start implementation: /rptc:tdd "@[feature-slug]"
+
+Note: TDD command will automatically load directory-based plan structure.
+```
+
+**Update TodoWrite**: Mark appropriate task as completed
+
+**END Phase 9** - Plan ready for implementation!
+
+---
+
+**Route B: Save Monolithic Plan** (if ≤2 steps):
+
+**The monolithic plan needs to be saved now**:
 
 1. **Check if plans directory exists**:
    - If `[ARTIFACT_LOC]/plans/` doesn't exist, create it using Bash:
      ```bash
-     mkdir -p [ARTIFACT_LOC value]/plans
+     mkdir -p "[ARTIFACT_LOC value]/plans"
      ```
 
-2. **Save document to**: `[ARTIFACT_LOC]/plans/[name-slug].md`
+2. **Sanitize feature name to slug**:
+   - Convert to lowercase
+   - Replace spaces, special characters with hyphens
+   - Remove multiple consecutive hyphens
+   - Example: "User Authentication" → "user-authentication"
 
-**Use template from plugin**:
+3. **Check if file already exists**:
+   - Path: `[ARTIFACT_LOC]/plans/[feature-slug].md`
+   - **If file exists**, ask PM:
+     ```text
+     ⚠️ Plan File Already Exists
 
-```bash
-# Load template
-TEMPLATE=$(cat "${CLAUDE_PLUGIN_ROOT}/templates/plan.md")
+     File: [ARTIFACT_LOC]/plans/[feature-slug].md
 
-# Fill in with plan content from Master Planner
-# Save to [ARTIFACT_LOC]/plans/[sanitized-feature-name].md
-```
+     Options:
+     1. Overwrite - Replace existing file with new plan
+     2. Abort - Keep existing plan, cancel save operation
 
-**Format** (based on template + Master Planner output):
+     What would you like to do? (type "overwrite" or "abort")
+     ```
+   - **If PM says "overwrite"**: Delete existing file, proceed with save
+   - **If PM says "abort"**: Exit Phase 9 without saving, inform PM operation cancelled
+   - **Wait for PM response before proceeding**
+
+4. **Save document to**: `[ARTIFACT_LOC]/plans/[feature-slug].md`
+
+**Use legacy monolithic template format**:
 
 ```markdown
 # Implementation Plan: [Feature Name]
@@ -1063,7 +1335,7 @@ If something goes wrong:
 
 ## Next Steps
 
-- [ ] Run `/rptc:tdd "@[name-slug].md"` to begin TDD implementation
+- [ ] Run `/rptc:tdd "@[feature-slug].md"` to begin TDD implementation
 
 ---
 
@@ -1072,18 +1344,17 @@ _Status: ✅ Approved by Project Manager_
 _SOP References: [List SOPs consulted]_
 ```
 
-After saving:
+**Report Success**:
 
 ```text
-✅ Plan saved to [ARTIFACT_LOC]/plans/[name-slug].md
+✅ Plan saved to [ARTIFACT_LOC]/plans/[feature-slug].md
 
 Next steps:
-- Review: cat [ARTIFACT_LOC]/plans/[name-slug].md
-- Implement: /rptc:tdd "@[name-slug].md"
+- Review: cat [ARTIFACT_LOC]/plans/[feature-slug].md
+- Implement: /rptc:tdd "@[feature-slug].md"
 ```
 
-**Update TodoWrite**: Mark appropriate task as completed (complex: "Save plan document to .rptc/plans/", simple: "Save plan document")
-
+**Update TodoWrite**: Mark appropriate task as completed
 ## Interaction Guidelines
 
 ### DO:
