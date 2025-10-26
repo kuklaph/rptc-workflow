@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.1] - 2025-10-26
+
+### Changed
+
+- **Security Agent Output**: Streamlined to deliver brief inline summaries instead of creating report files, improving token efficiency and workflow speed
+- **Admin Commands**: Enhanced configuration display in `/rptc:admin-init` and `/rptc:admin-upgrade` to show new v2.0.0 SOPs and Discord settings
+
+---
+
+
 ## [2.0.0] - 2025-10-24
 
 ### Added

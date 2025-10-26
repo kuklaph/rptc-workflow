@@ -147,11 +147,14 @@ echo "✓ Copied SOPs to .rptc/sop/ for project-specific customization"
 echo ""
 echo "  Project SOPs will override plugin defaults:"
 echo "  - testing-guide.md"
+echo "  - flexible-testing-guide.md         # NEW v2.0.0"
 echo "  - architecture-patterns.md"
 echo "  - frontend-guidelines.md"
 echo "  - git-and-deployment.md"
 echo "  - languages-and-style.md"
 echo "  - security-and-performance.md"
+echo "  - post-tdd-refactoring.md           # NEW v2.0.0"
+echo "  - todowrite-guide.md                # NEW v1.2.0"
 echo ""
 echo "  Edit these files to customize for this project."
 ```
@@ -269,7 +272,7 @@ if [ ! -f ".claude/settings.json" ]; then
   cat > .claude/settings.json <<'EOF'
 {
   "rptc": {
-    "_rptcVersion": "2.0.0",
+    "_rptcVersion": "2.0.1",
     "defaultThinkingMode": "think",
     "artifactLocation": ".rptc",
     "docsLocation": "docs",
@@ -290,12 +293,25 @@ if [ ! -f ".claude/settings.json" ]; then
 }
 EOF
   echo "✓ Created .claude/settings.json with RPTC defaults"
-  echo "  Default thinking mode: \"think\" (~4K tokens)"
+  echo ""
+  echo "Configuration defaults:"
   echo "  Test coverage target: 85%"
-  echo "  Artifact location: .rptc/"
-  echo "  Documentation location: docs/"
+  echo "  Max planning attempts: 10"
+  echo "  Thinking mode: think (valid: think/think hard/ultrathink)"
+  echo ""
+  echo "Research & Output:"
   echo "  Research output format: html (valid: html/md/both)"
-  echo "  Discord notifications: disabled (configure webhookUrl to enable)"
+  echo "  HTML report theme: dark (valid: dark/light)"
+  echo ""
+  echo "Advanced Settings:"
+  echo "  Verification mode: focused (valid: focused/comprehensive)"
+  echo "  TDG Mode (tdgMode): disabled (valid: disabled/enabled)"
+  echo ""
+  echo "Discord Notifications:"
+  echo "  • Enabled: false (set true to enable)"
+  echo "  • Webhook URL: '' (configure your Discord webhook)"
+  echo "  • Verbosity: summary (valid: summary/detailed/verbose)"
+  echo "  • See .rptc/CLAUDE.md for Discord webhook setup instructions"
   echo ""
   echo "ℹ️  Research Output Format:"
   echo "  Controls default format when \"auto\" chosen in exploration mode save prompt"
@@ -309,7 +325,7 @@ else
     if command -v jq >/dev/null 2>&1; then
       # Use jq for safe merging
       TEMP_FILE=$(mktemp)
-      jq '. + {"rptc": {"_rptcVersion": "2.0.0", "defaultThinkingMode": "think", "artifactLocation": ".rptc", "docsLocation": "docs", "testCoverageTarget": 85, "maxPlanningAttempts": 10, "customSopPath": ".rptc/sop", "researchOutputFormat": "html", "htmlReportTheme": "dark", "verificationMode": "focused", "tdgMode": "disabled", "qualityGatesEnabled": false, "discord": {"webhookUrl": "", "notificationsEnabled": false, "verbosity": "summary"}}}' .claude/settings.json > "$TEMP_FILE"
+      jq '. + {"rptc": {"_rptcVersion": "2.0.1"
       mv "$TEMP_FILE" .claude/settings.json
       echo "✓ Added RPTC configuration to existing .claude/settings.json"
     else
@@ -319,7 +335,7 @@ else
       echo "  Please add the following to your .claude/settings.json:"
       echo ""
       echo '  "rptc": {'
-      echo '    "_rptcVersion": "2.0.0",'
+      echo '    "_rptcVersion": "2.0.1",'
       echo '    "defaultThinkingMode": "think",'
       echo '    "artifactLocation": ".rptc",'
       echo '    "docsLocation": "docs",'
@@ -431,6 +447,12 @@ echo "    - \"ultrathink\" - Maximum depth thinking (~32K tokens)"
 echo ""
 echo "  You can also specify thinking mode per-command when prompted."
 echo "  User choice always overrides global setting."
+echo ""
+echo "🆕 New in v2.0.0:"
+echo "  • Efficiency Agent: Post-TDD refactoring guidance (post-tdd-refactoring.md)"
+echo "  • Discord Notifications: Real-time workflow updates (configure webhookUrl)"
+echo "  • Enhanced Research: HTML reports with dark/light themes"
+echo "  • Flexible Testing: Alternative testing strategies (flexible-testing-guide.md)"
 echo ""
 echo "Next Steps:"
 echo "  1. Review .rptc/CLAUDE.md for RPTC workflow guidance"

@@ -113,7 +113,7 @@ echo ""
 
 ```bash
 # Plugin version (update this with each release)
-PLUGIN_VERSION="2.0.0"
+PLUGIN_VERSION="2.0.1"
 
 # Load workspace version
 if command -v jq >/dev/null 2>&1; then
@@ -126,6 +126,11 @@ if command -v jq >/dev/null 2>&1; then
   MAX_ATTEMPTS=$(jq -r '.rptc.maxPlanningAttempts // 10' .claude/settings.json 2>/dev/null)
   CUSTOM_SOP_PATH=$(jq -r '.rptc.customSopPath // ".rptc/sop"' .claude/settings.json 2>/dev/null)
   THINKING_MODE=$(jq -r '.rptc.defaultThinkingMode // "think"' .claude/settings.json 2>/dev/null)
+  RESEARCH_OUTPUT_FORMAT=$(jq -r '.rptc.researchOutputFormat // "html"' .claude/settings.json 2>/dev/null)
+  HTML_REPORT_THEME=$(jq -r '.rptc.htmlReportTheme // "dark"' .claude/settings.json 2>/dev/null)
+  VERIFICATION_MODE=$(jq -r '.rptc.verificationMode // "focused"' .claude/settings.json 2>/dev/null)
+  TDD_MODE=$(jq -r '.rptc.tdgMode // "disabled"' .claude/settings.json 2>/dev/null)
+  DISCORD_ENABLED=$(jq -r '.rptc.discord.notificationsEnabled // false' .claude/settings.json 2>/dev/null)
 else
   # Fallback if jq not available
   if grep -q '"_rptcVersion"' .claude/settings.json; then
@@ -141,6 +146,11 @@ else
   MAX_ATTEMPTS=10
   CUSTOM_SOP_PATH=".rptc/sop"
   THINKING_MODE="think"
+  RESEARCH_OUTPUT_FORMAT="html"
+  HTML_REPORT_THEME="dark"
+  VERIFICATION_MODE="focused"
+  TDD_MODE="disabled"
+  DISCORD_ENABLED="false"
 fi
 
 echo "Workspace version: v${WORKSPACE_VERSION}"
@@ -180,6 +190,15 @@ else
       ;;
     "1.1.0")
       echo "v1.1.1: Fixed Windows backslash issue, shortened plugin name"
+      echo ""
+      ;;
+    "1.1.1"|"1.1.2"|"1.1.3"|"1.1.4"|"1.1.5"|"1.1.6"|"1.1.7"|"1.1.8"|"1.1.9"|"1.1.10")
+      echo "v1.2.0: TodoWrite integration, blocking validation checkpoints, comprehensive quality gates"
+      echo "v2.0.0: Efficiency agent rewrite, post-TDD refactoring SOP, Discord notifications"
+      echo ""
+      ;;
+    "1.2.0")
+      echo "v2.0.0: Efficiency agent rewrite, post-TDD refactoring SOP, Discord notifications"
       echo ""
       ;;
   esac
@@ -312,6 +331,26 @@ if command -v jq >/dev/null 2>&1; then
     MISSING_FIELDS+=("qualityGatesEnabled")
   fi
 
+  if ! echo "$CURRENT_CONFIG" | jq -e '.rptc.researchOutputFormat' >/dev/null 2>&1; then
+    MISSING_FIELDS+=("researchOutputFormat")
+  fi
+
+  if ! echo "$CURRENT_CONFIG" | jq -e '.rptc.htmlReportTheme' >/dev/null 2>&1; then
+    MISSING_FIELDS+=("htmlReportTheme")
+  fi
+
+  if ! echo "$CURRENT_CONFIG" | jq -e '.rptc.verificationMode' >/dev/null 2>&1; then
+    MISSING_FIELDS+=("verificationMode")
+  fi
+
+  if ! echo "$CURRENT_CONFIG" | jq -e '.rptc.tdgMode' >/dev/null 2>&1; then
+    MISSING_FIELDS+=("tdgMode")
+  fi
+
+  if ! echo "$CURRENT_CONFIG" | jq -e '.rptc.discord' >/dev/null 2>&1; then
+    MISSING_FIELDS+=("discord")
+  fi
+
   if [ ${#MISSING_FIELDS[@]} -gt 0 ]; then
     echo "  ✗ Missing config fields: ${MISSING_FIELDS[*]}"
     ISSUES_FOUND=$((ISSUES_FOUND + ${#MISSING_FIELDS[@]}))
@@ -329,6 +368,11 @@ if command -v jq >/dev/null 2>&1; then
   echo "    • maxPlanningAttempts: $MAX_ATTEMPTS"
   echo "    • customSopPath: $CUSTOM_SOP_PATH"
   echo "    • defaultThinkingMode: $THINKING_MODE"
+  echo "    • researchOutputFormat: $RESEARCH_OUTPUT_FORMAT"
+  echo "    • htmlReportTheme: $HTML_REPORT_THEME"
+  echo "    • verificationMode: $VERIFICATION_MODE"
+  echo "    • tdgMode: $TDD_MODE"
+  echo "    • discord.notificationsEnabled: $DISCORD_ENABLED"
 
 else
   echo "  ⚠️  jq not available - limited verification"
@@ -639,7 +683,12 @@ if [ ${#FIXES_TO_APPLY[@]} -gt 0 ]; then
               .rptc.testCoverageTarget //= 85 |
               .rptc.maxPlanningAttempts //= 10 |
               .rptc.customSopPath //= ".rptc/sop" |
-              .rptc.qualityGatesEnabled //= false' \
+              .rptc.qualityGatesEnabled //= false |
+              .rptc.researchOutputFormat //= "html" |
+              .rptc.htmlReportTheme //= "dark" |
+              .rptc.verificationMode //= "focused" |
+              .rptc.tdgMode //= "disabled" |
+              .rptc.discord //= {"webhookUrl": "", "notificationsEnabled": false, "verbosity": "summary"}' \
             .claude/settings.json > "$TEMP_FILE"
           mv "$TEMP_FILE" .claude/settings.json
           echo "✓ Added missing configuration fields"
