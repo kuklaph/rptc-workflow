@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.0] - 2025-10-26
+
+### Changed
+
+- **Repository Structure**: Moved plugin files from `rptc-workflow/` subfolder to repository root for GitHub URL installation compatibility
+- **Installation Methods**: Plugin now supports three install methods - local (`claude plugin install .`), GitHub URL (`claude plugin install <repo-url>`), and marketplace
+- **Development Files**: Reorganized dev artifacts - renamed `docs/` to `dev-docs/` to avoid conflict with user-facing documentation
+- **Version Scripts**: Updated all path references in `scripts/sync-version.sh`, `scripts/verify-version.sh`, and `.git/hooks/pre-commit` to work with new structure
+
+---
+
+
 ## [2.0.1] - 2025-10-26
 
 ### Changed

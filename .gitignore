@@ -8,8 +8,8 @@ README-Old.md
 scripts/
 .version-backup-*/
 .rptc
-rptc-workflow/.rptc/
 TODO.md
+dev-docs/
 
 # Version control
 .git/
