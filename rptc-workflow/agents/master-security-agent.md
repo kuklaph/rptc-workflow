@@ -138,6 +138,25 @@ Think harder and thoroughly examine similar areas of the codebase to ensure your
 
 ---
 
+## AI Code Security Blind Spots (CRITICAL)
+
+Research shows AI code contains 322% more privilege escalation paths.
+When reviewing AI-generated code, ALWAYS check:
+
+- [ ] Missing authentication on new API endpoints
+- [ ] Absent input validation and sanitization
+- [ ] SQL injection vulnerabilities in dynamic queries
+- [ ] XSS prevention gaps in user content
+- [ ] Removed CSRF token verification "to simplify"
+- [ ] Hardcoded credentials in scaffolding code
+- [ ] OAuth state parameter removal
+
+**Security Rule**:
+Authentication, authorization, payment processing, and data access code
+requires manual line-by-line review.
+
+---
+
 ## Input Context (Provided by TDD Phase)
 
 When invoked, you will receive:

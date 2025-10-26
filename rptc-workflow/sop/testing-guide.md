@@ -800,3 +800,53 @@ Document in `.context/testing-strategy.md`:
 - Testing environment setup
 - CI/CD pipeline details
 - Known testing challenges
+
+---
+
+## Advanced Topics
+
+### Testing AI-Generated Code and Non-Deterministic Systems
+
+Traditional TDD assumes deterministic outputs: `same_input → same_output`. This assumption breaks when testing:
+
+- **AI-generated code**: AI produces valid variations for identical inputs
+- **AI agents**: Non-deterministic decision-making and outputs
+- **ML models**: Probabilistic predictions, temperature-based sampling
+- **Non-deterministic algorithms**: Randomized algorithms, concurrent operations
+
+**Problem**: Exact-match assertions fail for valid variations, creating brittle tests and false failures.
+
+**Solution**: Use **flexible assertions** that verify semantic correctness while accepting acceptable variations.
+
+**When to Use Flexible Assertions**:
+- AI-generated text (comments, documentation, summaries)
+- Code variations (variable naming, formatting, equivalent implementations)
+- Reasoning explanations (where exact wording isn't critical)
+- Multiple valid solution paths (when several approaches are equally correct)
+
+**When NOT to Use** (Always Exact):
+- Security-critical operations (authentication, authorization, input validation)
+- API contracts and file formats (external integrations depend on exactness)
+- Performance SLAs (response times, throughput benchmarks)
+- Regulatory compliance (financial calculations, medical data)
+- Cryptographic operations (hashing, encryption, signing)
+
+**Four Flexible Assertion Patterns**:
+1. **Semantic Similarity Evaluation**: Compare meaning, not exact strings (cosine similarity, embeddings)
+2. **Behavioral Correctness Assessment**: Verify outputs and side effects, ignore implementation details
+3. **Quality of Reasoning Verification**: Assess logical coherence and correctness of explanations
+4. **Multiple Valid Solution Path Support**: Accept any solution from predefined valid set
+
+**Comprehensive Guide**: See `flexible-testing-guide.md` (SOP) for:
+- Detailed explanation of AI non-determinism and why traditional assertions fail
+- Complete decision tree for choosing flexible vs exact assertions
+- Implementation details for all four patterns with language-specific examples
+- Safety mechanisms preventing abuse and quality erosion
+- Integration with RPTC TDD workflow (`/rptc:plan`, `/rptc:tdd`)
+
+**Key Principle**: Flexible assertions are a **precision tool** for inherent non-determinism, not a quality compromise. Security, compliance, and contracts ALWAYS require exact assertions.
+
+---
+
+_Testing Guide last updated: 2025-01-25_
+_Version: 1.1.0 (Phase 1 Enhancement) + Advanced Topics (Phase 5)_

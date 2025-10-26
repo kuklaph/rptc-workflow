@@ -33,6 +33,9 @@ Act as an intelligent brainstorming partner who:
    - `rptc.artifactLocation` → ARTIFACT_LOC (default: ".rptc")
    - `rptc.researchOutputFormat` → OUTPUT_FORMAT (default: "html")
    - `rptc.htmlReportTheme` → HTML_THEME (default: "dark")
+   - `rptc.discord.notificationsEnabled` → DISCORD_ENABLED (default: false)
+   - `rptc.discord.webhookUrl` → DISCORD_WEBHOOK (default: "")
+   - `rptc.discord.verbosity` → DISCORD_VERBOSITY (default: "summary")
 
 3. **Display loaded configuration**:
    ```text
@@ -41,7 +44,45 @@ Act as an intelligent brainstorming partner who:
      Thinking mode: [THINKING_MODE value]
      Output format: [OUTPUT_FORMAT value]
      HTML theme: [HTML_THEME value]
+     Discord notifications: [DISCORD_ENABLED value]
    ```
+
+4. **Create Discord notification helper function**:
+
+```bash
+notify_discord() {
+  local message="$1"
+  local min_verbosity="${2:-summary}"  # summary, detailed, or verbose
+
+  # Check if notifications enabled
+  if [ "$DISCORD_ENABLED" != "true" ] || [ -z "$DISCORD_WEBHOOK" ]; then
+    return 0  # Silent skip
+  fi
+
+  # Check verbosity level
+  case "$DISCORD_VERBOSITY" in
+    summary)
+      if [ "$min_verbosity" != "summary" ]; then
+        return 0  # Skip this notification
+      fi
+      ;;
+    detailed)
+      if [ "$min_verbosity" = "verbose" ]; then
+        return 0  # Skip verbose-only notifications
+      fi
+      ;;
+    verbose)
+      # Always send
+      ;;
+  esac
+
+  # Send notification (fail-safe, never block workflow)
+  if ! bash "${CLAUDE_PLUGIN_ROOT}/skills/discord-notify/scripts/notify.sh" \
+    "$DISCORD_WEBHOOK" "$message" 2>/dev/null; then
+    echo "⚠️  Discord notification failed (continuing workflow)" >&2
+  fi
+}
+```
 
 **Use these values throughout the command execution.**
 
@@ -60,7 +101,7 @@ What's your goal for this research?
   - Understanding how something works
   - Exploring implementation options
   - Investigating existing code
-  - No documentation needed
+  - Optional report generation (can skip)
   - No sign-off required
   → Choose this for: "How does X work?", "What are the options for Y?"
 
@@ -80,6 +121,11 @@ Which mode? [exploration/planning-prep]
 **Display confirmation**:
 ```text
 ✅ Research Mode: [RESEARCH_MODE value]
+```
+
+```bash
+# Notify research mode determined
+notify_discord "🔍 **Research Started**\nMode: ${RESEARCH_MODE}\nTopic: \`${RESEARCH_TOPIC}\`" "detailed"
 ```
 
 ## Step 0c: Initialize TODO Tracking
@@ -306,10 +352,55 @@ Load SOPs using fallback chain (highest priority first):
    - If web research: "Any preferred sources or examples?"
    - If hybrid: Ask both
 
+4. **Manual Simulation Validation** (Optional but Recommended)
+
+   For features involving data processing, algorithms, or complex logic:
+
+   **Ask PM**: "Would you like to manually simulate the behavior before planning?"
+
+   **If PM says yes:**
+
+   a. **Identify Simulation Inputs**:
+      - Ask: "Do you have real example inputs we can use for simulation?"
+      - If YES: Use actual data from codebase, database samples, or user-provided examples
+      - If NO: **CRITICAL FALLBACK** - Create synthetic/example data that represents realistic scenarios
+
+   b. **Synthetic Data Guidance** (when real inputs unavailable):
+      ```pseudo
+      // For authentication feature (example):
+      SYNTHETIC_INPUT_1: { username: "user@example.com", password: "validPassword123" }
+      SYNTHETIC_INPUT_2: { username: "invalid", password: "short" }
+      SYNTHETIC_INPUT_3: { username: "", password: "" }
+
+      // For payment feature (example):
+      SYNTHETIC_INPUT_1: { amount: 100.00, currency: "USD", method: "credit_card" }
+      SYNTHETIC_INPUT_2: { amount: 0.01, currency: "EUR", method: "paypal" }
+      SYNTHETIC_INPUT_3: { amount: 10000.00, currency: "GBP", method: "invalid" }
+      ```
+
+   c. **Manual Simulation Process**:
+      - Ask PM to walk through: "Given [input], what should happen step-by-step?"
+      - Document: "When [input] → Then [expected behavior]"
+      - Identify gaps: "What happens if [edge case]?"
+
+   d. **Document Findings**:
+      - Inputs used (real or synthetic)
+      - Step-by-step expected behavior
+      - Edge cases discovered during simulation
+      - Gaps or unclear requirements identified
+
+   **Why This Matters**: Prevents building systems based on assumptions. Manual simulation reveals requirements gaps BEFORE planning.
+
+   **When to Skip**: Simple CRUD operations, pure UI changes, or well-understood patterns where behavior is obvious.
+
 **Keep this phase brief** - The specialist agents will conduct the deep research.
 
 **Update TodoWrite**: Mark "Complete interactive discovery" as completed
 
+```bash
+# Notify discovery complete
+notify_discord "📝 **Discovery Complete**\nBeginning deep research..." "detailed"
+```
 
 ### Phase 2: Agent Delegation (REQUIRED - Always Use Agents)
 
@@ -493,13 +584,191 @@ Focus on external insights to compare against our current implementation.
 
 ### IF RESEARCH_MODE="exploration":
 
-**Generate HTML Report (Default) or Markdown (if configured)**
+#### Phase 4A: Present Findings Inline (EXPLORATION MODE ONLY)
 
-**Check OUTPUT_FORMAT from Step 0a** (default: "html")
+**Display synthesized findings from Phase 3 directly in chat:**
 
-#### Option A: HTML Output (Default for Exploratory)
+Present the complete research findings inline using structured markdown format:
 
-**Invoke html-report-generator skill directly:**
+```text
+📊 Research Findings: [Topic Name]
+
+**Research Mode:** Exploration
+**Scope:** [Codebase/Web/Hybrid]
+**Date:** [YYYY-MM-DD]
+
+---
+
+## Summary
+
+[2-3 sentence overview from Phase 3]
+
+---
+
+## Detailed Findings
+
+[Insert full synthesized findings from Phase 3]
+
+### Codebase Analysis (if applicable)
+[Explore agent results]
+
+### Web Research (if applicable)
+[master-research-agent results]
+
+### Comparison & Gap Analysis (if hybrid)
+[Comparison analysis]
+
+---
+
+## Key Takeaways
+
+- [Takeaway 1]
+- [Takeaway 2]
+- [Takeaway 3]
+
+---
+
+_Research conducted: [timestamp]_
+_Agents used: [Explore | master-research-agent | Both]_
+```
+
+**After inline presentation, proceed to Phase 4B (Save Prompt).**
+
+---
+
+#### Phase 4B: Optional Save Prompt (EXPLORATION MODE ONLY)
+
+**Ask user if they want to save findings:**
+
+```text
+💾 Save Research Report?
+
+Your findings are shown above. Would you like to save them?
+
+Options:
+  - Press Enter or type "skip" to continue without saving
+  - Type format preference: "html", "md", "both", or "auto"
+
+Your choice:
+```
+
+**Capture user input into FORMAT_CHOICE variable:**
+
+```bash
+read -p "Your choice: " FORMAT_CHOICE
+# If empty input, set to "skip"
+FORMAT_CHOICE="${FORMAT_CHOICE:-skip}"
+```
+
+**Wait for user input.**
+
+**Handle responses:**
+- Empty input OR "skip" → Skip to Phase 4D (completion message, no save)
+- "html" → Save HTML only (delegate to html-report-generator)
+- "md" → Save Markdown only (direct save)
+- "both" → Save both formats (parallel sub-agents)
+- "auto" → Use researchOutputFormat config (default: html)
+
+**If user chooses to save, proceed to Phase 4C (directory creation) and Phase 4E (format generation).**
+
+**If user skips, proceed to Phase 4D (completion without save).**
+
+---
+
+#### Phase 4C: Create Research Directory (IF SAVE CHOSEN)
+
+**This phase runs only if user chose to save (not skip).**
+
+**1. Sanitize topic to slug:**
+
+Convert research topic to kebab-case slug using same logic as plan.md:
+- Convert to lowercase
+- Replace spaces, special characters with hyphens
+- Remove multiple consecutive hyphens
+- Trim leading/trailing hyphens
+
+**Examples:**
+- "User Authentication (OAuth 2.0)" → "user-authentication-oauth-2-0"
+- "API Rate Limiting" → "api-rate-limiting"
+- "React Hooks & Context" → "react-hooks-context"
+- "Database Migration Strategy" → "database-migration-strategy"
+
+**Bash sanitization:**
+```bash
+TOPIC_SLUG=$(echo "${RESEARCH_TOPIC}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//')
+```
+
+**2. Check if research directory exists:**
+
+```bash
+RESEARCH_DIR="${ARTIFACT_LOC}/research/${TOPIC_SLUG}"
+
+if [ ! -d "${ARTIFACT_LOC}/research" ]; then
+  mkdir -p "${ARTIFACT_LOC}/research"
+fi
+```
+
+**3. Handle duplicate topic detection:**
+
+If directory already exists, ask user:
+
+```text
+⚠️ Research Directory Already Exists
+
+A research directory for this topic already exists:
+  Directory: ${RESEARCH_DIR}/
+  Topic slug: ${TOPIC_SLUG}
+
+Note: Topic names are converted to kebab-case slugs. Examples:
+  "User Auth" → "user-auth"
+  "API Testing" → "api-testing"
+
+This might be:
+  - Same topic (you researched this before)
+  - Different topic with similar name (slug collision)
+
+Options:
+  1. Overwrite existing research (will replace files)
+  2. Create with different name (append timestamp)
+  3. Cancel save (return to inline findings)
+
+Your choice [1/2/3]:
+```
+
+**Handle responses:**
+- 1 (overwrite) → Proceed with TOPIC_SLUG as-is
+- 2 (different name) → Append timestamp: `TOPIC_SLUG="${TOPIC_SLUG}-$(date +%Y%m%d-%H%M%S)"`
+- 3 (cancel) → Skip to Phase 4D (completion without save)
+
+**4. Create topic directory:**
+
+```bash
+mkdir -p "${RESEARCH_DIR}"
+echo "✅ Created directory: ${RESEARCH_DIR}/"
+```
+
+**5. Set file paths for format generation:**
+
+```bash
+HTML_FILE="${RESEARCH_DIR}/research.html"
+MD_FILE="${RESEARCH_DIR}/research.md"
+```
+
+**Proceed to format generation (Step 4).**
+
+---
+
+### Phase 4E: Generate Research Files (IF SAVE CHOSEN)
+
+**Based on FORMAT_CHOICE variable from Phase 4B (Step 2), generate appropriate file(s).**
+
+**Variable Reference**: `${FORMAT_CHOICE}` contains: skip/html/md/both/auto
+
+---
+
+#### Option 1: HTML Only (Choice: "html")
+
+**Invoke html-report-generator skill:**
 
 ```text
 Use the Skill tool with command="rptc:html-report-generator":
@@ -524,7 +793,7 @@ scope: [RESEARCH_SCOPE value]
 
 ## Summary
 
-[Brief 2-3 sentence overview]
+[Brief 2-3 sentence overview from Phase 3]
 
 ---
 
@@ -533,15 +802,12 @@ scope: [RESEARCH_SCOPE value]
 [Insert synthesized findings from Phase 3]
 
 ### Codebase Analysis (if applicable)
-
 [Explore agent results]
 
 ### Web Research (if applicable)
-
 [master-research-agent results]
 
 ### Comparison & Gap Analysis (if hybrid)
-
 [Comparison between current implementation and industry standards]
 
 ---
@@ -557,53 +823,175 @@ scope: [RESEARCH_SCOPE value]
 _Research conducted: [timestamp]_
 _Agents used: [Explore | master-research-agent | Both]_
 
-Output file: [ARTIFACT_LOC]/research/[topic-slug].html
+Output file: ${HTML_FILE}
 Theme: [HTML_THEME value] (default: dark)
 ```
 
-**After HTML generation completes:**
+**After generation:**
+
+```bash
+notify_discord "✅ **Exploration Complete**\nReport: \`${TOPIC_SLUG}/research.html\`" "summary"
+```
 
 ```text
 ✅ Exploratory Research Complete!
 
-📊 Report generated: [ARTIFACT_LOC]/research/[topic-slug].html
+📊 HTML report generated: ${HTML_FILE}
 
-Open the HTML file in your browser to view the professionally formatted research report with:
-- Dark mode GitHub theme
-- Table of contents
-- Syntax highlighting
-- Responsive design
+Open the HTML file in your browser to view the professionally formatted research report.
 
-**Next Steps (Optional):**
-- Open the HTML report: open [ARTIFACT_LOC]/research/[topic-slug].html
-- Ask follow-up questions if you need more details
-- Run /rptc:research again in "planning-prep" mode to create implementation docs
-- Move to /rptc:plan if you're ready to implement
+**Next Steps:**
+- Open report: open ${HTML_FILE}
+- Ask follow-up questions
+- Move to /rptc:plan if ready to implement
 ```
 
-**Mark all TodoWrite tasks as completed and end command.**
+---
 
-#### Option B: Markdown Output (if OUTPUT_FORMAT="markdown")
+#### Option 2: Markdown Only (Choice: "md")
 
 **Save markdown directly:**
 
-Save synthesized findings to: `[ARTIFACT_LOC]/research/[topic-slug].md`
+```bash
+# Construct markdown content from Phase 3 synthesis
+cat > "${MD_FILE}" <<'EOF'
+# Research: [Topic Name]
+
+**Date**: [YYYY-MM-DD]
+**Mode**: Exploration
+**Scope**: [Codebase/Web/Hybrid]
+
+---
+
+## Summary
+
+[Brief overview from Phase 3]
+
+---
+
+## Findings
+
+[Synthesized findings from Phase 3]
+
+---
+
+## Key Takeaways
+
+- [Takeaway 1]
+- [Takeaway 2]
+
+---
+
+_Research conducted: [timestamp]_
+EOF
+```
 
 **After save:**
+
+```bash
+notify_discord "✅ **Exploration Complete**\nReport: \`${TOPIC_SLUG}/research.md\`" "summary"
+```
 
 ```text
 ✅ Exploratory Research Complete!
 
-📄 Report saved: [ARTIFACT_LOC]/research/[topic-slug].md
+📄 Markdown report saved: ${MD_FILE}
+
+**Next Steps:**
+- View: cat ${MD_FILE}
+- Edit with your preferred editor
+- Move to /rptc:plan if ready to implement
+```
+
+---
+
+#### Option 3: Both Formats (Choice: "both")
+
+**Generate HTML and Markdown in PARALLEL using two Task tool calls in single message:**
+
+**Task 1 - HTML Generation (Skill invocation):**
+```text
+Use the Skill tool with command="rptc:html-report-generator":
+[Same content as Option 1, output to ${HTML_FILE}]
+```
+
+**Task 2 - Markdown Generation (Direct save):**
+```text
+Use the Write tool to save markdown content:
+File: ${MD_FILE}
+Content: [Same structure as Option 2]
+```
+
+**CRITICAL:** Execute BOTH tasks in SINGLE message for parallel execution.
+
+**After both complete:**
+
+```bash
+notify_discord "✅ **Exploration Complete**\nReports: \`${TOPIC_SLUG}/research.{html,md}\`" "summary"
+```
+
+```text
+✅ Exploratory Research Complete!
+
+📊 Reports generated in ${RESEARCH_DIR}/
+  - research.html (open in browser)
+  - research.md (view/edit in text editor)
+
+**Next Steps:**
+- Open HTML: open ${HTML_FILE}
+- View Markdown: cat ${MD_FILE}
+- Move to /rptc:plan if ready to implement
+```
+
+---
+
+#### Option 4: Auto Format (Choice: "auto")
+
+**Use researchOutputFormat config setting:**
+
+```bash
+# Read config (default to "html" if not set)
+AUTO_FORMAT=$(jq -r '.rptc.researchOutputFormat // "html"' .claude/settings.json 2>/dev/null || echo "html")
+```
+
+**Then delegate to appropriate option:**
+- If AUTO_FORMAT="html" → Follow Option 1 (HTML Only)
+- If AUTO_FORMAT="md" → Follow Option 2 (Markdown Only)
+- If AUTO_FORMAT="both" → Follow Option 3 (Both Formats)
+
+**Display which format was chosen:**
+```text
+📋 Using config default: ${AUTO_FORMAT}
+```
+
+Then proceed with generation as per selected option.
+
+---
+
+**Proceed to Phase 4D (completion message) - already shown in generated files above.**
+
+---
+
+#### Phase 4D: Completion Message
+
+**If save skipped:**
+
+```text
+✅ Exploratory Research Complete!
+
+Findings displayed above. No files saved (as requested).
 
 **Next Steps (Optional):**
-- View: cat [ARTIFACT_LOC]/research/[topic-slug].md
 - Ask follow-up questions if you need more details
-- Run /rptc:research again in "planning-prep" mode for implementation docs
+- Run /rptc:research again in "planning-prep" mode for saved documentation
 - Move to /rptc:plan if you're ready to implement
 ```
 
 **Mark all TodoWrite tasks as completed and end command.**
+
+**If files saved:**
+
+[Show appropriate completion message from Phase 4E based on format]
 
 ---
 
@@ -823,7 +1211,7 @@ TEMPLATE=$(cat "${CLAUDE_PLUGIN_ROOT}/templates/research.md")
 
 - [ ] Review this research document
 - [ ] Make decisions on open questions (see "Decision Points" above)
-- [ ] Create implementation plan: `/rptc:plan "@[topic-slug].md"`
+- [ ] Create implementation plan: `/rptc:plan "@[topic-slug]/"`
 
 ---
 
@@ -840,8 +1228,13 @@ After saving:
 
 Next steps:
 - Review: cat [ARTIFACT_LOC]/research/[topic-slug].md
-- Plan: /rptc:plan "@[topic-slug].md"
+- Plan: /rptc:plan "@[topic-slug]/"
 - Or plan directly: /rptc:plan "[work item name]"
+```
+
+```bash
+# Notify research saved
+notify_discord "💾 **Research Saved**\nDocument: \`${TOPIC_SLUG}.md\`\nReady for planning" "summary"
 ```
 
 **Update TodoWrite**: Mark "Save research document" as completed

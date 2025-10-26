@@ -23,15 +23,15 @@
 # RPTC Workflow
 /rptc:research "topic"        # Interactive discovery & brainstorming
 /rptc:plan "feature"          # Collaborative planning with Master Planner
-/rptc:tdd "@plan.md"          # TDD implementation with quality gates
+/rptc:tdd "@plan/"            # TDD implementation with quality gates
 /rptc:commit [pr]             # Verify and ship (optional PR)
 
 # Helpers
 /rptc:helper-catch-up-quick          # Quick context (2 min)
 /rptc:helper-catch-up-med            # Medium context (5-10 min)
 /rptc:helper-catch-up-deep           # Deep analysis (15-30 min)
-/rptc:helper-update-plan "@plan.md"  # Modify existing plan
-/rptc:helper-resume-plan "@plan.md"  # Resume from previous session
+/rptc:helper-update-plan "@plan/"    # Modify existing plan
+/rptc:helper-resume-plan "@plan/"    # Resume from previous session
 ```
 
 ## RPTC Workflow Philosophy
@@ -95,7 +95,7 @@ Every feature follows this workflow:
 - Maps all file changes
 - Identifies risks and dependencies
 
-### 3. TDD Phase (`/rptc:tdd "@plan.md"`)
+### 3. TDD Phase (`/rptc:tdd "@plan/"`)
 
 **Strict Test-Driven Development**:
 
@@ -165,6 +165,8 @@ When you approve delegation, specialized agents provide expert analysis:
 2. **Prevent over-engineering** via pre-generation checklist
 3. **Catch problematic output** via red flag detection
 4. **Reference detailed guidance** via enhanced SOPs
+
+**For Comprehensive Coverage**: See `docs/AI_CODING_BEST_PRACTICES.md` for detailed educational content, research citations, and extended examples beyond this quick reference.
 
 **When to Use These Guidelines:**
 - ALWAYS before requesting AI code generation
@@ -513,6 +515,8 @@ These guidelines prevent 80%+ of AI-generated complexity issues, but edge cases 
 ### SOP Reference Guide (Detailed Guidance)
 
 This section provides quick links to enhanced SOPs. Use these for detailed guidance on specific topics.
+
+**Comprehensive Educational Resource**: For detailed research, extended examples, and educational content on AI coding best practices, see `docs/AI_CODING_BEST_PRACTICES.md`. This document complements the quick-reference checklists above with deeper analysis and citations.
 
 **Quick Reference:**
 

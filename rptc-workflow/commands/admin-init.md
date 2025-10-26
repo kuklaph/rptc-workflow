@@ -269,7 +269,7 @@ if [ ! -f ".claude/settings.json" ]; then
   cat > .claude/settings.json <<'EOF'
 {
   "rptc": {
-    "_rptcVersion": "1.2.0",
+    "_rptcVersion": "2.0.0",
     "defaultThinkingMode": "think",
     "artifactLocation": ".rptc",
     "docsLocation": "docs",
@@ -277,7 +277,15 @@ if [ ! -f ".claude/settings.json" ]; then
     "maxPlanningAttempts": 10,
     "customSopPath": ".rptc/sop",
     "researchOutputFormat": "html",
-    "htmlReportTheme": "dark"
+    "htmlReportTheme": "dark",
+    "verificationMode": "focused",
+    "tdgMode": "disabled",
+    "qualityGatesEnabled": false,
+    "discord": {
+      "webhookUrl": "",
+      "notificationsEnabled": false,
+      "verbosity": "summary"
+    }
   }
 }
 EOF
@@ -286,7 +294,13 @@ EOF
   echo "  Test coverage target: 85%"
   echo "  Artifact location: .rptc/"
   echo "  Documentation location: docs/"
-  echo "  Research output format: html (dark theme)"
+  echo "  Research output format: html (valid: html/md/both)"
+  echo "  Discord notifications: disabled (configure webhookUrl to enable)"
+  echo ""
+  echo "ℹ️  Research Output Format:"
+  echo "  Controls default format when \"auto\" chosen in exploration mode save prompt"
+  echo "  Valid values: \"html\" (dark theme reports), \"md\" (editable files), \"both\" (HTML + Markdown)"
+  echo "  Note: \"skip\" is a prompt-only option, not valid for config"
 else
   # File exists - check if it needs RPTC section
   if ! grep -q '"rptc"' .claude/settings.json; then
@@ -295,7 +309,7 @@ else
     if command -v jq >/dev/null 2>&1; then
       # Use jq for safe merging
       TEMP_FILE=$(mktemp)
-      jq '. + {"rptc": {"_rptcVersion": "1.2.0", "defaultThinkingMode": "think", "artifactLocation": ".rptc", "docsLocation": "docs", "testCoverageTarget": 85, "maxPlanningAttempts": 10, "customSopPath": ".rptc/sop", "researchOutputFormat": "html", "htmlReportTheme": "dark"}}' .claude/settings.json > "$TEMP_FILE"
+      jq '. + {"rptc": {"_rptcVersion": "2.0.0", "defaultThinkingMode": "think", "artifactLocation": ".rptc", "docsLocation": "docs", "testCoverageTarget": 85, "maxPlanningAttempts": 10, "customSopPath": ".rptc/sop", "researchOutputFormat": "html", "htmlReportTheme": "dark", "verificationMode": "focused", "tdgMode": "disabled", "qualityGatesEnabled": false, "discord": {"webhookUrl": "", "notificationsEnabled": false, "verbosity": "summary"}}}' .claude/settings.json > "$TEMP_FILE"
       mv "$TEMP_FILE" .claude/settings.json
       echo "✓ Added RPTC configuration to existing .claude/settings.json"
     else
@@ -305,7 +319,7 @@ else
       echo "  Please add the following to your .claude/settings.json:"
       echo ""
       echo '  "rptc": {'
-      echo '    "_rptcVersion": "1.2.0",'
+      echo '    "_rptcVersion": "2.0.0",'
       echo '    "defaultThinkingMode": "think",'
       echo '    "artifactLocation": ".rptc",'
       echo '    "docsLocation": "docs",'
@@ -313,7 +327,15 @@ else
       echo '    "maxPlanningAttempts": 10,'
       echo '    "customSopPath": ".rptc/sop",'
       echo '    "researchOutputFormat": "html",'
-      echo '    "htmlReportTheme": "dark"'
+      echo '    "htmlReportTheme": "dark",'
+      echo '    "verificationMode": "focused",'
+      echo '    "tdgMode": "disabled",'
+      echo '    "qualityGatesEnabled": false,'
+      echo '    "discord": {'
+      echo '      "webhookUrl": "",'
+      echo '      "notificationsEnabled": false,'
+      echo '      "verbosity": "summary"'
+      echo '    }'
       echo '  }'
       echo ""
       echo "  (Install 'jq' for automatic merging in future)"
@@ -358,7 +380,7 @@ echo "   "
 echo "   This project uses the RPTC workflow:"
 echo "   - \`/rptc:research \"topic\"\` - Interactive discovery"
 echo "   - \`/rptc:plan \"feature\"\` - Collaborative planning"
-echo "   - \`/rptc:tdd \"@plan.md\"\` - TDD implementation"
+echo "   - \`/rptc:tdd \"@plan/\"\` - TDD implementation"
 echo "   - \`/rptc:commit [pr]\` - Verify and ship"
 echo ""
 ```

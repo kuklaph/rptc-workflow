@@ -9,6 +9,7 @@ scripts/
 .version-backup-*/
 .rptc
 rptc-workflow/.rptc/
+TODO.md
 
 # Version control
 .git/

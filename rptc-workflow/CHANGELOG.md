@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.0] - 2025-10-24
+
+### Added
+
+- **Efficiency Agent Rewrite (#12)**: Extracted comprehensive refactoring checklist to `sop/post-tdd-refactoring.md`. Agent streamlined to <500 lines. Integrated Phase 1 Code Simplicity research (60-80% reduction, Rule of Three, AI pattern detection).
+  - **New SOP**: `post-tdd-refactoring.md` (654 lines) - Comprehensive 5-phase refactoring workflow
+    - Phase 1: Pre-Analysis (verify tests, baseline metrics, context review)
+    - Phase 2: Dead Code Sweep (tools: ESLint, Vulture, staticcheck by language)
+    - Phase 3: Complexity Reduction (refactoring patterns, metrics targets)
+    - Phase 4: Readability Pass (naming, comments, formatting)
+    - Phase 5: KISS/YAGNI Audit (AI anti-patterns, Rule of Three, Code Simplicity metrics)
+    - Phase 6: Final Verification & Reporting
+  - **Agent Streamlined**: `master-efficiency-agent.md` reduced to 519 lines (references SOP instead of duplicating content)
+  - **Code Simplicity Integration**: 4 new metrics in efficiency reports
+    - Code Reduction % (target: 5-15%)
+    - Duplication Ratio (target: <5%)
+    - AI Anti-Pattern Count (5 patterns from architecture-patterns.md)
+    - Pattern Reuse Efficiency (target: ≥2.0)
+  - **Single Source of Truth**: All refactoring guidance consolidated in SOP, accessible via fallback chain
+  - **Research-Backed**: Operationalizes Phase 1 Code Simplicity findings (60-80% code reduction, 8× duplication decrease)
+
+- **Discord Notifications**: Real-time workflow updates via Discord webhooks
+  - **Opt-in configuration**: Disabled by default, configured via `.claude/settings.json`
+  - **Supported commands**: `/rptc:research`, `/rptc:plan`, `/rptc:tdd`, `/rptc:commit`, `/rptc:helper-resume-plan`
+  - **Three verbosity levels**:
+    - `summary`: Minimal notifications (start + end only)
+    - `detailed`: Major milestones (quality gates, phase transitions)
+    - `verbose`: All steps (debugging mode, may trigger rate limits)
+  - **Non-blocking design**: All notification failures are silent, workflow never interrupted
+  - **Security**: Webhook URLs treated as credentials, never logged or committed
+  - **Rate limit protection**: Summary mode safe for all workflows (2-5 notifications per command)
+  - **Cross-platform**: Windows (Git Bash), macOS, Linux compatible
+
+---
+
 ## [1.2.0] - 2025-10-17
 
 ### Added
@@ -878,6 +913,36 @@ Three-tier fallback system (priority order):
 ---
 
 ## [Unreleased]
+
+### Changed
+
+- **BREAKING**: `/rptc:research` exploration mode now presents findings inline-first with optional save prompt
+  - **Old behavior**: Automatically saved HTML/Markdown report based on `OUTPUT_FORMAT` config
+  - **New behavior**: Shows findings in chat, then asks if user wants to save (skip/html/md/both/auto)
+  - **Default**: Inline presentation only, no files created unless user explicitly chooses to save
+  - **Migration**: If you relied on automatic file generation, you'll now need to respond to the save prompt
+  - **Config change**: `OUTPUT_FORMAT` replaced with `researchOutputFormat` (only used for "auto" option)
+  - **Directory structure**: Reports now saved to `.rptc/research/[topic-slug]/research.{html,md}` (was `.rptc/research/[topic-slug].{html,md}`)
+
+### Migration Guide: Research Command Behavior Change
+
+The `/rptc:research` command in exploration mode has changed from file-first to inline-first:
+
+**What Changed:**
+- Findings are now displayed in chat immediately
+- File generation is optional (prompt appears after findings)
+- Empty response or "skip" = no files created
+- Format options: skip/html/md/both/auto
+
+**Action Required:**
+1. If you used `.claude/settings.json` → `rptc.OUTPUT_FORMAT`, rename to `rptc.researchOutputFormat`
+2. If you relied on automatic file generation, be prepared to respond to save prompt
+3. Existing research files unchanged (no data loss)
+
+**Benefits:**
+- Faster exploration (no file I/O overhead)
+- More control (save only when needed)
+- Better UX (see findings immediately)
 
 ### Planned Features
 

@@ -109,30 +109,13 @@ Think harder and thoroughly examine similar areas of the codebase to ensure your
 
 ---
 
-## Operating Modes
+## Operating Mode
 
-This agent supports **two operating modes** depending on feature complexity:
+**Directory Format Only (v2.0.0+)**: This agent uses incremental sub-agent delegation for all features.
 
-### Mode 1: Monolithic Plan Generation (Simple Features ≤2 steps)
+### Incremental Sub-Agent Delegation
 
-**When Used**: Plan command delegates to this agent for simple features (≤2 steps)
-
-**Output**: Complete plan in single document (monolithic format)
-
-- All content in one markdown file
-- Includes overview, all steps, test strategy, risks, dependencies
-- Saved as single file: `.rptc/plans/[feature-slug].md`
-- Traditional approach for backward compatibility
-
-**Advantages**:
-
-- Simple, straightforward for small features
-- Single file to review and edit
-- Lower overhead for simple work
-
-### Mode 2: Incremental Sub-Agent Delegation (Complex Features >2 steps)
-
-**When Used**: Plan command uses sub-agent delegation for complex features (>2 steps)
+**When Used**: Plan command uses sub-agent delegation for all features
 
 **How it works**: This agent is NOT directly used. Instead, the plan command delegates to specialized sub-agents:
 
@@ -155,6 +138,82 @@ This agent supports **two operating modes** depending on feature complexity:
 - Token efficiency (TDD loads only needed files)
 
 **Note**: The sub-agents follow the same planning methodology defined in this document but with narrower scope (overview-only or step-only).
+
+---
+
+## Phase 3: Implementation Constraints Generation
+
+**When Used**: Every plan (directory format only)
+
+**What to Do**: Always generate a comprehensive "## Implementation Constraints" section.
+
+### Constraint Categories to Generate
+
+For EVERY plan, analyze the project and generate all 5 categories:
+
+#### 1. File Size Constraints
+
+- Examine `.context/` files and codebase for file size patterns
+- Default: 500 lines max if not specified
+- Ask: "What's the largest file in this codebase?"
+
+#### 2. Complexity Constraints
+
+- Review existing complexity patterns
+- Default: 50-line functions, complexity < 10
+- Ask: "How complex are existing implementations?"
+
+#### 3. Dependency Constraints
+
+- Search for prohibited patterns in architecture-patterns.md:
+  - ❌ Premature abstract base classes
+  - ❌ Factory/Builder for simple instantiation
+  - ❌ Unnecessary middleware layers
+- List existing patterns that SHOULD be reused
+- Ask: "What patterns has this team adopted?"
+
+#### 4. Platform Constraints
+
+- Check `.context/project-overview.md` for tech stack
+- Note environment limitations
+- Ask: "What platforms must this support?"
+
+#### 5. Performance Constraints
+
+- Review security-and-performance.md for targets
+- Default: Reasonable targets based on feature type
+- Ask: "Are there response time/memory targets?"
+
+### Population Logic (Directory Format Only)
+
+Generate constraints in overview.md.
+Keep concise (100-200 lines max).
+
+### Examples by Constraint Type
+
+**Minimal Constraints**:
+```markdown
+## Implementation Constraints
+
+- File Size: <500 lines (standard)
+- Complexity: <50 lines/function, <10 cyclomatic
+- Dependencies: Reuse existing patterns only
+- Platforms: Node.js 18+
+- Performance: No special requirements
+```
+
+**Strict Constraints** (security-critical):
+```markdown
+## Implementation Constraints
+
+- File Size: <300 lines (critical code)
+- Complexity: <30 lines/function, <5 cyclomatic
+- Dependencies:
+  - PROHIBITED: Direct database access (use repository pattern)
+  - REQUIRED: All auth code uses project's secure context
+- Platforms: Node.js 18+ with TypeScript strict mode
+- Performance: <100ms response time (p95)
+```
 
 ---
 
@@ -269,6 +328,74 @@ Ready for comprehensive planning.
 ### Phase 2: Test Strategy Design (CRITICAL - DO THIS FIRST)
 
 **Before writing ANY implementation steps, design the complete test strategy.**
+
+**2.0 Specification Collection (Foundation for Test Design)**
+
+Before designing tests, collect structured specifications across 6 areas:
+
+**A. Input/Output Formats**
+- Document data structures (pseudo-code format)
+- Define API contracts or function signatures
+- Example:
+  ```pseudo
+  function processPayment(paymentData)
+    input: { amount: number, currency: string, method: string }
+    output: { transactionId: string, status: enum, timestamp: datetime }
+  ```
+
+**B. Business Rules**
+- List validation rules and constraints
+- Define business logic requirements
+- Example:
+  ```pseudo
+  RULE: amount must be > 0 AND <= 10000
+  RULE: currency must be in [USD, EUR, GBP]
+  RULE: IF method == "credit_card" THEN require cardToken
+  ```
+
+**C. Edge Cases**
+- Identify boundary conditions
+- List unusual but valid inputs
+- Example:
+  ```pseudo
+  EDGE: amount = 0.01 (minimum)
+  EDGE: amount = 10000.00 (maximum)
+  EDGE: concurrent payments from same user
+  EDGE: payment retry after network timeout
+  ```
+
+**D. Integration Constraints**
+- Document external dependencies
+- Note rate limits, quotas, API constraints
+- Example:
+  ```pseudo
+  CONSTRAINT: Stripe API - 100 req/sec limit
+  CONSTRAINT: Database - max 1000 concurrent connections
+  CONSTRAINT: Payment gateway timeout - 30 seconds
+  ```
+
+**E. Performance Requirements**
+- Define response time expectations
+- Specify throughput or scalability needs
+- Example:
+  ```pseudo
+  REQUIREMENT: Payment processing < 500ms (p95)
+  REQUIREMENT: Support 1000 concurrent payments
+  REQUIREMENT: Handle 100K transactions/day
+  ```
+
+**F. Security Compliance**
+- Document authentication/authorization needs
+- Define data protection requirements
+- Example:
+  ```pseudo
+  SECURITY: Require OAuth 2.0 token (scope: payments:write)
+  SECURITY: Encrypt card data at rest (AES-256)
+  SECURITY: Mask card numbers in logs (show last 4 digits only)
+  SECURITY: PCI-DSS Level 1 compliance required
+  ```
+
+**Use these specifications to design comprehensive test scenarios in 2.2.**
 
 **2.1 Test Types Required**
 

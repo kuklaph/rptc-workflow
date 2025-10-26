@@ -79,7 +79,54 @@ git log --all --grep="fix" --oneline | head -10   # Fix history
 - Review test coverage
 - Analyze test patterns
 
-### 7. Code Pattern Analysis
+### 7. Complexity Analysis
+
+Identify refactoring candidates based on code complexity metrics (per `architecture-patterns.md` SOP).
+
+```bash
+# Files exceeding size limits (>500 lines)
+echo "### Files Exceeding Size Limits"
+find . -type f \( -name "*.js" -o -name "*.ts" -o -name "*.py" -o -name "*.java" -o -name "*.go" -o -name "*.rb" \) \
+  ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/build/*" \
+  -exec wc -l {} + 2>/dev/null | awk '$1 > 500 {print $2 " (" $1 " lines)"}' | sort -rn | head -10
+
+# Functions exceeding length limits (>50 lines) - heuristic for common languages
+echo ""
+echo "### Functions Exceeding Length Limits"
+# TypeScript/JavaScript: function declarations
+rg "^(function|const .* = \(|async function)" -A 60 --no-heading \
+  | awk '/^(function|const .* = \(|async function)/ {start=NR} /^}/ {if (NR-start > 50) print FILENAME":"start}' \
+  | head -10 2>/dev/null || echo "  (detection requires ripgrep)"
+
+# Deep abstraction chains (>3 inheritance/interface layers)
+echo ""
+echo "### Deep Abstraction Chains"
+# Heuristic: files with "extends" or "implements" keywords repeated >3 times
+rg "(extends|implements|inherits)" -c | awk -F: '$2 > 3 {print $1 " (" $2 " inheritance points)"}' | head -10
+
+# Single-implementation interfaces (premature abstraction)
+echo ""
+echo "### Potentially Premature Abstractions"
+# Heuristic: interface definitions with only one implementing class
+# (Language-specific, focusing on TypeScript/Java patterns)
+for iface in $(rg "^(interface|abstract class) \w+" -oIN --no-filename | sort -u); do
+  impl_count=$(rg "(implements|extends) ${iface##* }" -c | wc -l)
+  if [ "$impl_count" -eq 1 ]; then
+    echo "  - $iface (only 1 implementation found)"
+  fi
+done | head -10
+
+echo ""
+echo "**Recommendations:**"
+echo "- Files >500 lines: Consider splitting into feature modules"
+echo "- Functions >50 lines: Extract sub-functions with clear responsibilities"
+echo "- Deep abstractions: Flatten hierarchy, prefer composition over inheritance"
+echo "- Single-impl interfaces: Remove abstraction until 2nd implementation exists (Rule of Three)"
+echo ""
+echo "Reference: \`architecture-patterns.md\` (SOP) for refactoring guidance"
+```
+
+### 8. Code Pattern Analysis
 
 Search for key patterns:
 
@@ -89,14 +136,14 @@ rg "function\s+\w+" --type js -c  # Function definitions
 rg "export\s+(default|const)" -c  # Export patterns
 ```
 
-### 8. Recent Changes Deep Dive
+### 9. Recent Changes Deep Dive
 
 - Analyze last 30 commits
 - Identify active features
 - Note breaking changes
 - Review merge/branch patterns
 
-### 9. Comprehensive Summary Report
+### 10. Comprehensive Summary Report
 
 ```text
 📋 Deep Context Catch-Up
@@ -183,7 +230,7 @@ Based on comprehensive analysis:
 **Ready for**: [Very specific task recommendations based on deep understanding]
 ```
 
-### 10. Code Complexity Assessment
+### 11. Code Complexity Assessment (Optional Comprehensive Deep-Dive)
 
 Automated analysis to identify technical debt and AI-generated over-engineering.
 
@@ -510,9 +557,9 @@ After running all metrics, compile summary:
   - Systematic over-engineering
   - Significant KISS/YAGNI/DRY violations
 
-**Integration with Section 9 Summary**:
+**Integration with Section 10 Summary**:
 
-The Complexity Assessment summary should be referenced in the final "Comprehensive Summary Report" (section 9) under a new subsection:
+The Complexity Assessment summary should be referenced in the final "Comprehensive Summary Report" (section 10) under a new subsection:
 
 ```markdown
 **Technical Debt Analysis**:

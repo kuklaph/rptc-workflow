@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 1.2.0
+**Version**: 2.0.0
 **Status**: Beta
 **License**: MIT
 
@@ -57,7 +57,7 @@ RESEARCH → PLAN → TDD → COMMIT
 | --------------------------- | ---------------------- | ----------------------- |
 | `/rptc:research "topic"`    | Interactive discovery  | Complex/unfamiliar work |
 | `/rptc:plan "feature"`      | Collaborative planning | Medium to complex work  |
-| `/rptc:tdd "@plan.md"`      | TDD implementation     | Always (TDD required)   |
+| `/rptc:tdd "@plan/"`        | TDD implementation     | Always (TDD required)   |
 | `/rptc:commit [pr]`         | Verify and ship        | Ready to commit         |
 
 ### Helper Commands
@@ -67,8 +67,8 @@ RESEARCH → PLAN → TDD → COMMIT
 | `/rptc:helper-catch-up-quick`                     | Quick project context  | 2 min       |
 | `/rptc:helper-catch-up-med`                       | Medium project context | 5-10 min    |
 | `/rptc:helper-catch-up-deep`                      | Deep project analysis  | 15-30 min   |
-| `/rptc:helper-update-plan "@plan.md" "changes"`   | Modify existing plan   | As needed   |
-| `/rptc:helper-resume-plan "@plan.md"`             | Resume previous work   | After break |
+| `/rptc:helper-update-plan "@plan/" "changes"`     | Modify existing plan   | As needed   |
+| `/rptc:helper-resume-plan "@plan/"`               | Resume previous work   | After break |
 | `/rptc:helper-cleanup`                            | Review completed plans | Periodic    |
 
 ### Admin Commands
@@ -97,7 +97,7 @@ RESEARCH → PLAN → TDD → COMMIT
 ```bash
 # Skip research, plan directly
 /rptc:plan "add user profile avatar upload"
-/rptc:tdd "@user-avatar-upload.md"
+/rptc:tdd "@user-avatar-upload/"
 /rptc:commit pr
 ```
 
@@ -111,14 +111,57 @@ RESEARCH → PLAN → TDD → COMMIT
 /rptc:research "payment processing integration"
 
 # Collaborative planning
-/rptc:plan "@payment-processing.md"
+/rptc:plan "payment processing integration"
 
 # TDD implementation with quality gates
-/rptc:tdd "@payment-processing.md"
+/rptc:tdd "@payment-processing/"
 
 # Verify and ship
 /rptc:commit pr
 ```
+
+---
+
+## Advanced Features
+
+### Test-Driven Generation (TDG) Mode
+
+**Purpose:** AI-accelerated comprehensive test generation from plan specifications to dramatically reduce TDD overhead.
+
+**Benefits:**
+- Reduces TDD overhead by ~80% (~50 tests in <5 min vs. 10-20 min manually)
+- Augments manually-planned scenarios (not replaces)
+- Diverse coverage: happy path variations, edge cases, error conditions
+- Respects implementation constraints from plan
+
+**Usage:**
+
+```bash
+# Standard TDD execution
+/rptc:tdd "@plan-name/"
+
+# With Test-Driven Generation mode (AI-accelerated test generation)
+/rptc:tdd "@plan-name/" --tdg
+
+# TDG generates ~50 additional tests per step in <5 minutes
+# Augments planned test scenarios (not replaces)
+```
+
+**Configuration:** Opt-in by default. Set `tdgMode: "enabled"` in `.claude/settings.json` to always use TDG.
+
+**Strategy:** AUGMENTATION (planned scenarios + AI-generated tests)
+
+**When to use TDG:**
+- Complex features with many edge cases
+- New implementations requiring comprehensive coverage
+- Security-critical code (thorough error condition testing)
+- Unfamiliar domains (AI suggests test scenarios you might miss)
+
+**When to skip TDG:**
+- Simple CRUD operations (planned tests sufficient)
+- Refactoring with existing test coverage
+- Hot fixes (time pressure, manual tests faster)
+- Exploratory work (test strategy unclear)
 
 ---
 
@@ -160,11 +203,14 @@ SOPs are resolved in this order (highest priority first):
 ### Available SOPs
 
 - `testing-guide.md` - Testing frameworks, patterns, TDD guidance
+- `flexible-testing-guide.md` - Flexible assertions for AI-generated and non-deterministic code; extends testing-guide with semantic similarity, behavioral testing, and safety mechanisms
 - `architecture-patterns.md` - Architecture and design patterns
 - `frontend-guidelines.md` - Frontend design, visual style, accessibility
 - `git-and-deployment.md` - Git workflow, CI/CD, deployment
 - `languages-and-style.md` - Language conventions, formatters, linters
 - `security-and-performance.md` - Security practices, performance optimization
+- `post-tdd-refactoring.md` - Comprehensive 5-phase refactoring checklist for efficiency agent. Includes Code Simplicity metrics, Rule of Three abstraction framework, AI over-engineering detection, and tool configurations by language
+- `todowrite-guide.md` - TodoWrite integration patterns, state management, and best practices for progress tracking
 
 ---
 
@@ -200,6 +246,7 @@ rptc-workflow/
 │   └── master-documentation-specialist-agent.md
 ├── sop/                         # Default SOPs (read-only)
 │   ├── testing-guide.md
+│   ├── flexible-testing-guide.md
 │   ├── architecture-patterns.md
 │   ├── frontend-guidelines.md
 │   ├── git-and-deployment.md
@@ -275,8 +322,7 @@ RPTC uses an **incremental sub-agent architecture** that dramatically improves t
 
 ```text
 .rptc/plans/
-├── simple-feature.md                    # Monolithic (≤2 steps)
-└── complex-feature/                     # Directory-based (>2 steps)
+└── feature-name/                        # Directory format (v2.0.0+ all features)
     ├── overview.md                      # Test strategy, acceptance criteria
     ├── step-01.md                       # Individual step details
     ├── step-02.md
@@ -286,12 +332,11 @@ RPTC uses an **incremental sub-agent architecture** that dramatically improves t
 **Usage:**
 
 ```bash
-# Plan automatically chooses format based on complexity
-/rptc:plan "add user authentication"     # Creates monolithic or directory
+# Plan creates directory format (v2.0.0+)
+/rptc:plan "add user authentication"     # Creates directory structure
 
-# TDD automatically detects format
-/rptc:tdd "@user-authentication.md"      # Monolithic plan
-/rptc:tdd "@user-authentication/"        # Directory-based plan
+# TDD uses directory format
+/rptc:tdd "@user-authentication/"        # Directory-based plan (required)
 ```
 
 ---
@@ -313,9 +358,7 @@ When you approve delegation, specialized AI agents provide expert analysis:
 **Purpose**: Create comprehensive TDD-ready plans
 **When**: Planning phase (with permission)
 **Provides**: Detailed steps, test strategy, file changes, risks
-**Modes**:
-- **Mode 1 (Monolithic)**: Single-file plan for simple features (≤2 steps)
-- **Mode 2 (Incremental)**: Directory-based with sub-agents for complex features (>2 steps)
+**Architecture**: Incremental sub-agent delegation with directory format (v2.0.0+ all features)
 
 ### Master Efficiency Agent
 
@@ -380,7 +423,15 @@ All RPTC configuration lives under the `rptc` namespace in `.claude/settings.jso
     "maxPlanningAttempts": 10,
     "customSopPath": ".rptc/sop",
     "researchOutputFormat": "html",
-    "htmlReportTheme": "dark"
+    "htmlReportTheme": "dark",
+    "verificationMode": "focused",
+    "tdgMode": "disabled",
+    "qualityGatesEnabled": false,
+    "discord": {
+      "webhookUrl": "",
+      "notificationsEnabled": false,
+      "verbosity": "summary"
+    }
   }
 }
 ```
@@ -395,10 +446,33 @@ All RPTC configuration lives under the `rptc` namespace in `.claude/settings.jso
 | `testCoverageTarget` | `85` | Minimum test coverage percentage (used in commit phase) |
 | `maxPlanningAttempts` | `10` | Maximum auto-retry attempts during TDD implementation |
 | `customSopPath` | `".rptc/sop"` | Project-specific SOP directory (for fallback chain) |
-| `researchOutputFormat` | `"html"` | Research output format for exploratory mode: `"html"`, `"markdown"`, or `"both"` |
+| `researchOutputFormat` | `"html"` | Default output format for exploration mode "auto" save option. Valid: `"html"` (dark-theme reports), `"md"` (editable files), `"both"` (both formats in same directory). HTML creates professional formatted reports, Markdown creates editable text files. |
 | `htmlReportTheme` | `"dark"` | HTML report theme: `"dark"` (GitHub Dark with WCAG AA compliance) |
+| `verificationMode` | `"focused"` | Independent verification after GREEN phase: `"focused"` (intent/coverage/overfitting only, <5 min), `"disabled"` (skip verification), `"exhaustive"` (future enhancement) |
+| `tdgMode` | `"disabled"` | Test-Driven Generation mode: `"disabled"` (default, use --tdg flag to enable), `"enabled"` (always use TDG), `"auto"` (future: heuristic-based) |
+| `qualityGatesEnabled` | `false` | Enable quality gate checkpoints (efficiency & security reviews) during TDD phase |
+| `discord.webhookUrl` | `""` | Discord webhook URL for notifications (format: `https://discord.com/api/webhooks/...`) |
+| `discord.notificationsEnabled` | `false` | Enable/disable Discord workflow notifications |
+| `discord.verbosity` | `"summary"` | Notification detail level: `"summary"` (milestones only), `"detailed"` (phase updates), `"verbose"` (all steps) |
 
 **Note:** The init command (`/rptc:admin-init`) automatically creates this file with sensible defaults.
+
+### Research Command Modes
+
+The `/rptc:research` command operates in two modes:
+
+**Exploration Mode:**
+- Findings presented inline immediately
+- Optional save prompt after findings displayed (skip/html/md/both/auto)
+- "auto" option uses `researchOutputFormat` config setting (default: html)
+- No PM sign-off required
+- Files saved to `.rptc/research/[topic-slug]/research.{html,md}`
+
+**Planning-Prep Mode:**
+- Findings presented inline immediately
+- PM sign-off required before save
+- Always saves as Markdown to `.rptc/research/[topic-slug].md`
+- Creates formal research documentation for planning phase
 
 ### Thinking Mode Configuration (v1.0.7+)
 
@@ -451,6 +525,189 @@ Default is `"think"` (~4K tokens) to be mindful of Pro plan token limits. Max pl
 
 ---
 
+### Discord Notifications (Optional)
+
+RPTC supports real-time notifications via Discord webhooks for long-running workflows. Get notified when research completes, planning finishes, TDD steps progress, or quality gates pass - without watching the terminal.
+
+#### Setup
+
+**1. Create Discord Webhook:**
+- Open Discord Server Settings > Integrations > Webhooks
+- Click "New Webhook"
+- Copy webhook URL (starts with `https://discord.com/api/webhooks/...`)
+
+**2. Configure RPTC:**
+
+Edit `.claude/settings.json`:
+
+```json
+{
+  "rptc": {
+    "discord": {
+      "webhookUrl": "https://discord.com/api/webhooks/YOUR_WEBHOOK_URL",
+      "notificationsEnabled": true,
+      "verbosity": "summary"
+    }
+  }
+}
+```
+
+**3. Security Warning:**
+- **Webhook URLs are credentials** - treat as secrets
+- Add `.claude/settings.json` to `.gitignore` if committing
+- Never share webhook URLs publicly
+- Consider using environment variables for team projects
+
+#### Verbosity Levels
+
+| Level | Notifications | Best For |
+|-------|--------------|----------|
+| `summary` | Start + final result only | Minimal noise (default, recommended) |
+| `detailed` | Start + major milestones + final | Moderate monitoring |
+| `verbose` | All steps (every phase) | Debugging (may trigger rate limits) |
+
+**Recommendation:** Start with `summary` mode to avoid notification fatigue.
+
+#### Supported Commands
+
+Notifications are available for:
+
+| Command | Notifications |
+|---------|--------------|
+| `/rptc:research` | Research mode determined, discovery complete, saved |
+| `/rptc:plan` | Planning started, scaffold complete, plan saved |
+| `/rptc:tdd` | Step started, quality gates passed, implementation complete |
+| `/rptc:commit` | Tests passing, committed, PR created |
+| `/rptc:helper-resume-plan` | Plan resumed successfully |
+
+#### Troubleshooting
+
+**Notifications not working?**
+1. Verify webhook URL is correct (test with curl)
+2. Check `notificationsEnabled: true` in settings
+3. Ensure discord-notify skill is installed (bundled with plugin)
+4. Check console for warning messages
+
+**Rate limiting?**
+- Discord webhooks: 30 requests/60 seconds per webhook
+- Use `summary` verbosity to avoid limits
+- Avoid `verbose` mode for large features (>10 steps)
+
+**Security concerns?**
+- Webhook URLs never appear in logs or commits
+- All notification failures are silent (workflow continues)
+- Consider per-project webhooks for team visibility
+
+---
+
+## Advanced Features
+
+### Auto-Handoff with Dynamic Prediction (Roadmap #22)
+
+**Purpose:** Enables unlimited feature size by intelligently predicting context usage and triggering checkpoints before capacity is reached.
+
+**Always Enabled:** Auto-handoff has no configuration - it's automatic. This ensures no plan size limitations.
+
+**How It Works:**
+
+RPTC uses a **hybrid prediction model** that combines three estimation methods:
+
+1. **File-Based**: Analyzes next step file size (characters ÷ 4 × 1.25 for markdown/code mix)
+2. **Historical Average**: Average of last 3 completed steps (reliable for consistent patterns)
+3. **Growth Rate**: Extrapolates from recent delta trends (detects escalating complexity)
+
+The system takes the **maximum (most conservative)** of all three methods, then applies research-validated safety factors:
+
+- **1.5× safety multiplier** (overflow protection)
+- **+3% margin** (PREDICTOKEN study recommendation)
+- **Calibration adjustment** (improves accuracy after 3-5 steps)
+
+**80% Hard Cap:**
+
+Auto-handoff triggers when predicted next step would exceed **160,000 tokens (80% of 200K capacity)**.
+
+**Why 80% and not 90%?**
+- Research shows response quality degrades at 80-90% capacity
+- 80% provides safety buffer for estimation error (±10% typical)
+- MCP tools and quality gates consume additional overhead not in prediction
+
+**When Handoff Occurs:**
+
+```
+Current Context: 155K tokens
+Next Step Predicted: 12K tokens (with safety factors)
+Projected Total: 167K tokens
+Hard Cap: 160K tokens
+Decision: HANDOFF TRIGGERED (would exceed cap)
+```
+
+**Resume Workflow:**
+
+After handoff, continue in fresh context:
+
+```bash
+/rptc:helper-resume-plan "@feature-name/"
+```
+
+The helper:
+1. Loads `handoff.md` checkpoint
+2. Restores historical usage data and calibration
+3. Initializes fresh context (15K starting point)
+4. Continues from next uncompleted step
+
+**Prediction Accuracy:**
+
+- **Cold Start (Steps 1-3):** ±15-20% error (uses conservative floor of 25K/step)
+- **Calibrated (Steps 4+):** ±5-10% error (hybrid model with calibration)
+- **Improves Over Time:** Calibration adjusts multiplier based on actual vs predicted
+
+**Example Handoff Checkpoint:**
+
+```markdown
+# TDD Handoff Checkpoint
+
+**Feature:** user-authentication
+**Checkpoint Date:** 2025-01-24 15:30:00
+**Trigger Reason:** capacity_exceeded
+
+## Status Summary
+**Progress:** 13 of 20 steps completed (65%)
+**Next Step:** 14 (step-14.md)
+
+## Context Metrics
+**Current Context Usage:** 156,000 tokens (78% of capacity)
+**Projected with Next Step:** 174,000 tokens (87% of capacity)
+**Why Handoff Triggered:** Next step predicted at 18K tokens, would exceed 160K hard cap
+
+## Calibration Data (for Resume)
+**Historical Usage Array:** [...preserved for next session...]
+**Calibration Multiplier:** 1.05× (learned from previous steps)
+**Prediction Errors:** [...tracked for accuracy improvement...]
+
+## Resume Instructions
+/rptc:helper-resume-plan "@user-authentication/"
+```
+
+**Troubleshooting:**
+
+**Q: Handoff triggered after only 5 steps?**
+A: Large step files or high complexity. Review `.rptc/tdd-prediction.log` for per-step usage. Consider splitting steps if >30K each.
+
+**Q: Prediction consistently inaccurate?**
+A: System detects this (3+ errors >20%) and switches to conservative mode. Check if MCP servers adding unexpected overhead.
+
+**Q: Can I disable auto-handoff?**
+A: No - it's always enabled. This prevents plan size limitations. Trust the prediction system or split plan manually if needed.
+
+**Research Foundation:**
+
+See `.rptc/research/dynamic-context-prediction.md` for complete validation:
+- 25 sources (Anthropic, PREDICTOKEN, Azure, academic)
+- Hybrid approach validated across domains (30-50% better than single-method)
+- Safety factors proven in production systems
+
+---
+
 ## Best Practices
 
 ### When to Use Each Phase
@@ -475,6 +732,15 @@ Default is `"think"` (~4K tokens) to be mindful of Pro plan token limits. Max pl
 - **Efficiency Gate**: Catches over-engineering, enforces KISS/YAGNI
 - **Security Gate**: Prevents vulnerabilities before they ship
 - **All tests must remain passing** after each gate
+
+### AI Coding Best Practices
+
+For comprehensive guidance on working effectively with AI-generated code:
+
+- **Documentation**: `docs/AI_CODING_BEST_PRACTICES.md`
+- **Topics**: Prompting strategies, red flags, simplicity directives, before/after examples
+- **Read Time**: 10-15 minutes
+- **Use When**: Before accepting AI code, during code review, troubleshooting AI output quality
 
 ---
 

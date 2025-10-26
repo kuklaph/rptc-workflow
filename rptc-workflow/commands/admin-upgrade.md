@@ -113,7 +113,7 @@ echo ""
 
 ```bash
 # Plugin version (update this with each release)
-PLUGIN_VERSION="1.2.0"
+PLUGIN_VERSION="2.0.0"
 
 # Load workspace version
 if command -v jq >/dev/null 2>&1; then
@@ -306,6 +306,10 @@ if command -v jq >/dev/null 2>&1; then
 
   if ! echo "$CURRENT_CONFIG" | jq -e '.rptc.customSopPath' >/dev/null 2>&1; then
     MISSING_FIELDS+=("customSopPath")
+  fi
+
+  if ! echo "$CURRENT_CONFIG" | jq -e '.rptc.qualityGatesEnabled' >/dev/null 2>&1; then
+    MISSING_FIELDS+=("qualityGatesEnabled")
   fi
 
   if [ ${#MISSING_FIELDS[@]} -gt 0 ]; then
@@ -634,7 +638,8 @@ if [ ${#FIXES_TO_APPLY[@]} -gt 0 ]; then
               .rptc.docsLocation //= "docs" |
               .rptc.testCoverageTarget //= 85 |
               .rptc.maxPlanningAttempts //= 10 |
-              .rptc.customSopPath //= ".rptc/sop"' \
+              .rptc.customSopPath //= ".rptc/sop" |
+              .rptc.qualityGatesEnabled //= false' \
             .claude/settings.json > "$TEMP_FILE"
           mv "$TEMP_FILE" .claude/settings.json
           echo "✓ Added missing configuration fields"

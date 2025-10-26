@@ -9,9 +9,15 @@ The user is the **project manager** - they approve quality gates and final compl
 
 Arguments:
 
-- Directory plan: `/rptc:tdd "@plan-name/"` (new directory structure)
-- Monolithic plan: `/rptc:tdd "@plan-name.md"` (legacy single file)
-- Work item (no plan): `/rptc:tdd "simple calculator"`
+- Directory plan: `/rptc:tdd "@plan-name/"` (REQUIRED format in v2.0.0+)
+- Monolithic plan: `/rptc:tdd "@plan-name.md"` (DEPRECATED - shows migration guide)
+- Work item (no plan): `/rptc:tdd "simple calculator"` (generates directory plan on-the-fly)
+- With TDG mode: `/rptc:tdd "@plan-name/" --tdg` (AI-accelerated test generation)
+
+**Flags:**
+- `--tdg`: Enable Test-Driven Generation mode (AI generates ~50 comprehensive tests per step)
+
+**Note**: All plans must use directory format. Monolithic format deprecated in v2.0.0.
 
 ## Core Mission
 
@@ -37,6 +43,40 @@ As a Master specialist agent, you have access to helper commands:
 
 Use these if you need additional project context during implementation.
 
+### Implementation Constraints (Optional in Plans)
+
+Plans may include an **Implementation Constraints** section that guides TDD execution:
+
+**What are Implementation Constraints?**
+- Specific rules and limits that TDD sub-agents must follow during implementation
+- Defined in the plan's `overview.md` file (directory format)
+- Ensures consistent code quality and adherence to project standards
+
+**Common Constraint Types**:
+- **File size limits**: Maximum lines per file (e.g., <500 lines)
+- **Simplicity requirements**: No abstractions until 3rd use (Rule of Three)
+- **Architectural patterns**: Required patterns for specific functionality
+- **Security checkpoints**: BLOCKING gates before sensitive operations
+- **Performance budgets**: Response time limits, resource constraints
+
+**Example Constraints Section** (from plan):
+```markdown
+## Implementation Constraints
+
+- File size: All implementation files must be <500 lines
+- Simplicity: No abstractions until pattern appears 3+ times (Rule of Three)
+- Security: BLOCKING checkpoint required before any database writes
+- Testing: Minimum 85% coverage for new code
+```
+
+**How Constraints are Used**:
+- Automatically extracted from plan during Step 4d (Phase 0)
+- Passed to TDD sub-agents in delegation prompts
+- Sub-agents MUST respect constraints or request clarification
+- If plan lacks constraints section, defaults to standard best practices (KISS/YAGNI)
+
+**Backward Compatibility**: Plans without constraints section work normally - no errors, just use default best practices.
+
 ## Step 0: Load SOPs
 
 Load SOPs using fallback chain (highest priority first):
@@ -48,6 +88,7 @@ Load SOPs using fallback chain (highest priority first):
 **SOPs to reference**:
 
 - Testing guide: TDD methodology, test patterns, coverage goals
+- Flexible testing guide: Flexible assertions for AI-generated code and non-deterministic outputs
 - Languages & style: Language conventions, formatters, linters
 - Architecture patterns: Error handling, logging patterns
 - Security: Security best practices
@@ -55,6 +96,7 @@ Load SOPs using fallback chain (highest priority first):
 **Reference SOPs when**:
 
 - Writing tests (testing guide)
+- Writing assertions for AI-generated or non-deterministic code (flexible testing guide)
 - Implementing code (languages & style)
 - Error handling (architecture patterns)
 - Security concerns (security guide)
@@ -74,6 +116,9 @@ Check for project-specific testing strategies or code style overrides.
    - `rptc.defaultThinkingMode` → THINKING_MODE (default: "think")
    - `rptc.artifactLocation` → ARTIFACT_LOC (default: ".rptc")
    - `rptc.maxPlanningAttempts` → MAX_ATTEMPTS (default: 10)
+   - `rptc.discord.notificationsEnabled` → DISCORD_ENABLED (default: false)
+   - `rptc.discord.webhookUrl` → DISCORD_WEBHOOK (default: "")
+   - `rptc.discord.verbosity` → DISCORD_VERBOSITY (default: "summary")
 
 3. **Display loaded configuration**:
    ```text
@@ -81,37 +126,125 @@ Check for project-specific testing strategies or code style overrides.
      Artifact location: [ARTIFACT_LOC value]
      Thinking mode: [THINKING_MODE value]
      Max planning attempts: [MAX_ATTEMPTS value]
+     Discord notifications: [DISCORD_ENABLED value]
    ```
+
+4. **Create Discord notification helper function**:
+
+```bash
+notify_discord() {
+  local message="$1"
+  local min_verbosity="${2:-summary}"  # summary, detailed, or verbose
+
+  # Check if notifications enabled
+  if [ "$DISCORD_ENABLED" != "true" ] || [ -z "$DISCORD_WEBHOOK" ]; then
+    return 0  # Silent skip
+  fi
+
+  # Check verbosity level
+  case "$DISCORD_VERBOSITY" in
+    summary)
+      if [ "$min_verbosity" != "summary" ]; then
+        return 0  # Skip this notification
+      fi
+      ;;
+    detailed)
+      if [ "$min_verbosity" = "verbose" ]; then
+        return 0  # Skip verbose-only notifications
+      fi
+      ;;
+    verbose)
+      # Always send
+      ;;
+  esac
+
+  # Send notification (fail-safe, never block workflow)
+  if ! bash "${CLAUDE_PLUGIN_ROOT}/skills/discord-notify/scripts/notify.sh" \
+    "$DISCORD_WEBHOOK" "$message" 2>/dev/null; then
+    echo "⚠️  Discord notification failed (continuing workflow)" >&2
+  fi
+}
+```
 
 **Use these values throughout the command execution.**
 
 **Note**: References to these variables appear throughout this command as `$VARIABLE_NAME` or `[VARIABLE value]` - use the actual loaded values from this step.
 
+## Step 0a2: Parse Command Arguments
+
+**Parse command-line flags and plan reference from user input:**
+
+```bash
+# Initialize variables
+PLAN_REF=""
+TDG_FLAG=false
+
+# Parse all arguments
+for arg in "$@"; do
+  case "$arg" in
+    --tdg)
+      TDG_FLAG=true
+      ;;
+    @*)
+      PLAN_REF="$arg"
+      ;;
+    *)
+      # First non-flag argument is plan reference
+      if [ -z "$PLAN_REF" ]; then
+        PLAN_REF="$arg"
+      fi
+      ;;
+  esac
+done
+
+# Validate plan reference provided
+if [ -z "$PLAN_REF" ]; then
+  echo "❌ Error: Plan reference required"
+  echo "   Usage: /rptc:tdd \"@plan-name/\" [--tdg]"
+  echo ""
+  echo "   Examples:"
+  echo "     /rptc:tdd \"@user-authentication/\""
+  echo "     /rptc:tdd \"@user-authentication/\" --tdg"
+  echo ""
+  exit 1
+fi
+
+# Display parsed arguments
+echo "Parsed arguments:"
+echo "  Plan reference: $PLAN_REF"
+if [ "$TDG_FLAG" = "true" ]; then
+  echo "  TDG mode: Enabled (--tdg flag detected)"
+else
+  echo "  TDG mode: Check configuration (.claude/settings.json)"
+fi
+echo ""
+```
+
+**Variables set:**
+- `PLAN_REF`: Plan reference (e.g., `"@plan-name/"`)
+- `TDG_FLAG`: Boolean indicating if `--tdg` flag was provided
+
 ### Phase 0: Load Plan (REQUIRED)
 
 **Step 1: Detect Plan Format**
 
-The plan can be in two formats:
-1. **Directory format**: Argument ends with `/` (e.g., `@feature-name/`)
-   - New structure created by `/rptc:plan` (v1.2.0+)
-   - Enables token-efficient sub-agent delegation
-   - Plan stored as directory with `overview.md` + `step-*.md` files
+**Supported Format (v2.0.0+):**
+- **Directory format ONLY**: Argument must end with `/` (e.g., `@feature-name/`)
+  - Plan stored as directory with `overview.md` + `step-*.md` files
+  - Enables token-efficient sub-agent delegation
+  - All plans must use this format
 
-2. **Monolithic format**: Argument ends with `.md` (e.g., `@feature-name.md`)
-   - Legacy structure (pre-v1.2.0)
-   - Backward compatible with existing plans
-   - Entire plan in single markdown file
-
-**Detection Logic**:
+**Legacy Format Detection**:
 
 ```text
 If plan argument ends with "/":
-  → Directory format (new structure)
+  → Directory format (supported)
   → Load overview + delegate steps to sub-agents
 
 Else if plan argument ends with ".md":
-  → Monolithic format (legacy structure)
-  → Load entire plan + execute directly
+  → Legacy monolithic format (DEPRECATED in v2.0.0)
+  → Show migration guide
+  → Reject with error
 
 Else:
   → Error: Invalid format
@@ -123,8 +256,23 @@ Else:
 If directory format detected:
 
 1. **Verify overview file exists**: `$ARTIFACT_LOC/plans/[plan-name]/overview.md`
-   - If missing: Error with clear message
-   - Suggestion: "Run `/rptc:plan` to regenerate plan"
+
+   ```bash
+   OVERVIEW_FILE="${ARTIFACT_LOC}/plans/${PLAN_NAME}/overview.md"
+   if [ ! -f "$OVERVIEW_FILE" ]; then
+     echo "❌ Error: Plan overview not found"
+     echo ""
+     echo "   Expected file: $OVERVIEW_FILE"
+     echo "   Plan reference: @${PLAN_NAME}/"
+     echo ""
+     echo "   This indicates incomplete or corrupted plan structure."
+     echo ""
+     echo "   Fix: Run /rptc:plan to regenerate the plan"
+     echo "   Or: Check if plan directory exists: ${ARTIFACT_LOC}/plans/${PLAN_NAME}/"
+     echo ""
+     exit 1
+   fi
+   ```
 
 2. **Load overview content**:
    - Read overview file using Read tool
@@ -158,57 +306,110 @@ Ready to begin TDD implementation with sub-agent delegation.
 I will delegate each step to a TDD sub-agent that executes RED → GREEN → REFACTOR.
 ```
 
-**Step 2b: Load Monolithic Format Plan** (Backward Compatibility)
+**Context Efficiency Strategy** (Directory Format):
 
-If monolithic format detected:
+For directory-based plans (features >2 steps):
+- **Main context loads**: `overview.md` ONLY (~3K tokens)
+- **Sub-agents load**: Individual `step-0N.md` files (~10-15K each)
 
-1. Read `$ARTIFACT_LOC/plans/[plan-name].md`
-2. Extract implementation steps (look for checkbox items `- [ ]`)
-3. Note test strategy
-4. Confirm understanding
+**Why this matters**:
+- **70-80% context savings** for large features
+- Main context focuses on coordination, not implementation details
+- Each step's implementation isolated in sub-agent context
+- Enables features with 10-15 steps (vs. 3-5 without optimization)
 
-**Present Plan Summary** (Monolithic Format):
+**Trade-off**:
+- Main context has strategic view (overview)
+- Sub-agents have tactical view (step details)
+- Coordination overhead: ~5K tokens per step (delegation + result processing)
 
-**FORMATTING NOTE:** Ensure each list item is on its own line with proper newlines.
+This is an **intentional design choice** to maximize feature complexity capacity.
+
+**Step 2b: Handle Legacy Monolithic Format** (BREAKING CHANGE - v2.0.0)
+
+If monolithic format detected (argument ends with `.md`):
+
+**Show Migration Error**:
 
 ```text
-📋 Plan Loaded (Monolithic Format): [Work Item Name]
+═══════════════════════════════════════════════════════════════
+  ❌ MONOLITHIC PLAN FORMAT NO LONGER SUPPORTED (v2.0.0)
+═══════════════════════════════════════════════════════════════
 
-Steps to implement: [N]
-1. [ ] [Step 1] - [Brief description]
-2. [ ] [Step 2] - [Brief description]
-...
+Your plan reference: @[plan-name].md
+Legacy format: Monolithic (single .md file)
+Status: DEPRECATED and removed in v2.0.0
 
-Test Strategy:
-- Coverage target: 80%+
-- Test files: [list]
+═══════════════════════════════════════════════════════════════
+  MIGRATION REQUIRED
+═══════════════════════════════════════════════════════════════
 
-Ready to begin TDD implementation (direct execution).
-I will keep the plan synchronized by marking tasks complete `- [x]` as I progress.
+Monolithic plan format was removed in v2.0.0 for:
+✅ 79% token reduction (directory format)
+✅ Better timeout handling (distributed sub-agents)
+✅ Unlimited feature size (context-aware handoff)
+✅ Simpler codebase (single execution path)
+
+OPTION 1: Regenerate Plan (Recommended)
+────────────────────────────────────────
+
+  /rptc:plan "[feature description]"
+
+  This creates a new directory-format plan optimized for v2.0.0.
+  Your old plan remains at .rptc/plans/[plan-name].md for reference.
+
+OPTION 2: Manual Conversion (Advanced)
+────────────────────────────────────────
+
+  1. Create directory: .rptc/plans/[plan-name]/
+  2. Split monolithic plan into:
+     - overview.md (test strategy, acceptance criteria, risks)
+     - step-01.md through step-NN.md (individual steps)
+  3. Follow template: ${CLAUDE_PLUGIN_ROOT}/templates/plan-directory/
+
+  See: docs/MIGRATION_GUIDE.md for detailed instructions
+
+OPTION 3: Use Old Version (Temporary)
+────────────────────────────────────────
+
+  If you need to complete work using monolithic format:
+
+  1. Downgrade plugin: /plugin install rptc@1.2.0
+  2. Complete your work
+  3. Upgrade: /plugin install rptc@latest
+  4. Regenerate plans in new format
+
+═══════════════════════════════════════════════════════════════
+
+For help: See docs/RPTC_WORKFLOW_GUIDE.md - "Migration from Monolithic Plans"
 ```
+
+**HALT EXECUTION**: Do not proceed with TDD. User must migrate plan first.
 
 **Step 3: Handle Invalid Format**
 
-If plan argument doesn't match expected patterns:
+If plan argument doesn't match expected patterns (not `/` or `.md`):
 
 ```text
 ❌ Error: Invalid plan argument format
 
-Expected formats:
+Expected format (v2.0.0+):
 - Directory: /rptc:tdd "@plan-name/"
-- Monolithic: /rptc:tdd "@plan-name.md"
 
 Your input: "@[user's input]"
 
-Please specify plan format explicitly.
+The plan reference must end with "/" for directory format.
+All plans must use directory structure in v2.0.0+.
+
+To create a plan: /rptc:plan "[feature description]"
 ```
 
-**If no plan provided** (simple work item):
+**If no plan provided** (simple work item description):
 
-1. Create quick implementation plan
+1. Create quick implementation plan (directory format)
 2. Define test scenarios
-3. List steps
-4. Proceed with TDD (direct execution, monolithic approach)
+3. List steps (create step files)
+4. Proceed with TDD (sub-agent delegation)
 
 **CRITICAL - Plan Synchronization**:
 
@@ -264,6 +465,761 @@ After loading the plan, parse the Configuration section to determine which quali
 
 **Use these values throughout command execution** to conditionally generate TODOs and skip/execute quality gate phases.
 
+**Step 4d: Extract Implementation Constraints** (Phase 3B - Roadmap Item #5)
+
+After loading the plan, extract implementation constraints to guide TDD execution.
+
+1. **Extract constraints from plan** (Directory Format Only):
+
+   ```bash
+   # Directory format - always load from overview.md
+   CONSTRAINTS=$(sed -n '/^## Implementation Constraints/,/^## /p' "${PLAN_DIR}/overview.md" | head -n -1)
+
+   # Graceful degradation: default if section missing
+   [ -z "$CONSTRAINTS" ] && CONSTRAINTS="No specific constraints defined."
+   ```
+
+2. **Purpose of Implementation Constraints**:
+
+   Implementation Constraints ensure sub-agents respect:
+   - File size limits (e.g., <500 lines per file)
+   - Simplicity directives (KISS/YAGNI principles)
+   - Pattern reuse requirements (Rule of Three)
+   - Security checkpoints (from security-and-performance.md)
+   - Project-specific architectural decisions
+
+3. **Usage During Execution**:
+
+   - Constraints are passed to TDD sub-agents in their delegation prompt
+   - Sub-agents MUST respect constraints during implementation
+   - If constraints conflict with approach, sub-agent should STOP and request clarification
+   - Graceful handling: Plans without constraints section default to standard best practices
+
+4. **Display constraints** (if present):
+   ```text
+   Implementation Constraints Loaded:
+   [Display extracted constraints or "No specific constraints defined."]
+
+   Sub-agents will respect these constraints during TDD execution.
+   ```
+
+**Note**: For Monolithic Format (legacy), constraints extraction can be added if needed, but directory format is recommended for constraint-aware execution.
+
+**Step 4e: Validate Implementation Constraints** (Roadmap #14 - Quality Assurance)
+
+After extracting constraints, validate they are readable and complete:
+
+```bash
+# Validate constraints are readable (not empty or corrupted)
+if [ "$CONSTRAINTS" = "No specific constraints defined." ]; then
+  echo "⚠️  No implementation constraints found in overview.md"
+  echo "   Sub-agents will use standard best practices (KISS/YAGNI)"
+else
+  echo "✅ Implementation Constraints Loaded:"
+  echo "$CONSTRAINTS" | head -n 5  # Show first 5 lines
+  echo ""
+fi
+```
+
+**Purpose**: Provide clear feedback about constraint availability for debugging and transparency.
+
+## Phase 0e: Validation Utilities (Roadmap #14 - Reusable Logic)
+
+**Purpose**: Centralized validation functions for plan structure integrity checks.
+
+### Function: Validate Step File Exists
+
+```bash
+# Validates step file exists and provides helpful error if missing
+# Usage: validate_step_file STEP_NUM PLAN_DIR TOTAL_STEPS
+# Returns: 0 if valid, exits with error if invalid
+validate_step_file() {
+  local STEP_NUM=$1
+  local PLAN_DIR=$2
+  local TOTAL_STEPS=$3
+
+  STEP_FILE="${PLAN_DIR}step-$(printf '%02d' $STEP_NUM).md"
+
+  if [ ! -f "$STEP_FILE" ]; then
+    echo "❌ Error: Step $STEP_NUM file not found"
+    echo "   Expected: $STEP_FILE"
+    echo "   Total steps in plan: $TOTAL_STEPS"
+    echo ""
+    echo "   Possible causes:"
+    echo "   - Plan was modified after generation"
+    echo "   - Step file was deleted"
+    echo "   - Step numbering gap exists"
+    echo ""
+    echo "   Fix: Run /rptc:helper-update-plan to regenerate plan"
+    exit 1
+  fi
+
+  return 0
+}
+```
+
+### Function: Validate Step Sequence
+
+```bash
+# Validates no gaps in step numbering
+# Usage: validate_step_sequence PLAN_DIR EXPECTED_STEPS
+# Returns: 0 always (warnings only, not fatal)
+validate_step_sequence() {
+  local PLAN_DIR=$1
+  local EXPECTED_STEPS=$2
+
+  ACTUAL_STEPS=$(find "$PLAN_DIR" -name "step-*.md" 2>/dev/null | wc -l)
+
+  if [ "$ACTUAL_STEPS" -ne "$EXPECTED_STEPS" ]; then
+    echo "⚠️  Warning: Step count mismatch"
+    echo "   Overview declares: $EXPECTED_STEPS steps"
+    echo "   Step files found: $ACTUAL_STEPS"
+    echo ""
+    echo "   Proceeding with available steps (fail-safe mode)..."
+    echo ""
+  fi
+
+  return 0
+}
+```
+
+**Usage**: These functions are called during Phase 1 execution to ensure plan integrity before delegating to sub-agents.
+
+## Step 0c: Check for Resume State
+
+**Purpose**: Detect existing handoff checkpoint and offer auto-resume or restart options. This enables seamless continuation after interruptions by preserving context and progress state.
+
+**Determine handoff path** (directory format only):
+
+```bash
+# Directory format - handoff in plan directory
+if [ "$PLAN_FORMAT" = "directory" ]; then
+  HANDOFF_PATH="${PLAN_DIR}handoff.md"
+else
+  HANDOFF_PATH=""  # Monolithic plans don't use handoff (legacy)
+fi
+```
+
+**Check for existing handoff and offer resume**:
+
+```bash
+if [ -n "$HANDOFF_PATH" ] && [ -f "$HANDOFF_PATH" ]; then
+  echo "🔄 **Interrupted Session Detected**"
+  echo ""
+  cat "$HANDOFF_PATH"
+  echo ""
+  echo "════════════════════════════════════════════════════════"
+  echo "  RESUME OPTIONS"
+  echo "════════════════════════════════════════════════════════"
+  echo ""
+  echo "**Option 1: Resume from Checkpoint (Recommended)**"
+  echo "- TDD will start from the checkpoint step"
+  echo "- Previous step results are preserved"
+  echo "- Configuration from original session is restored"
+  echo "- Cumulative context maintained"
+  echo ""
+  echo "**Option 2: Restart from Beginning**"
+  echo "- Handoff file will be deleted"
+  echo "- TDD starts fresh from Step 1"
+  echo "- All progress since checkpoint lost"
+  echo ""
+  echo "════════════════════════════════════════════════════════"
+  echo ""
+
+  # Prompt user for decision
+  echo "**Choose an option:**"
+  echo "- Type 'resume' to continue from checkpoint"
+  echo "- Type 'restart' to begin fresh"
+  echo "- Type 'review' to check handoff details with /rptc:helper-resume-plan first"
+  echo ""
+
+  # Claude interprets user response and sets appropriate mode:
+
+  # If user says "resume":
+  # 1. Parse handoff.md for "**Current Step**: Step N"
+  #    RESUME_STEP=$(grep "^\*\*Current Step\*\*:" "$HANDOFF_PATH" | sed 's/.*Step \([0-9]*\).*/\1/')
+  # 2. Validate step number is valid (1 <= N <= TOTAL_STEPS)
+  # 3. Set RESUME_MODE=true
+  # 4. In Phase 1 execution, start step loop from RESUME_STEP instead of 1
+  # 5. Load configuration from handoff.md JSON block
+  # 6. Skip completed steps in TODO list (mark as completed)
+
+  # If user says "restart":
+  # 1. Confirm deletion: "This will delete handoff and restart. Confirm? (yes/no)"
+  # 2. If confirmed: rm "$HANDOFF_PATH"
+  # 3. Set RESUME_MODE=false
+  # 4. Continue normal flow from Step 1
+  # 5. Echo: "✅ Handoff deleted. Starting fresh from Step 1..."
+
+  # If user says "review":
+  # 1. Echo: "Run: /rptc:helper-resume-plan \"${PLAN_REF}\""
+  # 2. Echo: "Then restart this TDD command with your decision."
+  # 3. Exit gracefully (exit 0)
+fi
+```
+
+**Edge Case Handling**:
+
+```bash
+# Corrupted handoff detection
+if [ -n "$HANDOFF_PATH" ] && [ -f "$HANDOFF_PATH" ]; then
+  # Attempt to parse step number
+  RESUME_STEP=$(grep "^\*\*Current Step\*\*:" "$HANDOFF_PATH" | sed 's/.*Step \([0-9]*\).*/\1/' 2>/dev/null)
+
+  # If parsing fails (empty or invalid)
+  if [ -z "$RESUME_STEP" ]; then
+    echo "⚠️  **Handoff File Corrupted**"
+    echo ""
+    echo "Unable to parse checkpoint state from: $HANDOFF_PATH"
+    echo ""
+    echo "This may indicate:"
+    echo "- Incomplete handoff generation"
+    echo "- File corruption"
+    echo "- Format mismatch (old version)"
+    echo ""
+    echo "**Recommendation**: Delete handoff and restart fresh"
+    echo "  rm \"$HANDOFF_PATH\""
+    echo "  /rptc:tdd \"${PLAN_REF}\""
+    echo ""
+    exit 1
+  fi
+
+  # Validate step number is within bounds
+  TOTAL_STEPS=$(find "$PLAN_DIR" -name "step-*.md" 2>/dev/null | wc -l)
+  if [ "$RESUME_STEP" -lt 1 ] || [ "$RESUME_STEP" -gt "$TOTAL_STEPS" ]; then
+    echo "⚠️  **Invalid Handoff Step Number**"
+    echo ""
+    echo "Handoff references Step $RESUME_STEP, but plan has $TOTAL_STEPS steps."
+    echo ""
+    echo "This may indicate:"
+    echo "- Plan was modified after handoff"
+    echo "- Handoff file corruption"
+    echo "- Step renumbering"
+    echo ""
+    echo "**Recommendation**: Regenerate plan or restart fresh"
+    echo "  Option A: /rptc:plan (regenerate)"
+    echo "  Option B: rm \"$HANDOFF_PATH\" && /rptc:tdd \"${PLAN_REF}\" (restart)"
+    echo ""
+    exit 1
+  fi
+fi
+```
+
+**Developer Notes**:
+
+- **Handoff Format Dependency**: Handoff.md format defined in Step 3b (handoff generation, lines 551-680)
+- **Location Strategy**: Handoff.md belongs in plan directory (`${PLAN_DIR}handoff.md`) for easy discovery alongside step files
+- **Resume Logic**: Allows mid-feature interruption without progress loss - critical for large features (10+ steps)
+- **State Preservation**: Configuration (thinking mode, coverage targets) restored from handoff JSON block
+- **Future Enhancement**: Auto-cleanup handoff on successful completion (not implemented in this step - would go in Phase 5)
+
+**Integration with helper-resume-plan**:
+
+Users can run `/rptc:helper-resume-plan "@plan-name/"` to review handoff details before deciding whether to resume or restart. The helper command provides detailed context analysis and resumption guidance.
+
+## Phase 0a: Auto-Handoff Configuration (Roadmap #22)
+
+**Purpose:** Initialize dynamic context prediction system with research-validated safety factors.
+
+**Research Foundation:** `.rptc/research/dynamic-context-prediction.md` (25 sources)
+
+---
+
+### AUTO-HANDOFF Step 1: Hard Cap and Safety Factors
+
+**80% Hard Cap Constant:**
+```bash
+# Context capacity (Claude API limit)
+TOTAL_CONTEXT_CAPACITY=200000
+
+# 80% hard cap (PM decision - safety margin for degraded responses)
+HARD_CAP_TOKENS=160000  # 80% of 200K
+
+echo "🔧 Auto-Handoff Configuration:"
+echo "   Total Capacity: ${TOTAL_CONTEXT_CAPACITY} tokens"
+echo "   Hard Cap (80%): ${HARD_CAP_TOKENS} tokens"
+echo "   Always Enabled: YES (no configuration)"
+echo ""
+```
+
+**Safety Factors (Research-Validated):**
+```bash
+# PM Requirement: 1.5× safety multiplier
+SAFETY_MULTIPLIER=1.5
+
+# Research Recommendation: 3% margin (PREDICTOKEN study)
+SAFETY_MARGIN_PCT=0.03
+
+# Combined safety: prediction × 1.5 + 3%
+# Example: 10K estimate → 10K × 1.5 = 15K → 15K + 3% = 15,450 tokens
+
+echo "   Safety Multiplier: ${SAFETY_MULTIPLIER}× (PM requirement)"
+echo "   Safety Margin: ${SAFETY_MARGIN_PCT}% (PREDICTOKEN recommendation)"
+echo ""
+```
+
+### AUTO-HANDOFF Step 2: Overhead Constants
+
+**Overhead Components (from Research Question 4):**
+
+```bash
+# Delegation overhead: Task tool invocation + sub-agent prompt structure
+DELEGATION_OVERHEAD=7000  # Per step (Anthropic research: ~5-7K typical)
+
+# Quality gate overhead (if enabled)
+EFFICIENCY_GATE_OVERHEAD=20000  # Efficiency agent worst-case
+SECURITY_GATE_OVERHEAD=15000    # Security agent worst-case
+TOTAL_GATE_OVERHEAD=$((EFFICIENCY_GATE_OVERHEAD + SECURITY_GATE_OVERHEAD))
+
+# Check if quality gates enabled in config
+QUALITY_GATES_ENABLED=$(jq -r '.rptc.qualityGatesEnabled // false' .claude/settings.json 2>/dev/null || echo "false")
+
+if [ "$QUALITY_GATES_ENABLED" = "true" ]; then
+  GATE_OVERHEAD=$TOTAL_GATE_OVERHEAD
+  echo "   Quality Gates: ENABLED (+${GATE_OVERHEAD} tokens one-time overhead)"
+else
+  GATE_OVERHEAD=0
+  echo "   Quality Gates: DISABLED (no gate overhead)"
+fi
+echo ""
+
+# MCP overhead: Tool specifications sent with each prompt
+MCP_OVERHEAD=0
+# Detect active MCP servers
+if [ -f ".claude/mcp_settings.json" ]; then
+  MCP_COUNT=$(jq '.mcpServers | length' .claude/mcp_settings.json 2>/dev/null || echo "0")
+  if [ "$MCP_COUNT" -gt 0 ]; then
+    # Estimate: ~3-5K per MCP server for tool specs
+    MCP_OVERHEAD=$((MCP_COUNT * 4000))
+    echo "   MCP Servers: ${MCP_COUNT} active (+${MCP_OVERHEAD} tokens overhead)"
+  else
+    echo "   MCP Servers: NONE"
+  fi
+else
+  echo "   MCP Servers: NONE"
+fi
+echo ""
+
+# System context: Claude system prompts, formatting, metadata
+SYSTEM_OVERHEAD=10000  # Conservative estimate (5-10K typical)
+
+echo "   System Overhead: ${SYSTEM_OVERHEAD} tokens (prompts + formatting)"
+echo ""
+
+# Total overhead per step (base)
+BASE_OVERHEAD=$((DELEGATION_OVERHEAD + SYSTEM_OVERHEAD))
+echo "   Base Overhead per Step: ${BASE_OVERHEAD} tokens (delegation + system)"
+echo "   Additional One-Time: $((GATE_OVERHEAD + MCP_OVERHEAD)) tokens (gates + MCP)"
+echo ""
+```
+
+### AUTO-HANDOFF Step 3: Tracking Arrays Initialization
+
+**Historical Data Storage:**
+
+```bash
+# Array: Actual context usage per step (for historical average)
+declare -a STEP_CONTEXT_USAGE=()
+
+# Array: Prediction errors per step (for calibration)
+declare -a PREDICTION_ERRORS=()
+
+# Current context estimate (starts with overview.md load)
+CURRENT_CONTEXT=15000  # Overview.md ~10-15K typical
+
+echo "📊 Context Tracking Initialized:"
+echo "   Current Context: ${CURRENT_CONTEXT} tokens (overview.md loaded)"
+echo "   Historical Data: Empty (cold start)"
+echo ""
+```
+
+### AUTO-HANDOFF Step 4: Calibration System Initialization
+
+**Calibration Multiplier (Adapts Over Time):**
+
+```bash
+# Calibration adjustment: starts at 1.0 (neutral), adjusts ±10% based on accuracy
+CALIBRATION_MULTIPLIER=1.0
+
+# Cold start floor: Conservative estimate for first 3 steps (no historical data)
+COLD_START_FLOOR=25000  # 25K per step (research recommendation)
+
+echo "🎯 Calibration System:"
+echo "   Calibration: ${CALIBRATION_MULTIPLIER}× (neutral, will adjust)"
+echo "   Cold Start Floor: ${COLD_START_FLOOR} tokens (steps 1-3)"
+echo "   Accuracy Target: ±5-10% after 3-5 steps (research validated)"
+echo ""
+```
+
+### AUTO-HANDOFF Step 5: Effective Capacity Calculation
+
+**Available Capacity After Overhead:**
+
+```bash
+# Effective capacity: Hard cap minus one-time overhead
+EFFECTIVE_CAPACITY=$((HARD_CAP_TOKENS - GATE_OVERHEAD - MCP_OVERHEAD))
+
+echo "🧮 Effective Capacity Calculation:"
+echo "   Hard Cap:            ${HARD_CAP_TOKENS} tokens"
+echo "   Quality Gates:       -${GATE_OVERHEAD} tokens"
+echo "   MCP Overhead:        -${MCP_OVERHEAD} tokens"
+echo "   ─────────────────────────────────────────"
+echo "   Effective Capacity:  ${EFFECTIVE_CAPACITY} tokens"
+echo ""
+echo "   Context Budget:      $((EFFECTIVE_CAPACITY - CURRENT_CONTEXT)) tokens remaining"
+echo ""
+```
+
+### AUTO-HANDOFF Step 6: Prediction Log Initialization
+
+**Diagnostic Logging:**
+
+```bash
+# Log file: Prediction details for debugging and validation
+PREDICTION_LOG="${ARTIFACT_LOC}/tdd-prediction.log"
+
+# Initialize log with header
+cat > "$PREDICTION_LOG" <<EOF
+# Dynamic Context Prediction Log
+# Feature: ${PLAN_NAME}
+# Started: $(date '+%Y-%m-%d %H:%M:%S')
+# Research Foundation: dynamic-context-prediction.md (25 sources)
+
+## Configuration
+- Hard Cap: ${HARD_CAP_TOKENS} tokens (80%)
+- Safety Multiplier: ${SAFETY_MULTIPLIER}×
+- Safety Margin: ${SAFETY_MARGIN_PCT}%
+- Effective Capacity: ${EFFECTIVE_CAPACITY} tokens
+- Quality Gates: ${QUALITY_GATES_ENABLED}
+- MCP Overhead: ${MCP_OVERHEAD} tokens
+
+## Prediction Results
+Step | File Est | Hist Avg | Growth Est | Max | Overhead | Safety | Final | Current | Decision | Actual | Error
+-----|----------|----------|------------|-----|----------|--------|-------|---------|----------|--------|------
+EOF
+
+echo "📝 Prediction Logging: ${PREDICTION_LOG}"
+echo ""
+```
+
+---
+
+## Phase 0g: Auto-Handoff Utility Functions (Roadmap #22)
+
+**Purpose:** Reusable prediction and handoff generation functions.
+
+---
+
+### Function: Calculate File-Based Estimate
+
+**Estimate tokens from step file size:**
+
+```bash
+calculate_file_estimate() {
+  local STEP_FILE=$1
+
+  if [ ! -f "$STEP_FILE" ]; then
+    echo "$COLD_START_FLOOR"
+    return
+  fi
+
+  local CHARS=$(wc -m < "$STEP_FILE" 2>/dev/null || echo "0")
+  local ESTIMATE=$(awk "BEGIN {printf \"%.0f\", ($CHARS / 4) * 1.25}")
+
+  echo "$ESTIMATE"
+}
+```
+
+### Function: Calculate Historical Average
+
+**Average of last 3 completed steps:**
+
+```bash
+calculate_historical_average() {
+  local COMPLETED=$1
+
+  if [ "$COMPLETED" -lt 3 ]; then
+    echo "$COLD_START_FLOOR"
+    return
+  fi
+
+  local LAST_3=("${STEP_CONTEXT_USAGE[@]: -3}")
+  local SUM=0
+  for usage in "${LAST_3[@]}"; do
+    SUM=$((SUM + usage))
+  done
+
+  echo "$((SUM / 3))"
+}
+```
+
+### Function: Calculate Growth Estimate
+
+**Extrapolate from recent trend:**
+
+```bash
+calculate_growth_estimate() {
+  local COMPLETED=$1
+
+  if [ "$COMPLETED" -lt 2 ]; then
+    echo "0"
+    return
+  fi
+
+  # Calculate deltas
+  declare -a DELTAS=()
+  for ((i=1; i<${#STEP_CONTEXT_USAGE[@]}; i++)); do
+    DELTAS+=($((${STEP_CONTEXT_USAGE[$i]} - ${STEP_CONTEXT_USAGE[$((i-1))]})))
+  done
+
+  # Average growth
+  local SUM=0
+  for delta in "${DELTAS[@]}"; do
+    SUM=$((SUM + delta))
+  done
+  local AVG=$((SUM / ${#DELTAS[@]}))
+
+  # Extrapolate
+  local LAST=${STEP_CONTEXT_USAGE[-1]}
+  echo "$((LAST + AVG))"
+}
+```
+
+### Function: Apply Safety Factors
+
+**Apply 1.5× multiplier + 3% margin + calibration:**
+
+```bash
+apply_safety_factors() {
+  local BASE_ESTIMATE=$1
+
+  # 1.5× multiplier
+  local AFTER_MULT=$(awk "BEGIN {printf \"%.0f\", $BASE_ESTIMATE * $SAFETY_MULTIPLIER}")
+
+  # 3% margin
+  local MARGIN=$(awk "BEGIN {printf \"%.0f\", $AFTER_MULT * $SAFETY_MARGIN_PCT}")
+  local TOTAL=$((AFTER_MULT + MARGIN))
+
+  # Calibration
+  local CALIBRATED=$(awk "BEGIN {printf \"%.0f\", $TOTAL * $CALIBRATION_MULTIPLIER}")
+
+  echo "$CALIBRATED"
+}
+```
+
+### Function: Calculate Average Prediction Error
+
+**For handoff and calibration reporting:**
+
+```bash
+calculate_average_error() {
+  if [ "${#PREDICTION_ERRORS[@]}" -eq 0 ]; then
+    echo "N/A"
+    return
+  fi
+
+  local ERROR_SUM=0
+  for error in "${PREDICTION_ERRORS[@]}"; do
+    ERROR_SUM=$(awk "BEGIN {printf \"%.1f\", $ERROR_SUM + $error}")
+  done
+
+  local AVG=$(awk "BEGIN {printf \"%.1f\", $ERROR_SUM / ${#PREDICTION_ERRORS[@]}}")
+  echo "$AVG"
+}
+```
+
+### Function: Generate Step Summaries for Handoff
+
+**Extract step purposes for handoff.md:**
+
+```bash
+generate_step_summaries() {
+  local COMPLETED_STEP=$1
+  local SUMMARIES=""
+
+  for ((i=1; i<=COMPLETED_STEP; i++)); do
+    local STEP_FILE="${PLAN_DIR}step-$(printf '%02d' $i).md"
+    if [ -f "$STEP_FILE" ]; then
+      local STEP_PURPOSE=$(sed -n '/^## Purpose/,/^## /p' "$STEP_FILE" | head -n -1 | tail -n +2)
+      SUMMARIES+="#### Step ${i}\n\n"
+      SUMMARIES+="${STEP_PURPOSE}\n\n"
+      SUMMARIES+="**Status:** ✅ Complete\n\n"
+    fi
+  done
+
+  echo -e "$SUMMARIES"
+}
+```
+
+### Function: Generate Usage Table for Handoff
+
+**Create token usage table:**
+
+```bash
+generate_usage_table() {
+  local COMPLETED_STEP=$1
+  local TABLE=""
+  local CUMULATIVE=15000  # Start with overview.md
+
+  for ((i=0; i<${#STEP_CONTEXT_USAGE[@]}; i++)); do
+    local STEP_NUM=$((i + 1))
+    local USAGE=${STEP_CONTEXT_USAGE[$i]}
+    CUMULATIVE=$((CUMULATIVE + USAGE))
+    local PCT=$(( (CUMULATIVE * 100) / TOTAL_CONTEXT_CAPACITY ))
+
+    TABLE+="${STEP_NUM} | ${USAGE} | ${CUMULATIVE} | ${PCT}%\n"
+  done
+
+  echo -e "$TABLE"
+}
+```
+
+### Function: Generate Enhanced Handoff Checkpoint
+
+**Creates handoff.md with complete prediction state:**
+
+```bash
+generate_handoff_checkpoint() {
+  local COMPLETED_STEP=$1
+  local PROJECTED_TOTAL=$2
+  local TRIGGER_REASON=$3
+
+  local HANDOFF_FILE="${PLAN_DIR}handoff.md"
+
+  echo "📝 Generating enhanced handoff checkpoint..."
+  echo ""
+
+  # Calculate progress percentage
+  local PROGRESS_PCT=$(( (COMPLETED_STEP * 100) / TOTAL_STEPS ))
+
+  # Collect files modified (across all completed steps)
+  local FILES_MODIFIED=$(git diff --name-only HEAD~$COMPLETED_STEP 2>/dev/null || echo "Unable to detect")
+
+  # Count tests passing
+  local TESTS_STATUS="[Run test suite to verify]"
+
+  # Create enhanced handoff template
+  cat > "$HANDOFF_FILE" <<EOF
+# TDD Handoff Checkpoint
+
+**Feature:** ${PLAN_NAME}
+**Checkpoint Date:** $(date '+%Y-%m-%d %H:%M:%S')
+**Trigger Reason:** ${TRIGGER_REASON}
+
+---
+
+## Status Summary
+
+**Progress:** ${COMPLETED_STEP} of ${TOTAL_STEPS} steps completed (${PROGRESS_PCT}%)
+
+**Completed Steps:** 1 through ${COMPLETED_STEP}
+
+**Next Step:** $((COMPLETED_STEP + 1)) ($(printf 'step-%02d.md' $((COMPLETED_STEP + 1))))
+
+**Tests Status:** ${TESTS_STATUS}
+
+---
+
+## Context Metrics
+
+**Current Context Usage:** ${CURRENT_CONTEXT} tokens ($(( (CURRENT_CONTEXT * 100) / TOTAL_CONTEXT_CAPACITY ))% of capacity)
+
+**Projected with Next Step:** ${PROJECTED_TOTAL} tokens ($(( (PROJECTED_TOTAL * 100) / TOTAL_CONTEXT_CAPACITY ))% of capacity)
+
+**Hard Cap (80%):** ${HARD_CAP_TOKENS} tokens
+
+**Why Handoff Triggered:**
+- Next step predicted at ${FINAL_PREDICTION} tokens (with safety factors)
+- Would push total to ${PROJECTED_TOTAL} tokens
+- Exceeds ${HARD_CAP_TOKENS} hard cap (80% of ${TOTAL_CONTEXT_CAPACITY})
+
+---
+
+## Completed Work Summary
+
+### Files Modified
+
+\`\`\`
+${FILES_MODIFIED}
+\`\`\`
+
+### Step Summaries
+
+$(generate_step_summaries "$COMPLETED_STEP")
+
+---
+
+## Historical Context Usage
+
+**Per-Step Token Deltas:**
+
+| Step | Actual Usage | Cumulative | % of Capacity |
+|------|--------------|------------|---------------|
+$(generate_usage_table "$COMPLETED_STEP")
+
+**Prediction Accuracy:**
+- Average Error: $(calculate_average_error)%
+- Calibration Multiplier: ${CALIBRATION_MULTIPLIER}×
+
+---
+
+## Calibration Data (for Resume)
+
+**Historical Usage Array:**
+\`\`\`bash
+STEP_CONTEXT_USAGE=(${STEP_CONTEXT_USAGE[@]})
+\`\`\`
+
+**Prediction Errors Array:**
+\`\`\`bash
+PREDICTION_ERRORS=(${PREDICTION_ERRORS[@]})
+\`\`\`
+
+**Calibration Multiplier:**
+\`\`\`bash
+CALIBRATION_MULTIPLIER=${CALIBRATION_MULTIPLIER}
+\`\`\`
+
+**Current Context:**
+\`\`\`bash
+CURRENT_CONTEXT=${CURRENT_CONTEXT}
+\`\`\`
+
+---
+
+## Resume Instructions
+
+**To continue in fresh context:**
+
+\`\`\`bash
+/rptc:helper-resume-plan "@${PLAN_NAME}/"
+\`\`\`
+
+**What will happen:**
+1. Helper loads this handoff checkpoint
+2. Restores historical usage data and calibration
+3. Initializes fresh context (15K starting point)
+4. Continues from Step $((COMPLETED_STEP + 1))
+5. Uses calibrated prediction for remaining steps
+
+**Important:**
+- Tests must still be passing before resume
+- Review completed work summary above
+- Verify files modified are correct
+- Check that next step is appropriate to continue
+
+---
+
+_Generated by RPTC Auto-Handoff (Roadmap #22)_
+_Research: dynamic-context-prediction.md (25 sources)_
+EOF
+
+  echo "✅ Handoff checkpoint created: ${HANDOFF_FILE}"
+  echo ""
+}
+```
+
+---
 
 ## Step 0b: Initialize TODO Tracking
 
@@ -375,7 +1331,163 @@ After all N steps, add quality gate TODOs **conditionally based on configuration
 - Only ONE task "in_progress" at a time
 - Mark tasks "completed" immediately after finishing each phase
 
+## Phase 0c: Test-Driven Generation Setup (Roadmap #16 - TDG Mode)
+
+**Purpose**: Configure AI-accelerated comprehensive test generation from plan specifications to reduce TDD overhead by ~80%.
+
+**When Executed**: During Phase 0 (setup), before Phase 1 (TDD implementation). Actual test generation happens per-step in Phase 1.
+
+**Configuration**: Controlled by `--tdg` flag OR `.claude/settings.json` → `rptc.tdgMode`
+
+**Research Context**: TDG eliminates ~80% of TDD overhead (~50 tests in <5 min per research findings)
+
+**PM Decision**: AUGMENTATION mode (planned scenarios + AI-generated tests, not replacement)
+
+---
+
+### Step 1: Check TDG Mode Configuration
+
+**Determine if TDG mode should be enabled:**
+
+```bash
+# Load TDG configuration from settings.json
+TDG_CONFIG=$(jq -r '.rptc.tdgMode // "disabled"' .claude/settings.json 2>/dev/null || echo "disabled")
+
+# Determine if TDG should run
+RUN_TDG=false
+
+# Priority 1: --tdg flag (explicit user request)
+if [ "$TDG_FLAG" = "true" ]; then
+  RUN_TDG=true
+  echo "✅ TDG Mode: Enabled via --tdg flag"
+
+# Priority 2: Configuration setting
+elif [ "$TDG_CONFIG" = "enabled" ]; then
+  RUN_TDG=true
+  echo "✅ TDG Mode: Enabled via configuration (tdgMode: enabled)"
+
+# Default: Disabled
+else
+  echo "⏩ TDG Mode: Disabled"
+  echo "   Use --tdg flag or set tdgMode: \"enabled\" in .claude/settings.json"
+  echo "   Continuing with manual test writing in RED phase"
+fi
+
+echo ""
+```
+
+**Configuration Options:**
+- `"disabled"` (default): Require explicit `--tdg` flag
+- `"enabled"`: Always use TDG mode (no flag needed)
+- `"auto"`: Future enhancement - use heuristics to decide
+
+---
+
+### Step 2: Validate Plan Format (TDG Requirement)
+
+**TDG mode requires directory format plans:**
+
+```bash
+if [ "$RUN_TDG" = "true" ]; then
+  # Check plan format (PLAN_FORMAT set in Phase 0 Step 1)
+  if [ "$PLAN_FORMAT" != "directory" ]; then
+    echo "════════════════════════════════════════════════════════"
+    echo "  ❌ TDG MODE REQUIRES DIRECTORY PLAN FORMAT"
+    echo "════════════════════════════════════════════════════════"
+    echo ""
+    echo "Current plan: @${PLAN_NAME} (${PLAN_FORMAT} format)"
+    echo "Required: @${PLAN_NAME}/ (directory format)"
+    echo ""
+    echo "Reason: TDG generates per-step test suites, requiring"
+    echo "        directory structure with step-0N.md files"
+    echo ""
+    echo "Monolithic plans deprecated in v2.0.0."
+    echo ""
+    echo "Fix: Run /rptc:plan to regenerate plan in directory format"
+    echo "════════════════════════════════════════════════════════"
+    echo ""
+    exit 1
+  fi
+
+  echo "✅ Plan format validated: Directory format (compatible with TDG)"
+  echo ""
+fi
+```
+
+---
+
+### Step 3: Load TDG Template
+
+**Verify TDG template exists and is accessible:**
+
+```bash
+if [ "$RUN_TDG" = "true" ]; then
+  # Locate TDG template from plugin
+  TDG_TEMPLATE="${CLAUDE_PLUGIN_ROOT}/templates/tdg-prompt.md"
+
+  if [ ! -f "$TDG_TEMPLATE" ]; then
+    echo "⚠️  Warning: TDG template not found"
+    echo "   Expected: $TDG_TEMPLATE"
+    echo "   Falling back to manual test writing"
+    echo ""
+    RUN_TDG=false
+  else
+    echo "✅ TDG template loaded: ${CLAUDE_PLUGIN_ROOT}/templates/tdg-prompt.md"
+    echo ""
+  fi
+fi
+```
+
+---
+
+### Step 4: TDG Phase Summary
+
+**Display TDG configuration for user awareness:**
+
+```bash
+if [ "$RUN_TDG" = "true" ]; then
+  echo "════════════════════════════════════════════════════════"
+  echo "  PHASE 0c: TEST-DRIVEN GENERATION (TDG MODE)"
+  echo "════════════════════════════════════════════════════════"
+  echo ""
+  echo "Strategy: AUGMENTATION (planned scenarios + ~50 AI-generated tests)"
+  echo "Target: Comprehensive coverage in <5 minutes per step"
+  echo "Integration: Generated tests augment plan, not replace"
+  echo ""
+  echo "TDG will run during Phase 1 for EACH step:"
+  echo "  1. Load step specifications and planned test scenarios"
+  echo "  2. Delegate to TDG sub-agent for test generation"
+  echo "  3. Merge AI-generated tests with planned tests"
+  echo "  4. Validate test suite (deduplication, syntax check)"
+  echo "  5. Save augmented test suite: step-0N-tests-augmented.md"
+  echo "  6. Proceed to RED phase with comprehensive test suite"
+  echo ""
+  echo "════════════════════════════════════════════════════════"
+  echo ""
+fi
+```
+
+---
+
+**Note:** The actual TDG sub-agent delegation happens in **Phase 1** (per-step execution), not in Phase 0. Phase 0c only validates configuration and prepares infrastructure.
+
+**Integration Point:** When `RUN_TDG=true`, Phase 1 will include a TDG sub-step AFTER loading each step file and BEFORE the RED phase.
+
+**Variables set in Phase 0c:**
+- `RUN_TDG`: Boolean (`true` or `false`)
+- `TDG_TEMPLATE`: Path to TDG prompt template (if TDG enabled)
+- `TDG_CONFIG`: Configuration value from settings.json
+
+**Phase 0c Complete** - Ready to proceed to Phase 1 with TDG infrastructure prepared.
+
+---
+
 ### Phase 1: TDD Cycle for Each Step (REQUIRED)
+
+```bash
+# Notify TDD execution start
+notify_discord "🚀 **TDD Execution Started**\nPlan: \`${PLAN_NAME}\`\nSteps: ${TOTAL_STEPS}" "summary"
+```
 
 **Execution Strategy Based on Plan Format**:
 
@@ -390,7 +1502,382 @@ After all N steps, add quality gate TODOs **conditionally based on configuration
 
 **If using directory format, follow this process for each step**:
 
+### Step 3a: Self-Assessment Checkpoint (Before Each Step)
+
+**Purpose**: Intelligently assess whether main context can handle next step coordination without quality degradation.
+
+**Context Needs Calculation** (Main Context Focus):
+
+```bash
+# Main context handles coordination, NOT implementation (sub-agents do that)
+OVERVIEW_SIZE=3000  # Already loaded
+COORDINATION_OVERHEAD=5000  # Step delegation, result processing
+STEP_RESULT_PROCESSING=3000  # Parsing sub-agent outputs
+CUMULATIVE_STATE=$((COMPLETED_STEPS * 1000))  # Tracking progress
+TODOWRITE_UPDATES=1000  # Plan synchronization
+SAFETY_BUFFER=10000  # Middle-ground conservativeness
+
+ESTIMATED_NEED=$((OVERVIEW_SIZE + COORDINATION_OVERHEAD + STEP_RESULT_PROCESSING + CUMULATIVE_STATE + TODOWRITE_UPDATES + SAFETY_BUFFER))
+
+# Dynamic context check (not static 80%)
+CONTEXT_WINDOW=200000
+# Note: Current usage determined by Claude state (cannot be directly queried in bash)
+# MCP overhead varies (1K-5K typically)
+
+echo ""
+echo "📊 Self-Assessment for Step $CURRENT_STEP:"
+echo "   Estimated main context needs: ${ESTIMATED_NEED} tokens"
+echo "   (Coordination overhead only - sub-agents handle implementation)"
+echo ""
+```
+
+**Decision Logic**:
+
+```bash
+# PM must assess current context state and decide
+# This is a CHECKPOINT for explicit decision-making, not automatic
+
+echo "⚠️  CHECKPOINT: Assess Main Context Capacity"
+echo ""
+echo "Current Step: $CURRENT_STEP of $TOTAL_STEPS"
+echo "Estimated Need: ${ESTIMATED_NEED}K tokens (coordination only)"
+echo ""
+echo "Review current conversation length and MCP tool usage."
+echo "Consider handoff if context feels constrained."
+echo ""
+echo "Options:"
+echo "  1. PROCEED - Continue with this step (sufficient context)"
+echo "  2. HANDOFF - Generate handoff.md and resume in fresh context"
+echo ""
+
+# PM makes explicit decision
+# If HANDOFF chosen, proceed to handoff generation
+```
+
+**Logging** (After Decision):
+
+```bash
+# If PROCEED chosen
+echo "✅ Self-Assessment Decision: PROCEED"
+echo ""
+echo "   Context Budget:"
+echo "   - Estimated coordination needs: ${ESTIMATED_NEED}K"
+echo "   - Safety buffer included: 10K"
+echo "   - Main context focus: Coordination, not implementation"
+echo ""
+```
+
+### Step 3b: Generate Handoff Checkpoint (When Needed)
+
+**Purpose**: Create resume point with full context for continuation in fresh conversation.
+
+**Handoff File Path Determination**:
+
+```bash
+# Function to generate handoff
+generate_handoff() {
+  local CURRENT_STEP=$1
+  local COMPLETED_STEPS=$((CURRENT_STEP - 1))
+
+  # Directory-only format
+  HANDOFF_FILE="${PLAN_DIR}handoff.md"
+
+  echo "📝 Generating handoff checkpoint: $HANDOFF_FILE"
+
+  # Generate handoff content
+  cat > "$HANDOFF_FILE" <<EOF
+# TDD Handoff Checkpoint
+
+**Feature**: ${PLAN_NAME}
+**Plan Reference**: ${PLAN_REF}
+**Current Step**: Step ${CURRENT_STEP} (next to execute)
+**Completed Steps**: Steps 1-${COMPLETED_STEPS} ✅
+**Handoff Reason**: Context capacity management
+
+---
+
+## Configuration
+
+\`\`\`json
+{
+  "thinkingMode": "${THINKING_MODE}",
+  "coverageTarget": ${COVERAGE_TARGET},
+  "artifactLocation": "${ARTIFACT_LOC}"
+}
+\`\`\`
+
+---
+
+## Cumulative File Changes (Steps 1-${COMPLETED_STEPS})
+
+<!-- TODO: Extract from completed step summaries -->
+<!-- This will be populated by Step 2 (resume capability) -->
+
+---
+
+## Step Summaries (Steps 1-${COMPLETED_STEPS})
+
+<!-- TODO: Extract from TodoWrite entries -->
+<!-- This will be populated by Step 2 (resume capability) -->
+
+---
+
+## Next Step: Step ${CURRENT_STEP}
+
+EOF
+
+  # Append next step content
+  NEXT_STEP_FILE="${PLAN_DIR}step-$(printf '%02d' $CURRENT_STEP).md"
+  if [ -f "$NEXT_STEP_FILE" ]; then
+    cat "$NEXT_STEP_FILE" >> "$HANDOFF_FILE"
+  else
+    echo "⚠️  Warning: Next step file not found: $NEXT_STEP_FILE" >> "$HANDOFF_FILE"
+  fi
+
+  # Add resume instructions
+  cat >> "$HANDOFF_FILE" <<EOF
+
+---
+
+## Resume Instructions
+
+**To continue TDD execution from this checkpoint**:
+
+1. **Review this handoff file** to understand context
+2. **Run TDD command**: \`/rptc:tdd "${PLAN_REF}"\`
+3. **TDD will auto-detect** handoff and resume from Step ${CURRENT_STEP}
+
+**Note**: The TDD command will load this handoff file automatically when it detects completion through Step ${COMPLETED_STEPS}.
+
+---
+
+## Context Analysis (Why Handoff Triggered)
+
+**Main Context Focus**: Coordination overhead (step delegation, result processing, state tracking)
+
+**Estimated Needs**:
+- Overview content: ~3K tokens (already loaded)
+- Coordination per step: ~5K tokens
+- Result processing: ~3K tokens per step
+- Cumulative state: ${CUMULATIVE_STATE} tokens
+- Safety buffer: 10K tokens
+- **Total Estimated**: ${ESTIMATED_NEED}K tokens
+
+**Decision**: Handoff triggered to preserve execution quality and prevent context degradation.
+
+**Benefits of Fresh Context**:
+- Full context window available for remaining steps
+- Clean slate for complex implementation work
+- Maintained quality gates and verification rigor
+
+---
+
+_Generated by RPTC TDD v1.2.0 - Phase 3A Context Efficiency_
+EOF
+
+  echo "✅ Handoff checkpoint created: $HANDOFF_FILE"
+  echo ""
+  echo "📋 Next Steps:"
+  echo "   1. Review handoff file for completeness"
+  echo "   2. In fresh conversation, run: /rptc:tdd \"${PLAN_REF}\""
+  echo "   3. TDD will resume from Step ${CURRENT_STEP}"
+  echo ""
+
+  # Exit TDD execution gracefully
+  exit 0
+}
+```
+
+**Handoff Trigger Integration**:
+
+```bash
+# In self-assessment checkpoint, if PM chooses HANDOFF:
+if [ "$DECISION" = "HANDOFF" ]; then
+  generate_handoff "$CURRENT_STEP"
+fi
+```
+
+---
+
+## Anthropic's 7-Step TDD Workflow
+
+This command follows a rigorous 7-step Test-Driven Development workflow:
+
+### Step 1: Understand the Requirement
+- Load plan overview and current step details
+- Review acceptance criteria and dependencies
+- Confirm technical approach aligns with architecture
+
+### Step 2: Design Test Scenarios (Pre-Validation Checkpoint)
+- Review test scenarios from plan (Given-When-Then format)
+- Validate scenarios cover: happy path, edge cases, error conditions
+- **CHECKPOINT**: Ensure test design quality before proceeding to RED phase
+- **Questions to validate**:
+  - [ ] Are all acceptance criteria covered by test scenarios?
+  - [ ] Do scenarios test boundaries and edge cases?
+  - [ ] Are error conditions handled?
+  - [ ] Is test data realistic and representative?
+
+**Handoff to RED Phase**: If test scenarios are well-designed, proceed. If gaps found, update plan or refine scenarios before continuing.
+
+### Step 3: Write Failing Test (RED Phase)
+- Implement test scenarios as actual test code
+- Run tests to confirm they fail for the right reasons
+- Verify test output clearly indicates what's missing
+
+**Example**:
+```javascript
+// Test for user authentication feature
+describe('UserAuth', () => {
+  it('should reject invalid credentials', () => {
+    // Given: Invalid credentials
+    const credentials = { username: 'user', password: 'wrong' };
+
+    // When: Attempting login
+    const result = auth.login(credentials);
+
+    // Then: Returns error
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('Invalid credentials');
+  });
+});
+```
+
+**Expected Output**: Test fails because `auth.login()` not yet implemented.
+
+### Step 4: Minimal Implementation (GREEN Phase)
+- Write simplest code to make tests pass
+- Focus on correctness, not optimization
+- Run tests to confirm GREEN state
+
+### Step 5: Refactor for Quality
+- Improve code structure while keeping tests green
+- Extract common logic, improve naming
+- Ensure KISS and YAGNI principles
+- Re-run tests after each refactor
+
+### Step 6: Verify No Regressions
+- Run full test suite (not just current step)
+- Check test coverage meets targets
+- Verify no existing tests broken
+
+### Step 7: Document and Commit
+- Update plan with completion status
+- Document deviations or learnings
+- Prepare for next step or quality gates
+
+**Integration with Self-Assessment**: Step 1's self-assessment checkpoint determines if directory format is beneficial. Steps 2-7 execute the TDD cycle with context-appropriate loading strategy.
+
+---
+
+## Workflow Integration Points
+
+The following diagram shows how checkpoints integrate with the TDD workflow:
+
+```
+Self-Assessment (Step 3a)
+         ↓
+   [Assess Context Needs]
+         ↓
+    ┌─────────────┐
+    │ Continue?   │ → YES → Continue with current context
+    └─────────────┘
+         ↓ NO
+  [Handoff beneficial]
+         ↓
+  Generate handoff.md (Step 3b)
+         ↓
+  Resume in fresh context
+         ↓
+Load Step File (Step N)
+         ↓
+Test Scenario Pre-Validation (Step 1b)
+         ↓
+   [Validate Scenarios]
+         ↓
+    ┌──────────────┐
+    │ Gaps found?  │ → YES → Report to PM, refine scenarios
+    └──────────────┘
+         ↓ NO
+  Proceed to RED phase (Step 3)
+         ↓
+   [7-step TDD cycle]
+         ↓
+  RED → GREEN → REFACTOR → VERIFY → DOCUMENT
+```
+
+**See Also**:
+- Self-assessment checkpoint (Step 3a) - Context loading decision
+- Test scenario pre-validation (Step 1b) - Quality gate before RED phase
+- Handoff generation (Step 3b) - Documentation for next session
+
+---
+
+## Important Notes
+
+> **⚠️ IMPORTANT**: Test scenario pre-validation (Step 1b) is a BLOCKING checkpoint. If scenarios are incomplete or poorly designed, STOP and request plan updates before proceeding to RED phase. Poor test scenarios lead to rework and wasted implementation time.
+
+> **💡 TIP**: Well-designed test scenarios (Step 2 of 7-step workflow) save significant refactoring time later. Invest 5-10 minutes validating scenarios to save hours of rework. The test scenario pre-validation checkpoint (Step 1b) enforces this quality gate.
+
+> **🔄 WORKFLOW NOTE**: Steps 3-6 of the 7-step workflow (RED → GREEN → REFACTOR → VERIFY) may iterate multiple times per acceptance criterion. This is normal and expected in TDD. Each iteration strengthens code quality and test coverage.
+
+---
+
 ### For Each Step (1 through N):
+
+**Before starting Phase 1 loop, log execution strategy:**
+
+```bash
+echo ""
+echo "════════════════════════════════════════════════════════"
+echo "  PHASE 1: TDD IMPLEMENTATION (Step-by-Step Execution)"
+echo "════════════════════════════════════════════════════════"
+echo ""
+echo "Execution Strategy: Sub-agent delegation per step"
+echo "Dependency Validation: Sequential (conservative approach)"
+echo "Total Steps: $TOTAL_STEPS"
+echo ""
+
+# Validate step sequence once before starting
+validate_step_sequence "$PLAN_DIR" "$TOTAL_STEPS"
+```
+
+**Note**: This logging provides visibility into the TDD execution approach and validates plan integrity before proceeding.
+
+#### Step N: Validate Execution Order (NEW - Roadmap #14)
+
+**Purpose**: Conservative dependency validation to prevent execution order violations.
+
+**Approach**: For Step 1, this implements fail-safe sequential execution. Future enhancements will add explicit dependency parsing.
+
+**Validation Logic**:
+
+1. **Check step file exists**:
+   ```bash
+   STEP_FILE="${PLAN_DIR}step-$(printf '%02d' $STEP_NUM).md"
+   if [ ! -f "$STEP_FILE" ]; then
+     echo "❌ Error: Step $STEP_NUM file not found"
+     echo "   Expected: $STEP_FILE"
+     echo "   Available steps: $(find "$PLAN_DIR" -name "step-*.md" | wc -l)"
+     echo ""
+     echo "   Possible causes:"
+     echo "   - Plan was modified after generation"
+     echo "   - Step file was deleted"
+     echo "   - Step numbering gap exists"
+     echo ""
+     echo "   Fix: Run /rptc:helper-update-plan to regenerate plan"
+     exit 1
+   fi
+   ```
+
+2. **Fail-safe default** (for Step 1 implementation):
+   ```bash
+   # Conservative approach: Execute steps sequentially
+   # Future enhancement: Parse "Dependencies from Other Steps" section
+   echo "📋 Step $STEP_NUM: Sequential execution (dependency validation: basic)"
+   ```
+
+**Note**: This conservative approach ensures safe execution. Future enhancements will add intelligent dependency graph parsing for optimized execution order.
 
 #### Step N: Load Step File
 
@@ -412,6 +1899,318 @@ After all N steps, add quality gate TODOs **conditionally based on configuration
    - Current step details (from step-0N.md)
    - Cumulative file changes (from Steps 1 through N-1)
    - Configuration values (ARTIFACT_LOC, THINKING_MODE, MAX_ATTEMPTS)
+
+#### Step 1b: Test Scenario Pre-Validation
+
+**Purpose**: Validate test scenario quality before implementing tests (Roadmap #7).
+
+Review test scenarios from current step plan:
+
+**Validation Checklist**:
+- [ ] **Coverage**: All acceptance criteria have corresponding test scenarios
+- [ ] **Happy Path**: Normal usage flows tested
+- [ ] **Edge Cases**: Boundaries, empty inputs, unusual conditions covered
+- [ ] **Error Handling**: Invalid inputs, failures, exceptions tested
+- [ ] **Test Data**: Realistic and representative inputs
+- [ ] **Clarity**: Given-When-Then format clear and unambiguous
+
+**Decision Point**:
+- ✅ **All checks pass**: Proceed to RED phase (delegate to TDD sub-agent)
+- ⚠️ **Gaps identified**: Document gaps, suggest plan updates, await PM approval
+
+**If gaps identified**:
+
+```text
+⚠️  Test Scenario Quality Issues Detected - Step $STEP_NUM
+
+Validation results:
+- [Issue 1: Description]
+- [Issue 2: Description]
+
+Recommendations:
+- [Recommendation 1]
+- [Recommendation 2]
+
+Options:
+1. Update test scenarios in step file and retry
+2. Proceed with current scenarios (PM override)
+3. Skip to next step (not recommended)
+
+Waiting for PM decision...
+```
+
+**If scenarios validated successfully**:
+
+```text
+✅ Test Scenario Pre-Validation Complete - Step $STEP_NUM
+
+All validation checks passed:
+- Coverage: ✅ All acceptance criteria covered
+- Happy Path: ✅ Normal flows included
+- Edge Cases: ✅ Boundaries tested
+- Error Handling: ✅ Failure scenarios covered
+- Test Data: ✅ Realistic inputs defined
+- Clarity: ✅ Given-When-Then format clear
+
+Proceeding to delegate step to TDD sub-agent for RED → GREEN → REFACTOR execution...
+```
+
+---
+
+## Phase 4b: Dynamic Context Prediction (Roadmap #22)
+
+**Purpose:** Predict if next step can safely execute within 80% capacity using hybrid estimation.
+
+**Timing:** BEFORE delegating to sub-agent (prevents mid-step handoff)
+
+---
+
+### PREDICTION Step 1: File-Based Estimation
+
+**Method 1: Estimate from step file size:**
+
+```bash
+echo ""
+echo "════════════════════════════════════════════════════════"
+echo "  PHASE 4b: CONTEXT PREDICTION (Step ${STEP_NUM})"
+echo "════════════════════════════════════════════════════════"
+echo ""
+echo "🔮 Predicting next step context impact..."
+echo ""
+
+# Load next step file for analysis
+STEP_FILE="${PLAN_DIR}step-$(printf '%02d' $STEP_NUM).md"
+
+FILE_ESTIMATE=$(calculate_file_estimate "$STEP_FILE")
+
+echo "📄 File-Based Estimate:"
+echo "   Step File: $(basename "$STEP_FILE")"
+echo "   Estimated Tokens: ${FILE_ESTIMATE}"
+echo ""
+```
+
+### PREDICTION Step 2: Historical Average Estimation
+
+**Method 2: Average of last 3 completed steps:**
+
+```bash
+# Check if we have enough history (3+ completed steps)
+COMPLETED_STEPS=$((STEP_NUM - 1))
+
+HISTORICAL_AVG=$(calculate_historical_average "$COMPLETED_STEPS")
+
+if [ "$COMPLETED_STEPS" -lt 3 ]; then
+  echo "🌱 Historical Average: COLD START (${COMPLETED_STEPS}/3 steps completed)"
+  echo "   Using conservative floor: ${HISTORICAL_AVG} tokens"
+  USING_COLD_START=true
+else
+  LAST_3_STEPS=("${STEP_CONTEXT_USAGE[@]: -3}")
+  echo "📊 Historical Average (last 3 steps):"
+  echo "   Step $((COMPLETED_STEPS - 2)): ${LAST_3_STEPS[0]} tokens"
+  echo "   Step $((COMPLETED_STEPS - 1)): ${LAST_3_STEPS[1]} tokens"
+  echo "   Step $((COMPLETED_STEPS)):     ${LAST_3_STEPS[2]} tokens"
+  echo "   Average: ${HISTORICAL_AVG} tokens"
+  USING_COLD_START=false
+fi
+echo ""
+```
+
+### PREDICTION Step 3: Growth Rate Estimation
+
+**Method 3: Extrapolate from recent trend:**
+
+```bash
+GROWTH_ESTIMATE=$(calculate_growth_estimate "$COMPLETED_STEPS")
+
+if [ "$GROWTH_ESTIMATE" = "0" ]; then
+  echo "📈 Growth Rate: INSUFFICIENT DATA (need 2+ steps)"
+  echo "   Skipping growth estimate"
+  HAS_GROWTH_ESTIMATE=false
+else
+  # Calculate average growth for display
+  declare -a GROWTH_DELTAS=()
+  for ((i=1; i<${#STEP_CONTEXT_USAGE[@]}; i++)); do
+    PREV=${STEP_CONTEXT_USAGE[$((i-1))]}
+    CURR=${STEP_CONTEXT_USAGE[$i]}
+    DELTA=$((CURR - PREV))
+    GROWTH_DELTAS+=("$DELTA")
+  done
+
+  GROWTH_SUM=0
+  for delta in "${GROWTH_DELTAS[@]}"; do
+    GROWTH_SUM=$((GROWTH_SUM + delta))
+  done
+  AVG_GROWTH=$((GROWTH_SUM / ${#GROWTH_DELTAS[@]}))
+
+  LAST_STEP_USAGE=${STEP_CONTEXT_USAGE[-1]}
+
+  echo "📈 Growth Rate Estimate:"
+  echo "   Average Growth: ${AVG_GROWTH} tokens/step"
+  echo "   Last Step Usage: ${LAST_STEP_USAGE} tokens"
+  echo "   Projected Next: ${GROWTH_ESTIMATE} tokens"
+  HAS_GROWTH_ESTIMATE=true
+fi
+echo ""
+```
+
+### PREDICTION Step 4: Hybrid Maximum (Most Conservative)
+
+**Take maximum of all three methods:**
+
+```bash
+echo "🔀 Hybrid Prediction (take most conservative):"
+echo ""
+
+# Collect all estimates
+declare -a ALL_ESTIMATES=()
+ALL_ESTIMATES+=("$FILE_ESTIMATE")
+ALL_ESTIMATES+=("$HISTORICAL_AVG")
+if [ "$HAS_GROWTH_ESTIMATE" = true ]; then
+  ALL_ESTIMATES+=("$GROWTH_ESTIMATE")
+fi
+
+# Find maximum (most conservative)
+MAX_ESTIMATE=0
+for estimate in "${ALL_ESTIMATES[@]}"; do
+  if [ "$estimate" -gt "$MAX_ESTIMATE" ]; then
+    MAX_ESTIMATE=$estimate
+  fi
+done
+
+echo "   File-Based:     ${FILE_ESTIMATE} tokens"
+echo "   Historical Avg: ${HISTORICAL_AVG} tokens"
+if [ "$HAS_GROWTH_ESTIMATE" = true ]; then
+  echo "   Growth Rate:    ${GROWTH_ESTIMATE} tokens"
+fi
+echo "   ─────────────────────────────────────────"
+echo "   Maximum (used): ${MAX_ESTIMATE} tokens"
+echo ""
+```
+
+### PREDICTION Step 5: Add Overhead Components
+
+**Add known per-step overhead:**
+
+```bash
+echo "➕ Adding Overhead Components:"
+echo ""
+echo "   Base Estimate:   ${MAX_ESTIMATE} tokens"
+echo "   + Delegation:    ${DELEGATION_OVERHEAD} tokens"
+echo "   + System:        ${SYSTEM_OVERHEAD} tokens"
+echo "   ─────────────────────────────────────────"
+
+ESTIMATE_WITH_OVERHEAD=$((MAX_ESTIMATE + BASE_OVERHEAD))
+
+echo "   Subtotal:        ${ESTIMATE_WITH_OVERHEAD} tokens"
+echo ""
+```
+
+### PREDICTION Step 6: Apply Safety Factors
+
+**Apply 1.5× multiplier + 3% margin:**
+
+```bash
+echo "🛡️  Applying Safety Factors:"
+echo ""
+
+# Step 6a: Safety multiplier (1.5×)
+AFTER_MULTIPLIER=$(awk "BEGIN {printf \"%.0f\", $ESTIMATE_WITH_OVERHEAD * $SAFETY_MULTIPLIER}")
+
+echo "   Before Safety:    ${ESTIMATE_WITH_OVERHEAD} tokens"
+echo "   × Safety (1.5×):  ${AFTER_MULTIPLIER} tokens"
+
+# Step 6b: Safety margin (3%)
+SAFETY_MARGIN_TOKENS=$(awk "BEGIN {printf \"%.0f\", $AFTER_MULTIPLIER * $SAFETY_MARGIN_PCT}")
+FINAL_PREDICTION=$((AFTER_MULTIPLIER + SAFETY_MARGIN_TOKENS))
+
+echo "   + Margin (3%):    +${SAFETY_MARGIN_TOKENS} tokens"
+echo "   ─────────────────────────────────────────"
+echo "   Final Prediction: ${FINAL_PREDICTION} tokens"
+echo ""
+
+# Step 6c: Apply calibration adjustment
+if [ "$USING_COLD_START" = false ]; then
+  CALIBRATED_PREDICTION=$(awk "BEGIN {printf \"%.0f\", $FINAL_PREDICTION * $CALIBRATION_MULTIPLIER}")
+  if [ "$CALIBRATION_MULTIPLIER" != "1.0" ]; then
+    echo "   × Calibration:    ${CALIBRATION_MULTIPLIER}× → ${CALIBRATED_PREDICTION} tokens"
+    FINAL_PREDICTION=$CALIBRATED_PREDICTION
+  fi
+fi
+echo ""
+```
+
+### PREDICTION Step 7: Decision Logic (80% Hard Cap Check)
+
+**Determine if safe to proceed:**
+
+```bash
+echo "🎯 Handoff Decision:"
+echo ""
+echo "   Current Context:  ${CURRENT_CONTEXT} tokens"
+echo "   + Predicted Step: ${FINAL_PREDICTION} tokens"
+echo "   ─────────────────────────────────────────"
+
+PROJECTED_TOTAL=$((CURRENT_CONTEXT + FINAL_PREDICTION))
+
+echo "   Projected Total:  ${PROJECTED_TOTAL} tokens"
+echo "   Hard Cap (80%):   ${HARD_CAP_TOKENS} tokens"
+echo "   Remaining Budget: $((HARD_CAP_TOKENS - PROJECTED_TOTAL)) tokens"
+echo ""
+
+# Check if would exceed hard cap
+if [ "$PROJECTED_TOTAL" -ge "$HARD_CAP_TOKENS" ]; then
+  echo "⛔ HANDOFF TRIGGERED: Would exceed 80% capacity"
+  echo ""
+  echo "   Reason: Next step would push context to ${PROJECTED_TOTAL} tokens"
+  echo "           (exceeds ${HARD_CAP_TOKENS} hard cap)"
+  echo ""
+
+  # Generate handoff checkpoint
+  generate_handoff_checkpoint "$((STEP_NUM - 1))" "$PROJECTED_TOTAL" "capacity_exceeded"
+
+  # Exit with resume instructions
+  echo ""
+  echo "════════════════════════════════════════════════════════"
+  echo "  CHECKPOINT CREATED - RESUME IN FRESH CONTEXT"
+  echo "════════════════════════════════════════════════════════"
+  echo ""
+  echo "✅ Completed: Steps 1-$((STEP_NUM - 1)) ($(((STEP_NUM - 1) * 100 / TOTAL_STEPS))% of plan)"
+  echo "📝 Checkpoint: ${PLAN_DIR}handoff.md"
+  echo ""
+  echo "📍 Resume with:"
+  echo "   /rptc:helper-resume-plan \"@${PLAN_NAME}/\""
+  echo ""
+  exit 0
+else
+  echo "✅ SAFE TO PROCEED: Within capacity budget"
+  echo ""
+  echo "   Headroom: $((HARD_CAP_TOKENS - PROJECTED_TOTAL)) tokens ($((100 * (HARD_CAP_TOKENS - PROJECTED_TOTAL) / HARD_CAP_TOKENS))%)"
+  echo ""
+fi
+```
+
+### PREDICTION Step 8: Log Prediction Details
+
+**Append to prediction log:**
+
+```bash
+# Log row: Step | File Est | Hist | Growth | Max | Overhead | Safety | Final | Current | Decision | [Actual filled in Phase 5]
+echo -n "${STEP_NUM} | ${FILE_ESTIMATE} | ${HISTORICAL_AVG} | " >> "$PREDICTION_LOG"
+if [ "$HAS_GROWTH_ESTIMATE" = true ]; then
+  echo -n "${GROWTH_ESTIMATE} | " >> "$PREDICTION_LOG"
+else
+  echo -n "N/A | " >> "$PREDICTION_LOG"
+fi
+echo -n "${MAX_ESTIMATE} | ${BASE_OVERHEAD} | " >> "$PREDICTION_LOG"
+echo -n "×${SAFETY_MULTIPLIER}+${SAFETY_MARGIN_PCT}% | ${FINAL_PREDICTION} | " >> "$PREDICTION_LOG"
+echo -n "${CURRENT_CONTEXT} | PROCEED | " >> "$PREDICTION_LOG"
+echo "[measuring...]" >> "$PREDICTION_LOG"
+
+echo "📝 Logged to: ${PREDICTION_LOG}"
+echo ""
+```
+
+---
 
 #### Step N: Delegate to TDD Sub-Agent
 
@@ -438,6 +2237,23 @@ Files modified/created in Steps 1 through $STEP_NUM-1:
 [Pass list of files with brief description of changes]
 
 If this is Step 1: "No prior changes (first step)"
+
+## Implementation Constraints
+
+${CONSTRAINTS}
+
+**CRITICAL**: These constraints MUST be respected during implementation.
+- If constraints conflict with your intended approach, STOP and request clarification from main TDD executor
+- Constraints ensure code quality, maintainability, and adherence to project standards
+- Violating constraints may result in implementation rejection during refactoring phase
+- If constraints are unclear or contradictory, document concern and request PM guidance before proceeding
+
+**Graceful Handling**: If constraints section shows "No specific constraints defined," apply standard best practices:
+- KISS (Keep It Simple) principle
+- YAGNI (You Aren't Gonna Need It)
+- DRY (Don't Repeat Yourself) after 3rd occurrence
+- File size < 500 lines when practical
+- Function size < 50 lines when practical
 
 ## Execute TDD Cycle
 
@@ -584,6 +2400,18 @@ Files created: [list]
 Coverage: [Y]% (for this step)
 
 📝 Plan synchronized: Step $STEP_NUM marked complete
+```
+
+```bash
+# Notify step completion
+notify_discord "✅ **Step ${STEP_NUM} Complete**\n\`${STEP_NAME}\`" "detailed"
+```
+
+```text
+📊 Context Status After Step $STEP_NUM:
+   Coordination overhead used: ~8K tokens (delegation + result processing)
+   Cumulative state tracking: $((STEP_NUM * 1000)) tokens
+   Main context preserved for: $((TOTAL_STEPS - STEP_NUM)) remaining steps
 
 [If more steps remaining:]
 Next: Step [N+1] - [Next step name]
@@ -591,218 +2419,193 @@ Next: Step [N+1] - [Next step name]
 [If all steps complete:]
 All implementation steps complete! Proceeding to quality gates...
 ```
+
+---
+
+## Phase 5: Context Usage Tracking (Roadmap #22 - Post-Step Analysis)
+
+**Purpose:** Measure actual context usage, calculate prediction accuracy, adjust calibration.
+
+**Timing:** AFTER step completes (tests pass, plan synced)
+
+---
+
+### TRACKING Step 1: Estimate Current Context Usage
+
+**Heuristic approach (no direct API access):**
+
+```bash
+echo ""
+echo "════════════════════════════════════════════════════════"
+echo "  PHASE 5: CONTEXT TRACKING"
+echo "════════════════════════════════════════════════════════"
+echo ""
+echo "📏 Measuring actual context usage..."
+echo ""
+
+# Method: Estimate based on files changed + summary size
+# This is heuristic (±15% accuracy) but sufficient for calibration
+
+# Get files modified in this step
+MODIFIED_FILES=$(git diff --name-only HEAD~1 2>/dev/null | wc -l)
+MODIFIED_LINES=$(git diff --stat HEAD~1 2>/dev/null | tail -1 | awk '{print $4}')
+
+# Estimate summary size (cumulative summaries grow ~2-3K per step)
+SUMMARY_SIZE=2500  # Conservative average
+
+# Estimate actual step impact
+# Formula: (modified lines × 2) + summary + overhead (already counted)
+if [ -n "$MODIFIED_LINES" ] && [ "$MODIFIED_LINES" != "0" ]; then
+  IMPLEMENTATION_TOKENS=$((MODIFIED_LINES * 2))
+else
+  IMPLEMENTATION_TOKENS=5000  # Fallback if git diff unavailable
+fi
+
+ACTUAL_STEP_DELTA=$((IMPLEMENTATION_TOKENS + SUMMARY_SIZE + BASE_OVERHEAD))
+
+# Update current context tracker
+PREVIOUS_CONTEXT=$CURRENT_CONTEXT
+CURRENT_CONTEXT=$((CURRENT_CONTEXT + ACTUAL_STEP_DELTA))
+
+echo "   Modified Files: ${MODIFIED_FILES}"
+echo "   Modified Lines: ${MODIFIED_LINES}"
+echo "   Estimated Implementation: ${IMPLEMENTATION_TOKENS} tokens"
+echo "   Cumulative Summary: ${SUMMARY_SIZE} tokens"
+echo "   Overhead: ${BASE_OVERHEAD} tokens"
+echo "   ─────────────────────────────────────────"
+echo "   Step Delta: ${ACTUAL_STEP_DELTA} tokens"
+echo ""
+echo "   Context Before: ${PREVIOUS_CONTEXT} tokens"
+echo "   Context After:  ${CURRENT_CONTEXT} tokens"
+echo ""
+```
+
+### TRACKING Step 2: Store in Historical Array
+
+**Add to STEP_CONTEXT_USAGE for future predictions:**
+
+```bash
+# Append actual usage to history
+STEP_CONTEXT_USAGE+=("$ACTUAL_STEP_DELTA")
+
+echo "📊 Historical Data Updated:"
+echo "   Total Steps Tracked: ${#STEP_CONTEXT_USAGE[@]}"
+echo "   Recent Usage:"
+if [ "${#STEP_CONTEXT_USAGE[@]}" -ge 3 ]; then
+  echo "     Step $((${#STEP_CONTEXT_USAGE[@]} - 2)): ${STEP_CONTEXT_USAGE[-3]} tokens"
+  echo "     Step $((${#STEP_CONTEXT_USAGE[@]} - 1)): ${STEP_CONTEXT_USAGE[-2]} tokens"
+  echo "     Step ${#STEP_CONTEXT_USAGE[@]}:         ${STEP_CONTEXT_USAGE[-1]} tokens"
+else
+  for ((i=0; i<${#STEP_CONTEXT_USAGE[@]}; i++)); do
+    echo "     Step $((i + 1)): ${STEP_CONTEXT_USAGE[$i]} tokens"
+  done
+fi
+echo ""
+```
+
+### TRACKING Step 3: Calculate Prediction Error
+
+**Compare predicted vs actual:**
+
+```bash
+echo "🎯 Prediction Accuracy:"
+echo ""
+
+# Retrieve predicted value from Phase 4b
+echo "   Predicted: ${FINAL_PREDICTION} tokens"
+echo "   Actual:    ${ACTUAL_STEP_DELTA} tokens"
+
+# Calculate error percentage
+PREDICTION_ERROR=$(awk "BEGIN {printf \"%.1f\", abs($ACTUAL_STEP_DELTA - $FINAL_PREDICTION) / $FINAL_PREDICTION * 100}")
+
+echo "   Error:     ${PREDICTION_ERROR}%"
+echo ""
+
+# Store error for calibration analysis
+PREDICTION_ERRORS+=("$PREDICTION_ERROR")
+```
+
+### TRACKING Step 4: Calibration Adjustment
+
+**Adjust multiplier if errors consistently high:**
+
+```bash
+# Only calibrate after 3+ steps (enough data)
+if [ "${#PREDICTION_ERRORS[@]}" -ge 3 ]; then
+  # Calculate average error over last 3 steps
+  LAST_3_ERRORS=("${PREDICTION_ERRORS[@]: -3}")
+  ERROR_SUM=0
+  for error in "${LAST_3_ERRORS[@]}"; do
+    ERROR_SUM=$(awk "BEGIN {printf \"%.1f\", $ERROR_SUM + $error}")
+  done
+  AVG_ERROR=$(awk "BEGIN {printf \"%.1f\", $ERROR_SUM / 3}")
+
+  echo "📐 Calibration Analysis:"
+  echo "   Average Error (last 3): ${AVG_ERROR}%"
+  echo "   Target: <15% (acceptable), <10% (excellent)"
+  echo ""
+
+  # Adjust calibration multiplier if error >15%
+  if (( $(awk "BEGIN {print ($AVG_ERROR > 15)}") )); then
+    # Check if consistently over or under predicting
+    OVER_PREDICT=0
+    UNDER_PREDICT=0
+
+    for ((i=${#STEP_CONTEXT_USAGE[@]}-3; i<${#STEP_CONTEXT_USAGE[@]}; i++)); do
+      # Compare actual vs final prediction (need to recalculate for each)
+      STEP_ACTUAL=${STEP_CONTEXT_USAGE[$i]}
+      # This is simplified - in production would need to track predictions
+      if [ "$STEP_ACTUAL" -gt "$FINAL_PREDICTION" ]; then
+        UNDER_PREDICT=$((UNDER_PREDICT + 1))
+      else
+        OVER_PREDICT=$((OVER_PREDICT + 1))
+      fi
+    done
+
+    if [ "$UNDER_PREDICT" -ge 2 ]; then
+      # Consistently under-predicting: Increase multiplier by 10%
+      OLD_CALIBRATION=$CALIBRATION_MULTIPLIER
+      CALIBRATION_MULTIPLIER=$(awk "BEGIN {printf \"%.2f\", $CALIBRATION_MULTIPLIER * 1.1}")
+      echo "   ⚠️  Consistently UNDER-predicting (${UNDER_PREDICT}/3 steps)"
+      echo "   Adjusting calibration: ${OLD_CALIBRATION}× → ${CALIBRATION_MULTIPLIER}×"
+      echo "   (Increases future predictions by 10%)"
+    elif [ "$OVER_PREDICT" -ge 2 ]; then
+      # Consistently over-predicting: Decrease multiplier by 5%
+      OLD_CALIBRATION=$CALIBRATION_MULTIPLIER
+      CALIBRATION_MULTIPLIER=$(awk "BEGIN {printf \"%.2f\", $CALIBRATION_MULTIPLIER * 0.95}")
+      echo "   ℹ️  Consistently OVER-predicting (${OVER_PREDICT}/3 steps)"
+      echo "   Adjusting calibration: ${OLD_CALIBRATION}× → ${CALIBRATION_MULTIPLIER}×"
+      echo "   (Decreases future predictions by 5%)"
+    else
+      echo "   ⚠️  High error but inconsistent direction - no adjustment"
+    fi
+    echo ""
+  else
+    echo "   ✅ Error within acceptable range (no adjustment needed)"
+    echo ""
+  fi
+else
+  echo "📐 Calibration: Insufficient data (${#PREDICTION_ERRORS[@]}/3 steps)"
+  echo "   Need 3+ steps for calibration analysis"
+  echo ""
+fi
+```
+
+### TRACKING Step 5: Update Prediction Log
+
+**Fill in actual value and error:**
+
+```bash
+# Update last line of prediction log with actual data
+sed -i "$ s/\[measuring...\]/${ACTUAL_STEP_DELTA} | ${PREDICTION_ERROR}%/" "$PREDICTION_LOG"
+
+echo "📝 Prediction log updated: ${PREDICTION_LOG}"
+echo ""
+```
+
+---
 
 **Repeat for all N steps**, then proceed to Phase 2 (Quality Gates).
-
----
-
-## Phase 1b: Monolithic Format - Direct Execution (Backward Compatibility)
-
-**If using monolithic format, follow this process for each step**:
-
-#### RED Phase: Write Tests First ❌
-
-**Update TodoWrite**: Mark "Step X: RED - Write failing tests" as in_progress
-
-**CRITICAL**: Write tests BEFORE any implementation code.
-
-1. **Review step's test requirements**
-
-   - Read "Tests to Write First" from plan
-   - Understand expected behavior
-   - Identify edge cases
-
-2. **Write ALL tests for this step**
-
-   - Use descriptive test names
-   - Cover happy path
-   - Cover edge cases
-   - Cover error conditions
-   - Follow project's test conventions
-
-3. **Verify tests FAIL**
-   - Run tests
-   - Confirm they fail for the RIGHT reasons
-   - Show failure output
-
-**Report RED State**:
-
-**FORMATTING NOTE:** Each list item MUST be on its own line with proper newlines.
-
-```text
-🔴 RED Phase Complete - Step [N]: [Step Name]
-
-Tests written: [X] tests
-- ❌ [test 1 name]
-- ❌ [test 2 name]
-- ❌ [test 3 name]
-
-All tests failing as expected (no implementation yet).
-
-Proceeding to GREEN phase...
-```
-
-**Update TodoWrite**: Mark "Step X: RED - Write failing tests" as completed
-
-#### GREEN Phase: Minimal Implementation ✅
-
-**Update TodoWrite**: Mark "Step X: GREEN - Implement to pass" as in_progress
-
-**Write ONLY enough code to pass current tests.**
-
-1. **Implement minimal solution**
-
-   - Focus on correctness, not elegance
-   - No premature optimization
-   - No extra features
-   - Just make tests pass
-
-2. **Run tests**
-
-   - Execute test suite
-   - Check results
-
-3. **Auto-Iteration (if tests fail)**
-   - Maximum $MAX_ATTEMPTS iterations per step
-   - Each iteration:
-     - Analyze specific failure
-     - Make targeted fix
-     - Re-run tests
-     - Report progress
-   - **DO NOT create separate TODOs per iteration** (aggregate in GREEN phase)
-
-**Report Each Iteration**:
-
-**FORMATTING NOTE:** Ensure each status line is on its own line.
-
-```text
-Iteration [N]: [What was fixed]
-Tests: [X] passing, [Y] failing
-[If not all passing, continue iteration...]
-```
-
-**Report GREEN State**:
-
-**FORMATTING NOTE:** Keep all status items on separate lines.
-
-```text
-🟢 GREEN Phase Complete - Step [N]: [Step Name]
-
-✅ All tests passing ([X] tests)
-
-Proceeding to REFACTOR phase...
-```
-
-**Update TodoWrite**: Mark "Step X: GREEN - Implement to pass" as completed
-
-#### REFACTOR Phase: Improve Quality 🔧
-
-**Update TodoWrite**: Mark "Step X: REFACTOR - Improve quality" as in_progress
-
-**Now that tests are green, improve the code.**
-
-1. **Code improvements**
-
-   - Remove duplication
-   - Improve naming
-   - Extract functions
-   - Add clarifying comments
-   - Simplify complex logic
-
-2. **Run tests after EACH refactor**
-
-   - Ensure tests still pass
-   - If tests fail, fix and continue
-   - Keep iterating until tests green
-
-3. **Final verification**
-   - Run full test suite
-   - Check for regressions
-   - Verify code quality
-
-**Report REFACTOR Complete**:
-
-**FORMATTING NOTE:** Each improvement and status line must be on its own line.
-
-```text
-🔧 REFACTOR Phase Complete - Step [N]: [Step Name]
-
-Improvements made:
-- [Improvement 1]
-- [Improvement 2]
-
-✅ All tests still passing
-✅ Code quality improved
-
-Step [N] complete!
-```
-
-**Update TodoWrite**: Mark "Step X: REFACTOR - Improve quality" as completed
-
-#### Verify Step Complete & Sync Plan
-
-**Update TodoWrite**: Mark "Step X: SYNC - Update plan" as in_progress
-
-**After each step**:
-
-1. **Update plan document** (`$ARTIFACT_LOC/plans/[plan-name].md`):
-
-   - Mark step complete: Change `- [ ]` to `- [x]` for this step
-   - Mark all tests for this step complete
-   - Save updated plan
-
-2. **Report completion**:
-
-**FORMATTING NOTE:** Each status line (Tests, Files, Coverage) must be on separate lines with proper newlines.
-
-```text
-✅ Step [N] Complete: [Step Name]
-
-Tests: [X] passing
-Files modified: [list]
-Coverage: [Y]% (for new code)
-
-📝 Plan synchronized: Step [N] marked complete in `$ARTIFACT_LOC/plans/[plan-name].md`
-
-[If more steps remaining:]
-Next: Step [N+1] - [Next step name]
-
-[If all steps complete:]
-All implementation steps complete! Proceeding to quality gates...
-```
-
-**Update TodoWrite**: Mark "Step X: SYNC - Update plan" as completed
-
-**CRITICAL**: Never skip plan synchronization. The plan is a living document that must reflect actual progress.
-
----
-
-**CRITICAL VALIDATION CHECKPOINT - NON-NEGOTIABLE QUALITY GATE**
-
-Before executing Master Efficiency Agent:
-
-**TodoWrite Check**: "REQUEST PM: Efficiency Agent approval" MUST be completed
-
-**Verification**:
-1. All implementation steps MUST be completed
-2. All tests MUST be passing
-3. PM approval MUST be obtained
-
-❌ **QUALITY GATE BLOCKED** - Cannot proceed to Efficiency review without PM approval
-
-**Required**: PM must explicitly approve efficiency review
-
-**ENFORCEMENT**: If PM has NOT approved:
-1. Verify all tests passing
-2. Present implementation summary
-3. Ask: "Ready for Master Efficiency Agent review?"
-4. Explain: "MUST get PM approval - CANNOT PROCEED without efficiency review"
-5. Wait for explicit "yes" or "approved"
-6. NEVER skip this gate without explicit override
-
-**Override Phrase**: PM may say "SKIP EFFICIENCY REVIEW - I ACCEPT THE RISKS"
-
-**This is a NON-NEGOTIABLE quality gate. Efficiency review ensures code maintainability and follows KISS/YAGNI principles.**
 
 ---
 
@@ -871,6 +2674,11 @@ Waiting for your sign-off...
    - Else: Use default "think" mode
 
 **Step 2: Create Sub-Agent**:
+
+```bash
+# Notify Efficiency Agent start
+notify_discord "🔍 **Quality Gate: Efficiency Review**\nAnalyzing code quality..." "detailed"
+```
 
 **Sub-Agent Prompt**:
 
@@ -1049,6 +2857,11 @@ Waiting for your sign-off...
 
 **Step 2: Create Sub-Agent**:
 
+```bash
+# Notify Security Agent start
+notify_discord "🔒 **Quality Gate: Security Review**\nScanning for vulnerabilities..." "detailed"
+```
+
 **Sub-Agent Prompt**:
 
 ```text
@@ -1157,7 +2970,220 @@ New security tests added: [N]
 TDD implementation complete with quality gates passed!
 ```
 
+```bash
+# Notify TDD completion
+notify_discord "✨ **TDD Execution Complete**\nPlan: \`${PLAN_NAME}\`\nAll tests passing ✅" "summary"
+```
+
 **Update TodoWrite**: Mark "EXECUTE: Security Agent review" as completed
+
+---
+
+### Phase 3.75: Independent Verification (Roadmap #18)
+
+**Purpose**: Catch test overfitting and validate intent fulfillment before proceeding to refactoring.
+
+**When Executed**: After GREEN phase (tests pass), before documentation and PM review
+
+**Configuration**: Controlled by `.claude/settings.json` → `rptc.verificationMode`
+- `"focused"` (default): Verify intent/coverage/overfitting only (<5 min)
+- `"disabled"`: Skip verification (backward compatibility)
+- `"exhaustive"`: Full verification (future enhancement, not yet implemented)
+
+**Anthropic 7-Step Workflow Integration**: This implements Step 6 (Verify Before Refactoring)
+
+---
+
+#### Step 1: Check Verification Mode
+
+```bash
+# Load verification configuration
+VERIFICATION_MODE=$(jq -r '.rptc.verificationMode // "focused"' .claude/settings.json 2>/dev/null || echo "focused")
+
+if [ "$VERIFICATION_MODE" = "disabled" ]; then
+  echo ""
+  echo "⏩ Verification: Disabled (config: verificationMode='disabled')"
+  echo "   Proceeding directly to documentation phase..."
+  echo ""
+  # Skip to next phase
+  continue
+fi
+
+echo ""
+echo "════════════════════════════════════════════════════════"
+echo "  PHASE 3.75: INDEPENDENT VERIFICATION"
+echo "════════════════════════════════════════════════════════"
+echo ""
+echo "Mode: $VERIFICATION_MODE"
+echo "Purpose: Catch test overfitting and validate intent fulfillment"
+echo "Time Limit: <5 minutes per step"
+echo ""
+```
+
+#### Step 2: Prepare Verification Context
+
+```bash
+# Collect context for verification sub-agent
+VERIFICATION_CONTEXT=$(cat <<EOF
+## Step Context
+
+**Step Number:** $STEP_NUM
+**Step Purpose:** $(sed -n '/^## Purpose/,/^## /p' "$STEP_FILE" | head -n -1)
+
+## Planned Test Scenarios
+
+$(sed -n '/^## Tests to Write First/,/^## Files/p' "$STEP_FILE" | head -n -1)
+
+## Implementation Summary
+
+**Files Modified:**
+$(git diff --name-only HEAD 2>/dev/null || echo "Unable to detect changes")
+
+**Tests Passing:**
+[Test results from Phase 3 GREEN - all tests passed]
+
+## Verification Task
+
+Please complete the verification checklist:
+
+$(cat "${CLAUDE_PLUGIN_ROOT}/templates/verification-checklist.md")
+
+**Note on Test Assertions**: When reviewing tests, consider whether flexible assertions are appropriate for AI-generated or non-deterministic outputs:
+
+- **Use exact assertions** for: Security logic, API contracts, performance benchmarks, compliance requirements
+- **Consider flexible assertions** for: AI-generated text, code variations, reasoning explanations, multiple valid solution paths
+- **Decision framework**: See \`flexible-testing-guide.md\` (SOP) for guidance on when to use semantic similarity, behavioral testing, or exact assertions
+
+**Key Principle**: Exact assertions are the default. Flexible assertions require explicit justification and documentation.
+
+---
+
+Review ONLY:
+1. Intent fulfillment (does implementation match step purpose?)
+2. Coverage gaps (are all planned tests implemented?)
+3. Overfitting detection (any hardcoded test gaming?)
+
+Time limit: 5 minutes
+EOF
+)
+```
+
+#### Step 3: Delegate to Verification Sub-Agent
+
+```bash
+# Use Task tool with focused verification sub-agent
+echo "🔍 Delegating to Verification Sub-Agent..."
+echo ""
+echo "Verification checks:"
+echo "  1. Intent Fulfillment (does implementation match plan purpose?)"
+echo "  2. Coverage Gaps (are all planned tests implemented?)"
+echo "  3. Overfitting Detection (any hardcoded test gaming?)"
+echo ""
+
+# Delegate using Task tool
+# In actual execution, this uses:
+# Task(prompt: VERIFICATION_CONTEXT, type: "verification", thinking_mode: "think")
+#
+# For documentation purposes, we describe expected behavior:
+# - Sub-agent receives full context (step purpose, planned tests, implementation files)
+# - Sub-agent completes verification checklist
+# - Returns structured result (PASS/FAIL/NEEDS_CLARIFICATION)
+
+# Simulate sub-agent call (actual implementation uses Task tool)
+# VERIFICATION_RESULT=$(task_delegation "$VERIFICATION_CONTEXT" "verification" "think")
+```
+
+#### Step 4: Process Verification Result
+
+```bash
+# Parse verification result
+VERIFICATION_STATUS=$(echo "$VERIFICATION_RESULT" | grep "Verification Result:" | awk '{print $NF}')
+
+case "$VERIFICATION_STATUS" in
+  PASS)
+    echo "✅ Verification: PASS"
+    echo ""
+    echo "$VERIFICATION_RESULT"
+    echo ""
+    echo "✅ All verification checks passed. Proceeding to documentation phase..."
+    echo ""
+    ;;
+
+  FAIL)
+    echo "❌ Verification: FAIL"
+    echo ""
+    echo "$VERIFICATION_RESULT"
+    echo ""
+    echo "❌ Verification identified gaps. Implementation requires rework."
+    echo ""
+    echo "Please review verification feedback above and address issues:"
+    echo "  1. Fix intent fulfillment gaps"
+    echo "  2. Add missing test scenarios"
+    echo "  3. Remove hardcoded test gaming"
+    echo ""
+    read -p "Continue after fixes? (y/n): " CONTINUE_VERIFY
+    if [ "$CONTINUE_VERIFY" != "y" ]; then
+      echo ""
+      echo "Pausing for implementation rework."
+      echo "Resume with: /rptc:helper-resume-plan"
+      echo ""
+      exit 0
+    fi
+    ;;
+
+  NEEDS_CLARIFICATION)
+    echo "⚠️  Verification: Needs Clarification"
+    echo ""
+    echo "$VERIFICATION_RESULT"
+    echo ""
+    echo "Verification sub-agent flagged ambiguities. PM review required."
+    echo ""
+    read -p "Proceed with manual PM review? (y/n): " PM_REVIEW
+    if [ "$PM_REVIEW" != "y" ]; then
+      echo ""
+      echo "Pausing for PM clarification."
+      echo "Resume with: /rptc:helper-resume-plan"
+      echo ""
+      exit 0
+    fi
+    echo ""
+    echo "Manual PM review approved. Proceeding..."
+    echo ""
+    ;;
+
+  *)
+    echo "⚠️  Verification: Unknown Result"
+    echo ""
+    echo "Verification sub-agent returned unexpected status: $VERIFICATION_STATUS"
+    echo ""
+    echo "Verification output:"
+    echo "$VERIFICATION_RESULT"
+    echo ""
+    echo "Falling back to manual PM review..."
+    echo ""
+    read -p "Manual review complete? (y/n): " MANUAL_REVIEW
+    if [ "$MANUAL_REVIEW" != "y" ]; then
+      echo ""
+      echo "Pausing for manual review."
+      echo "Resume with: /rptc:helper-resume-plan"
+      echo ""
+      exit 0
+    fi
+    ;;
+esac
+```
+
+#### Step 5: Log Verification Completion
+
+```bash
+echo ""
+echo "✅ Phase 3.75 Complete: Independent Verification"
+echo "   Status: $VERIFICATION_STATUS"
+echo "   Time: $(date '+%Y-%m-%d %H:%M:%S')"
+echo ""
+echo "Proceeding to Documentation Phase..."
+echo ""
+```
 
 ---
 
@@ -1433,6 +3459,11 @@ Options:
 3. Ask PM for guidance
 
 What would you like to do?
+```
+
+```bash
+# Notify test failure
+notify_discord "❌ **TDD Execution Failed**\nPlan: \`${PLAN_NAME}\`\nStep: ${STEP_NUM}\nReason: Tests failing after max attempts" "summary"
 ```
 
 **Never proceed with failing tests** - that violates TDD principles.

@@ -26,6 +26,7 @@ Available SOPs:
 
 - architecture-patterns.md
 - testing-guide.md
+- flexible-testing-guide.md
 - languages-and-style.md
 - security-and-performance.md
 - git-and-deployment.md

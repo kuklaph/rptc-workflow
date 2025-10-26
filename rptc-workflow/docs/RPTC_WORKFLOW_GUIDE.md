@@ -37,6 +37,8 @@ bash setup-rptc-workflow.sh
 - ✅ Approving quality gate reviews
 - ✅ Approving final completion
 
+**Want to understand when to use workflows vs autonomous agents?** See [Workflows vs Agents Decision Tree](#workflows-vs-agents-making-the-right-choice) for guidance on choosing the right approach.
+
 ---
 
 ## Architecture Overview (v1.2.0+)
@@ -93,6 +95,264 @@ RPTC uses an **incremental sub-agent architecture** that dramatically improves t
 /rptc:tdd "@user-authentication.md"      # Monolithic
 /rptc:tdd "@user-authentication/"        # Directory
 ```
+
+**Agentic Patterns Used**: This architecture leverages all 5 of [Anthropic's Agentic Patterns](#anthropics-five-agentic-patterns) - prompt chaining (phase transitions), routing (format selection), parallelization (sub-agent delegation), orchestrator-workers (plan generation), and evaluator-optimizer (quality gates).
+
+---
+
+## Workflows vs Agents: Making the Right Choice
+
+### The Spectrum of AI Orchestration
+
+AI-powered development exists on a spectrum from simple prompts to complex autonomous agents:
+
+**Simple Prompts** → **Workflows** → **Autonomous Agents**
+
+- **Simple Prompts**: Single-turn interactions (e.g., "Fix this bug")
+- **Workflows**: Predefined decision paths with clear phases (e.g., RPTC's Research→Plan→TDD→Commit)
+- **Autonomous Agents**: Dynamic decision-making with minimal predefined paths (e.g., "Improve the system")
+
+**RPTC is workflow-centric** but uses agent patterns strategically within its workflow structure.
+
+---
+
+### Anthropic's Five Agentic Patterns
+
+Reference: [Anthropic's Agentic Patterns Documentation](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/agentic-patterns)
+
+#### 1. Prompt Chaining
+
+**Definition**: Sequential prompts where output N becomes input N+1
+
+**RPTC Uses This**: Research → Plan → TDD phase transitions
+- Research output feeds into plan scaffold
+- Plan document drives TDD execution
+- Each phase builds on previous results
+
+**Best For**: Well-defined multi-step processes with clear dependencies
+
+---
+
+#### 2. Routing
+
+**Definition**: Single classifier prompt routes to specialized sub-prompts based on input type
+
+**RPTC Uses This**: Complexity-based plan format selection
+- Simple features (≤2 steps) → Monolithic plan format
+- Complex features (>2 steps) → Directory format with sub-agents
+- Automatic format detection based on feature analysis
+
+**Best For**: Varied inputs requiring different handling strategies
+
+---
+
+#### 3. Parallelization
+
+**Definition**: Multiple prompts run concurrently, results aggregated
+
+**RPTC Uses This**: Sub-agent delegation in planning and research
+- Research phase: Discovery Q&A + Codebase exploration + Web research run in parallel
+- Planning phase: Step generators can run in parallel for independent steps
+- Results integrated efficiently
+
+**Best For**: Independent tasks that can execute simultaneously
+
+---
+
+#### 4. Orchestrator-Workers
+
+**Definition**: Central orchestrator delegates to specialized workers dynamically
+
+**RPTC Uses This**: Plan command orchestrates overview + step generators
+- Main planning command acts as orchestrator
+- Overview Generator creates strategic context
+- Step Generators create tactical implementation details
+- Cohesiveness Reviewer validates integration
+
+**Best For**: Complex tasks with multiple specialized sub-tasks
+
+---
+
+#### 5. Evaluator-Optimizer
+
+**Definition**: Loop of generate → evaluate → refine until quality threshold met
+
+**RPTC Uses This**: Quality gates and iterative refinement
+- Efficiency Agent reviews implementation, suggests improvements
+- Security Agent audits and fixes vulnerabilities
+- TDD cycle: RED → GREEN → REFACTOR with auto-iteration (max 10 attempts)
+- All tests must remain passing after optimization
+
+**Best For**: Quality-critical outputs requiring iteration and validation
+
+---
+
+### When to Use Workflows
+
+✅ **Choose workflows when**:
+
+- Task has clear **start and end states**
+- Steps are **well-defined and repeatable**
+- **Predictability and cost control** are priorities
+- **Human approval points** needed at key decisions
+- Want **auditable decision trail** for compliance
+- Team needs **consistent execution** across developers
+
+**Examples**:
+- CRUD operations (Create, Read, Update, Delete)
+- API integrations with known endpoints
+- Standard deployments following established procedures
+- Feature implementations with clear requirements
+- Bug fixes with reproducible test cases
+
+**Advantages**:
+- **Predictable costs**: Token usage is consistent
+- **Faster execution**: No exploration overhead
+- **Easier debugging**: Clear decision trail
+- **Better testability**: Repeatable workflows validate easily
+- **Team consistency**: Same process for all developers
+
+---
+
+### When to Use Autonomous Agents
+
+✅ **Choose autonomous agents when**:
+
+- Problem space is **open-ended** with unclear solution path
+- **Optimal approach unknown** upfront
+- Need **adaptive decision-making** based on discoveries
+- **Exploration vs exploitation** trade-offs important
+- Can tolerate **higher costs and unpredictability**
+- Goal clarity more important than path clarity
+
+**Examples**:
+- Research synthesis across disparate sources
+- Creative problem-solving ("make this better")
+- Competitive analysis with evolving landscape
+- Strategic planning with multiple valid approaches
+- Root cause analysis in complex systems
+
+**Advantages**:
+- **Adaptive**: Adjusts strategy based on findings
+- **Exploratory**: Discovers non-obvious solutions
+- **Flexible**: Handles unexpected scenarios
+- **Creative**: Not bound by predefined paths
+
+**Disadvantages**:
+- **Unpredictable costs**: Token usage varies widely
+- **Slower**: Exploration takes time
+- **Harder to debug**: Decision path not predetermined
+- **Inconsistent**: Different runs may take different approaches
+
+---
+
+### Why RPTC is Workflow-Centric
+
+RPTC deliberately chooses a **workflow-centric architecture** for these reasons:
+
+#### 1. Predictability
+Developers know what to expect at each phase. No surprises, clear mental model.
+
+#### 2. Cost Efficiency
+Predefined paths use **79% fewer tokens** than autonomous exploration (measured in TDD phase with directory format).
+
+#### 3. Human Control
+PM approval gates prevent unwanted actions. You control when agents run, what they optimize, and when to ship.
+
+#### 4. Testability
+Repeatable workflows are easier to validate. TDD workflow ensures tests written before implementation, every time.
+
+#### 5. Debugging
+Clear decision trail when issues arise. Know exactly which phase, which agent, which decision caused a problem.
+
+#### 6. Best Practices Enforcement
+Systematically enforces TDD, quality gates, security reviews, and efficiency optimization.
+
+#### 7. Team Consistency
+All developers follow the same Research→Plan→TDD→Commit flow. Onboarding simplified.
+
+---
+
+### RPTC's Hybrid Approach
+
+**RPTC uses workflows for structure, agents for flexibility**:
+
+- **Workflows**: Phase transitions (Research → Plan → TDD → Commit) are predefined
+- **Agent Patterns**: Within phases, RPTC uses all 5 Anthropic patterns strategically
+  - Prompt Chaining: Phase output feeds next phase
+  - Routing: Format selection based on complexity
+  - Parallelization: Sub-agent delegation for independent work
+  - Orchestrator-Workers: Planning command orchestrates generators
+  - Evaluator-Optimizer: Quality gates and TDD iteration
+
+**Result**: Structure + flexibility = predictable costs, human control, adaptive sub-tasks.
+
+---
+
+### Decision Flowchart
+
+```text
+START: What are you trying to accomplish?
+
+┌─────────────────────────────────────────────────┐
+│ Can you define the steps upfront?              │
+│ Do you know the expected deliverable format?   │
+└───────────┬─────────────────────────────────────┘
+            │
+    ┌───────┴────────┐
+    │                │
+   YES              NO
+    │                │
+    ▼                ▼
+┌──────────────┐  ┌──────────────────────────────┐
+│  WORKFLOW    │  │  AUTONOMOUS AGENT or HYBRID  │
+│  (RPTC)      │  │                              │
+└──────────────┘  └──────────────────────────────┘
+    │                │
+    │                │
+    ▼                ▼
+Examples:           Examples:
+• Add feature      • "Make it better"
+• Fix bug          • Open-ended research
+• Refactor X       • Creative design
+• Deploy to Y      • Competitive analysis
+• Test Z           • Strategic planning
+• API integration  • Root cause analysis
+
+┌──────────────────────────────────────────────────┐
+│  HYBRID APPROACH (RPTC's Model):                 │
+│  ✅ Use workflow for phase structure             │
+│  ✅ Use agent patterns within phases             │
+│  ✅ Best of both worlds                          │
+│                                                  │
+│  Example: RPTC uses Research→Plan→TDD workflow,  │
+│  but delegates to specialist agents within       │
+│  phases (Master Feature Planner, Efficiency      │
+│  Agent, Security Agent, etc.)                    │
+└──────────────────────────────────────────────────┘
+```
+
+---
+
+### Quick Decision Questions
+
+Ask yourself:
+
+**Workflow Indicators** (RPTC is right):
+- ✅ Do I know the final deliverable format?
+- ✅ Can I list the major steps upfront?
+- ✅ Do I need approval gates for control?
+- ✅ Is cost predictability important?
+- ✅ Do I want a repeatable process?
+
+**Agent Indicators** (Autonomous agent or hybrid):
+- ✅ Am I exploring unknowns?
+- ✅ Is the optimal path unclear?
+- ✅ Do I need adaptive behavior?
+- ✅ Is creative problem-solving required?
+- ✅ Can I tolerate unpredictable costs?
+
+**When in doubt, start with workflows** (KISS principle). Upgrade to agent patterns only when workflows prove insufficient.
 
 ---
 
@@ -270,6 +530,367 @@ RPTC uses an **incremental sub-agent architecture** that dramatically improves t
 **Output**: Fully tested implementation with quality gates passed
 
 **Key Principle**: Tests are ALWAYS written before implementation
+
+---
+
+### Phase 3 Enhanced: TDD Execution Optimization (v1.2.0+)
+
+**New Capabilities**: 5 enhancements for unlimited feature size
+
+#### What's New
+
+**1. Implementation Constraints** - Quality Gate Specifications
+
+- **What**: Plans include structured constraints (file size, complexity, dependencies, platform, performance)
+- **When**: Always - required in every plan template
+- **How**: Agent generates constraints from project context
+- **Benefit**: Prevents over-engineering at generation time
+- **Example**:
+  ```
+  ## Implementation Constraints
+  - File Size: <500 lines
+  - Complexity: <50 lines/function, <10 cyclomatic
+  - Dependencies: Reuse patterns, prohibit factories for single use
+  - Platforms: Node.js 18+
+  - Performance: <100ms response (p95)
+  ```
+
+**2. Seven-Step TDD Workflow** - Structured Implementation
+
+- **What**: Explicit 7-step TDD cycle from Anthropic research
+- **When**: Applied to every step in TDD phase
+- **How**: Auto-enforced in tdd.md workflow
+- **Steps**:
+  1. Understand the Requirement
+  2. Design Test Scenarios (Pre-Validation Checkpoint)
+  3. Write Failing Test (RED Phase)
+  4. Minimal Implementation (GREEN Phase)
+  5. Refactor for Quality
+  6. Verify No Regressions (Phase 3.75: Independent Verification)
+  7. Document and Commit
+
+**Phase 3.75: Independent Verification** - Catch Test Overfitting
+
+**Purpose:** Catch test overfitting and validate intent fulfillment after GREEN phase, before refactoring begins.
+
+**When:** After tests pass (GREEN), before documentation and PM review
+
+**Configuration:** `.claude/settings.json` → `rptc.verificationMode`
+
+**Verification Scope (Focused Mode):**
+1. **Intent Fulfillment:** Does implementation match step purpose from plan?
+2. **Coverage Gaps:** Are all planned test scenarios actually implemented?
+3. **Overfitting Detection:** Any hardcoded test gaming (returning expected values without logic)?
+
+**Time Limit:** <5 minutes per step (goal, not hard timeout)
+
+**Verification Results:**
+- **PASS:** All checks passed, proceed to refactoring
+- **FAIL:** Gaps identified, implementation requires rework before proceeding
+- **NEEDS_CLARIFICATION:** Ambiguities detected, PM review required
+
+**Example Output:**
+
+```bash
+# After GREEN phase completes
+════════════════════════════════════════════════════════
+  PHASE 3.75: INDEPENDENT VERIFICATION
+════════════════════════════════════════════════════════
+
+Mode: focused
+Purpose: Catch test overfitting and validate intent fulfillment
+Time Limit: <5 minutes per step
+
+🔍 Delegating to Verification Sub-Agent...
+
+Verification checks:
+  1. Intent Fulfillment (does implementation match plan purpose?)
+  2. Coverage Gaps (are all planned tests implemented?)
+  3. Overfitting Detection (any hardcoded test gaming?)
+
+## Verification Result: PASS
+
+### 1. Intent Fulfillment: ✅ PASS
+Implementation correctly validates user input and throws error on invalid email format.
+Matches step purpose: "Implement email validation with format and domain checks"
+
+### 2. Coverage Gaps: ✅ PASS
+All planned tests implemented:
+- Happy path: valid email formats
+- Edge cases: empty string, missing @, invalid domain
+- Error conditions: null input, malformed format
+
+### 3. Overfitting Detection: ✅ PASS
+No hardcoded test gaming detected. Implementation uses regex validation logic.
+Code review: validateEmail() function implements real validation, not test-specific returns.
+
+## Recommendation
+Proceed to REFACTOR phase
+
+## Time Spent: 3 minutes
+
+✅ Verification: PASS
+✅ All verification checks passed. Proceeding to documentation phase...
+```
+
+**Disabling Verification:**
+
+If you prefer to skip independent verification (backward compatibility):
+
+```json
+{
+  "rptc": {
+    "verificationMode": "disabled"
+  }
+}
+```
+
+**When to Disable:**
+- Simple refactoring work (low overfitting risk)
+- Hot fixes with time pressure
+- Exploratory/prototype work
+- Trust in implementation quality
+
+**When to Keep Enabled (Recommended):**
+- Complex business logic
+- Security-critical code
+- AI-heavy implementation (higher overfitting risk)
+- New team members or unfamiliar codebases
+
+**Phase 0b: Test-Driven Generation (TDG Mode)** - AI-Accelerated Test Generation (v2.0.0+)
+
+**Purpose:** AI-accelerated comprehensive test generation from plan specifications to dramatically reduce TDD overhead.
+
+**When:** After plan load (Phase 0), before RED phase (Phase 1), ONLY if `--tdg` flag OR config `tdgMode: "enabled"`
+
+**Strategy:** AUGMENTATION (planned scenarios + ~50 AI-generated tests)
+
+**Benefits:**
+- **80% overhead reduction:** ~50 tests in <5 minutes vs. 10-20 min manually
+- **Comprehensive coverage:** Diverse edge cases and error conditions
+- **Plan-driven:** Respects specifications and implementation constraints
+- **Augmentation:** Keeps planned tests, adds AI-generated tests (not replacement)
+
+**Example Output:**
+
+```bash
+════════════════════════════════════════════════════════
+  PHASE 0b: TEST-DRIVEN GENERATION (TDG MODE)
+════════════════════════════════════════════════════════
+
+Strategy: AUGMENTATION (planned scenarios + ~50 AI-generated tests)
+Target: Comprehensive coverage in <5 minutes
+Integration: Generated tests augment plan, not replace
+
+🧪 TDG Mode: Generating comprehensive test suite...
+
+📋 Step 2: Delegating to TDG Sub-Agent...
+   Planned tests: 5
+   Target: ~50 additional tests
+
+✅ TDG Complete
+
+📊 Test Suite Summary:
+   Planned tests (from plan): 5
+   Generated tests (TDG): 47
+   Total tests: 52
+
+✅ Augmented test suite saved: step-02-tests-augmented.md
+
+Proceeding to RED phase with comprehensive test suite...
+
+✅ Phase 0b Complete: Test-Driven Generation
+   Generated: 47 tests
+   Total: 52 tests (planned + generated)
+   Time: 2025-01-24 14:32:15
+```
+
+**Configuration:**
+
+**Opt-in (default):**
+```json
+{
+  "rptc": {
+    "tdgMode": "disabled"
+  }
+}
+```
+
+Use `--tdg` flag to enable per-execution:
+```bash
+/rptc:tdd "@plan-name/" --tdg
+```
+
+**Always-on:**
+```json
+{
+  "rptc": {
+    "tdgMode": "enabled"
+  }
+}
+```
+
+TDG runs automatically for all TDD executions (no flag needed).
+
+**When to Use TDG:**
+- Complex features with many edge cases
+- New implementations requiring comprehensive coverage
+- Security-critical code (thorough error condition testing)
+- Unfamiliar domains (AI suggests test scenarios you might miss)
+
+**When to Skip TDG:**
+- Simple CRUD operations (planned tests sufficient)
+- Refactoring with existing test coverage
+- Hot fixes (time pressure, manual tests faster)
+- Exploratory work (test strategy unclear)
+
+**Deduplication:**
+
+TDG sub-agent deduplicates generated tests against planned scenarios automatically. Post-processing adds secondary duplicate detection (name matching). If duplicate count high (>10%), review generated tests manually.
+
+**Troubleshooting:**
+
+**Problem:** TDG generates too many tests (>100 total)
+**Solution:** Warning shown, option to continue or pause. Review augmented test file, manually remove low-value tests.
+
+**Problem:** TDG timeout (>10 min)
+**Solution:** Graceful degradation, uses planned tests only. Check specification clarity (incomplete specs cause longer generation time).
+
+**Problem:** Generated tests have syntax errors
+**Solution:** Validation checkpoint catches errors, fallback to planned tests. Report issue (may indicate TDG template needs adjustment).
+
+**3. Constraint-Aware Execution** - Respecting Project Boundaries
+
+- **What**: TDD sub-agents receive Implementation Constraints in context
+- **When**: Every step when using directory-format plans
+- **Benefit**: Reduces over-engineering, ensures simplicity
+
+**4. Simplicity Enforcement** - REFACTOR Phase Validation
+
+- **What**: REFACTOR phase includes explicit simplicity checks
+- **Checks**:
+  - Abstraction count (no single-use abstractions)
+  - Indirection layers (≤3)
+  - Enterprise pattern misuse check
+  - Code size compliance
+  - YAGNI violations
+- **Benefit**: Prevents architecture complexity creep
+
+**5. Auto-Handoff with Dynamic Prediction (Roadmap #22)** - Unlimited Feature Size
+
+**Problem Solved:** Large features (>15 steps) previously hit context limits, requiring manual plan splitting.
+
+**Solution:** Dynamic context prediction with automatic checkpoint/resume.
+
+**Always Enabled:** No configuration needed - automatic protection prevents plan size limitations.
+
+**How to Use:**
+
+**1. Write large plan (no size restrictions):**
+```bash
+/rptc:plan "Implement complete user authentication system with OAuth, MFA, and session management" --complexity complex
+```
+
+Plan generates 20+ steps - no problem!
+
+**2. Execute with TDD:**
+```bash
+/rptc:tdd "@user-authentication/"
+```
+
+**3. System monitors context automatically:**
+
+After each step:
+- Measures actual context usage
+- Predicts next step impact (hybrid model)
+- Checks if safe to proceed (<160K projected total)
+
+**4. Handoff triggers when needed:**
+
+```
+Step 13 Complete ✅
+Predicting Step 14...
+⛔ HANDOFF TRIGGERED: Would exceed 80% capacity
+📝 Checkpoint: .rptc/plans/user-authentication/handoff.md
+📍 Resume with: /rptc:helper-resume-plan "@user-authentication/"
+```
+
+**5. Resume in fresh context:**
+
+```bash
+/rptc:helper-resume-plan "@user-authentication/"
+```
+
+Continues from Step 14, uses calibrated predictions from first session.
+
+**Multiple Handoffs:**
+
+Large plans (30+ steps) may require 2-3 handoff cycles:
+- Session 1: Steps 1-13 (handoff at 156K)
+- Session 2: Steps 14-26 (handoff at 158K)
+- Session 3: Steps 27-30 (completes at 45K)
+
+Each session preserves context from previous, no work lost.
+
+**Prediction Improves Over Time:**
+
+- **Steps 1-3:** Conservative (±20% error, uses 25K floor)
+- **Steps 4-10:** Calibrating (±10-15% error, adjusts multiplier)
+- **Steps 11+:** Accurate (±5-10% error, stable)
+
+**Diagnostic Log:**
+
+Check prediction details:
+```bash
+cat .rptc/tdd-prediction.log
+```
+
+Shows: predicted vs actual for each step, calibration adjustments, errors.
+
+**When NOT to Worry:**
+
+- Handoff after 5 steps with 30-step plan (normal for complex features)
+- Prediction errors <15% (acceptable range)
+- Multiple handoff cycles (expected for large features)
+
+**When to Investigate:**
+
+- Handoff after 2 steps (steps may be too large - split plan)
+- Prediction errors >25% consistently (check MCP overhead)
+- Handoff triggers mid-step (shouldn't happen - report bug)
+
+**Troubleshooting:**
+
+**Q: Handoff triggered after only 5 steps?**
+A: Large step files or high complexity. Review `.rptc/tdd-prediction.log` for per-step usage. Consider splitting steps if >30K each.
+
+**Q: Prediction consistently inaccurate?**
+A: System detects this (3+ errors >20%) and switches to conservative mode. Check if MCP servers adding unexpected overhead.
+
+**Q: Can I disable auto-handoff?**
+A: No - it's always enabled. This prevents plan size limitations. Trust the prediction system or split plan manually if needed.
+
+#### Configuration Options
+
+```json
+{
+  "rptc": {
+    "defaultThinkingMode": "think",
+    "simplifyEnforcement": "enabled",
+    "constraintGeneration": "enabled"
+  }
+}
+```
+
+#### Troubleshooting
+
+**Problem: "Simplicity validation flagging valid patterns"**
+- Solution: Override using Implementation Constraints
+- Add justified exception to constraints section
+
+**Problem: "Want to disable handoff checkpoint?"**
+- Solution: PM can choose PROCEED at checkpoint
+- Handoff is not automatic
 
 ---
 

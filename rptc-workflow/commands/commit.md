@@ -62,6 +62,9 @@ Load SOPs using fallback chain (highest priority first):
    - `rptc.defaultThinkingMode` → THINKING_MODE (default: "think")
    - `rptc.testCoverageTarget` → COVERAGE_TARGET (default: 85)
    - `rptc.docsLocation` → DOCS_LOC (default: "docs")
+   - `rptc.discord.notificationsEnabled` → DISCORD_ENABLED (default: false)
+   - `rptc.discord.webhookUrl` → DISCORD_WEBHOOK (default: "")
+   - `rptc.discord.verbosity` → DISCORD_VERBOSITY (default: "summary")
 
 3. **Display loaded configuration**:
    ```text
@@ -69,7 +72,45 @@ Load SOPs using fallback chain (highest priority first):
      Thinking mode: [THINKING_MODE value]
      Coverage target: [COVERAGE_TARGET value]%
      Docs location: [DOCS_LOC value]
+     Discord notifications: [DISCORD_ENABLED value]
    ```
+
+4. **Create Discord notification helper function**:
+
+```bash
+notify_discord() {
+  local message="$1"
+  local min_verbosity="${2:-summary}"  # summary, detailed, or verbose
+
+  # Check if notifications enabled
+  if [ "$DISCORD_ENABLED" != "true" ] || [ -z "$DISCORD_WEBHOOK" ]; then
+    return 0  # Silent skip
+  fi
+
+  # Check verbosity level
+  case "$DISCORD_VERBOSITY" in
+    summary)
+      if [ "$min_verbosity" != "summary" ]; then
+        return 0  # Skip this notification
+      fi
+      ;;
+    detailed)
+      if [ "$min_verbosity" = "verbose" ]; then
+        return 0  # Skip verbose-only notifications
+      fi
+      ;;
+    verbose)
+      # Always send
+      ;;
+  esac
+
+  # Send notification (fail-safe, never block workflow)
+  if ! bash "${CLAUDE_PLUGIN_ROOT}/skills/discord-notify/scripts/notify.sh" \
+    "$DISCORD_WEBHOOK" "$message" 2>/dev/null; then
+    echo "⚠️  Discord notification failed (continuing workflow)" >&2
+  fi
+}
+```
 
 **Use these values throughout the command execution.**
 
@@ -170,12 +211,22 @@ To fix:
 Use '/rptc:tdd' to fix with auto-iteration.
 ```
 
+```bash
+# Notify about test failures
+notify_discord "❌ **Commit Blocked**\nTests failing - fix before committing" "summary"
+```
+
 **STOP IMMEDIATELY** - do not proceed with any other checks.
 
 **If all tests pass**:
 
 ```text
 ✅ Test Suite: [X] tests passing
+```
+
+```bash
+# Notify about tests passing
+notify_discord "✅ **Tests Passing**\nReady to commit" "detailed"
 ```
 
 #### 2. Coverage Check
@@ -452,6 +503,11 @@ COMMIT_MSG
 🚀 Ready to ship!
 ```
 
+```bash
+# Notify about successful commit
+notify_discord "💾 **Commit Created**\n\`${COMMIT_MESSAGE}\`" "summary"
+```
+
 **Update TodoWrite**: Mark "Execute git commit" as completed
 
 ### Phase 5: Create PR (Optional - If "pr" Argument)
@@ -510,6 +566,11 @@ COMMIT_MSG
    Title: [pr-title]
 
    ✅ Ready for review!
+```
+
+```bash
+# Notify about PR creation
+notify_discord "🔗 **Pull Request Created**\n${PR_URL}" "summary"
 ```
 
 - **Update TodoWrite**: Mark "Create pull request" as completed

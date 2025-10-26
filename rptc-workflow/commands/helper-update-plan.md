@@ -4,14 +4,14 @@ Modify an existing implementation plan with PM collaboration.
 
 Arguments:
 
-- Plan reference: `/rptc:helper-update-plan "@plan-name.md"`
-- Plan + changes: `/rptc:helper-update-plan "@plan-name.md" "add OAuth support"`
+- Plan reference: `/rptc:helper-update-plan "@plan-name/"`
+- Plan + changes: `/rptc:helper-update-plan "@plan-name/" "add OAuth support"`
 
 ## Process
 
 ### 1. Load Existing Plan
 
-Read `.rptc/plans/[plan-name].md`:
+Read `.rptc/plans/[plan-name]/overview.md` (directory format):
 
 - Current status
 - Existing steps
@@ -120,7 +120,7 @@ Waiting for your sign-off...
 
 ### 6. Save Updated Plan (Only After Approval)
 
-Update `.rptc/plans/[plan-name].md`:
+Update `.rptc/plans/[plan-name]/overview.md`:
 
 1. Preserve original sections (don't lose context)
 2. Update modified sections
@@ -146,7 +146,7 @@ Status: ✅ Updated and Approved
 **Confirm save**:
 
 ```text
-✅ Plan Updated: `.rptc/plans/[plan-name].md`
+✅ Plan Updated: `.rptc/plans/[plan-name]/overview.md`
 
 Changes applied:
 - [Change 1]
@@ -157,8 +157,8 @@ Updated sections:
 - [Section 2]
 
 Next actions:
-- Continue with `/rptc:tdd "@[plan-name].md"` (if implementing)
-- Or make more updates with `/rptc:helper-update-plan "@[plan-name].md"`
+- Continue with `/rptc:tdd "@[plan-name]/"` (if implementing)
+- Or make more updates with `/rptc:helper-update-plan "@[plan-name]/"`
 ```
 
 ## Use Cases
@@ -166,25 +166,25 @@ Next actions:
 ### Add New Step
 
 ```text
-/rptc:helper-update-plan "@user-auth.md" "add password strength validation"
+/rptc:helper-update-plan "@user-auth/" "add password strength validation"
 ```
 
 ### Modify Existing Step
 
 ```text
-/rptc:helper-update-plan "@user-auth.md" "change JWT expiry from 1h to 24h"
+/rptc:helper-update-plan "@user-auth/" "change JWT expiry from 1h to 24h"
 ```
 
 ### Update Test Strategy
 
 ```text
-/rptc:helper-update-plan "@user-auth.md" "add load testing for 1000 concurrent users"
+/rptc:helper-update-plan "@user-auth/" "add load testing for 1000 concurrent users"
 ```
 
 ### Change Acceptance Criteria
 
 ```text
-/rptc:helper-update-plan "@user-auth.md" "coverage must be 90% not 80%"
+/rptc:helper-update-plan "@user-auth/" "coverage must be 90% not 80%"
 ```
 
 ## Success Criteria
