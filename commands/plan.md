@@ -67,15 +67,7 @@ Load SOPs using fallback chain (highest priority first):
    - `rptc.discord.webhookUrl` → DISCORD_WEBHOOK (default: "")
    - `rptc.discord.verbosity` → DISCORD_VERBOSITY (default: "summary")
 
-3. **Display loaded configuration**:
-   ```text
-   Configuration loaded:
-     Artifact location: [ARTIFACT_LOC value]
-     Thinking mode: [THINKING_MODE value]
-     Discord notifications: [DISCORD_ENABLED value]
-   ```
-
-4. **Create Discord notification helper function**:
+3. **Create Discord notification helper function**:
 
 ```bash
 notify_discord() {
@@ -124,7 +116,7 @@ notify_discord() {
 
 After creating initial plan scaffold (Phase 2), determine:
 - **Simple feature**: ≤2 implementation steps → Use 4-phase TodoWrite
-- **Complex feature**: >2 implementation steps → Use 9-phase TodoWrite
+- **Complex feature**: >2 implementation steps → Use 6-phase TodoWrite
 
 ### TodoWrite for Simple Features (≤2 steps)
 
@@ -188,24 +180,9 @@ After creating initial plan scaffold (Phase 2), determine:
       "activeForm": "Delegating to Master Feature Planner"
     },
     {
-      "content": "Present comprehensive plan to PM",
+      "content": "Report plan completion",
       "status": "pending",
-      "activeForm": "Presenting plan to PM"
-    },
-    {
-      "content": "Support iterative refinement if needed",
-      "status": "pending",
-      "activeForm": "Supporting plan refinement"
-    },
-    {
-      "content": "Get final PM sign-off",
-      "status": "pending",
-      "activeForm": "Getting final PM approval"
-    },
-    {
-      "content": "Save plan document to .rptc/plans/",
-      "status": "pending",
-      "activeForm": "Saving plan document"
+      "activeForm": "Reporting plan completion"
     }
   ]
 }
@@ -387,24 +364,9 @@ All features now use incremental sub-agent delegation with directory format:
       "activeForm": "Delegating to Master Feature Planner"
     },
     {
-      "content": "Present comprehensive plan to PM",
+      "content": "Report plan completion",
       "status": "pending",
-      "activeForm": "Presenting plan to PM"
-    },
-    {
-      "content": "Support iterative refinement if needed",
-      "status": "pending",
-      "activeForm": "Supporting plan refinement"
-    },
-    {
-      "content": "Get final PM sign-off",
-      "status": "pending",
-      "activeForm": "Getting final PM approval"
-    },
-    {
-      "content": "Save plan document to .rptc/plans/",
-      "status": "pending",
-      "activeForm": "Saving plan document"
+      "activeForm": "Reporting plan completion"
     }
   ]
 }
@@ -724,22 +686,7 @@ notify_discord "🤖 **Master Planner Started**\nGenerating detailed plan..." "d
 **Inform PM**:
 
 ```text
-🏗️ Using Incremental Plan Generation!
-
-Your feature has [N] steps. I'll use **Incremental Sub-Agent Delegation**:
-
-✅ Create directory structure first
-✅ Generate overview (test strategy, acceptance criteria, risks)
-✅ Generate each step incrementally with immediate save
-✅ Review cohesiveness across all steps
-
-This approach:
-- Prevents timeout on large features
-- Saves work immediately (recovery if interrupted)
-- Enables modular plan structure (TDD-optimized)
-- Produces comprehensive, consistent plan
-
-Starting incremental planning...
+Starting incremental plan generation...
 ```
 
 ---
@@ -944,20 +891,27 @@ Output the complete overview.md content AND save it using Write tool now.
 
 **Verify overview.md was created by sub-agent:**
 
-1. **Check file exists**: `[ARTIFACT_LOC]/plans/[feature-slug]/overview.md`
-2. **If missing**, retry once:
+1. **Attempt to read file using Read tool**: `[ARTIFACT_LOC]/plans/[feature-slug]/overview.md`
+2. **If Read fails** (file not found), retry once:
    - Report: "⚠️ overview.md not found, retrying sub-agent..."
    - Invoke Task tool again with same prompt (same thinking mode, same parameters)
-   - Re-check file existence after retry
-3. **If still missing** after retry:
+   - Attempt Read again after retry
+3. **If Read still fails** after retry:
    - Report error: "❌ Sub-agent failed to write overview.md after retry. Aborting plan generation."
    - Abort command execution
-4. **If present**, report success:
+4. **If Read succeeds**, extract strategic context and report success:
+   - Parse "Step Breakdown" or "Implementation Steps" section from overview
+   - Count steps: Extract step numbers (e.g., "Step 1:", "Step 2:", etc.)
+   - Store step count as N for next phase
    ```text
    ✅ Overview generated and saved: overview.md
 
-   Proceeding to generate individual steps...
+   Detected [N] implementation steps.
+
+   Proceeding to generate individual step files...
    ```
+
+**Note**: No bash file checks needed. Read tool returns error if file doesn't exist.
 
 ---
 
@@ -1067,19 +1021,24 @@ Output the complete step-[0X].md content AND save it using Write tool now.
 
 **Verify step-[0X].md was created by sub-agent:**
 
-1. **Check file exists**: `[ARTIFACT_LOC]/plans/[feature-slug]/step-[0X].md`
-2. **If missing**, retry once:
+1. **Attempt to read file using Read tool**: `[ARTIFACT_LOC]/plans/[feature-slug]/step-[0X].md`
+2. **If Read fails** (file not found), retry once:
    - Report: "⚠️ step-[0X].md not found, retrying sub-agent..."
    - Invoke Task tool again with same prompt (same thinking mode, same parameters)
-   - Re-check file existence after retry
-3. **If still missing** after retry:
+   - Attempt Read again after retry
+3. **If Read still fails** after retry:
    - Report error: "❌ Sub-agent failed to write step-[0X].md after retry. Aborting plan generation."
    - Abort command execution
-4. **If present**, store brief summary for next step context and report success:
+4. **If Read succeeds**, extract brief summary for next step context:
+   - Parse "## Summary" or "## Overview" section (first 3-5 lines)
+   - Store summary for cumulative context in step [X+1]
+   - Report success:
 
 ```text
 ✅ Step [X] generated and saved: step-[0X].md
 ```
+
+**Note**: No bash file checks needed. Read tool handles file existence validation automatically.
 
 **Repeat for all N steps.**
 
@@ -1107,7 +1066,7 @@ Proceeding to cohesiveness review...
 - Thinking mode: [determined thinking mode]
 - Role: Plan Cohesiveness Reviewer
 - Input: All generated plan files
-- Output: Review report with issues and suggested fixes
+- Output: Review report with fixes applied autonomously
 
 **Agent Prompt**:
 
@@ -1158,6 +1117,53 @@ Read these files from `[ARTIFACT_LOC]/plans/[feature-slug]/`:
    - Each step: 150-240 tokens
    - Flag any files significantly over budget
 
+**Fix Application Protocol** (CRITICAL - You MUST Apply Fixes):
+
+When you identify issues, you MUST apply fixes directly using the Edit tool:
+
+1. **For ALL severity levels** (Critical, Medium, Low):
+   - Read the affected file using Read tool
+   - Apply the fix using Edit tool (old_string → new_string)
+   - If Edit fails, retry up to 3 times with slight variations
+   - Mark "Fix Applied: YES" if successful, "Fix Applied: NO" if all retries fail
+
+2. **Retry Logic for Edit Failures**:
+   ```
+   For EACH issue requiring a fix:
+
+   1. Attempt Edit Tool with exact old_string/new_string from analysis
+   2. If Edit fails:
+      - Log failure reason clearly: "Edit failed (attempt 1/3): [reason]"
+      - Retry up to 2 more times (3 total attempts)
+      - On each retry, verify old_string still matches file state
+   3. If all retries exhausted:
+      - Document unfixed issue in final summary
+      - Log: "Unable to apply fix after 3 attempts: [issue description]"
+      - Continue to next issue (do not block plan generation)
+   4. If Edit succeeds:
+      - Mark issue as resolved
+      - Proceed to next issue
+   ```
+
+3. **Re-Verification After All Fixes** (CRITICAL - Single Pass Only):
+
+   After ALL fixes attempted (successful or failed):
+
+   1. **Run cohesiveness analysis ONE MORE TIME** on all modified files
+   2. **Report verification results:**
+      - Issues successfully fixed
+      - Issues still present (if any)
+      - New issues introduced (if any)
+   3. **Do NOT recursively re-fix** - single re-verification pass only
+
+   **Error Handling Requirements:**
+   - Clear retry logging: "Edit failed (attempt 1/3): [reason]"
+   - Exhaustion messaging: "Unable to apply fix after 3 attempts: [issue description]"
+   - Partial success handling: "Applied 4/5 fixes successfully, 1 unfixed: [details]"
+   - Never block plan: If fixes fail, document and proceed
+
+**IMPORTANT**: Do NOT suggest fixes for main context to apply. YOU apply them using Edit tool.
+
 **Output Format**:
 
 For EACH issue found, provide:
@@ -1170,7 +1176,9 @@ For EACH issue found, provide:
 - **Location**: [Which file(s) affected]
 - **Description**: [What's wrong and why it matters]
 - **Impact**: [How this affects plan quality/execution]
-- **Suggested Fix**: [Specific changes to make - exact file edits if possible]
+- **Fix Applied**: [YES/NO]
+- **Fix Details**: [What was changed - old_string → new_string summary]
+- **Fix Status**: [Success/Failed after 3 retries/Not applicable]
 ```
 
 **Summary Section**:
@@ -1190,10 +1198,16 @@ For EACH issue found, provide:
 - Score 6-7: Minor issues, fix before PM review
 - Score < 6: Significant issues, requires revision
 
-**Top Priority Fixes** (if score < 8):
-1. [Fix 1]
-2. [Fix 2]
-3. [Fix 3]
+**Fixes Applied**: [count of successful fixes / total issues]
+
+**Re-Verification Results** (after applying fixes):
+- Initial cohesiveness score: [X]/10
+- Post-fix cohesiveness score: [Y]/10
+- Score improvement: [+N points or "No change - see explanation"]
+
+**Files Modified**:
+- [list of files edited with Edit tool]
+- [example: overview.md - fixed inconsistent file path reference]
 ```
 
 Perform comprehensive review now and output your findings.
@@ -1210,165 +1224,39 @@ Perform comprehensive review now and output your findings.
    Score: [X]/10
    Issues found: [count by severity]
 
-   Plan is cohesive and ready for PM review.
+   Plan is cohesive and ready for completion.
    ```
 
-   Proceed to Phase 6 (Present Plan to PM)
-
-2. **If Overall Cohesiveness Score < 8**:
+2. **If Overall Cohesiveness Score < 8** (after sub-agent applied fixes):
    ```text
-   ⚠️ Cohesiveness Issues Detected!
+   ℹ️ Cohesiveness Issues Detected and Fixed by Reviewer
 
-   Score: [X]/10
-   Critical issues: [count]
-   Medium issues: [count]
+   Initial score: [X]/10
+   Post-fix score: [Y]/10
+   Fixes applied: [count successful / total issues]
 
-   Applying fixes automatically...
+   Files modified by reviewer:
+   - [list from reviewer's output]
+
+   Plan is now cohesive and ready for completion.
    ```
 
-   **Apply suggested fixes**:
-   - For each Critical or Medium issue with a specific fix
-   - Read the affected file
-   - Apply the suggested edit using Edit tool
-   - Save the updated file
-   - Report fix applied
-
-   **After applying fixes**:
-   ```text
-   ✅ Cohesiveness issues resolved!
-
-   Updated files:
-   - [list of files modified]
-
-   Plan is now cohesive and ready for PM review.
-   ```
+   **Note**: Fixes already applied by cohesiveness reviewer sub-agent. No main context action needed.
 
 ```bash
 # Notify Master Planner complete
-notify_discord "✅ **Master Planner Complete**\nDetailed plan ready for review" "detailed"
+notify_discord "✅ **Master Planner Complete**\nDetailed plan ready for completion" "detailed"
 ```
 
 **Update TodoWrite**: Mark "Delegate to Master Feature Planner Agent" as completed (complex path only)
 
-**Proceed to Phase 6.**
-### Phase 6: Present Plan to PM (REQUIRED)
-
-**Update TodoWrite**: Mark "Present comprehensive plan to PM" as in_progress (complex path only)
-
-**CRITICAL FORMATTING NOTE:** Each section and list item MUST be on its own line. Never concatenate items (e.g., `Install: pkg1Migrations: Yes` is WRONG).
-
-**Present the detailed plan clearly**:
-
-```text
-📋 Master Feature Planner Complete!
-
-The Master Feature Planner has created a comprehensive plan:
-
-## Overview
-[Feature summary and approach]
-
-## Implementation Steps ([N] steps)
-[Brief summary - full details in plan]
-
-## Test Strategy (from testing SOP)
-- [X] test scenarios identified
-- Coverage target: [Y]%
-- Test files: [list]
-
-## Dependencies
-- Install: [packages]
-- Migrations: [Y/N]
-- Config: [changes]
-
-## Risks Identified
-[Key risks and mitigation]
-
-## File Changes
-- Modify: [X] files
-- Create: [Y] files
-
-Would you like to:
-1. Review the full plan details?
-2. Request modifications?
-3. Approve and save the plan?
-
-Let me know how to proceed...
-```
-
-**Update TodoWrite**: Mark "Present comprehensive plan to PM" as completed (complex path only)
-
-### Phase 7: PM Review & Modifications (INTERACTIVE)
-
-**Update TodoWrite**: Mark "Support iterative refinement if needed" as in_progress (complex path only)
-
-**Support iterative refinement**:
-
-- If PM says "show me step 3": Display step 3 details
-- If PM says "modify [something]": Make changes and re-present
-- If PM says "add [requirement]": Update plan accordingly
-- If PM says "approved": Proceed to save
-
-**Keep iterating until PM explicitly approves.**
-
-**Update TodoWrite**: Mark "Support iterative refinement if needed" as completed (complex path only)
-
-### Phase 8: Final PM Sign-Off (REQUIRED)
-
-**Update TodoWrite**: Mark appropriate task as in_progress (complex: "Get final PM sign-off", simple: begins save preparation)
-
-**FORMATTING NOTE:** Each option line must be on its own line with proper newlines.
-
-**Get explicit approval to save**:
-
-```text
-📋 Plan Finalized!
-
-All modifications incorporated.
-
-**Do you approve this plan for implementation?**
-- Type "yes" or "approved" to save plan document
-- Type "modify" to make additional changes
-- Provide specific feedback for adjustments
-
-This plan will be saved to: [ARTIFACT_LOC]/plans/[name-slug].md
-
-Waiting for your final sign-off...
-```
-
-**DO NOT SAVE** until PM gives explicit approval.
-
-**Update TodoWrite**: Mark appropriate task as completed (complex: "Get final PM sign-off", simple: approval phase complete)
+**Proceed to Phase 6 (Final Output Generation).**
 
 ---
 
-**CRITICAL VALIDATION CHECKPOINT - DO NOT SKIP**
+### Phase 6: Final Output Generation (REQUIRED)
 
-Before saving plan document:
-
-**TodoWrite Check**: "Get final PM sign-off" MUST be completed
-
-**Verification**:
-1. Check TodoWrite status for final plan approval
-2. If status is NOT "completed", you MUST NOT save plan document
-
-❌ **PHASE 9 BLOCKED** - Cannot save plan without PM approval
-
-**Required**: PM must review comprehensive plan and explicitly approve
-
-**ENFORCEMENT**: If PM has NOT approved:
-1. Present complete plan clearly
-2. Ask: "Do you approve this plan for implementation?"
-3. Wait for explicit "yes" or "approved"
-4. Support modifications if PM says "modify"
-5. NEVER save without explicit approval
-
-**This is a NON-NEGOTIABLE gate. Plans define implementation approach and must be reviewed by PM before execution.**
-
----
-
-### Phase 9: Report Plan Status
-
-**Update TodoWrite**: Mark "Save plan document to .rptc/plans/" as in_progress
+**Update TodoWrite**: Mark "Report plan completion" as in_progress
 
 **Directory Format (v2.0.0+ - All Features)**:
 
@@ -1396,14 +1284,14 @@ Next steps:
 Note: TDD command will automatically load directory-based plan structure.
 ```
 
-**Update TodoWrite**: Mark "Save plan document to .rptc/plans/" as completed
+**Update TodoWrite**: Mark "Report plan completion" as completed
 
 ```bash
 # Notify plan saved
 notify_discord "💾 **Plan Saved**\nPlan: \`${PLAN_NAME}/\`\nReady for TDD" "summary"
 ```
 
-**END Phase 9** - Plan ready for implementation!
+**END Phase 6** - Plan ready for implementation!
 
 ---
 ## Interaction Guidelines

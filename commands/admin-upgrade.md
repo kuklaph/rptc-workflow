@@ -113,7 +113,7 @@ echo ""
 
 ```bash
 # Plugin version (update this with each release)
-PLUGIN_VERSION="2.1.0"
+PLUGIN_VERSION="2.1.1"
 
 # Load workspace version
 if command -v jq >/dev/null 2>&1; then
@@ -407,37 +407,6 @@ else
 fi
 
 echo ""
-
-# 5. SOP Location Check
-echo "📚 SOP Configuration:"
-echo ""
-
-SOP_ISSUES=0
-
-# Check if customSopPath matches reality
-if [ "$CUSTOM_SOP_PATH" != ".rptc/sop" ]; then
-  echo "  ℹ️  Using custom SOP path: $CUSTOM_SOP_PATH"
-
-  # Verify it exists or can be found via fallback
-  if [ -d "$CUSTOM_SOP_PATH" ]; then
-    echo "  ✓ Custom SOP directory exists"
-  elif [ -d "$HOME/.claude/global/sop" ]; then
-    echo "  ℹ️  Custom SOP path not found, will fall back to user global"
-  else
-    echo "  ℹ️  Will use plugin default SOPs"
-  fi
-else
-  echo "  ℹ️  Using default SOP path: .rptc/sop"
-
-  # Check fallback chain
-  if [ -d ".rptc/sop" ]; then
-    echo "  ✓ Project SOPs found"
-  elif [ -d "$HOME/.claude/global/sop" ]; then
-    echo "  ✓ User global SOPs found"
-  else
-    echo "  ✓ Will use plugin default SOPs"
-  fi
-fi
 
 # Special migration check for v1.0.x users
 if [ -d ".claude/sop" ] && [ "$CUSTOM_SOP_PATH" != ".claude/sop" ]; then

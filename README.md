@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 2.1.0
+**Version**: 2.1.1
 **Status**: Beta
 **License**: MIT
 
@@ -446,7 +446,7 @@ All RPTC configuration lives under the `rptc` namespace in `.claude/settings.jso
 | `testCoverageTarget` | `85` | Minimum test coverage percentage (used in commit phase) |
 | `maxPlanningAttempts` | `10` | Maximum auto-retry attempts during TDD implementation |
 | `customSopPath` | `".rptc/sop"` | Project-specific SOP directory (for fallback chain) |
-| `researchOutputFormat` | `"html"` | Default output format for exploration mode "auto" save option. Valid: `"html"` (dark-theme reports), `"md"` (editable files), `"both"` (both formats in same directory). HTML creates professional formatted reports, Markdown creates editable text files. |
+| `researchOutputFormat` | `"html"` | Default output format for research "auto" save option. Valid: `"html"` (dark-theme reports), `"md"` (editable files), `"both"` (both formats in same directory). HTML creates professional formatted reports, Markdown creates editable text files. |
 | `htmlReportTheme` | `"dark"` | HTML report theme: `"dark"` (GitHub Dark with WCAG AA compliance) |
 | `verificationMode` | `"focused"` | Independent verification after GREEN phase: `"focused"` (intent/coverage/overfitting only, <5 min), `"disabled"` (skip verification), `"exhaustive"` (future enhancement) |
 | `tdgMode` | `"disabled"` | Test-Driven Generation mode: `"disabled"` (default, use --tdg flag to enable), `"enabled"` (always use TDG), `"auto"` (future: heuristic-based) |
@@ -457,22 +457,22 @@ All RPTC configuration lives under the `rptc` namespace in `.claude/settings.jso
 
 **Note:** The init command (`/rptc:admin-init`) automatically creates this file with sensible defaults.
 
-### Research Command Modes
+### Research Workflow
 
-The `/rptc:research` command operates in two modes:
+The `/rptc:research` command provides a unified workflow for interactive discovery and exploration:
 
-**Exploration Mode:**
-- Findings presented inline immediately
-- Optional save prompt after findings displayed (skip/html/md/both/auto)
-- "auto" option uses `researchOutputFormat` config setting (default: html)
-- No PM sign-off required
-- Files saved to `.rptc/research/[topic-slug]/research.{html,md}`
+**How it works:**
+1. Interactive discovery through questions and codebase exploration
+2. Findings presented inline immediately
+3. Optional save prompt after findings displayed (skip/html/md/both/auto)
+4. "auto" option uses `researchOutputFormat` config setting (default: html)
+5. Uses inline/dynamic TodoWrite tracking throughout research
 
-**Planning-Prep Mode:**
-- Findings presented inline immediately
-- PM sign-off required before save
-- Always saves as Markdown to `.rptc/research/[topic-slug].md`
-- Creates formal research documentation for planning phase
+**Output options:**
+- HTML: Professional dark-theme reports in `.rptc/research/[topic-slug]/research.html`
+- Markdown: Editable text files in `.rptc/research/[topic-slug]/research.md`
+- Both: Generates both formats in the same directory
+- Auto: Uses configured `researchOutputFormat` preference
 
 ### Thinking Mode Configuration (v1.0.7+)
 

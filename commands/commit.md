@@ -66,16 +66,7 @@ Load SOPs using fallback chain (highest priority first):
    - `rptc.discord.webhookUrl` → DISCORD_WEBHOOK (default: "")
    - `rptc.discord.verbosity` → DISCORD_VERBOSITY (default: "summary")
 
-3. **Display loaded configuration**:
-   ```text
-   Configuration loaded:
-     Thinking mode: [THINKING_MODE value]
-     Coverage target: [COVERAGE_TARGET value]%
-     Docs location: [DOCS_LOC value]
-     Discord notifications: [DISCORD_ENABLED value]
-   ```
-
-4. **Create Discord notification helper function**:
+3. **Create Discord notification helper function**:
 
 ```bash
 notify_discord() {

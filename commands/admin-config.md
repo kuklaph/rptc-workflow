@@ -43,46 +43,6 @@ else
 fi
 ```
 
-## Step 3: SOP Resolution Status
-
-Show where SOPs are being loaded from:
-
-```bash
-echo ""
-echo "SOP Configuration:"
-echo "  Resolution order (highest priority first):"
-echo "  1. Project:  .rptc/sop/"
-echo "  2. User:     ~/.claude/global/sop/"
-echo "  3. Plugin:   ${CLAUDE_PLUGIN_ROOT}/sop/"
-echo ""
-
-# Check project SOPs
-if [ -d ".rptc/sop" ]; then
-  SOP_COUNT=$(find .rptc/sop -name "*.md" 2>/dev/null | wc -l)
-  echo "  ✓ Project SOPs: ${SOP_COUNT} files in .rptc/sop/"
-  find .rptc/sop -name "*.md" -exec basename {} \; 2>/dev/null | sed 's/^/    - /'
-else
-  echo "  ✗ No project SOPs (.rptc/sop/ not found)"
-fi
-
-echo ""
-
-# Check user global SOPs
-if [ -d "~/.claude/global/sop" ]; then
-  SOP_COUNT=$(find ~/.claude/global/sop -name "*.md" 2>/dev/null | wc -l)
-  echo "  ✓ User Global SOPs: ${SOP_COUNT} files in ~/.claude/global/sop/"
-else
-  echo "  ✗ No user global SOPs (~/.claude/global/sop/ not found)"
-fi
-
-echo ""
-
-# Plugin SOPs (always available)
-SOP_COUNT=$(find "${CLAUDE_PLUGIN_ROOT}/sop" -name "*.md" 2>/dev/null | wc -l)
-echo "  ✓ Plugin SOPs: ${SOP_COUNT} files (default fallback)"
-find "${CLAUDE_PLUGIN_ROOT}/sop" -name "*.md" -exec basename {} \; | sed 's/^/    - /'
-```
-
 ## Step 4: Project Instructions
 
 Check for project instructions:
@@ -114,11 +74,16 @@ echo "Plugin Settings:"
 echo "  (from ${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json)"
 echo ""
 
-# Parse and display key settings from plugin.json
-echo "  Artifact Location:     .rptc/"
-echo "  Docs Location:         docs/"
-echo "  Test Coverage Target:  80%"
-echo "  Max Planning Attempts: 10"
+# Read actual values from config (with fallback to defaults)
+ARTIFACT_LOC=$(jq -r '.rptc.artifactLocation // ".rptc"' .claude/settings.json 2>/dev/null || echo ".rptc")
+DOCS_LOC=$(jq -r '.rptc.docsLocation // "docs"' .claude/settings.json 2>/dev/null || echo "docs")
+COVERAGE_TARGET=$(jq -r '.rptc.testCoverageTarget // 85' .claude/settings.json 2>/dev/null || echo "85")
+MAX_ATTEMPTS=$(jq -r '.rptc.maxPlanningAttempts // 10' .claude/settings.json 2>/dev/null || echo "10")
+
+echo "  Artifact Location:     $ARTIFACT_LOC"
+echo "  Docs Location:         $DOCS_LOC"
+echo "  Test Coverage Target:  ${COVERAGE_TARGET}%"
+echo "  Max Planning Attempts: $MAX_ATTEMPTS"
 ```
 
 ## Step 6: Git Integration Status

@@ -144,19 +144,6 @@ fi
 cp "$PLUGIN_ROOT/sop/"*.md .rptc/sop/
 
 echo "✓ Copied SOPs to .rptc/sop/ for project-specific customization"
-echo ""
-echo "  Project SOPs will override plugin defaults:"
-echo "  - testing-guide.md"
-echo "  - flexible-testing-guide.md         # NEW v2.0.0"
-echo "  - architecture-patterns.md"
-echo "  - frontend-guidelines.md"
-echo "  - git-and-deployment.md"
-echo "  - languages-and-style.md"
-echo "  - security-and-performance.md"
-echo "  - post-tdd-refactoring.md           # NEW v2.0.0"
-echo "  - todowrite-guide.md                # NEW v1.2.0"
-echo ""
-echo "  Edit these files to customize for this project."
 ```
 
 #### B. Copy to User Global (If --global provided)
@@ -176,25 +163,6 @@ fi
 cp "$PLUGIN_ROOT/sop/"*.md ~/.claude/global/sop/
 
 echo "✓ Copied SOPs to ~/.claude/global/sop/ as user defaults"
-echo ""
-echo "  These SOPs will be used across ALL your projects unless"
-echo "  overridden by project-specific SOPs in .rptc/sop/"
-echo ""
-echo "  Edit these files to set your personal coding standards."
-```
-
-### If `--copy-sops` was NOT provided:
-
-```bash
-echo "ℹ️  SOPs will be referenced from plugin (read-only)"
-echo ""
-echo "  Commands will use: $PLUGIN_ROOT/sop/"
-echo ""
-echo "  To customize SOPs for this project, run:"
-echo "  /rptc:admin-init --copy-sops"
-echo ""
-echo "  To set personal defaults across all projects, run:"
-echo "  /rptc:admin-init --copy-sops --global"
 ```
 
 ## Step 5: Create RPTC Workflow Instructions
@@ -272,7 +240,7 @@ if [ ! -f ".claude/settings.json" ]; then
   cat > .claude/settings.json <<'EOF'
 {
   "rptc": {
-    "_rptcVersion": "2.1.0",
+    "_rptcVersion": "2.1.1",
     "defaultThinkingMode": "think",
     "artifactLocation": ".rptc",
     "docsLocation": "docs",
@@ -294,29 +262,9 @@ if [ ! -f ".claude/settings.json" ]; then
 EOF
   echo "✓ Created .claude/settings.json with RPTC defaults"
   echo ""
-  echo "Configuration defaults:"
-  echo "  Test coverage target: 85%"
-  echo "  Max planning attempts: 10"
-  echo "  Thinking mode: think (valid: think/think hard/ultrathink)"
+  echo "  View configuration: /rptc:admin-config"
+  echo "  Edit: .claude/settings.json"
   echo ""
-  echo "Research & Output:"
-  echo "  Research output format: html (valid: html/md/both)"
-  echo "  HTML report theme: dark (valid: dark/light)"
-  echo ""
-  echo "Advanced Settings:"
-  echo "  Verification mode: focused (valid: focused/comprehensive)"
-  echo "  TDG Mode (tdgMode): disabled (valid: disabled/enabled)"
-  echo ""
-  echo "Discord Notifications:"
-  echo "  • Enabled: false (set true to enable)"
-  echo "  • Webhook URL: '' (configure your Discord webhook)"
-  echo "  • Verbosity: summary (valid: summary/detailed/verbose)"
-  echo "  • See .rptc/CLAUDE.md for Discord webhook setup instructions"
-  echo ""
-  echo "ℹ️  Research Output Format:"
-  echo "  Controls default format when \"auto\" chosen in exploration mode save prompt"
-  echo "  Valid values: \"html\" (dark theme reports), \"md\" (editable files), \"both\" (HTML + Markdown)"
-  echo "  Note: \"skip\" is a prompt-only option, not valid for config"
 else
   # File exists - check if it needs RPTC section
   if ! grep -q '"rptc"' .claude/settings.json; then
@@ -325,7 +273,7 @@ else
     if command -v jq >/dev/null 2>&1; then
       # Use jq for safe merging
       TEMP_FILE=$(mktemp)
-      jq '. + {"rptc": {"_rptcVersion": "2.1.0"
+      jq '. + {"rptc": {"_rptcVersion": "2.1.1"
       mv "$TEMP_FILE" .claude/settings.json
       echo "✓ Added RPTC configuration to existing .claude/settings.json"
     else
@@ -335,7 +283,7 @@ else
       echo "  Please add the following to your .claude/settings.json:"
       echo ""
       echo '  "rptc": {'
-      echo '    "_rptcVersion": "2.1.0",'
+      echo '    "_rptcVersion": "2.1.1",'
       echo '    "defaultThinkingMode": "think",'
       echo '    "artifactLocation": ".rptc",'
       echo '    "docsLocation": "docs",'
@@ -407,60 +355,22 @@ Provide clear summary of what was created:
 
 ```bash
 echo ""
-echo "═══════════════════════════════════════════════════════"
-echo "✅ RPTC Workspace Initialized"
-echo "═══════════════════════════════════════════════════════"
+echo "════════════════════════════════════════════════════════"
+echo "  RPTC WORKSPACE INITIALIZED"
+echo "════════════════════════════════════════════════════════"
 echo ""
-echo "Structure created:"
-echo "  .rptc/research/         - Active research"
-echo "  .rptc/plans/            - Active plans"
-echo "  .rptc/complete/         - Old work"
-echo "  .rptc/sop/              - Project-specific SOPs (ready for your files)"
-echo "  .rptc/CLAUDE.md         - RPTC workflow instructions"
-echo "  .claude/settings.json   - RPTC configuration"
-echo "  docs/                   - Permanent documentation"
+echo "✓ Workspace structure created"
+echo "✓ Configuration saved (.claude/settings.json)"
+echo "✓ Project instructions installed (.rptc/CLAUDE.md)"
 echo ""
-echo "SOP Configuration:"
-if [ --copy-sops provided ]; then
-  if [ --global provided ]; then
-    echo "  ✓ Copied SOPs to ~/.claude/global/sop/ (user defaults)"
-  else
-    echo "  ✓ Copied SOPs to .rptc/sop/ (project-specific)"
-  fi
-else
-  echo "  ℹ️  .rptc/sop/ created (empty, ready for your SOPs)"
-  echo "  📖 Commands will use plugin SOPs: $PLUGIN_ROOT/sop/"
-  echo ""
-  echo "  To copy plugin SOPs for customization:"
-  echo "    /rptc:admin-init --copy-sops"
-fi
+echo "Next steps:"
+echo "  • Review instructions: cat .rptc/CLAUDE.md"
+echo "  • View configuration: /rptc:admin-config"
+echo "  • Start research: /rptc:research \"topic\""
+echo "  • Get help: /rptc --help"
 echo ""
-echo "💡 Thinking Mode Configuration"
-echo ""
-echo "  Default thinking mode set to \"think\" (~4K tokens)"
-echo "  Edit .claude/settings.json to change:"
-echo ""
-echo "  Available modes:"
-echo "    - \"think\"       - Basic extended thinking (~4K tokens, default)"
-echo "    - \"think hard\"  - Medium depth thinking (~10K tokens)"
-echo "    - \"ultrathink\" - Maximum depth thinking (~32K tokens)"
-echo ""
-echo "  You can also specify thinking mode per-command when prompted."
-echo "  User choice always overrides global setting."
-echo ""
-echo "🆕 New in v2.0.0:"
-echo "  • Efficiency Agent: Post-TDD refactoring guidance (post-tdd-refactoring.md)"
-echo "  • Discord Notifications: Real-time workflow updates (configure webhookUrl)"
-echo "  • Enhanced Research: HTML reports with dark/light themes"
-echo "  • Flexible Testing: Alternative testing strategies (flexible-testing-guide.md)"
-echo ""
-echo "Next Steps:"
-echo "  1. Review .rptc/CLAUDE.md for RPTC workflow guidance"
-echo "  2. Start your first workflow: /rptc:research \"your topic\""
-echo "  3. Or jump to planning: /rptc:plan \"your feature\""
-echo ""
-echo "For help: See docs/RPTC_WORKFLOW_GUIDE.md"
-echo "═══════════════════════════════════════════════════════"
+echo "Workspace ready! 🚀"
+echo "════════════════════════════════════════════════════════"
 ```
 
 ## Important Notes

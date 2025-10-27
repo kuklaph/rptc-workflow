@@ -1195,19 +1195,18 @@ Request full replan if:
 
 ## Next Actions
 
-**After Plan Approval:**
+**After Plan Complete:**
 
-1. **For PM:** Review and approve plan
-2. **For Developer:** Execute with `/rptc:tdd "@[plan-name].md"`
-3. **Quality Gates:** Efficiency Agent → Security Agent (with PM approval)
-4. **Completion:** Verify all acceptance criteria met
+1. **For Developer:** Execute with `/rptc:tdd "@[plan-name]/"`
+2. **Quality Gates:** Efficiency Agent → Security Agent (if enabled)
+3. **Completion:** Verify all acceptance criteria met
 
-**First Step:** Run `/rptc:tdd "@[plan-filename].md"` to begin TDD implementation
+**First Step:** Run `/rptc:tdd "@[plan-filename]/"` to begin TDD implementation
 
 ---
 
 _Plan created by Master Feature Planner_
-_Status: ✅ Ready for PM Approval_
+_Status: ✅ Ready for TDD Implementation_
 
 ````
 
@@ -1265,6 +1264,7 @@ Your plan will be considered successful when:
 ✅ **Checkbox Format:** All tasks use `- [ ]` for tracking in TDD phase
 ✅ **Test Coverage:** Happy path, edge cases, and errors all covered in test strategy
 ✅ **Self-Validated:** Passed self-critique with score ≥ 4.0/5.0
+✅ **Cohesiveness Validated:** Sub-agent review confirms plan coherence
 ✅ **Risk-Aware:** Risks identified with specific mitigations
 ✅ **Token-Efficient:** Plan output <15K tokens
 ✅ **Complete:** All required sections present per template
@@ -1469,22 +1469,22 @@ Your plan will be considered successful when:
 
 You'll know you've created an excellent plan when:
 
-1. **PM can approve with confidence** - No major questions or gaps
-2. **Developer can execute immediately** - Clear first step, well-defined tests
-3. **Tests guide implementation** - Each step references specific tests to write
-4. **Risks are transparent** - Nothing hidden, mitigations specified
-5. **Changes are manageable** - Plan flexible enough to adapt during implementation
-6. **Quality is measurable** - Clear acceptance criteria and definition of done
-7. **Context is efficient** - <15K tokens, references rather than duplicates
-8. **Self-critique passed** - Score ≥ 4.0, all critical checks completed
+1. **Developer can execute immediately** - Clear first step, well-defined tests
+2. **Tests guide implementation** - Each step references specific tests to write
+3. **Risks are transparent** - Nothing hidden, mitigations specified
+4. **Changes are manageable** - Plan flexible enough to adapt during implementation
+5. **Quality is measurable** - Clear acceptance criteria and definition of done
+6. **Context is efficient** - <15K tokens, references rather than duplicates
+7. **Self-critique passed** - Score ≥ 4.0, all critical checks completed
+8. **Cohesiveness validated** - Sub-agent review confirms plan coherence
 9. **Checkbox format used** - All tasks marked with `- [ ]` for tracking
 10. **TDD-ready** - Tests designed before implementation at every step
 
 ---
 
-## Final Pre-Submission Checklist
+## Final Pre-Completion Checklist
 
-Before presenting plan to PM, verify:
+Before finalizing plan, verify:
 
 - [ ] **Context loaded** - SOPs referenced, project context checked
 - [ ] **Test strategy complete** - Happy path, edge cases, errors all covered
@@ -1496,6 +1496,7 @@ Before presenting plan to PM, verify:
 - [ ] **File map provided** - All files to create/modify listed
 - [ ] **Assumptions documented** - All assumptions explicitly stated
 - [ ] **Self-critique completed** - Quality score ≥ 4.0/5.0
+- [ ] **Cohesiveness validated** - Sub-agent review confirms plan coherence
 - [ ] **Token budget met** - Plan output <15K tokens
 - [ ] **Template followed** - Exact format from Required Output section
 - [ ] **No TODOs or TBDs** - All sections complete

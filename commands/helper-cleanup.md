@@ -45,8 +45,6 @@ Review completed plans in `$ARTIFACT_LOC/plans/` and help user decide what to do
 grep -l "Status.*Complete" $ARTIFACT_LOC/plans/*.md 2>/dev/null
 ```
 
-If no completed plans found:
-
 ```text
 ℹ️  No completed plans found in $ARTIFACT_LOC/plans/
 
@@ -180,65 +178,6 @@ When reviewing a plan, provide smart suggestions based on content:
 - Completed recently (< 7 days)
 - May need reference soon
 - Contains useful implementation notes
-
-## Example Interaction
-
-```text
-User: /rptc:helper-cleanup
-
-Agent:
-📋 Completed Plans Found: 3 plans
-
-1. user-avatar-upload.md
-   - Completed: 2 weeks ago
-   - Simple feature implementation
-   - Suggestion: Archive ✅
-
-2. payment-system-integration.md
-   - Completed: 1 month ago
-   - Contains architecture decisions
-   - Suggestion: Promote to docs/ ✅
-
-3. fix-login-bug.md
-   - Completed: 3 days ago
-   - Recent bug fix
-   - Suggestion: Keep for now
-
-───────────────────────────────────────────────────────
-
-Reviewing plan 1/3: user-avatar-upload.md
-
-[Shows preview...]
-
-Options:
-1. [k] Keep
-2. [a] Archive (recommended)
-3. [p] Promote to docs/
-4. [d] Delete
-5. [s] Skip
-
-What should we do? [k/a/p/d/s]: a
-
-✅ Archived to $ARTIFACT_LOC/complete/user-avatar-upload.md
-
-───────────────────────────────────────────────────────
-
-[Continue with remaining plans...]
-
-═══════════════════════════════════════════════════════
-📋 Cleanup Summary
-═══════════════════════════════════════════════════════
-
-Actions taken:
-- Archived: 1 plan (user-avatar-upload.md)
-- Promoted: 1 plan (payment-system-integration.md)
-- Kept: 1 plan (fix-login-bug.md)
-
-Storage freed: 15KB
-
-Cleanup complete!
-═══════════════════════════════════════════════════════
-```
 
 ## Notes
 

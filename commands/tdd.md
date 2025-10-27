@@ -120,16 +120,7 @@ Check for project-specific testing strategies or code style overrides.
    - `rptc.discord.webhookUrl` → DISCORD_WEBHOOK (default: "")
    - `rptc.discord.verbosity` → DISCORD_VERBOSITY (default: "summary")
 
-3. **Display loaded configuration**:
-   ```text
-   Configuration loaded:
-     Artifact location: [ARTIFACT_LOC value]
-     Thinking mode: [THINKING_MODE value]
-     Max planning attempts: [MAX_ATTEMPTS value]
-     Discord notifications: [DISCORD_ENABLED value]
-   ```
-
-4. **Create Discord notification helper function**:
+3. **Create Discord notification helper function**:
 
 ```bash
 notify_discord() {
@@ -209,15 +200,6 @@ if [ -z "$PLAN_REF" ]; then
   exit 1
 fi
 
-# Display parsed arguments
-echo "Parsed arguments:"
-echo "  Plan reference: $PLAN_REF"
-if [ "$TDG_FLAG" = "true" ]; then
-  echo "  TDG mode: Enabled (--tdg flag detected)"
-else
-  echo "  TDG mode: Check configuration (.claude/settings.json)"
-fi
-echo ""
 ```
 
 **Variables set:**
@@ -717,192 +699,6 @@ fi
 
 Users can run `/rptc:helper-resume-plan "@plan-name/"` to review handoff details before deciding whether to resume or restart. The helper command provides detailed context analysis and resumption guidance.
 
-## Phase 0a: Auto-Handoff Configuration (Roadmap #22)
-
-**Purpose:** Initialize dynamic context prediction system with research-validated safety factors.
-
-**Research Foundation:** `.rptc/research/dynamic-context-prediction.md` (25 sources)
-
----
-
-### AUTO-HANDOFF Step 1: Hard Cap and Safety Factors
-
-**80% Hard Cap Constant:**
-```bash
-# Context capacity (Claude API limit)
-TOTAL_CONTEXT_CAPACITY=200000
-
-# 80% hard cap (PM decision - safety margin for degraded responses)
-HARD_CAP_TOKENS=160000  # 80% of 200K
-
-echo "🔧 Auto-Handoff Configuration:"
-echo "   Total Capacity: ${TOTAL_CONTEXT_CAPACITY} tokens"
-echo "   Hard Cap (80%): ${HARD_CAP_TOKENS} tokens"
-echo "   Always Enabled: YES (no configuration)"
-echo ""
-```
-
-**Safety Factors (Research-Validated):**
-```bash
-# PM Requirement: 1.5× safety multiplier
-SAFETY_MULTIPLIER=1.5
-
-# Research Recommendation: 3% margin (PREDICTOKEN study)
-SAFETY_MARGIN_PCT=0.03
-
-# Combined safety: prediction × 1.5 + 3%
-# Example: 10K estimate → 10K × 1.5 = 15K → 15K + 3% = 15,450 tokens
-
-echo "   Safety Multiplier: ${SAFETY_MULTIPLIER}× (PM requirement)"
-echo "   Safety Margin: ${SAFETY_MARGIN_PCT}% (PREDICTOKEN recommendation)"
-echo ""
-```
-
-### AUTO-HANDOFF Step 2: Overhead Constants
-
-**Overhead Components (from Research Question 4):**
-
-```bash
-# Delegation overhead: Task tool invocation + sub-agent prompt structure
-DELEGATION_OVERHEAD=7000  # Per step (Anthropic research: ~5-7K typical)
-
-# Quality gate overhead (if enabled)
-EFFICIENCY_GATE_OVERHEAD=20000  # Efficiency agent worst-case
-SECURITY_GATE_OVERHEAD=15000    # Security agent worst-case
-TOTAL_GATE_OVERHEAD=$((EFFICIENCY_GATE_OVERHEAD + SECURITY_GATE_OVERHEAD))
-
-# Check if quality gates enabled in config
-QUALITY_GATES_ENABLED=$(jq -r '.rptc.qualityGatesEnabled // false' .claude/settings.json 2>/dev/null || echo "false")
-
-if [ "$QUALITY_GATES_ENABLED" = "true" ]; then
-  GATE_OVERHEAD=$TOTAL_GATE_OVERHEAD
-  echo "   Quality Gates: ENABLED (+${GATE_OVERHEAD} tokens one-time overhead)"
-else
-  GATE_OVERHEAD=0
-  echo "   Quality Gates: DISABLED (no gate overhead)"
-fi
-echo ""
-
-# MCP overhead: Tool specifications sent with each prompt
-MCP_OVERHEAD=0
-# Detect active MCP servers
-if [ -f ".claude/mcp_settings.json" ]; then
-  MCP_COUNT=$(jq '.mcpServers | length' .claude/mcp_settings.json 2>/dev/null || echo "0")
-  if [ "$MCP_COUNT" -gt 0 ]; then
-    # Estimate: ~3-5K per MCP server for tool specs
-    MCP_OVERHEAD=$((MCP_COUNT * 4000))
-    echo "   MCP Servers: ${MCP_COUNT} active (+${MCP_OVERHEAD} tokens overhead)"
-  else
-    echo "   MCP Servers: NONE"
-  fi
-else
-  echo "   MCP Servers: NONE"
-fi
-echo ""
-
-# System context: Claude system prompts, formatting, metadata
-SYSTEM_OVERHEAD=10000  # Conservative estimate (5-10K typical)
-
-echo "   System Overhead: ${SYSTEM_OVERHEAD} tokens (prompts + formatting)"
-echo ""
-
-# Total overhead per step (base)
-BASE_OVERHEAD=$((DELEGATION_OVERHEAD + SYSTEM_OVERHEAD))
-echo "   Base Overhead per Step: ${BASE_OVERHEAD} tokens (delegation + system)"
-echo "   Additional One-Time: $((GATE_OVERHEAD + MCP_OVERHEAD)) tokens (gates + MCP)"
-echo ""
-```
-
-### AUTO-HANDOFF Step 3: Tracking Arrays Initialization
-
-**Historical Data Storage:**
-
-```bash
-# Array: Actual context usage per step (for historical average)
-declare -a STEP_CONTEXT_USAGE=()
-
-# Array: Prediction errors per step (for calibration)
-declare -a PREDICTION_ERRORS=()
-
-# Current context estimate (starts with overview.md load)
-CURRENT_CONTEXT=15000  # Overview.md ~10-15K typical
-
-echo "📊 Context Tracking Initialized:"
-echo "   Current Context: ${CURRENT_CONTEXT} tokens (overview.md loaded)"
-echo "   Historical Data: Empty (cold start)"
-echo ""
-```
-
-### AUTO-HANDOFF Step 4: Calibration System Initialization
-
-**Calibration Multiplier (Adapts Over Time):**
-
-```bash
-# Calibration adjustment: starts at 1.0 (neutral), adjusts ±10% based on accuracy
-CALIBRATION_MULTIPLIER=1.0
-
-# Cold start floor: Conservative estimate for first 3 steps (no historical data)
-COLD_START_FLOOR=25000  # 25K per step (research recommendation)
-
-echo "🎯 Calibration System:"
-echo "   Calibration: ${CALIBRATION_MULTIPLIER}× (neutral, will adjust)"
-echo "   Cold Start Floor: ${COLD_START_FLOOR} tokens (steps 1-3)"
-echo "   Accuracy Target: ±5-10% after 3-5 steps (research validated)"
-echo ""
-```
-
-### AUTO-HANDOFF Step 5: Effective Capacity Calculation
-
-**Available Capacity After Overhead:**
-
-```bash
-# Effective capacity: Hard cap minus one-time overhead
-EFFECTIVE_CAPACITY=$((HARD_CAP_TOKENS - GATE_OVERHEAD - MCP_OVERHEAD))
-
-echo "🧮 Effective Capacity Calculation:"
-echo "   Hard Cap:            ${HARD_CAP_TOKENS} tokens"
-echo "   Quality Gates:       -${GATE_OVERHEAD} tokens"
-echo "   MCP Overhead:        -${MCP_OVERHEAD} tokens"
-echo "   ─────────────────────────────────────────"
-echo "   Effective Capacity:  ${EFFECTIVE_CAPACITY} tokens"
-echo ""
-echo "   Context Budget:      $((EFFECTIVE_CAPACITY - CURRENT_CONTEXT)) tokens remaining"
-echo ""
-```
-
-### AUTO-HANDOFF Step 6: Prediction Log Initialization
-
-**Diagnostic Logging:**
-
-```bash
-# Log file: Prediction details for debugging and validation
-PREDICTION_LOG="${ARTIFACT_LOC}/tdd-prediction.log"
-
-# Initialize log with header
-cat > "$PREDICTION_LOG" <<EOF
-# Dynamic Context Prediction Log
-# Feature: ${PLAN_NAME}
-# Started: $(date '+%Y-%m-%d %H:%M:%S')
-# Research Foundation: dynamic-context-prediction.md (25 sources)
-
-## Configuration
-- Hard Cap: ${HARD_CAP_TOKENS} tokens (80%)
-- Safety Multiplier: ${SAFETY_MULTIPLIER}×
-- Safety Margin: ${SAFETY_MARGIN_PCT}%
-- Effective Capacity: ${EFFECTIVE_CAPACITY} tokens
-- Quality Gates: ${QUALITY_GATES_ENABLED}
-- MCP Overhead: ${MCP_OVERHEAD} tokens
-
-## Prediction Results
-Step | File Est | Hist Avg | Growth Est | Max | Overhead | Safety | Final | Current | Decision | Actual | Error
------|----------|----------|------------|-----|----------|--------|-------|---------|----------|--------|------
-EOF
-
-echo "📝 Prediction Logging: ${PREDICTION_LOG}"
-echo ""
-```
-
----
 
 ## Phase 0g: Auto-Handoff Utility Functions (Roadmap #22)
 
@@ -1970,23 +1766,10 @@ Proceeding to delegate step to TDD sub-agent for RED → GREEN → REFACTOR exec
 **Method 1: Estimate from step file size:**
 
 ```bash
-echo ""
-echo "════════════════════════════════════════════════════════"
-echo "  PHASE 4b: CONTEXT PREDICTION (Step ${STEP_NUM})"
-echo "════════════════════════════════════════════════════════"
-echo ""
-echo "🔮 Predicting next step context impact..."
-echo ""
-
 # Load next step file for analysis
 STEP_FILE="${PLAN_DIR}step-$(printf '%02d' $STEP_NUM).md"
 
 FILE_ESTIMATE=$(calculate_file_estimate "$STEP_FILE")
-
-echo "📄 File-Based Estimate:"
-echo "   Step File: $(basename "$STEP_FILE")"
-echo "   Estimated Tokens: ${FILE_ESTIMATE}"
-echo ""
 ```
 
 ### PREDICTION Step 2: Historical Average Estimation

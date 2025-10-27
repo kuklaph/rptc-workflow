@@ -161,32 +161,6 @@ Next actions:
 - Or make more updates with `/rptc:helper-update-plan "@[plan-name]/"`
 ```
 
-## Use Cases
-
-### Add New Step
-
-```text
-/rptc:helper-update-plan "@user-auth/" "add password strength validation"
-```
-
-### Modify Existing Step
-
-```text
-/rptc:helper-update-plan "@user-auth/" "change JWT expiry from 1h to 24h"
-```
-
-### Update Test Strategy
-
-```text
-/rptc:helper-update-plan "@user-auth/" "add load testing for 1000 concurrent users"
-```
-
-### Change Acceptance Criteria
-
-```text
-/rptc:helper-update-plan "@user-auth/" "coverage must be 90% not 80%"
-```
-
 ## Success Criteria
 
 - [ ] Existing plan loaded and reviewed

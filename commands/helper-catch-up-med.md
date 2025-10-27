@@ -15,25 +15,6 @@ Gather thorough context in 5-10 minutes:
 - Read `README.md`
 - Check `.context/` files if exist
 
-**Standard Operating Procedures** (resolved via fallback chain):
-SOPs are loaded from (highest priority first):
-
-1. `.rptc/sop/` - Project-specific overrides
-2. `~/.claude/global/sop/` - User global defaults
-3. Plugin SOPs - Plugin defaults
-
-Available SOPs:
-
-- architecture-patterns.md
-- testing-guide.md
-- flexible-testing-guide.md
-- languages-and-style.md
-- security-and-performance.md
-- git-and-deployment.md
-- frontend-guidelines.md
-
-Check `.context/` for project-specific context documents.
-
 ### 2. Architecture Understanding
 
 - Scan project structure:

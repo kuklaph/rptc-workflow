@@ -37,17 +37,7 @@ Act as an intelligent brainstorming partner who:
    - `rptc.discord.webhookUrl` → DISCORD_WEBHOOK (default: "")
    - `rptc.discord.verbosity` → DISCORD_VERBOSITY (default: "summary")
 
-3. **Display loaded configuration**:
-   ```text
-   Configuration loaded:
-     Artifact location: [ARTIFACT_LOC value]
-     Thinking mode: [THINKING_MODE value]
-     Output format: [OUTPUT_FORMAT value]
-     HTML theme: [HTML_THEME value]
-     Discord notifications: [DISCORD_ENABLED value]
-   ```
-
-4. **Create Discord notification helper function**:
+3. **Create Discord notification helper function**:
 
 ```bash
 notify_discord() {
@@ -86,53 +76,9 @@ notify_discord() {
 
 **Use these values throughout the command execution.**
 
-## Step 0b: Determine Research Mode
-
-**Ask PM to clarify research intent BEFORE initializing TodoWrite.**
-
-Present this choice clearly:
-
-```text
-🔍 Research Mode Selection
-
-What's your goal for this research?
-
-**Option 1: Exploration Mode** (Just gathering information)
-  - Understanding how something works
-  - Exploring implementation options
-  - Investigating existing code
-  - Optional report generation (can skip)
-  - No sign-off required
-  → Choose this for: "How does X work?", "What are the options for Y?"
-
-**Option 2: Planning-Prep Mode** (Research leading to implementation)
-  - Preparing for upcoming feature work
-  - Documenting findings for team reference
-  - Requires PM sign-off and saved document
-  → Choose this when planning to implement based on research
-
-Which mode? [exploration/planning-prep]
-```
-
-**Wait for explicit response**, then set RESEARCH_MODE variable:
-- RESEARCH_MODE="exploration" (if user says "exploration", "just exploring", "info only", etc.)
-- RESEARCH_MODE="planning-prep" (if user says "planning-prep", "planning", "implementation", etc.)
-
-**Display confirmation**:
-```text
-✅ Research Mode: [RESEARCH_MODE value]
-```
-
-```bash
-# Notify research mode determined
-notify_discord "🔍 **Research Started**\nMode: ${RESEARCH_MODE}\nTopic: \`${RESEARCH_TOPIC}\`" "detailed"
-```
-
 ## Step 0c: Initialize TODO Tracking
 
-**Initialize dynamic TodoWrite based on research mode.**
-
-**If RESEARCH_MODE="exploration"** (4 phases):
+**Initialize TodoWrite for research workflow.**
 
 ```json
 {
@@ -144,69 +90,24 @@ notify_discord "🔍 **Research Started**\nMode: ${RESEARCH_MODE}\nTopic: \`${RE
       "activeForm": "Conducting interactive discovery"
     },
     {
-      "content": "Complete codebase exploration",
+      "content": "Complete research (codebase and/or web)",
       "status": "pending",
-      "activeForm": "Exploring codebase"
+      "activeForm": "Conducting research"
     },
     {
-      "content": "Complete web research (if needed)",
-      "status": "pending",
-      "activeForm": "Conducting web research"
-    },
-    {
-      "content": "Present findings to PM",
+      "content": "Present findings inline",
       "status": "pending",
       "activeForm": "Presenting findings"
-    }
-  ]
-}
-```
-
-**If RESEARCH_MODE="planning-prep"** (6 phases):
-
-```json
-{
-  "tool": "TodoWrite",
-  "todos": [
-    {
-      "content": "Complete interactive discovery",
-      "status": "pending",
-      "activeForm": "Conducting interactive discovery"
-    },
-    {
-      "content": "Complete codebase exploration",
-      "status": "pending",
-      "activeForm": "Exploring codebase"
-    },
-    {
-      "content": "Complete web research (if needed)",
-      "status": "pending",
-      "activeForm": "Conducting web research"
-    },
-    {
-      "content": "Present findings to PM",
-      "status": "pending",
-      "activeForm": "Presenting findings"
-    },
-    {
-      "content": "Get PM sign-off on research",
-      "status": "pending",
-      "activeForm": "Requesting PM approval"
-    },
-    {
-      "content": "Save research document",
-      "status": "pending",
-      "activeForm": "Saving research document"
     }
   ]
 }
 ```
 
 **Important TodoWrite Rules**:
-- Mark tasks "in_progress" when starting each phase
-- Mark tasks "completed" immediately after finishing each phase
+- Mark tasks "in_progress" when starting
+- Mark tasks "completed" immediately after finishing
 - Only ONE task should be "in_progress" at a time
-- Update frequently to prevent system reminders
+- When user requests save (later message): dynamically add "Save research report" todo
 
 ## Step 0d: Intelligent Query Analysis
 
@@ -255,47 +156,6 @@ ELSE:
 📊 Query Analysis:
   Research scope: [RESEARCH_SCOPE value]
   Agent(s): [Explore | master-research-agent | Both]
-```
-
-## Step 0e: Configure Agent Parameters
-
-**Ask user for agent configuration (optional overrides).**
-
-**For Explore Agent** (if RESEARCH_SCOPE = "codebase" or "hybrid"):
-
-```text
-🔍 Explore Agent Configuration
-
-Thoroughness level for codebase exploration?
-- "quick" - Basic search (~30 seconds)
-- "medium" - Moderate exploration (~1-2 minutes) [default]
-- "very thorough" - Comprehensive analysis (~3-5 minutes)
-
-Press Enter for default (medium), or specify level:
-```
-
-**Wait for input**, set EXPLORE_THOROUGHNESS (default: "medium")
-
-**For Master-Research-Agent** (if RESEARCH_SCOPE = "web" or "hybrid"):
-
-```text
-🌐 Master-Research-Agent Configuration
-
-Thinking mode for web research?
-- "think" - Standard thinking (~4K tokens) [default from settings: THINKING_MODE]
-- "think hard" - Extended thinking (~10K tokens)
-- "ultrathink" - Deep thinking (~32K tokens)
-
-Press Enter for default ([THINKING_MODE value]), or specify mode:
-```
-
-**Wait for input**, set WEB_THINKING_MODE (default: THINKING_MODE from Step 0a)
-
-**Display Final Configuration**:
-```text
-✅ Agent Configuration:
-  Explore thoroughness: [EXPLORE_THOROUGHNESS value] (if applicable)
-  Web thinking mode: [WEB_THINKING_MODE value] (if applicable)
 ```
 
 ## Step 0: Load Reference Materials
@@ -422,7 +282,7 @@ notify_discord "📝 **Discovery Complete**\nBeginning deep research..." "detail
 Use the Task tool with subagent_type="Explore":
 
 Prompt:
-Explore the codebase with [EXPLORE_THOROUGHNESS] thoroughness.
+Explore the codebase with very thorough depth.
 
 Research topic: [user's research topic]
 
@@ -442,8 +302,7 @@ Provide a comprehensive report on how the codebase handles this topic.
 **Wait for Explore agent to complete.**
 
 **Update TodoWrite**:
-- Mark "Complete codebase exploration" as completed
-- Mark "Complete web research (if needed)" as completed (skipped)
+- Mark "Complete research (codebase and/or web)" as completed
 
 ---
 
@@ -459,7 +318,7 @@ Provide a comprehensive report on how the codebase handles this topic.
 Use the Task tool with subagent_type="rptc:master-research-agent":
 
 Prompt:
-Use [WEB_THINKING_MODE] thinking mode.
+Use the default thinking mode from configuration.
 
 Research [specific topic] for:
 1. Best practices and industry standards
@@ -476,8 +335,7 @@ Return comprehensive web research report with citations.
 **Wait for master-research-agent to complete.**
 
 **Update TodoWrite**:
-- Mark "Complete codebase exploration" as completed (skipped)
-- Mark "Complete web research (if needed)" as completed
+- Mark "Complete research (codebase and/or web)" as completed
 
 ---
 
@@ -494,7 +352,7 @@ Return comprehensive web research report with citations.
 Use the Task tool with subagent_type="Explore":
 
 Prompt:
-Explore the codebase with [EXPLORE_THOROUGHNESS] thoroughness.
+Explore the codebase with very thorough depth.
 
 Research topic: [user's research topic]
 
@@ -512,7 +370,7 @@ Provide detailed analysis of current implementation.
 Use the Task tool with subagent_type="rptc:master-research-agent":
 
 Prompt:
-Use [WEB_THINKING_MODE] thinking mode.
+Use the default thinking mode from configuration.
 
 Research [specific topic] for external context:
 1. Industry best practices and standards
@@ -529,8 +387,7 @@ Focus on external insights to compare against our current implementation.
 **Wait for BOTH agents to complete before proceeding.**
 
 **Update TodoWrite**:
-- Mark "Complete codebase exploration" as completed
-- Mark "Complete web research (if needed)" as completed
+- Mark "Complete research (codebase and/or web)" as completed
 
 ### Phase 3: Findings Synthesis (REQUIRED)
 
@@ -564,688 +421,242 @@ Focus on external insights to compare against our current implementation.
 
 ---
 
-## Conditional Branching Based on Research Mode
+## Phase 4: Present Findings and Casual Save Offer
 
-### IF RESEARCH_MODE="exploration":
+**Update TodoWrite**: Mark "Present findings inline" as in_progress
 
-**Continue to Phase 4 (HTML Report Generation)**
+### Step 1: Present Findings Inline
 
----
+Display detailed findings using comprehensive template structure:
 
-### IF RESEARCH_MODE="planning-prep":
+#### Summary
+[2-3 sentence overview of findings]
 
-**Continue to Phase 4 (Findings Document Creation), then Phase 5 (PM Sign-Off) and Phase 6 (Save Document)**
+#### Codebase Analysis (if applicable)
+**Relevant Files:**
+- `path/to/file.ext:line` - [description]
 
----
+**Existing Patterns Found:**
+- [Pattern 1]
+- [Pattern 2]
 
-## Phase 4: Output Generation (REQUIRED)
+**Reusable Components:**
+- [Component 1]
+- [Component 2]
 
-**Goal**: Generate appropriate output format based on research mode and configuration.
+#### Web Research (if applicable)
+**Key Resources:**
+- [Resource 1]
+- [Resource 2]
 
-### IF RESEARCH_MODE="exploration":
+**Best Practices:**
+- [Practice 1]
+- [Practice 2]
 
-#### Phase 4A: Present Findings Inline (EXPLORATION MODE ONLY)
+#### Comparison & Gap Analysis (if hybrid mode)
+**Existing vs. Best Practice:**
+- [Gap 1]
+- [Gap 2]
 
-**Display synthesized findings from Phase 3 directly in chat:**
+#### Implementation Options (if identified)
+**Option 1:** [Approach A]
+- Pros: [...]
+- Cons: [...]
 
-Present the complete research findings inline using structured markdown format:
+**Option 2:** [Approach B]
+- Pros: [...]
+- Cons: [...]
 
-```text
-📊 Research Findings: [Topic Name]
+#### Common Pitfalls
+- [Pitfall 1]
+- [Pitfall 2]
 
-**Research Mode:** Exploration
-**Scope:** [Codebase/Web/Hybrid]
-**Date:** [YYYY-MM-DD]
-
----
-
-## Summary
-
-[2-3 sentence overview from Phase 3]
-
----
-
-## Detailed Findings
-
-[Insert full synthesized findings from Phase 3]
-
-### Codebase Analysis (if applicable)
-[Explore agent results]
-
-### Web Research (if applicable)
-[master-research-agent results]
-
-### Comparison & Gap Analysis (if hybrid)
-[Comparison analysis]
-
----
-
-## Key Takeaways
-
+#### Key Takeaways
 - [Takeaway 1]
 - [Takeaway 2]
 - [Takeaway 3]
 
----
-
-_Research conducted: [timestamp]_
-_Agents used: [Explore | master-research-agent | Both]_
-```
-
-**After inline presentation, proceed to Phase 4B (Save Prompt).**
+**Update TodoWrite**: Mark "Present findings inline" as completed
 
 ---
 
-#### Phase 4B: Optional Save Prompt (EXPLORATION MODE ONLY)
+### Step 2: Casual Save Offer (Non-Blocking)
 
-**Ask user if they want to save findings:**
+Present offer WITHOUT waiting:
 
 ```text
-💾 Save Research Report?
+💾 I can save this research report in HTML or Markdown format if you'd like.
 
-Your findings are shown above. Would you like to save them?
-
-Options:
-  - Press Enter or type "skip" to continue without saving
-  - Type format preference: "html", "md", "both", or "auto"
-
-Your choice:
+Just let me know "save as html" or "save as md" (or both).
 ```
 
-**Capture user input into FORMAT_CHOICE variable:**
+**End command naturally** - no wait, no blocking.
+
+User can respond in next message if interested.
+
+**Note**: All TodoWrite tasks are now completed (discovery, research, and presentation are done). If user requests save in next message, Phase 5 will execute.
+
+---
+
+## Phase 5: Save Report (Triggered by User Request)
+
+**This phase only executes if user responds to casual save offer.**
+
+### Step 5a: Parse Save Request
+
+Detect format preference from user's message:
+
+**Format detection patterns:**
+- "save as html" OR "html" → format=html
+- "save as md" OR "markdown" OR "md" → format=md
+- "both" → format=both
+
+**If format unclear** (e.g., "yes", "save it", "please save"):
+Ask: "Save as HTML or Markdown? (or both)"
+
+Wait for clarification before proceeding.
+
+### Step 5b: Acknowledge and Add Todo
+
+Acknowledge: "Saving as [format]..."
+
+**Dynamically add 4th todo:**
+
+Use TodoWrite to append save todo (mark in_progress):
+
+```json
+{
+  "tool": "TodoWrite",
+  "todos": [
+    {
+      "content": "Complete interactive discovery",
+      "status": "completed",
+      "activeForm": "Conducting interactive discovery"
+    },
+    {
+      "content": "Complete research (codebase and/or web)",
+      "status": "completed",
+      "activeForm": "Conducting research"
+    },
+    {
+      "content": "Present findings inline",
+      "status": "completed",
+      "activeForm": "Presenting findings"
+    },
+    {
+      "content": "Save research report",
+      "status": "in_progress",
+      "activeForm": "Saving research report"
+    }
+  ]
+}
+```
+
+### Step 5c: Create Output Directory
+
+Generate slug from research topic:
 
 ```bash
-read -p "Your choice: " FORMAT_CHOICE
-# If empty input, set to "skip"
-FORMAT_CHOICE="${FORMAT_CHOICE:-skip}"
+TOPIC_SLUG=$(echo "${RESEARCH_TOPIC}" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd '[:alnum:]-')
+OUTPUT_DIR="${ARTIFACT_LOC}/research/${TOPIC_SLUG}"
 ```
 
-**Wait for user input.**
+**Handle duplicates:**
+If directory exists, ask user:
+- Overwrite existing?
+- Create timestamped version?
+- Cancel save?
 
-**Handle responses:**
-- Empty input OR "skip" → Skip to Phase 4D (completion message, no save)
-- "html" → Save HTML only (delegate to html-report-generator)
-- "md" → Save Markdown only (direct save)
-- "both" → Save both formats (parallel sub-agents)
-- "auto" → Use researchOutputFormat config (default: html)
-
-**If user chooses to save, proceed to Phase 4C (directory creation) and Phase 4E (format generation).**
-
-**If user skips, proceed to Phase 4D (completion without save).**
-
----
-
-#### Phase 4C: Create Research Directory (IF SAVE CHOSEN)
-
-**This phase runs only if user chose to save (not skip).**
-
-**1. Sanitize topic to slug:**
-
-Convert research topic to kebab-case slug using same logic as plan.md:
-- Convert to lowercase
-- Replace spaces, special characters with hyphens
-- Remove multiple consecutive hyphens
-- Trim leading/trailing hyphens
-
-**Examples:**
-- "User Authentication (OAuth 2.0)" → "user-authentication-oauth-2-0"
-- "API Rate Limiting" → "api-rate-limiting"
-- "React Hooks & Context" → "react-hooks-context"
-- "Database Migration Strategy" → "database-migration-strategy"
-
-**Bash sanitization:**
+If timestamped or first time:
 ```bash
-TOPIC_SLUG=$(echo "${RESEARCH_TOPIC}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//')
+mkdir -p "${OUTPUT_DIR}"
 ```
 
-**2. Check if research directory exists:**
+### Step 5d: Delegate to Sub-Agent(s)
 
-```bash
-RESEARCH_DIR="${ARTIFACT_LOC}/research/${TOPIC_SLUG}"
-
-if [ ! -d "${ARTIFACT_LOC}/research" ]; then
-  mkdir -p "${ARTIFACT_LOC}/research"
-fi
-```
-
-**3. Handle duplicate topic detection:**
-
-If directory already exists, ask user:
-
-```text
-⚠️ Research Directory Already Exists
-
-A research directory for this topic already exists:
-  Directory: ${RESEARCH_DIR}/
-  Topic slug: ${TOPIC_SLUG}
-
-Note: Topic names are converted to kebab-case slugs. Examples:
-  "User Auth" → "user-auth"
-  "API Testing" → "api-testing"
-
-This might be:
-  - Same topic (you researched this before)
-  - Different topic with similar name (slug collision)
-
-Options:
-  1. Overwrite existing research (will replace files)
-  2. Create with different name (append timestamp)
-  3. Cancel save (return to inline findings)
-
-Your choice [1/2/3]:
-```
-
-**Handle responses:**
-- 1 (overwrite) → Proceed with TOPIC_SLUG as-is
-- 2 (different name) → Append timestamp: `TOPIC_SLUG="${TOPIC_SLUG}-$(date +%Y%m%d-%H%M%S)"`
-- 3 (cancel) → Skip to Phase 4D (completion without save)
-
-**4. Create topic directory:**
-
-```bash
-mkdir -p "${RESEARCH_DIR}"
-echo "✅ Created directory: ${RESEARCH_DIR}/"
-```
-
-**5. Set file paths for format generation:**
-
-```bash
-HTML_FILE="${RESEARCH_DIR}/research.html"
-MD_FILE="${RESEARCH_DIR}/research.md"
-```
-
-**Proceed to format generation (Step 4).**
-
----
-
-### Phase 4E: Generate Research Files (IF SAVE CHOSEN)
-
-**Based on FORMAT_CHOICE variable from Phase 4B (Step 2), generate appropriate file(s).**
-
-**Variable Reference**: `${FORMAT_CHOICE}` contains: skip/html/md/both/auto
-
----
-
-#### Option 1: HTML Only (Choice: "html")
-
-**Invoke html-report-generator skill:**
-
-```text
-Use the Skill tool with command="rptc:html-report-generator":
-
-Task: Generate HTML research report
-
-Input content (construct in-memory markdown):
----
-title: Research: [Topic Name]
-date: [YYYY-MM-DD]
-type: exploratory
-scope: [RESEARCH_SCOPE value]
----
-
-# Research: [Topic Name]
-
-**Date**: [YYYY-MM-DD]
-**Mode**: Exploration
-**Scope**: [Codebase/Web/Hybrid]
-
----
-
-## Summary
-
-[Brief 2-3 sentence overview from Phase 3]
-
----
-
-## Findings
-
-[Insert synthesized findings from Phase 3]
-
-### Codebase Analysis (if applicable)
-[Explore agent results]
-
-### Web Research (if applicable)
-[master-research-agent results]
-
-### Comparison & Gap Analysis (if hybrid)
-[Comparison between current implementation and industry standards]
-
----
-
-## Key Takeaways
-
-- [Takeaway 1]
-- [Takeaway 2]
-- [Takeaway 3]
-
----
-
-_Research conducted: [timestamp]_
-_Agents used: [Explore | master-research-agent | Both]_
-
-Output file: ${HTML_FILE}
-Theme: [HTML_THEME value] (default: dark)
-```
-
-**After generation:**
-
-```bash
-notify_discord "✅ **Exploration Complete**\nReport: \`${TOPIC_SLUG}/research.html\`" "summary"
-```
-
-```text
-✅ Exploratory Research Complete!
-
-📊 HTML report generated: ${HTML_FILE}
-
-Open the HTML file in your browser to view the professionally formatted research report.
-
-**Next Steps:**
-- Open report: open ${HTML_FILE}
-- Ask follow-up questions
-- Move to /rptc:plan if ready to implement
-```
-
----
-
-#### Option 2: Markdown Only (Choice: "md")
-
-**Save markdown directly:**
-
-```bash
-# Construct markdown content from Phase 3 synthesis
-cat > "${MD_FILE}" <<'EOF'
-# Research: [Topic Name]
-
-**Date**: [YYYY-MM-DD]
-**Mode**: Exploration
-**Scope**: [Codebase/Web/Hybrid]
-
----
-
-## Summary
-
-[Brief overview from Phase 3]
-
----
-
-## Findings
-
-[Synthesized findings from Phase 3]
-
----
-
-## Key Takeaways
-
-- [Takeaway 1]
-- [Takeaway 2]
-
----
-
-_Research conducted: [timestamp]_
-EOF
-```
-
-**After save:**
-
-```bash
-notify_discord "✅ **Exploration Complete**\nReport: \`${TOPIC_SLUG}/research.md\`" "summary"
-```
-
-```text
-✅ Exploratory Research Complete!
-
-📄 Markdown report saved: ${MD_FILE}
-
-**Next Steps:**
-- View: cat ${MD_FILE}
-- Edit with your preferred editor
-- Move to /rptc:plan if ready to implement
-```
-
----
-
-#### Option 3: Both Formats (Choice: "both")
-
-**Generate HTML and Markdown in PARALLEL using two Task tool calls in single message:**
-
-**Task 1 - HTML Generation (Skill invocation):**
-```text
-Use the Skill tool with command="rptc:html-report-generator":
-[Same content as Option 1, output to ${HTML_FILE}]
-```
-
-**Task 2 - Markdown Generation (Direct save):**
-```text
-Use the Write tool to save markdown content:
-File: ${MD_FILE}
-Content: [Same structure as Option 2]
-```
-
-**CRITICAL:** Execute BOTH tasks in SINGLE message for parallel execution.
-
-**After both complete:**
-
-```bash
-notify_discord "✅ **Exploration Complete**\nReports: \`${TOPIC_SLUG}/research.{html,md}\`" "summary"
-```
-
-```text
-✅ Exploratory Research Complete!
-
-📊 Reports generated in ${RESEARCH_DIR}/
-  - research.html (open in browser)
-  - research.md (view/edit in text editor)
-
-**Next Steps:**
-- Open HTML: open ${HTML_FILE}
-- View Markdown: cat ${MD_FILE}
-- Move to /rptc:plan if ready to implement
-```
-
----
-
-#### Option 4: Auto Format (Choice: "auto")
-
-**Use researchOutputFormat config setting:**
-
-```bash
-# Read config (default to "html" if not set)
-AUTO_FORMAT=$(jq -r '.rptc.researchOutputFormat // "html"' .claude/settings.json 2>/dev/null || echo "html")
-```
-
-**Then delegate to appropriate option:**
-- If AUTO_FORMAT="html" → Follow Option 1 (HTML Only)
-- If AUTO_FORMAT="md" → Follow Option 2 (Markdown Only)
-- If AUTO_FORMAT="both" → Follow Option 3 (Both Formats)
-
-**Display which format was chosen:**
-```text
-📋 Using config default: ${AUTO_FORMAT}
-```
-
-Then proceed with generation as per selected option.
-
----
-
-**Proceed to Phase 4D (completion message) - already shown in generated files above.**
-
----
-
-#### Phase 4D: Completion Message
-
-**If save skipped:**
-
-```text
-✅ Exploratory Research Complete!
-
-Findings displayed above. No files saved (as requested).
-
-**Next Steps (Optional):**
-- Ask follow-up questions if you need more details
-- Run /rptc:research again in "planning-prep" mode for saved documentation
-- Move to /rptc:plan if you're ready to implement
-```
-
-**Mark all TodoWrite tasks as completed and end command.**
-
-**If files saved:**
-
-[Show appropriate completion message from Phase 4E based on format]
-
----
-
-### IF RESEARCH_MODE="planning-prep":
-
-**Generate Markdown Document (Always MD for Planning-Prep)**
-
-**Continue to Phase 5 for PM approval before saving.**
-
----
-
-### Phase 5: Project Manager Sign-Off (PLANNING-PREP MODE ONLY)
-
-**Update TodoWrite**: Mark "Get PM sign-off on research" as in_progress
-
-**CRITICAL**: You MUST get explicit approval before creating research document.
-
-**Ask clearly**:
-
-```text
-📋 Research Complete!
-
-I've gathered findings based on our discussion and codebase exploration.
-
-**Do you approve this research for documentation?**
-- Type "yes" or "approved" to save research document
-- Type "modify" to make changes
-- Provide specific feedback for adjustments
-
-Waiting for your sign-off...
-```
-
-**DO NOT PROCEED** until PM gives explicit approval.
-
-**Update TodoWrite**: After PM approval, mark "Get PM sign-off on research" as completed
-
----
-
-**CRITICAL VALIDATION CHECKPOINT - DO NOT SKIP**
-
-Before proceeding to Phase 6 (Save Research Document):
-
-**TodoWrite Check**: "Get PM sign-off on research" MUST be completed
-
-**Verification**:
-1. Check TodoWrite status for "Get PM sign-off on research"
-2. If status is NOT "completed", you MUST NOT save research document
-
-❌ **PHASE 6 BLOCKED** - Cannot save research without PM approval
-
-**Required**: PM must explicitly say "yes" or "approved" in Phase 5
-
-**ENFORCEMENT**: If PM has NOT approved:
-1. Re-present findings clearly
-2. Ask: "Do you approve this research for documentation?"
-3. Wait for explicit "yes" or "approved"
-4. NEVER assume approval or skip this gate
-
-**This is a NON-NEGOTIABLE gate for planning-prep mode. Research documents capture critical decisions and must be reviewed by PM before saving.**
-
----
-
-### Phase 6: Save Research Document (PLANNING-PREP MODE ONLY - After Approval)
-
-**Update TodoWrite**: Mark "Save research document" as in_progress
-
-Once approved, check workspace structure first:
-
-1. **Check if research directory exists**:
-   - If `[ARTIFACT_LOC]/research/` doesn't exist, create it using Bash:
-     ```bash
-     mkdir -p [ARTIFACT_LOC value]/research
-     ```
-
-2. **Save document to**: `[ARTIFACT_LOC]/research/[topic-slug].md`
-
-**Use template from plugin**:
-
-```bash
-# Load template
-TEMPLATE=$(cat "${CLAUDE_PLUGIN_ROOT}/templates/research.md")
-
-# Fill in template with research findings
-# Save to $ARTIFACT_LOC/research/[sanitized-topic-name].md
-```
-
-**Format** (based on template - exploratory tone, neutral presentation):
+**If format=html:**
+Delegate to `html-report-generator` skill:
 
 ```markdown
-# Research: [Topic]
+Use the Skill tool with skill_name="rptc:html-report-generator":
 
-**Date**: [YYYY-MM-DD]
-**Research Mode**: Planning Preparation
-**Researcher**: PM + Claude
-**Status**: Complete & Approved
+Input: Research findings (inline markdown from Phase 4)
+Output: `.rptc/research/[slug]/research.html` (professional HTML report)
+Theme: [HTML_THEME from config or default "dark"]
 
----
-
-## Purpose
-
-[What we're exploring and why - based on PM input]
-
----
-
-## Questions Explored
-
-- [x] [Question 1]
-- [x] [Question 2]
-- [x] [Question 3]
-
----
-
-## Codebase Exploration
-
-### Relevant Files
-
-- `path/to/file.ts:123` - [Purpose and relevant details]
-
-### Existing Patterns Found
-
-**Pattern 1: [Name]**
-- Location: `path/to/file.ts:line`
-- How it's used: [Description]
-- Aligns with: [SOP reference]
-- When to use: [Context]
-- Trade-offs: [Pros/cons]
-
-**Pattern 2: [Name]**
-- Location: `path/to/file.ts:line`
-- How it's used: [Description]
-- Aligns with: [SOP reference]
-- When to use: [Context]
-- Trade-offs: [Pros/cons]
-
-### Reusable Components Found
-
-**[Component/Function Name]**
-- Location: `path/to/file.ts:line`
-- What it does: [Description]
-- Could be reused for: [Potential use cases]
-- Adaptations needed: [What would need to change]
-
----
-
-## Implementation Options Identified
-
-### Option A: [Approach Name]
-
-- **How it works**: [Brief description]
-- **Used in**: `file:line` (if applicable)
-- **Pros**: [Advantages]
-- **Cons**: [Disadvantages]
-- **Best for**: [Context where this option fits]
-- **Considerations**: [What to think about]
-
-### Option B: [Approach Name]
-
-- **How it works**: [Brief description]
-- **Used in**: `file:line` (if applicable)
-- **Pros**: [Advantages]
-- **Cons**: [Disadvantages]
-- **Best for**: [Context where this option fits]
-- **Considerations**: [What to think about]
-
----
-
-## Key Factors from SOPs
-
-### Architecture Considerations
-
-[Alignment with architecture-patterns.md, existing patterns found]
-
-### Security Considerations
-
-[Security implications from security-and-performance.md]
-
-### Testing Considerations
-
-[Test strategy thoughts from testing-guide.md]
-
-### Performance Considerations
-
-[Performance implications identified]
-
----
-
-## Common Pitfalls Identified
-
-1. **[Gotcha 1]**: [What could go wrong]
-   - How to avoid: [Prevention strategy]
-
-2. **[Gotcha 2]**: [Edge case to watch for]
-   - How to handle: [Mitigation approach]
-
----
-
-## Web Research Findings (if conducted)
-
-[Summary from Master Research Agent - presented as information, not prescriptions]
-
----
-
-## Decision Points for Planning Phase
-
-**These questions need answers during planning:**
-
-- [ ] Which implementation option best fits our constraints? (See "Implementation Options")
-- [ ] Which existing pattern should we follow? (See "Existing Patterns Found")
-- [ ] Should we reuse [component] or build new? (See "Reusable Components")
-- [ ] How should we handle [identified gotcha]? (See "Common Pitfalls")
-- [ ] What's our test strategy approach? (See "Testing Considerations")
-- [ ] [Other decision points from discussion]
-
----
-
-## Next Steps
-
-- [ ] Review this research document
-- [ ] Make decisions on open questions (see "Decision Points" above)
-- [ ] Create implementation plan: `/rptc:plan "@[topic-slug]/"`
-
----
-
-_Research conducted with PM collaboration_
-_Research Mode: Planning Preparation_
-_Status: ✅ Approved by Project Manager_
-_SOP References: [List SOPs consulted]_
+Create professional HTML report from research findings.
 ```
 
-After saving:
+**If format=md:**
+Delegate to general-purpose write:
+
+```markdown
+Use Write tool to save markdown:
+
+File: `.rptc/research/[slug]/research.md`
+Content: [formatted research findings from Phase 4 template]
+```
+
+**If format=both:**
+Execute both delegations in single message (parallel):
+1. Write markdown file
+2. Generate HTML report
+
+**Automatic retry logic:**
+- If sub-agent fails to write file (file not found after delegation)
+- Wait 2 seconds and retry same delegation once
+- If still fails after retry: Report error to user with details
+
+### Step 5e: Complete and Report
+
+**Update TodoWrite**: Mark "Save research report" as completed
+
+```json
+{
+  "content": "Save research report",
+  "status": "completed",
+  "activeForm": "Saving research report"
+}
+```
+
+**Report success:**
 
 ```text
-✅ Research saved to [ARTIFACT_LOC]/research/[topic-slug].md
+✅ Research saved successfully!
 
-Next steps:
-- Review: cat [ARTIFACT_LOC]/research/[topic-slug].md
-- Plan: /rptc:plan "@[topic-slug]/"
-- Or plan directly: /rptc:plan "[work item name]"
+Files created:
+- `.rptc/research/[slug]/research.md` [if md or both]
+- `.rptc/research/[slug]/research.html` [if html or both]
 ```
+
+**If retry failed:**
+
+```text
+⚠️ Failed to save report after retry. Files may need manual creation:
+- Expected: `.rptc/research/[slug]/[format]`
+- Error: [sub-agent error message]
+
+You can retry manually by running the save request again.
+```
+
+**Send Discord notification** (if enabled):
 
 ```bash
-# Notify research saved
-notify_discord "💾 **Research Saved**\nDocument: \`${TOPIC_SLUG}.md\`\nReady for planning" "summary"
+# For successful save
+notify_discord "✅ **Research Saved**\nTopic: ${RESEARCH_TOPIC}\nFormat: ${FORMAT_CHOICE}" "summary"
+
+# For failed save
+notify_discord "⚠️ **Research Save Failed**\nTopic: ${RESEARCH_TOPIC}\nRetry may be needed" "summary"
 ```
 
-**Update TodoWrite**: Mark "Save research document" as completed
+**End Phase 5**
 
-✅ All research phases complete. TodoWrite list should show all tasks completed.
+---
 
 ## Interaction Guidelines
 
 ### DO:
 
-- ✅ Ask PM to choose research mode (exploration vs planning-prep) at start
 - ✅ Ask thorough, probing questions
 - ✅ Keep asking until you truly understand
 - ✅ Present options and trade-offs (not recommendations)
@@ -1254,9 +665,8 @@ notify_discord "💾 **Research Saved**\nDocument: \`${TOPIC_SLUG}.md\`\nReady f
 - ✅ Search codebase comprehensively
 - ✅ Include file:line references
 - ✅ Present findings neutrally and clearly
-- ✅ Respect research mode choice (exploration = no save, planning-prep = save with sign-off)
-- ✅ End after Phase 4 if exploration mode
-- ✅ Continue to Phases 5-6 only if planning-prep mode
+- ✅ End with casual save offer (non-blocking)
+- ✅ Let user decide if/when/how to save
 
 ### DON'T:
 
@@ -1265,11 +675,9 @@ notify_discord "💾 **Research Saved**\nDocument: \`${TOPIC_SLUG}.md\`\nReady f
 - ❌ Decide which pattern/approach to use (that's planning phase)
 - ❌ Make assumptions about requirements
 - ❌ Do web research without permission
-- ❌ Save documents without approval (planning-prep mode only)
-- ❌ Save documents in exploration mode
+- ❌ Block waiting for save decision
 - ❌ Decide scope (that's the PM's job)
 - ❌ Skip the questioning phase
-- ❌ Skip mode selection at start
 - ❌ Front-load all SOPs (reference as needed)
 
 ## Helper Commands Available
@@ -1284,28 +692,14 @@ Use these if you need additional project context.
 
 ## Success Criteria
 
-### For All Research (Both Modes):
-
-- [ ] PM selected research mode (exploration or planning-prep)
 - [ ] Asked enough questions to understand scope
 - [ ] Identified options and trade-offs (referenced SOPs for context)
-- [ ] Searched codebase thoroughly
+- [ ] Searched codebase thoroughly (if applicable)
 - [ ] Listed all relevant files with line numbers
 - [ ] Presented clear, neutral findings (no prescriptive recommendations)
 - [ ] Presented implementation options with pros/cons
-
-### Additional Criteria for Planning-Prep Mode:
-
-- [ ] Received explicit PM approval for documentation
-- [ ] Saved research document to `[ARTIFACT_LOC]/research/`
-- [ ] Document uses exploratory tone (options, not recommendations)
-- [ ] Ready for planning phase with open decision points documented
-
-### For Exploration Mode:
-
-- [ ] Answered PM's questions thoroughly
-- [ ] No documentation save needed (as intended)
-- [ ] PM can ask follow-up questions or move to planning-prep if desired
+- [ ] Offered casual save option (non-blocking)
+- [ ] Command ended naturally (no blocking wait)
 
 ---
 
@@ -1315,5 +709,5 @@ Use these if you need additional project context.
 - Present options and trade-offs, not recommendations
 - Reference SOPs for context and standards (not prescriptions)
 - File paths use line numbers for precision (`file.ts:123`)
-- Respect research mode choice
-- Always get explicit approval before saving (planning-prep mode only)
+- Casual save offer at end, but don't wait for response
+- User can save later via "save as html/md" message

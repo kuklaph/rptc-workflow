@@ -18,17 +18,6 @@ Perform comprehensive project analysis in 15-30 minutes:
 - Read `.gitignore`
 - Review CI/CD configs (.github/, .gitlab-ci.yml, etc.)
 
-**Standard Operating Procedures** (resolved via fallback chain):
-SOPs are loaded from (highest priority first):
-
-1. `.rptc/sop/` - Project-specific overrides
-2. `~/.claude/global/sop/` - User global defaults
-3. Plugin SOPs - Plugin defaults
-
-These SOPs provide consistent cross-project guidance.
-Use `/rptc:admin-sop-check [filename]` to verify which SOP will be loaded.
-Check `.context/` for project-specific context documents.
-
 ### 2. Complete Architecture Analysis
 
 **Structure Mapping**:
@@ -36,19 +25,6 @@ Check `.context/` for project-specific context documents.
 ```bash
 tree -L 3 -I 'node_modules|__pycache__|.git' || find . -type d -not -path "*/\.*" | head -30
 ```
-
-**Code Organization**:
-
-- Identify all major modules/packages
-- Map file relationships
-- Find design patterns in use
-- Locate configuration files
-
-**Entry Points**:
-
-- Read all entry files (index._, main._, app.\*)
-- Understand initialization flow
-- Identify core services/modules
 
 ### 3. Complete Git History
 
@@ -80,8 +56,6 @@ git log --all --grep="fix" --oneline | head -10   # Fix history
 - Analyze test patterns
 
 ### 7. Complexity Analysis
-
-Identify refactoring candidates based on code complexity metrics (per `architecture-patterns.md` SOP).
 
 ```bash
 # Files exceeding size limits (>500 lines)
@@ -127,8 +101,6 @@ echo "Reference: \`architecture-patterns.md\` (SOP) for refactoring guidance"
 ```
 
 ### 8. Code Pattern Analysis
-
-Search for key patterns:
 
 ```bash
 rg "class\s+\w+" --type ts -c    # Class usage

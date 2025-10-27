@@ -31,7 +31,6 @@ bash setup-rptc-workflow.sh
 
 **Your authority includes**:
 
-- ✅ Approving research findings
 - ✅ Approving delegation to Master specialist agents
 - ✅ Approving plans before implementation
 - ✅ Approving quality gate reviews
@@ -390,9 +389,9 @@ Ask yourself:
    - Web research (if needed) runs in parallel
    - Results integrated efficiently
 
-4. **PM Sign-Off**: You explicitly approve before research is saved
+4. **Inline Results & Optional Save**: Findings presented immediately, followed by optional non-blocking save prompt (skip/html/md/both/auto)
 
-**Output**: `.rptc/research/[topic].md`
+**Output**: `.rptc/research/[topic-slug]/research.{html,md}` (based on format choice)
 
 **When to use**:
 
