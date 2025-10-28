@@ -17,7 +17,7 @@ When starting a new session and continuing work on an existing plan, this comman
 4. Automatically runs appropriate catch-up command
 5. Provides focused context for continuing work
 
-**Handoff Awareness (v1.2.0+)**: If a handoff checkpoint exists (`.rptc/plans/[plan-name]/handoff.md`), this command prioritizes it to resume from the exact state where TDD paused. This provides superior context restoration with:
+**Handoff Awareness (v1.2.0+)**: If a handoff checkpoint exists (`[artifact-location]/plans/[plan-name]/handoff.md`), this command prioritizes it to resume from the exact state where TDD paused. This provides superior context restoration with:
 - Exact step checkpoint (which step to resume)
 - Configuration preservation (thinking mode, coverage targets)
 - Context analysis from pause point
@@ -25,7 +25,30 @@ When starting a new session and continuing work on an existing plan, this comman
 
 ## Process
 
-### Step 0: Detect Plan Format and Handoff State
+## Step 0: Load Configuration
+
+**Load configuration**:
+
+1. **Check if settings file exists**:
+   - Use Read tool to read `.claude/settings.json`
+   - If file doesn't exist or can't be read, use defaults (skip to step 3)
+
+2. **Parse configuration** (extract these fields):
+   - `rptc.artifactLocation` → ARTIFACT_LOC (default: ".rptc")
+   - `rptc.docsLocation` → DOCS_LOC (default: "docs")
+
+3. **Display loaded configuration**:
+   ```text
+   Configuration loaded:
+     Artifact location: [ARTIFACT_LOC value]
+     Docs location: [DOCS_LOC value]
+   ```
+
+**Use these values throughout the command execution.**
+
+**Note**: References to these variables appear throughout this command - use the actual loaded values from this step.
+
+### Step 1: Detect Plan Format and Handoff State
 
 **Determine plan format from argument**:
 
@@ -38,14 +61,14 @@ if [[ "$PLAN_REF" == @*/ ]]; then
   PLAN_FORMAT="directory"
   PLAN_NAME="${PLAN_REF#@}"
   PLAN_NAME="${PLAN_NAME%/}"
-  PLAN_DIR=".rptc/plans/${PLAN_NAME}/"
+  PLAN_DIR="${ARTIFACT_LOC}/plans/${PLAN_NAME}/"
   PLAN_FILE="${PLAN_DIR}overview.md"
   HANDOFF_FILE="${PLAN_DIR}handoff.md"
 elif [[ "$PLAN_REF" == @*.md ]]; then
   PLAN_FORMAT="monolithic"
   PLAN_NAME="${PLAN_REF#@}"
   PLAN_NAME="${PLAN_NAME%.md}"
-  PLAN_FILE=".rptc/plans/${PLAN_NAME}.md"
+  PLAN_FILE="${ARTIFACT_LOC}/plans/${PLAN_NAME}.md"
   HANDOFF_FILE=""  # Monolithic plans don't use handoff.md
 else
   echo "❌ Error: Invalid plan format"
@@ -205,7 +228,7 @@ Resume Mode: HANDOFF (Superior context restoration)
 
 **If no handoff (standard plan analysis):**
 
-Read `.rptc/plans/[plan-name]/overview.md` (directory) or `.rptc/plans/[plan-name].md` (monolithic):
+Read `[artifact-location]/plans/[plan-name]/overview.md` (directory) or `[artifact-location]/plans/[plan-name].md` (monolithic):
 
 - Parse all implementation steps
 - Count total steps vs completed steps
@@ -290,7 +313,7 @@ Based on remaining work, automatically decide:
 
 Check if plan references research document:
 
-- If found in plan frontmatter, read `.rptc/research/[topic].md`
+- If found in plan frontmatter, read `${ARTIFACT_LOC}/research/[topic].md`
 - Summarize key findings relevant to remaining work
 
 **Present Research Summary** (if applicable):
@@ -382,7 +405,7 @@ To continue from checkpoint:
 Note: TDD command will auto-detect handoff.md and resume from Step [CURRENT_STEP]
 
 To review handoff details:
-  cat .rptc/plans/[plan-name]/handoff.md
+  cat ${ARTIFACT_LOC}/plans/[plan-name]/handoff.md
 
 To modify plan first:
   /rptc:helper-update-plan "@[plan-name]/" "changes"
@@ -503,7 +526,7 @@ If handoff.md referenced but doesn't exist:
 ```text
 ⚠️  Handoff File Missing
 
-Expected: .rptc/plans/[plan-name]/handoff.md
+Expected: ${ARTIFACT_LOC}/plans/[plan-name]/handoff.md
 Status: File not found
 
 This may indicate:
@@ -524,7 +547,7 @@ If handoff.md exists but data extraction fails:
 ```text
 ⚠️  Handoff Data Extraction Failed
 
-File exists: .rptc/plans/[plan-name]/handoff.md
+File exists: ${ARTIFACT_LOC}/plans/[plan-name]/handoff.md
 Issue: Unable to parse checkpoint state
 
 Common causes:
@@ -563,7 +586,7 @@ If user provides monolithic reference but directory exists:
 ℹ️  Plan Format Note
 
 You provided: @plan-name.md (monolithic)
-Found: .rptc/plans/plan-name/ (directory format)
+Found: ${ARTIFACT_LOC}/plans/plan-name/ (directory format)
 
 Auto-correcting to directory format...
 Checking for handoff checkpoint...

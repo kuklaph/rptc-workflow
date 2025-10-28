@@ -240,7 +240,7 @@ if [ ! -f ".claude/settings.json" ]; then
   cat > .claude/settings.json <<'EOF'
 {
   "rptc": {
-    "_rptcVersion": "2.1.1",
+    "_rptcVersion": "2.2.0",
     "defaultThinkingMode": "think",
     "artifactLocation": ".rptc",
     "docsLocation": "docs",
@@ -268,41 +268,85 @@ EOF
 else
   # File exists - check if it needs RPTC section
   if ! grep -q '"rptc"' .claude/settings.json; then
-    # Settings file exists but no rptc section - add it
-    # Check if jq is available for safe JSON merging
-    if command -v jq >/dev/null 2>&1; then
-      # Use jq for safe merging
-      TEMP_FILE=$(mktemp)
-      jq '. + {"rptc": {"_rptcVersion": "2.1.1"
-      mv "$TEMP_FILE" .claude/settings.json
-      echo "✓ Added RPTC configuration to existing .claude/settings.json"
-    else
-      # jq not available - warn user to manually add
-      echo "⚠️  .claude/settings.json exists but lacks RPTC config"
-      echo ""
-      echo "  Please add the following to your .claude/settings.json:"
-      echo ""
-      echo '  "rptc": {'
-      echo '    "_rptcVersion": "2.1.1",'
-      echo '    "defaultThinkingMode": "think",'
-      echo '    "artifactLocation": ".rptc",'
-      echo '    "docsLocation": "docs",'
-      echo '    "testCoverageTarget": 85,'
-      echo '    "maxPlanningAttempts": 10,'
-      echo '    "customSopPath": ".rptc/sop",'
-      echo '    "researchOutputFormat": "html",'
-      echo '    "htmlReportTheme": "dark",'
-      echo '    "verificationMode": "focused",'
-      echo '    "tdgMode": "disabled",'
-      echo '    "qualityGatesEnabled": false,'
-      echo '    "discord": {'
-      echo '      "webhookUrl": "",'
-      echo '      "notificationsEnabled": false,'
-      echo '      "verbosity": "summary"'
-      echo '    }'
-      echo '  }'
-      echo ""
-      echo "  (Install 'jq' for automatic merging in future)"
+    # Settings file exists but no rptc section - merge it using Read/Write
+    echo "Merging RPTC configuration into existing .claude/settings.json..."
+
+    # Use Read tool to load existing settings
+    # Note: This delegates to Claude to read the file
+    # Claude will read .claude/settings.json, parse JSON, add rptc config, and write back
+
+    # Create temp marker for Claude
+    echo "DELEGATE_TO_CLAUDE_READ_WRITE" > .claude/.rptc-merge-needed
+
+    cat <<'INSTRUCTIONS'
+
+**Action Required**: Use Read and Write tools to merge RPTC configuration:
+
+1. **Read** `.claude/settings.json` to get existing configuration
+2. **Parse** the JSON content (preserve all existing fields)
+3. **Add** the following RPTC configuration as a new top-level key:
+
+```json
+"rptc": {
+  "_rptcVersion": "2.1.1",
+  "defaultThinkingMode": "think",
+  "artifactLocation": ".rptc",
+  "docsLocation": "docs",
+  "testCoverageTarget": 85,
+  "maxPlanningAttempts": 10,
+  "customSopPath": ".rptc/sop",
+  "researchOutputFormat": "html",
+  "htmlReportTheme": "dark",
+  "verificationMode": "focused",
+  "tdgMode": "disabled",
+  "qualityGatesEnabled": false,
+  "discord": {
+    "webhookUrl": "",
+    "notificationsEnabled": false,
+    "verbosity": "summary"
+  }
+}
+```
+
+4. **Write** the merged JSON back to `.claude/settings.json`
+5. **Delete** `.claude/.rptc-merge-needed` marker file
+6. **Confirm**: "✓ Added RPTC configuration to existing .claude/settings.json"
+
+**If Read/Write fails**, show this fallback message:
+
+INSTRUCTIONS
+
+cat <<'FALLBACK'
+⚠️  .claude/settings.json exists but lacks RPTC config
+
+Please manually add the following to your .claude/settings.json:
+
+  "rptc": {
+    "_rptcVersion": "2.2.0",
+    "defaultThinkingMode": "think",
+    "artifactLocation": ".rptc",
+    "docsLocation": "docs",
+    "testCoverageTarget": 85,
+    "maxPlanningAttempts": 10,
+    "customSopPath": ".rptc/sop",
+    "researchOutputFormat": "html",
+    "htmlReportTheme": "dark",
+    "verificationMode": "focused",
+    "tdgMode": "disabled",
+    "qualityGatesEnabled": false,
+    "discord": {
+      "webhookUrl": "",
+      "notificationsEnabled": false,
+      "verbosity": "summary"
+    }
+  }
+
+FALLBACK
+
+    # Wait for Claude to complete merge
+    if [ -f ".claude/.rptc-merge-needed" ]; then
+      # Claude hasn't completed merge - manual fallback needed
+      rm -f .claude/.rptc-merge-needed
     fi
   else
     echo "ℹ️  .claude/settings.json already contains RPTC configuration"

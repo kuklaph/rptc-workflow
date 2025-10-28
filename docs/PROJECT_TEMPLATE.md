@@ -607,7 +607,9 @@ your-project/
 │   │   └── [topic].md
 │   ├── plans/                   # Active/completed plans
 │   │   └── [feature].md
-│   └── archive/                 # Old plans (optional)
+│   ├── complete/                # Old plans (optional)
+│   └── sop/                     # Project SOPs (optional overrides)
+│       └── testing-guide.md     # Overrides plugin default
 │
 ├── docs/                        # Permanent documentation
 │   ├── architecture/            # Auto-created by Doc Specialist
@@ -616,9 +618,7 @@ your-project/
 │
 ├── .claude/
 │   ├── settings.json            # Project settings
-│   ├── settings.local.json      # Local overrides (gitignored)
-│   └── sop/                     # Project SOPs (optional overrides)
-│       └── testing-guide.md     # Overrides plugin default
+│   └── settings.local.json      # Local overrides (gitignored)
 │
 ├── CLAUDE.md                    # Your project instructions (auto-includes RPTC reference)
 └── src/                         # Your application code

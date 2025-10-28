@@ -166,9 +166,10 @@ my-project/
 ├── .rptc/              # Working artifacts
 │   ├── research/       # Research documents
 │   ├── plans/          # Implementation plans
-│   └── archive/        # Completed work
-├── .claude/            # Project-specific settings
+│   ├── complete/       # Completed work
 │   └── sop/            # Project SOP overrides (optional)
+├── .claude/            # Project-specific settings
+│   └── settings.json   # Configuration
 └── docs/               # Permanent documentation (auto-created)
 ```
 

@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 2.1.1
+**Version**: 2.2.0
 **Status**: Beta
 **License**: MIT
 
@@ -70,6 +70,7 @@ RESEARCH → PLAN → TDD → COMMIT
 | `/rptc:helper-update-plan "@plan/" "changes"`     | Modify existing plan   | As needed   |
 | `/rptc:helper-resume-plan "@plan/"`               | Resume previous work   | After break |
 | `/rptc:helper-cleanup`                            | Review completed plans | Periodic    |
+| `/rptc:helper-simplify`                           | Simplify existing code complexity | As needed   |
 
 ### Admin Commands
 

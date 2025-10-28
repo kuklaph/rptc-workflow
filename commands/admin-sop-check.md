@@ -197,6 +197,9 @@ SOPS=(
   "git-and-deployment"
   "languages-and-style"
   "security-and-performance"
+  "flexible-testing-guide"
+  "post-tdd-refactoring"
+  "todowrite-guide"
 )
 
 for sop in "${SOPS[@]}"; do

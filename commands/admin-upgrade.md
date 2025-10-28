@@ -113,7 +113,7 @@ echo ""
 
 ```bash
 # Plugin version (update this with each release)
-PLUGIN_VERSION="2.1.1"
+PLUGIN_VERSION="2.2.0"
 
 # Load workspace version
 if command -v jq >/dev/null 2>&1; then
@@ -199,6 +199,21 @@ else
       ;;
     "1.2.0")
       echo "v2.0.0: Efficiency agent rewrite, post-TDD refactoring SOP, Discord notifications"
+      echo ""
+      ;;
+    "2.0.0")
+      echo "v2.0.1: Security agent streamlined, admin config display enhanced"
+      echo "v2.1.0: BREAKING: Simplified research workflow, GitHub URL installation"
+      echo "v2.1.1: Windows compatibility fixes, context window efficiency"
+      echo ""
+      ;;
+    "2.0.1")
+      echo "v2.1.0: BREAKING: Simplified research workflow, GitHub URL installation"
+      echo "v2.1.1: Windows compatibility fixes, context window efficiency"
+      echo ""
+      ;;
+    "2.1.0"|"2.1.1")
+      echo "v2.2.0: Bug fixes and cohesiveness improvements"
       echo ""
       ;;
   esac

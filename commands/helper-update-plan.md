@@ -9,9 +9,32 @@ Arguments:
 
 ## Process
 
+## Step 0: Load Configuration
+
+**Load configuration**:
+
+1. **Check if settings file exists**:
+   - Use Read tool to read `.claude/settings.json`
+   - If file doesn't exist or can't be read, use defaults (skip to step 3)
+
+2. **Parse configuration** (extract these fields):
+   - `rptc.artifactLocation` → ARTIFACT_LOC (default: ".rptc")
+   - `rptc.docsLocation` → DOCS_LOC (default: "docs")
+
+3. **Display loaded configuration**:
+   ```text
+   Configuration loaded:
+     Artifact location: [ARTIFACT_LOC value]
+     Docs location: [DOCS_LOC value]
+   ```
+
+**Use these values throughout the command execution.**
+
+**Note**: References to these variables appear throughout this command - use the actual loaded values from this step.
+
 ### 1. Load Existing Plan
 
-Read `.rptc/plans/[plan-name]/overview.md` (directory format):
+Read `$ARTIFACT_LOC/plans/[plan-name]/overview.md` (directory format):
 
 - Current status
 - Existing steps
@@ -120,7 +143,7 @@ Waiting for your sign-off...
 
 ### 6. Save Updated Plan (Only After Approval)
 
-Update `.rptc/plans/[plan-name]/overview.md`:
+Update `$ARTIFACT_LOC/plans/[plan-name]/overview.md`:
 
 1. Preserve original sections (don't lose context)
 2. Update modified sections
@@ -146,7 +169,7 @@ Status: ✅ Updated and Approved
 **Confirm save**:
 
 ```text
-✅ Plan Updated: `.rptc/plans/[plan-name]/overview.md`
+✅ Plan Updated: `$ARTIFACT_LOC/plans/[plan-name]/overview.md`
 
 Changes applied:
 - [Change 1]

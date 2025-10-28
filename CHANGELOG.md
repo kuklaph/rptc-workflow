@@ -7,6 +7,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.0] - 2025-10-28
+
+### Fixed
+
+- **Removed jq Dependency**: admin-init command now uses Read/Write tools instead of jq
+  - Fixes broken JSON merge at line 276 (incomplete syntax, missing 14 config fields)
+  - All 15 RPTC config fields now included in delegation instructions
+  - Manual fallback provided if Read/Write delegation fails
+  - More reliable workspace initialization (no external dependency required)
+
+- **Custom Artifact Location Support**: Helper commands now respect configured paths
+  - helper-resume-plan: Added Step 0 config loading, replaced 9 hardcoded paths
+  - helper-update-plan: Added Step 0 config loading, replaced 3 hardcoded paths
+  - Both commands now work with custom `artifactLocation` setting
+  - Fixes v2+ compatibility issues for users with custom workspace paths
+
+- **Complete SOP Coverage**: admin-sop-check now verifies all 9 SOPs
+  - Added 3 missing SOPs: flexible-testing-guide, post-tdd-refactoring, todowrite-guide
+  - Fixes incomplete SOP verification (was showing only 6 of 9)
+
+- **Version Changelog Display**: admin-upgrade now shows changelogs for v2.0.x users
+  - Added case entries for versions 2.0.0, 2.0.1, and 2.1.0/2.1.1
+  - Fixes empty "What's New" section for users upgrading from v2.0.x
+
+- **Documentation Path References**: Corrected outdated directory naming
+  - PROJECT_TEMPLATE.md: Fixed 2 path references (archive→complete, .claude/sop→.rptc/sop)
+  - PLUGIN_ARCHITECTURE.md: Fixed 2 path references (archive→complete, .claude/sop→.rptc/sop)
+  - All documentation now matches v2.0.0+ directory structure
+
+- **Command Format Consistency**: Fixed command references in CLAUDE.md
+  - Updated 7 command references from colon format to hyphen format
+  - Users can now copy-paste commands directly from documentation
+
+### Improved
+
+- **Configuration Display**: admin-config now shows all 13 configuration fields
+  - Previously showed only 4 fields (artifactLocation, docsLocation, testCoverageTarget, maxPlanningAttempts)
+  - Now displays all fields: version, thinking mode, SOP path, research format, HTML theme, verification mode, TDG mode, quality gates, Discord settings
+  - Uses Read tool pattern (consistent with jq removal)
+  - Users can verify complete configuration at a glance
+
+- **Feature Documentation**: Added missing command and skill documentation
+  - Added helper-simplify to README.md Helper Commands table
+  - Added discord-notify to CLAUDE.md Available Skills table
+  - Improved feature discoverability
+
+### Technical
+
+- **Issues Resolved**: 21/21 (100% completion)
+  - 6 critical issues fixed
+  - 8 high priority issues resolved
+  - 7 medium/low priority issues addressed
+- **Files Modified**: 9 command/documentation files
+- **Total Changes**: +202 insertions, -60 deletions
+
+---
+
 ## [2.1.1] - 2025-10-27
 
 ### Fixed

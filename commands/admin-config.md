@@ -71,19 +71,51 @@ Display current plugin configuration:
 ```bash
 echo ""
 echo "Plugin Settings:"
-echo "  (from ${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json)"
+echo "  (from .claude/settings.json)"
 echo ""
 
-# Read actual values from config (with fallback to defaults)
-ARTIFACT_LOC=$(jq -r '.rptc.artifactLocation // ".rptc"' .claude/settings.json 2>/dev/null || echo ".rptc")
-DOCS_LOC=$(jq -r '.rptc.docsLocation // "docs"' .claude/settings.json 2>/dev/null || echo "docs")
-COVERAGE_TARGET=$(jq -r '.rptc.testCoverageTarget // 85' .claude/settings.json 2>/dev/null || echo "85")
-MAX_ATTEMPTS=$(jq -r '.rptc.maxPlanningAttempts // 10' .claude/settings.json 2>/dev/null || echo "10")
+# Read configuration values from .claude/settings.json using Read tool
+# Delegate to Claude to extract these values (Read tool pattern - no jq dependency)
 
+echo "Loading configuration from .claude/settings.json..."
+
+# Request Claude to read .claude/settings.json and extract these fields:
+# - rptc._rptcVersion → RPTC_VERSION (default: "unknown")
+# - rptc.defaultThinkingMode → THINKING_MODE (default: "think")
+# - rptc.artifactLocation → ARTIFACT_LOC (default: ".rptc")
+# - rptc.docsLocation → DOCS_LOC (default: "docs")
+# - rptc.testCoverageTarget → COVERAGE_TARGET (default: "85")
+# - rptc.maxPlanningAttempts → MAX_ATTEMPTS (default: "10")
+# - rptc.customSopPath → CUSTOM_SOP (default: ".rptc/sop")
+# - rptc.researchOutputFormat → RESEARCH_FORMAT (default: "html")
+# - rptc.htmlReportTheme → HTML_THEME (default: "dark")
+# - rptc.verificationMode → VERIFICATION_MODE (default: "focused")
+# - rptc.tdgMode → TDG_MODE (default: "disabled")
+# - rptc.qualityGatesEnabled → QUALITY_GATES (default: "false")
+# - rptc.discord.notificationsEnabled → DISCORD_ENABLED (default: "false")
+
+# Claude will use Read tool on .claude/settings.json and set these variables
+# If Read fails or field is missing, use the default values shown above
+```
+
+After Claude extracts the values, display them:
+
+```bash
+echo ""
+echo "Current Configuration:"
+echo "  RPTC Version:          $RPTC_VERSION"
+echo "  Default Thinking Mode: $THINKING_MODE"
 echo "  Artifact Location:     $ARTIFACT_LOC"
 echo "  Docs Location:         $DOCS_LOC"
 echo "  Test Coverage Target:  ${COVERAGE_TARGET}%"
 echo "  Max Planning Attempts: $MAX_ATTEMPTS"
+echo "  Custom SOP Path:       $CUSTOM_SOP"
+echo "  Research Output:       $RESEARCH_FORMAT"
+echo "  HTML Report Theme:     $HTML_THEME"
+echo "  Verification Mode:     $VERIFICATION_MODE"
+echo "  TDG Mode:              $TDG_MODE"
+echo "  Quality Gates:         $QUALITY_GATES"
+echo "  Discord Notifications: $DISCORD_ENABLED"
 ```
 
 ## Step 6: Git Integration Status
