@@ -14,63 +14,17 @@ Show exactly which SOP file will be loaded for a given SOP name, demonstrating t
 
 Accept optional SOP name to check. If not provided, check all SOPs.
 
-## Step 1: Locate Plugin Directory (CRITICAL)
+## Step 1: Resolve Plugin Root
 
-Before checking SOPs, find where the RPTC plugin is installed:
+Use the CLAUDE_PLUGIN_ROOT environment variable (provided by Claude Code plugin system):
 
 ```bash
-# Find the plugin directory by searching for the unique plugin manifest
-PLUGIN_ROOT=""
-
-# Check user plugins directory (including marketplaces subdirectory)
-if [ -d "$HOME/.claude/plugins" ]; then
-  FOUND=$(find "$HOME/.claude/plugins" -name "plugin.json" -path "*/.claude-plugin/plugin.json" 2>/dev/null | while read manifest; do
-    # Check for either "rptc-workflow" or "rptc" as plugin name
-    if grep -q '"name".*"rptc' "$manifest" 2>/dev/null; then
-      dirname "$(dirname "$manifest")"
-      break
-    fi
-  done | head -1)
-  if [ -n "$FOUND" ]; then
-    PLUGIN_ROOT="$FOUND"
-  fi
-fi
-
-# If not found, check system plugins directory (including marketplaces subdirectory)
-if [ -z "$PLUGIN_ROOT" ] && [ -d "/opt/claude/plugins" ]; then
-  FOUND=$(find "/opt/claude/plugins" -name "plugin.json" -path "*/.claude-plugin/plugin.json" 2>/dev/null | while read manifest; do
-    # Check for either "rptc-workflow" or "rptc" as plugin name
-    if grep -q '"name".*"rptc' "$manifest" 2>/dev/null; then
-      dirname "$(dirname "$manifest")"
-      break
-    fi
-  done | head -1)
-  if [ -n "$FOUND" ]; then
-    PLUGIN_ROOT="$FOUND"
-  fi
-fi
-
-# If still not found, try alternative search in home directory
-if [ -z "$PLUGIN_ROOT" ]; then
-  FOUND=$(find "$HOME" -type f -name "plugin.json" -path "*rptc*/.claude-plugin/plugin.json" 2>/dev/null | while read manifest; do
-    # Check for either "rptc-workflow" or "rptc" as plugin name
-    if grep -q '"name".*"rptc' "$manifest" 2>/dev/null; then
-      dirname "$(dirname "$manifest")"
-      break
-    fi
-  done | head -1)
-  if [ -n "$FOUND" ]; then
-    PLUGIN_ROOT="$FOUND"
-  fi
-fi
-
-if [ -z "$PLUGIN_ROOT" ]; then
-  echo "❌ ERROR: Could not locate RPTC plugin installation directory"
-  echo ""
-  echo "Please ensure the RPTC plugin is properly installed."
-  echo "Try: /plugin install rptc"
+# Step 1: Resolve plugin root
+if [ -z "${CLAUDE_PLUGIN_ROOT}" ]; then
+  echo "❌ Error: CLAUDE_PLUGIN_ROOT not set. Plugin may not be installed correctly."
   exit 1
 fi
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT}"
 ```
 
 ## Step 2: Parse Arguments
@@ -127,16 +81,18 @@ if [ -f ".rptc/sop/${SOP_NAME}.md" ]; then
   echo "   ✓ FOUND: .rptc/sop/${SOP_NAME}.md"
   echo "   ⚡ This file will be used (highest priority)"
 
-  # Show file info
-  FILE_SIZE=$(wc -c < ".rptc/sop/${SOP_NAME}.md")
-  LAST_MODIFIED=$(stat -c %y ".rptc/sop/${SOP_NAME}.md" 2>/dev/null || stat -f %Sm ".rptc/sop/${SOP_NAME}.md")
-  echo "   📊 Size: ${FILE_SIZE} bytes"
-  echo "   📅 Last modified: ${LAST_MODIFIED}"
+  # Show file info using Read tool (cross-platform compatible)
+  echo ""
+  echo "   Use Read tool to verify file:"
+  echo "   Read(file_path: \".rptc/sop/${SOP_NAME}.md\")"
+  echo "   📍 File exists and is readable"
 
   # Show first few lines as preview
   echo ""
   echo "   Preview (first 5 lines):"
-  head -5 ".rptc/sop/${SOP_NAME}.md" | sed 's/^/   │ /'
+  # Claude: Use Read tool with limit parameter
+  # Read(file_path: ".rptc/sop/${SOP_NAME}.md", limit: 5)
+  # Prefix each line with "   │ " in output
 
   exit 0  # Found, no need to check further
 else
@@ -149,11 +105,11 @@ if [ -f "$HOME/.claude/global/sop/${SOP_NAME}.md" ]; then
   echo "   ✓ FOUND: $HOME/.claude/global/sop/${SOP_NAME}.md"
   echo "   ⚡ This file will be used (user default)"
 
-  # Show file info
-  FILE_SIZE=$(wc -c < "$HOME/.claude/global/sop/${SOP_NAME}.md")
-  LAST_MODIFIED=$(stat -c %y "$HOME/.claude/global/sop/${SOP_NAME}.md" 2>/dev/null || stat -f %Sm "$HOME/.claude/global/sop/${SOP_NAME}.md")
-  echo "   📊 Size: ${FILE_SIZE} bytes"
-  echo "   📅 Last modified: ${LAST_MODIFIED}"
+  # Show file info using Read tool (cross-platform compatible)
+  echo ""
+  echo "   Use Read tool to verify file:"
+  echo "   Read(file_path: \"$HOME/.claude/global/sop/${SOP_NAME}.md\")"
+  echo "   📍 File exists and is readable"
 
   exit 0  # Found
 else
@@ -166,10 +122,9 @@ if [ -f "$PLUGIN_ROOT/sop/${SOP_NAME}.md" ]; then
   echo "   ✓ FOUND: $PLUGIN_ROOT/sop/${SOP_NAME}.md"
   echo "   ⚡ This file will be used (plugin default)"
 
-  # Show file info
-  FILE_SIZE=$(wc -c < "$PLUGIN_ROOT/sop/${SOP_NAME}.md")
-  echo "   📊 Size: ${FILE_SIZE} bytes"
-  echo "   📅 Plugin version"
+  # Show file info (simplified for cross-platform compatibility)
+  echo "   📍 File exists and is readable"
+  echo "   📦 Plugin version"
 else
   echo "   ✗ ERROR: SOP not found in plugin!"
   echo "   ⚠️  This may indicate a plugin issue"
@@ -202,22 +157,20 @@ SOPS=(
   "todowrite-guide"
 )
 
-for sop in "${SOPS[@]}"; do
-  echo "• ${sop}.md"
-
-  # Check resolution
-  if [ -f ".rptc/sop/${sop}.md" ]; then
-    echo "  ⚡ Project (.rptc/sop/)"
-  elif [ -f "$HOME/.claude/global/sop/${sop}.md" ]; then
-    echo "  ⚡ User (~/.claude/global/sop/)"
-  elif [ -f "$PLUGIN_ROOT/sop/${sop}.md" ]; then
-    echo "  ⚡ Plugin (default)"
-  else
-    echo "  ✗ NOT FOUND (ERROR)"
-  fi
-
-  echo ""
-done
+# Claude: Use Read tool for SOP resolution (file existence)
+# For each SOP in SOPS array:
+# 1. Try Read(".rptc/sop/${sop}.md") → if succeeds: echo "  ⚡ Project (.rptc/sop/)"
+# 2. Else try Read("~/.claude/global/sop/${sop}.md") → if succeeds: echo "  ⚡ User (~/.claude/global/sop/)"
+# 3. Else try Read("${PLUGIN_ROOT}/sop/${sop}.md") → if succeeds: echo "  ⚡ Plugin (default)"
+# 4. Else: echo "  ✗ NOT FOUND (ERROR)"
+#
+# Output format for each SOP:
+# • ${sop}.md
+#   ⚡ [Resolution location]
+#
+# (Process all 9 SOPs: testing-guide, architecture-patterns, frontend-guidelines,
+#  git-and-deployment, languages-and-style, security-and-performance,
+#  flexible-testing-guide, post-tdd-refactoring, todowrite-guide)
 
 echo "═══════════════════════════════════════════════════════"
 ```

@@ -40,9 +40,14 @@ Review completed plans in `$ARTIFACT_LOC/plans/` and help user decide what to do
 
 ## Step 1: Find Completed Plans
 
-```bash
-# Find plans marked as complete
-grep -l "Status.*Complete" $ARTIFACT_LOC/plans/*.md 2>/dev/null
+```markdown
+# Claude: Use Grep tool to find completed plans
+Grep(
+  pattern: "Status.*Complete",
+  path: "${ARTIFACT_LOC}/plans",
+  glob: "*.md",
+  output_mode: "files_with_matches"
+)
 ```
 
 ```text

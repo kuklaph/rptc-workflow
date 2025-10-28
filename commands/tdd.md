@@ -1146,8 +1146,10 @@ After all N steps, add quality gate TODOs **conditionally based on configuration
 **Determine if TDG mode should be enabled:**
 
 ```bash
-# Load TDG configuration from settings.json
-TDG_CONFIG=$(jq -r '.rptc.tdgMode // "disabled"' .claude/settings.json 2>/dev/null || echo "disabled")
+# Claude: Extract TDG mode from .claude/settings.json (use Read tool)
+# Store in TDG_CONFIG variable (default: "disabled" if field missing)
+# Read(".claude/settings.json")
+# Extract: rptc.tdgMode → TDG_CONFIG
 
 # Determine if TDG should run
 RUN_TDG=false
@@ -2780,8 +2782,10 @@ notify_discord "✨ **TDD Execution Complete**\nPlan: \`${PLAN_NAME}\`\nAll test
 #### Step 1: Check Verification Mode
 
 ```bash
-# Load verification configuration
-VERIFICATION_MODE=$(jq -r '.rptc.verificationMode // "focused"' .claude/settings.json 2>/dev/null || echo "focused")
+# Claude: Extract verification mode from .claude/settings.json (use Read tool)
+# Store in VERIFICATION_MODE variable (default: "focused" if field missing)
+# Read(".claude/settings.json")
+# Extract: rptc.verificationMode → VERIFICATION_MODE
 
 if [ "$VERIFICATION_MODE" = "disabled" ]; then
   echo ""

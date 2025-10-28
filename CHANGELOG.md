@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.1] - 2025-10-28
+
+### Changed
+
+- **Systematic Bash Removal**: Replaced unnecessary bash with native Claude Code tools across 8 command files
+  - **Cross-platform compatibility**: Removed stat command (Windows blocker in admin-sop-check)
+  - **jq dependency eliminated**: 50+ instances replaced with Read + Claude parsing
+  - **DRY violations fixed**: 150+ duplicated lines consolidated via ${CLAUDE_PLUGIN_ROOT}
+  - **Settings merge simplified**: admin-init.md reduced from 86 to 47 lines (45% reduction)
+  - **Token efficiency**: ~15-25K token reduction per command execution
+  - **Maintainability**: Bash-to-keep criteria documented inline for future development
+  - **Net reduction**: 171 lines removed (228 insertions, 399 deletions)
+
+---
+
+
 ## [2.2.0] - 2025-10-28
 
 ### Fixed

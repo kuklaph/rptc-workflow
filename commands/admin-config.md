@@ -21,8 +21,9 @@ echo "Plugin Location:"
 echo "  ${CLAUDE_PLUGIN_ROOT}"
 echo ""
 echo "Plugin Version:"
-# Read from plugin.json
-cat "${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json" | grep '"version"' | head -1
+# Claude: Use Read tool to extract version from plugin.json
+# Read("${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json")
+# Extract and display line containing: "version": "X.Y.Z"
 ```
 
 ## Step 2: Check Workspace Structure
@@ -34,9 +35,13 @@ echo ""
 echo "Workspace Status:"
 if [ -d ".rptc" ]; then
   echo "  ✓ .rptc/ directory exists"
-  echo "    - research/: $(find .rptc/research -type f 2>/dev/null | wc -l) files"
-  echo "    - plans/:    $(find .rptc/plans -type f 2>/dev/null | wc -l) files"
-  echo "    - complete/:  $(find .rptc/complete -type f 2>/dev/null | wc -l) files"
+  # Claude: Use Glob tool to count files in each directory
+  # Glob(pattern: ".rptc/research/**/*") → count results → RESEARCH_COUNT
+  # Glob(pattern: ".rptc/plans/**/*") → count results → PLANS_COUNT
+  # Glob(pattern: ".rptc/complete/**/*") → count results → COMPLETE_COUNT
+  echo "    - research/: ${RESEARCH_COUNT} files"
+  echo "    - plans/:    ${PLANS_COUNT} files"
+  echo "    - complete/:  ${COMPLETE_COUNT} files"
 else
   echo "  ✗ .rptc/ not initialized"
   echo "    Run: /rptc:admin-init"

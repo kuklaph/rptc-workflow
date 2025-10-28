@@ -84,9 +84,13 @@ if [ "$PLAN_FORMAT" = "directory" ] && [ -f "$HANDOFF_FILE" ]; then
   RESUME_MODE="handoff"
   echo "🔄 Handoff checkpoint detected: $HANDOFF_FILE"
   echo "   Resuming from exact TDD pause point..."
-  # Notify handoff detected (inline fail-safe)
-  DISCORD_ENABLED=$(jq -r '.rptc.discord.notificationsEnabled // false' .claude/settings.json 2>/dev/null || echo "false")
-  DISCORD_WEBHOOK=$(jq -r '.rptc.discord.webhookUrl // ""' .claude/settings.json 2>/dev/null || echo "")
+
+  # Claude: Read .claude/settings.json and extract nested discord config:
+  # - rptc.discord.notificationsEnabled → DISCORD_ENABLED (default: false)
+  # - rptc.discord.webhookUrl → DISCORD_WEBHOOK (default: "")
+  # Read(".claude/settings.json")
+  # Extract: rptc.discord.notificationsEnabled → DISCORD_ENABLED
+  # Extract: rptc.discord.webhookUrl → DISCORD_WEBHOOK
   if [ "$DISCORD_ENABLED" = "true" ] && [ -n "$DISCORD_WEBHOOK" ]; then
     bash "${CLAUDE_PLUGIN_ROOT}/skills/discord-notify/scripts/notify.sh" "$DISCORD_WEBHOOK" "🔄 **Handoff Detected**\nResuming: \`${PLAN_NAME}\`" 2>/dev/null || true
   fi
@@ -444,9 +448,12 @@ To continue implementation:
   /rptc:tdd "@[plan-name]/" (directory) or "@[plan-name].md" (monolithic)
 
 ```bash
-# Notify resume complete (inline fail-safe)
-DISCORD_ENABLED=$(jq -r '.rptc.discord.notificationsEnabled // false' .claude/settings.json 2>/dev/null || echo "false")
-DISCORD_WEBHOOK=$(jq -r '.rptc.discord.webhookUrl // ""' .claude/settings.json 2>/dev/null || echo "")
+# Claude: Read .claude/settings.json and extract nested discord config:
+# - rptc.discord.notificationsEnabled → DISCORD_ENABLED (default: false)
+# - rptc.discord.webhookUrl → DISCORD_WEBHOOK (default: "")
+# Read(".claude/settings.json")
+# Extract: rptc.discord.notificationsEnabled → DISCORD_ENABLED
+# Extract: rptc.discord.webhookUrl → DISCORD_WEBHOOK
 if [ "$DISCORD_ENABLED" = "true" ] && [ -n "$DISCORD_WEBHOOK" ]; then
   bash "${CLAUDE_PLUGIN_ROOT}/skills/discord-notify/scripts/notify.sh" "$DISCORD_WEBHOOK" "🔄 **Resume Complete**\nPlan: \`${PLAN_NAME}\`\nReady to continue TDD" 2>/dev/null || true
 fi

@@ -58,69 +58,17 @@ echo "  .rptc/sop/          - Project-specific SOPs (optional)"
 echo "  docs/               - Permanent documentation"
 ```
 
-## Step 3: Locate Plugin Directory (CRITICAL)
+## Step 3: Resolve Plugin Root
 
-Before copying files, we need to find where the RPTC plugin is installed:
+Use the CLAUDE_PLUGIN_ROOT environment variable (provided by Claude Code plugin system):
 
 ```bash
-# Find the plugin directory by searching for the unique plugin manifest
-# Search in common Claude Code plugin installation locations
-PLUGIN_ROOT=""
-
-# Check user plugins directory (including marketplaces subdirectory)
-if [ -d "$HOME/.claude/plugins" ]; then
-  FOUND=$(find "$HOME/.claude/plugins" -name "plugin.json" -path "*/.claude-plugin/plugin.json" 2>/dev/null | while read manifest; do
-    # Check for either "rptc-workflow" or "rptc" as plugin name
-    if grep -q '"name".*"rptc' "$manifest" 2>/dev/null; then
-      dirname "$(dirname "$manifest")"
-      break
-    fi
-  done | head -1)
-  if [ -n "$FOUND" ]; then
-    PLUGIN_ROOT="$FOUND"
-  fi
-fi
-
-# If not found, check system plugins directory
-if [ -z "$PLUGIN_ROOT" ] && [ -d "/opt/claude/plugins" ]; then
-  FOUND=$(find "/opt/claude/plugins" -name "plugin.json" -path "*/.claude-plugin/plugin.json" 2>/dev/null | while read manifest; do
-    # Check for either "rptc-workflow" or "rptc" as plugin name
-    if grep -q '"name".*"rptc' "$manifest" 2>/dev/null; then
-      dirname "$(dirname "$manifest")"
-      break
-    fi
-  done | head -1)
-  if [ -n "$FOUND" ]; then
-    PLUGIN_ROOT="$FOUND"
-  fi
-fi
-
-# If still not found, try alternative search in home directory
-if [ -z "$PLUGIN_ROOT" ]; then
-  FOUND=$(find "$HOME" -type f -name "plugin.json" -path "*rptc*/.claude-plugin/plugin.json" 2>/dev/null | while read manifest; do
-    # Check for either "rptc-workflow" or "rptc" as plugin name
-    if grep -q '"name".*"rptc' "$manifest" 2>/dev/null; then
-      dirname "$(dirname "$manifest")"
-      break
-    fi
-  done | head -1)
-  if [ -n "$FOUND" ]; then
-    PLUGIN_ROOT="$FOUND"
-  fi
-fi
-
-if [ -z "$PLUGIN_ROOT" ]; then
-  echo "❌ ERROR: Could not locate RPTC plugin installation directory"
-  echo ""
-  echo "Searched in:"
-  echo "  - $HOME/.claude/plugins/"
-  echo "  - /opt/claude/plugins/"
-  echo "  - $HOME/**/rptc-workflow/"
-  echo ""
-  echo "Please ensure the RPTC plugin is properly installed."
-  echo "Try: /plugin install rptc"
+# Step 3: Resolve plugin root
+if [ -z "${CLAUDE_PLUGIN_ROOT}" ]; then
+  echo "❌ Error: CLAUDE_PLUGIN_ROOT not set. Plugin may not be installed correctly."
   exit 1
 fi
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT}"
 
 echo "✓ Found plugin at: $PLUGIN_ROOT"
 ```
@@ -240,7 +188,7 @@ if [ ! -f ".claude/settings.json" ]; then
   cat > .claude/settings.json <<'EOF'
 {
   "rptc": {
-    "_rptcVersion": "2.2.0",
+    "_rptcVersion": "2.2.1",
     "defaultThinkingMode": "think",
     "artifactLocation": ".rptc",
     "docsLocation": "docs",
@@ -268,27 +216,25 @@ EOF
 else
   # File exists - check if it needs RPTC section
   if ! grep -q '"rptc"' .claude/settings.json; then
-    # Settings file exists but no rptc section - merge it using Read/Write
+    # Settings file exists but no rptc section - merge using Edit tool
     echo "Merging RPTC configuration into existing .claude/settings.json..."
 
-    # Use Read tool to load existing settings
-    # Note: This delegates to Claude to read the file
-    # Claude will read .claude/settings.json, parse JSON, add rptc config, and write back
+    cat <<'MERGE_INSTRUCTION'
 
-    # Create temp marker for Claude
-    echo "DELEGATE_TO_CLAUDE_READ_WRITE" > .claude/.rptc-merge-needed
+**Action Required**: Use the Edit tool to add RPTC configuration:
 
-    cat <<'INSTRUCTIONS'
+1. **Read** `.claude/settings.json` to understand existing structure
+2. **Use Edit tool** to add the rptc section as a new top-level key:
+   - Preserve all existing fields
+   - Add comma after last existing field if needed
+   - Insert before closing brace
+3. **Verify** JSON remains valid after edit
 
-**Action Required**: Use Read and Write tools to merge RPTC configuration:
-
-1. **Read** `.claude/settings.json` to get existing configuration
-2. **Parse** the JSON content (preserve all existing fields)
-3. **Add** the following RPTC configuration as a new top-level key:
+**RPTC configuration to add:**
 
 ```json
 "rptc": {
-  "_rptcVersion": "2.1.1",
+  "_rptcVersion": "2.2.1",
   "defaultThinkingMode": "think",
   "artifactLocation": ".rptc",
   "docsLocation": "docs",
@@ -308,46 +254,9 @@ else
 }
 ```
 
-4. **Write** the merged JSON back to `.claude/settings.json`
-5. **Delete** `.claude/.rptc-merge-needed` marker file
-6. **Confirm**: "✓ Added RPTC configuration to existing .claude/settings.json"
+**After successful edit**: Confirm with "✓ Added RPTC configuration to existing .claude/settings.json"
 
-**If Read/Write fails**, show this fallback message:
-
-INSTRUCTIONS
-
-cat <<'FALLBACK'
-⚠️  .claude/settings.json exists but lacks RPTC config
-
-Please manually add the following to your .claude/settings.json:
-
-  "rptc": {
-    "_rptcVersion": "2.2.0",
-    "defaultThinkingMode": "think",
-    "artifactLocation": ".rptc",
-    "docsLocation": "docs",
-    "testCoverageTarget": 85,
-    "maxPlanningAttempts": 10,
-    "customSopPath": ".rptc/sop",
-    "researchOutputFormat": "html",
-    "htmlReportTheme": "dark",
-    "verificationMode": "focused",
-    "tdgMode": "disabled",
-    "qualityGatesEnabled": false,
-    "discord": {
-      "webhookUrl": "",
-      "notificationsEnabled": false,
-      "verbosity": "summary"
-    }
-  }
-
-FALLBACK
-
-    # Wait for Claude to complete merge
-    if [ -f ".claude/.rptc-merge-needed" ]; then
-      # Claude hasn't completed merge - manual fallback needed
-      rm -f .claude/.rptc-merge-needed
-    fi
+MERGE_INSTRUCTION
   else
     echo "ℹ️  .claude/settings.json already contains RPTC configuration"
   fi
@@ -356,20 +265,43 @@ fi
 
 ## Step 8: Update .gitignore
 
+<!--
+BASH USAGE CRITERIA (Developer Reference)
+
+**When to KEEP bash:**
+- Git operations: `git status`, `git add`, `git commit` (subprocess coordination)
+- Simple file operations: `mkdir`, `cp`, `rm` (reliable, cross-platform)
+- Directory/file checks: `if [ -d dir ]`, `if [ -f file ]` (simple conditionals)
+- Version extraction in maintainer scripts: `grep/awk` for version parsing
+
+**When to REPLACE with native tools:**
+- File content reading: Use Read tool (not `cat`/`head`/`tail`)
+- File searching: Use Glob tool (not `find`)
+- Content searching: Use Grep tool (not `grep -l`)
+- JSON parsing: Use Read + Claude parsing (not `jq`)
+- File introspection: Use Read tool (not `stat`)
+- Complex pipelines: Use native tools (not `cat|grep|awk|head`)
+
+**Rationale:** Native tools provide better error handling, cross-platform compatibility
+(Windows), and context efficiency. Bash appropriate for subprocess coordination and
+simple shell operations where Claude native tools don't apply.
+
+Research reference: .rptc/research/bash-removal-native-tools.md
+-->
+
 Add Claude settings gitignore entries if not already present:
 
 ```bash
 if [ -f ".gitignore" ]; then
-  if ! grep -q ".claude/settings.local.json" .gitignore; then
-    echo "" >> .gitignore
-    echo "# Claude settings" >> .gitignore
-    echo ".claude/settings.local.json  # Local overrides" >> .gitignore
-    echo ".claude/.env*           # Secrets" >> .gitignore
-
-    echo "✓ Updated .gitignore with Claude settings entries"
-  else
-    echo "ℹ️  .gitignore already contains Claude settings entries"
-  fi
+  # Claude: Use Read + Edit tools to append .gitignore entries
+  # 1. Read(".gitignore") → check if ".claude/settings.local.json" exists
+  # 2. If NOT found:
+  #    Edit(file_path: ".gitignore",
+  #         old_string: [end of file],
+  #         new_string: "\n\n# Claude settings\n.claude/settings.local.json  # Local overrides\n.claude/.env*           # Secrets\n")
+  #    echo "✓ Updated .gitignore with Claude settings entries"
+  # 3. If found:
+  #    echo "ℹ️  .gitignore already contains Claude settings entries"
 else
   echo "⚠️  No .gitignore found. Consider creating one."
 fi

@@ -19,58 +19,17 @@ You are executing the **RPTC Workspace Upgrade & Verification** command.
 
 ---
 
-## Step 0: Locate Plugin Directory
+## Step 0: Resolve Plugin Root
+
+Use the CLAUDE_PLUGIN_ROOT environment variable (provided by Claude Code plugin system):
 
 ```bash
-# Find the plugin directory by searching for the unique plugin manifest
-PLUGIN_ROOT=""
-
-# Check user plugins directory
-if [ -d "$HOME/.claude/plugins" ]; then
-  FOUND=$(find "$HOME/.claude/plugins" -name "plugin.json" -path "*/.claude-plugin/plugin.json" 2>/dev/null | while read manifest; do
-    if grep -q '"name".*"rptc"' "$manifest" 2>/dev/null; then
-      dirname "$(dirname "$manifest")"
-      break
-    fi
-  done | head -1)
-  if [ -n "$FOUND" ]; then
-    PLUGIN_ROOT="$FOUND"
-  fi
-fi
-
-# If not found, check system plugins directory
-if [ -z "$PLUGIN_ROOT" ] && [ -d "/opt/claude/plugins" ]; then
-  FOUND=$(find "/opt/claude/plugins" -name "plugin.json" -path "*/.claude-plugin/plugin.json" 2>/dev/null | while read manifest; do
-    if grep -q '"name".*"rptc"' "$manifest" 2>/dev/null; then
-      dirname "$(dirname "$manifest")"
-      break
-    fi
-  done | head -1)
-  if [ -n "$FOUND" ]; then
-    PLUGIN_ROOT="$FOUND"
-  fi
-fi
-
-# If still not found, try alternative search
-if [ -z "$PLUGIN_ROOT" ]; then
-  FOUND=$(find "$HOME" -type f -name "plugin.json" -path "*rptc*/.claude-plugin/plugin.json" 2>/dev/null | while read manifest; do
-    if grep -q '"name".*"rptc"' "$manifest" 2>/dev/null; then
-      dirname "$(dirname "$manifest")"
-      break
-    fi
-  done | head -1)
-  if [ -n "$FOUND" ]; then
-    PLUGIN_ROOT="$FOUND"
-  fi
-fi
-
-if [ -z "$PLUGIN_ROOT" ]; then
-  echo "❌ ERROR: Could not locate RPTC plugin"
-  echo ""
-  echo "Please ensure the plugin is installed:"
-  echo "  /plugin install rptc"
+# Step 0: Resolve plugin root
+if [ -z "${CLAUDE_PLUGIN_ROOT}" ]; then
+  echo "❌ Error: CLAUDE_PLUGIN_ROOT not set. Plugin may not be installed correctly."
   exit 1
 fi
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT}"
 ```
 
 ## Step 1: Initial Health Check
@@ -113,45 +72,29 @@ echo ""
 
 ```bash
 # Plugin version (update this with each release)
-PLUGIN_VERSION="2.2.0"
+PLUGIN_VERSION="2.2.1"
+```
 
-# Load workspace version
-if command -v jq >/dev/null 2>&1; then
-  WORKSPACE_VERSION=$(jq -r '.rptc._rptcVersion // "1.0.0"' .claude/settings.json 2>/dev/null)
+**Configuration Extraction** (replaced jq dependency with Read tool + Claude parsing):
 
-  # Load user config values
-  ARTIFACT_LOC=$(jq -r '.rptc.artifactLocation // ".rptc"' .claude/settings.json 2>/dev/null)
-  DOCS_LOC=$(jq -r '.rptc.docsLocation // "docs"' .claude/settings.json 2>/dev/null)
-  COVERAGE_TARGET=$(jq -r '.rptc.testCoverageTarget // 85' .claude/settings.json 2>/dev/null)
-  MAX_ATTEMPTS=$(jq -r '.rptc.maxPlanningAttempts // 10' .claude/settings.json 2>/dev/null)
-  CUSTOM_SOP_PATH=$(jq -r '.rptc.customSopPath // ".rptc/sop"' .claude/settings.json 2>/dev/null)
-  THINKING_MODE=$(jq -r '.rptc.defaultThinkingMode // "think"' .claude/settings.json 2>/dev/null)
-  RESEARCH_OUTPUT_FORMAT=$(jq -r '.rptc.researchOutputFormat // "html"' .claude/settings.json 2>/dev/null)
-  HTML_REPORT_THEME=$(jq -r '.rptc.htmlReportTheme // "dark"' .claude/settings.json 2>/dev/null)
-  VERIFICATION_MODE=$(jq -r '.rptc.verificationMode // "focused"' .claude/settings.json 2>/dev/null)
-  TDD_MODE=$(jq -r '.rptc.tdgMode // "disabled"' .claude/settings.json 2>/dev/null)
-  DISCORD_ENABLED=$(jq -r '.rptc.discord.notificationsEnabled // false' .claude/settings.json 2>/dev/null)
-else
-  # Fallback if jq not available
-  if grep -q '"_rptcVersion"' .claude/settings.json; then
-    WORKSPACE_VERSION=$(grep '_rptcVersion' .claude/settings.json | sed 's/.*: *"\([^"]*\)".*/\1/')
-  else
-    WORKSPACE_VERSION="1.0.0"
-  fi
+# Claude: Use Read tool to parse JSON
+# Read(".claude/settings.json")
+# Extract the following configuration values (use defaults if fields missing):
+# - rptc._rptcVersion → WORKSPACE_VERSION (default: "1.0.0")
+# - rptc.artifactLocation → ARTIFACT_LOC (default: ".rptc")
+# - rptc.docsLocation → DOCS_LOC (default: "docs")
+# - rptc.testCoverageTarget → COVERAGE_TARGET (default: 85)
+# - rptc.maxPlanningAttempts → MAX_ATTEMPTS (default: 10)
+# - rptc.customSopPath → CUSTOM_SOP_PATH (default: ".rptc/sop")
+# - rptc.defaultThinkingMode → THINKING_MODE (default: "think")
+# - rptc.researchOutputFormat → RESEARCH_OUTPUT_FORMAT (default: "html")
+# - rptc.htmlReportTheme → HTML_REPORT_THEME (default: "dark")
+# - rptc.verificationMode → VERIFICATION_MODE (default: "focused")
+# - rptc.tdgMode → TDD_MODE (default: "disabled")
+# - rptc.discord.notificationsEnabled → DISCORD_ENABLED (default: false)
+# Store these values for use in subsequent steps.
 
-  # Use defaults for other values
-  ARTIFACT_LOC=".rptc"
-  DOCS_LOC="docs"
-  COVERAGE_TARGET=85
-  MAX_ATTEMPTS=10
-  CUSTOM_SOP_PATH=".rptc/sop"
-  THINKING_MODE="think"
-  RESEARCH_OUTPUT_FORMAT="html"
-  HTML_REPORT_THEME="dark"
-  VERIFICATION_MODE="focused"
-  TDD_MODE="disabled"
-  DISCORD_ENABLED="false"
-fi
+```bash
 
 echo "Workspace version: v${WORKSPACE_VERSION}"
 echo "Plugin version:    v${PLUGIN_VERSION}"
@@ -307,65 +250,31 @@ echo ""
 # 3. Check configuration file completeness
 echo "⚙️  Configuration Verification:"
 echo ""
+```
 
-if command -v jq >/dev/null 2>&1; then
-  CURRENT_CONFIG=$(cat .claude/settings.json)
+**Field Existence Check** (replaced jq dependency with Read tool + Claude parsing):
 
-  # Check each required field
-  MISSING_FIELDS=()
+# Claude: Use Read tool to parse JSON
+# Read(".claude/settings.json")
+# Check which of these fields are missing in the rptc configuration:
+# - rptc._rptcVersion
+# - rptc.defaultThinkingMode
+# - rptc.artifactLocation
+# - rptc.docsLocation
+# - rptc.testCoverageTarget
+# - rptc.maxPlanningAttempts
+# - rptc.customSopPath
+# - rptc.qualityGatesEnabled
+# - rptc.researchOutputFormat
+# - rptc.htmlReportTheme
+# - rptc.verificationMode
+# - rptc.tdgMode
+# - rptc.discord (object with webhookUrl, notificationsEnabled, verbosity)
+#
+# For each missing field, add to MISSING_FIELDS array.
+# Then execute the following bash logic:
 
-  if ! echo "$CURRENT_CONFIG" | jq -e '.rptc._rptcVersion' >/dev/null 2>&1; then
-    MISSING_FIELDS+=("_rptcVersion")
-  fi
-
-  if ! echo "$CURRENT_CONFIG" | jq -e '.rptc.defaultThinkingMode' >/dev/null 2>&1; then
-    MISSING_FIELDS+=("defaultThinkingMode")
-  fi
-
-  if ! echo "$CURRENT_CONFIG" | jq -e '.rptc.artifactLocation' >/dev/null 2>&1; then
-    MISSING_FIELDS+=("artifactLocation")
-  fi
-
-  if ! echo "$CURRENT_CONFIG" | jq -e '.rptc.docsLocation' >/dev/null 2>&1; then
-    MISSING_FIELDS+=("docsLocation")
-  fi
-
-  if ! echo "$CURRENT_CONFIG" | jq -e '.rptc.testCoverageTarget' >/dev/null 2>&1; then
-    MISSING_FIELDS+=("testCoverageTarget")
-  fi
-
-  if ! echo "$CURRENT_CONFIG" | jq -e '.rptc.maxPlanningAttempts' >/dev/null 2>&1; then
-    MISSING_FIELDS+=("maxPlanningAttempts")
-  fi
-
-  if ! echo "$CURRENT_CONFIG" | jq -e '.rptc.customSopPath' >/dev/null 2>&1; then
-    MISSING_FIELDS+=("customSopPath")
-  fi
-
-  if ! echo "$CURRENT_CONFIG" | jq -e '.rptc.qualityGatesEnabled' >/dev/null 2>&1; then
-    MISSING_FIELDS+=("qualityGatesEnabled")
-  fi
-
-  if ! echo "$CURRENT_CONFIG" | jq -e '.rptc.researchOutputFormat' >/dev/null 2>&1; then
-    MISSING_FIELDS+=("researchOutputFormat")
-  fi
-
-  if ! echo "$CURRENT_CONFIG" | jq -e '.rptc.htmlReportTheme' >/dev/null 2>&1; then
-    MISSING_FIELDS+=("htmlReportTheme")
-  fi
-
-  if ! echo "$CURRENT_CONFIG" | jq -e '.rptc.verificationMode' >/dev/null 2>&1; then
-    MISSING_FIELDS+=("verificationMode")
-  fi
-
-  if ! echo "$CURRENT_CONFIG" | jq -e '.rptc.tdgMode' >/dev/null 2>&1; then
-    MISSING_FIELDS+=("tdgMode")
-  fi
-
-  if ! echo "$CURRENT_CONFIG" | jq -e '.rptc.discord' >/dev/null 2>&1; then
-    MISSING_FIELDS+=("discord")
-  fi
-
+```bash
   if [ ${#MISSING_FIELDS[@]} -gt 0 ]; then
     echo "  ✗ Missing config fields: ${MISSING_FIELDS[*]}"
     ISSUES_FOUND=$((ISSUES_FOUND + ${#MISSING_FIELDS[@]}))
@@ -388,11 +297,6 @@ if command -v jq >/dev/null 2>&1; then
   echo "    • verificationMode: $VERIFICATION_MODE"
   echo "    • tdgMode: $TDD_MODE"
   echo "    • discord.notificationsEnabled: $DISCORD_ENABLED"
-
-else
-  echo "  ⚠️  jq not available - limited verification"
-  echo "      Install jq for comprehensive checks: https://jqlang.github.io/jq/"
-fi
 
 echo ""
 
@@ -648,44 +552,52 @@ if [ ${#FIXES_TO_APPLY[@]} -gt 0 ]; then
       config)
         CONFIG_KEY="${FIX_ARGS%%:*}"
         CONFIG_VAL="${FIX_ARGS#*:}"
+```
 
-        if command -v jq >/dev/null 2>&1; then
-          TEMP_FILE=$(mktemp)
-          jq ".rptc.${CONFIG_KEY} = \"${CONFIG_VAL}\"" .claude/settings.json > "$TEMP_FILE"
-          mv "$TEMP_FILE" .claude/settings.json
-          echo "✓ Updated config: $CONFIG_KEY = \"$CONFIG_VAL\""
-        fi
+# Claude: Use Read tool to update JSON field
+# Read(".claude/settings.json")
+# Update: rptc.${CONFIG_KEY} = "${CONFIG_VAL}"
+# Use Edit tool to write back the modified JSON (preserve structure)
+
+```bash
+        echo "✓ Updated config: $CONFIG_KEY = \"$CONFIG_VAL\""
         ;;
 
       add_missing_config_fields)
-        if command -v jq >/dev/null 2>&1; then
-          TEMP_FILE=$(mktemp)
-          jq '.rptc._rptcVersion //= "'"$PLUGIN_VERSION"'" |
-              .rptc.defaultThinkingMode //= "think" |
-              .rptc.artifactLocation //= ".rptc" |
-              .rptc.docsLocation //= "docs" |
-              .rptc.testCoverageTarget //= 85 |
-              .rptc.maxPlanningAttempts //= 10 |
-              .rptc.customSopPath //= ".rptc/sop" |
-              .rptc.qualityGatesEnabled //= false |
-              .rptc.researchOutputFormat //= "html" |
-              .rptc.htmlReportTheme //= "dark" |
-              .rptc.verificationMode //= "focused" |
-              .rptc.tdgMode //= "disabled" |
-              .rptc.discord //= {"webhookUrl": "", "notificationsEnabled": false, "verbosity": "summary"}' \
-            .claude/settings.json > "$TEMP_FILE"
-          mv "$TEMP_FILE" .claude/settings.json
-          echo "✓ Added missing configuration fields"
-        fi
+```
+
+# Claude: Use Read tool to add missing config fields
+# Read(".claude/settings.json")
+# Add missing fields with these defaults (preserve existing values):
+# - rptc._rptcVersion = "$PLUGIN_VERSION"
+# - rptc.defaultThinkingMode = "think"
+# - rptc.artifactLocation = ".rptc"
+# - rptc.docsLocation = "docs"
+# - rptc.testCoverageTarget = 85
+# - rptc.maxPlanningAttempts = 10
+# - rptc.customSopPath = ".rptc/sop"
+# - rptc.qualityGatesEnabled = false
+# - rptc.researchOutputFormat = "html"
+# - rptc.htmlReportTheme = "dark"
+# - rptc.verificationMode = "focused"
+# - rptc.tdgMode = "disabled"
+# - rptc.discord = {"webhookUrl": "", "notificationsEnabled": false, "verbosity": "summary"}
+# Use Edit tool to write updated JSON back to file
+
+```bash
+        echo "✓ Added missing configuration fields"
         ;;
 
       update_version_only)
-        if command -v jq >/dev/null 2>&1; then
-          TEMP_FILE=$(mktemp)
-          jq ".rptc._rptcVersion = \"$PLUGIN_VERSION\"" .claude/settings.json > "$TEMP_FILE"
-          mv "$TEMP_FILE" .claude/settings.json
-          echo "✓ Updated version: v${WORKSPACE_VERSION} → v${PLUGIN_VERSION}"
-        fi
+```
+
+# Claude: Use Read tool to update version field
+# Read(".claude/settings.json")
+# Update: rptc._rptcVersion = "$PLUGIN_VERSION"
+# Use Edit tool to write back the modified JSON (preserve structure)
+
+```bash
+        echo "✓ Updated version: v${WORKSPACE_VERSION} → v${PLUGIN_VERSION}"
         ;;
     esac
   done
@@ -733,7 +645,6 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 ## Error Handling
 
 - **No workspace**: Direct to `/rptc:admin-init`
-- **No jq**: Provide manual instructions for config updates
 - **Merge conflicts**: Warn user to handle manually
 - **Always backup**: Create backup before any modifications
 - **Idempotent**: Safe to run multiple times
