@@ -263,9 +263,10 @@ Think deeply to:
 
 **Read/Write Tools:**
 
-- **When:** Saving research notes, writing temporary analysis files
-- **Best Practice:** Use for structured note-taking during research process
-- **Scope:** Working files only - not for codebase exploration
+- **CRITICAL:** ONLY write files when explicitly instructed by the parent command (research.md Phase 5)
+- **Default Behavior:** Return findings inline in your response - DO NOT create files proactively
+- **When Instructed:** Only write files if the parent command delegation explicitly says to save/write
+- **Scope:** Working files only - never codebase files or user documents
 
 **Tool Result Management:**
 
@@ -340,6 +341,8 @@ As you research, maintain structured notes in this format:
 ---
 
 ## Required Output Format
+
+**CRITICAL:** Return your findings INLINE (in your response message), NOT as a file, unless the parent command explicitly instructs you to write a file.
 
 Return your findings in the following structured format:
 

@@ -297,6 +297,8 @@ Please find:
 5. Potential gotchas or edge cases
 
 Provide a comprehensive report on how the codebase handles this topic.
+
+**IMPORTANT**: DO NOT create any files or documents. Return your findings inline only. Document creation happens later if the user requests it.
 ```
 
 **Wait for Explore agent to complete.**
@@ -330,6 +332,8 @@ Research [specific topic] for:
 
 Focus on actionable insights for implementing [feature] in [tech stack].
 Return comprehensive web research report with citations.
+
+**IMPORTANT**: DO NOT create any files or documents. Return your findings inline only. Document creation happens later if the user requests it.
 ```
 
 **Wait for master-research-agent to complete.**
@@ -363,6 +367,8 @@ Focus: Understanding our current implementation
 - Any existing issues or technical debt?
 
 Provide detailed analysis of current implementation.
+
+**IMPORTANT**: DO NOT create any files or documents. Return your findings inline only. Document creation happens later if the user requests it.
 ```
 
 **Task 2 - Master-Research-Agent (in same message):**
@@ -380,6 +386,8 @@ Research [specific topic] for external context:
 5. Recommended tools/libraries
 
 Focus on external insights to compare against our current implementation.
+
+**IMPORTANT**: DO NOT create any files or documents. Return your findings inline only. Document creation happens later if the user requests it.
 ```
 
 **CRITICAL**: Execute BOTH Task tool calls in a SINGLE message to run agents in parallel.

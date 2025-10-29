@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.3] - 2025-10-29
+
+### Fixed
+
+- **Agent Naming Consistency**: Renamed `tdd-executor-agent` to `master-tdd-executor-agent` to follow established naming convention
+  - Updated `commands/tdd.md` line 1327: Agent file path validation now references correct file path
+  - Updated `commands/tdd.md` line 2075: Task tool invocation uses correct subagent name `rptc:master-tdd-executor-agent`
+  - Updated `CLAUDE.md` (4 locations): Documentation now consistently references `master-tdd-executor-agent`
+    - Line 322: Sub-agent delegation table
+    - Line 366: TDD execution pattern description
+    - Line 377: Example delegation pattern code block
+    - Line 400: Agent reference file path
+  - **Impact**: Fixes runtime failure where TDD command would fail to find agent definition file
+  - **Pattern Alignment**: Agent now follows `master-*-agent` naming pattern used by all other master agents
+
+- **Research Command File Creation Prevention**: Added explicit instructions to prevent sub-agents from creating files during research phase
+  - Updated `commands/research.md` (4 delegation locations): All Explore and master-research-agent delegations now include `**IMPORTANT**: DO NOT create any files or documents. Return your findings inline only.`
+    - Scenario A (codebase-only): Explore agent delegation
+    - Scenario B (web-only): master-research-agent delegation
+    - Scenario C (hybrid): Both Explore and master-research-agent delegations
+  - Updated `agents/master-research-agent.md` (2 locations): Added CRITICAL instructions in Read/Write Tools section and Required Output Format section
+  - **Impact**: Prevents sub-agents from proactively creating research files; file creation only happens in Phase 5 when user explicitly requests it
+  - **Behavior**: Research findings returned inline, document creation deferred to user request
+
+### Technical
+
+- **Files Modified**: `commands/tdd.md` (2 locations), `commands/research.md` (4 locations), `agents/master-research-agent.md` (2 locations), `CLAUDE.md` (4 locations), `agents/tdd-executor-agent.md` (renamed to `agents/master-tdd-executor-agent.md`)
+- **Breaking Change**: None (agent functionality unchanged for TDD rename; research behavior clarified but not breaking)
+- **Backward Compatibility**: Full (existing plans and workflows continue to work)
+
+---
+
 ## [2.2.2] - 2025-10-28
 
 ### Changed

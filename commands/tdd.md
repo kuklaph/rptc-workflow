@@ -1324,7 +1324,7 @@ echo "🔍 Validating TDD infrastructure..."
 echo ""
 
 # Check agent definition exists
-AGENT_FILE="${CLAUDE_PLUGIN_ROOT}/agents/tdd-executor-agent.md"
+AGENT_FILE="${CLAUDE_PLUGIN_ROOT}/agents/master-tdd-executor-agent.md"
 if [ ! -f "$AGENT_FILE" ]; then
   echo "❌ CRITICAL ERROR: TDD Executor Agent definition not found"
   echo ""
@@ -2072,7 +2072,7 @@ echo ""
 
 **Delegate to TDD Executor Agent** via Task tool:
 
-Use the Task tool with subagent_type="rptc:tdd-executor-agent":
+Use the Task tool with subagent_type="rptc:master-tdd-executor-agent":
 
 **Prompt:**
 
