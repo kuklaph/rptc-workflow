@@ -57,38 +57,74 @@ git log --all --grep="fix" --oneline | head -10   # Fix history
 
 ### 7. Complexity Analysis
 
-```bash
+```markdown
 # Files exceeding size limits (>500 lines)
 echo "### Files Exceeding Size Limits"
-find . -type f \( -name "*.js" -o -name "*.ts" -o -name "*.py" -o -name "*.java" -o -name "*.go" -o -name "*.rb" \) \
-  ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/build/*" \
-  -exec wc -l {} + 2>/dev/null | awk '$1 > 500 {print $2 " (" $1 " lines)"}' | sort -rn | head -10
+
+Use Glob tool to find code files:
+- Pattern 1: Glob(pattern: "**/*.{js,ts}", exclude: "node_modules,.git,dist,build")
+- Pattern 2: Glob(pattern: "**/*.{py,java,go,rb}", exclude: "node_modules,.git,dist,build")
+
+For each file from both Glob results:
+1. Use Read tool: Read(file_path: "[file]")
+2. Extract line count from Read output
+3. If line count > 500: Store file + line count
+
+Sort results by line count (descending) and display top 10:
+- "[file] ([count] lines)"
 
 # Functions exceeding length limits (>50 lines) - heuristic for common languages
 echo ""
 echo "### Functions Exceeding Length Limits"
 # TypeScript/JavaScript: function declarations
-rg "^(function|const .* = \(|async function)" -A 60 --no-heading \
-  | awk '/^(function|const .* = \(|async function)/ {start=NR} /^}/ {if (NR-start > 50) print FILENAME":"start}' \
-  | head -10 2>/dev/null || echo "  (detection requires ripgrep)"
+
+Use Grep tool to find function starts with context:
+- Pattern: "^(function|const .* = \\(|async function)"
+- Type: ts, js
+- Output mode: "content"
+- Context: -A 60 (60 lines after)
+
+For each match:
+1. Parse function start line in Claude
+2. Count lines until closing brace "^}"
+3. If line count > 50:
+   - Display: "[file]:[line] (function exceeds 50 lines)"
+
+Limit to top 10 results or note: "(detection requires ripgrep)"
 
 # Deep abstraction chains (>3 inheritance/interface layers)
 echo ""
 echo "### Deep Abstraction Chains"
-# Heuristic: files with "extends" or "implements" keywords repeated >3 times
-rg "(extends|implements|inherits)" -c | awk -F: '$2 > 3 {print $1 " (" $2 " inheritance points)"}' | head -10
+
+Use Grep tool to count inheritance keywords:
+- Pattern: "(extends|implements|inherits)"
+- Output mode: "count"
+
+For each file with count:
+1. Parse count from Grep output in Claude
+2. If count > 3:
+   - Display: "[file] ([count] inheritance points)"
+
+Sort by count (descending) and limit to top 10 results.
 
 # Single-implementation interfaces (premature abstraction)
 echo ""
 echo "### Potentially Premature Abstractions"
-# Heuristic: interface definitions with only one implementing class
-# (Language-specific, focusing on TypeScript/Java patterns)
-for iface in $(rg "^(interface|abstract class) \w+" -oIN --no-filename | sort -u); do
-  impl_count=$(rg "(implements|extends) ${iface##* }" -c | wc -l)
-  if [ "$impl_count" -eq 1 ]; then
-    echo "  - $iface (only 1 implementation found)"
-  fi
-done | head -10
+
+Use Grep tool to find interface/abstract class definitions:
+- Pattern: "^(interface|abstract class) \\w+"
+- Output mode: "content"
+- Parse unique interface names in Claude
+
+For each interface name found:
+1. Use Grep tool:
+   - Pattern: "(implements|extends) [interface_name]"
+   - Output mode: "count"
+2. Sum counts across all files in Claude
+3. If total count == 1:
+   - Display: "  - [interface_name] (only 1 implementation found)"
+
+Limit to top 10 results.
 
 echo ""
 echo "**Recommendations:**"
@@ -210,17 +246,26 @@ Automated analysis to identify technical debt and AI-generated over-engineering.
 
 **File Size Distribution**:
 
-```bash
-# Find files exceeding size limits (500 lines from architecture-patterns.md)
-find . -type f \( -name "*.ts" -o -name "*.js" -o -name "*.py" -o -name "*.java" \) \
-  -not -path "*/node_modules/*" -not -path "*/.git/*" \
-  -exec wc -l {} + | sort -rn | head -20
+```markdown
+**Largest Files (Top 20):**
 
-# Summary statistics
-echo "Files >500 lines (refactoring candidates):"
-find . -type f \( -name "*.ts" -o -name "*.js" -o -name "*.py" -o -name "*.java" \) \
-  -not -path "*/node_modules/*" -not -path "*/.git/*" \
-  -exec wc -l {} + | awk '$1 > 500 {count++} END {print count " files"}'
+Use Glob tool to find code files:
+- Glob(pattern: "**/*.{ts,js,py,java}", exclude: "node_modules,.git")
+
+For each file:
+1. Read(file_path: "[file]")
+2. Extract line count from Read output
+
+Sort all results by line count (descending).
+Display top 20 files with format:
+- "[line_count] [file]"
+
+**Files Exceeding Limits:**
+
+From the same file list above:
+1. Filter files where line count > 500
+2. Count total exceeding limit
+3. Display: "[count] files"
 ```
 
 **Interpretation**:
@@ -240,12 +285,20 @@ rg "if\s*\(|else|switch|case|\?\s*.*\s*:" --type ts --type js -c | sort -rn | he
 
 # Approximation: Count branching keywords per file
 echo "Files with high branching (potential complexity >10):"
-for file in $(find . -name "*.ts" -o -name "*.js" -not -path "*/node_modules/*"); do
-  count=$(grep -c "if\|else\|switch\|case\|\?\|&&\|||" "$file" 2>/dev/null || echo 0)
-  if [ "$count" -gt 20 ]; then
-    echo "$file: ~$count decision points"
-  fi
-done
+
+Use Glob tool to find files:
+- Glob(pattern: "**/*.{ts,js}", exclude: "node_modules")
+
+For each file:
+1. Use Grep tool:
+   - Pattern: "if\\(|else|switch|case|\\?|&&|\\|\\|"
+   - File: [current file]
+   - Output mode: "count"
+
+2. If count > 20:
+   - Display: "[file]: ~[count] decision points"
+
+List all files with excessive complexity.
 ```
 
 **Interpretation**:
@@ -261,7 +314,15 @@ done
 rg "extends\s+\w+" --type ts --type js -A 5 | grep "extends" -c
 
 # Detect deeply nested directory structures (>4 levels from src/)
-find ./src -type d | awk -F/ '{print NF-2}' | sort -rn | head -10
+Use Glob tool to find all directories:
+- Glob(pattern: "src/**/", path: ".")
+
+For each directory:
+1. Count directory depth by splitting path by "/" in Claude
+2. Calculate depth relative to src/ (subtract 2 for "./" and "src/")
+3. Store directory + depth
+
+Sort by depth (descending) and display top 10 deepest directories.
 
 # Detect excessive call chains (A→B→C→D→E)
 echo "Files with potential deep call chains:"
@@ -278,15 +339,36 @@ rg "this\.\w+\(\).*\.\w+\(\).*\.\w+\(\)" --type ts --type js
 ```bash
 # Detect duplicate code blocks (DRY violations)
 # For simple duplication: repeated lines
-rg --count-matches "^\s*(function|const|class|def)\s+\w+" --type ts --type js --type py \
-  | awk -F: '$2 > 5 {print $1 ": " $2 " definitions"}'
+Use Grep tool to count definition patterns:
+- Pattern: "^\\s*(function|const|class|def)\\s+\\w+"
+- Type: ts, js, py
+- Output mode: "count"
+
+For each file with count:
+1. Parse count from Grep output in Claude
+2. If count > 5:
+   - Display: "[file]: [count] definitions"
+
+List all files with excessive definitions.
 
 # Detect copy-paste patterns (similar file names)
-find . -type f -name "*-copy.*" -o -name "*-backup.*" -o -name "*-old.*" -o -name "*-2.*"
+Use Glob tool with multiple patterns:
+- Glob(pattern: "**/*-copy.*")
+- Glob(pattern: "**/*-backup.*")
+- Glob(pattern: "**/*-old.*")
+- Glob(pattern: "**/*-2.*")
+
+List all matching files.
 
 # Approximate duplication: files with identical line counts
-find . -type f \( -name "*.ts" -o -name "*.js" \) -not -path "*/node_modules/*" \
-  -exec wc -l {} + | awk '{print $1}' | sort | uniq -c | awk '$1 > 2 {print "Potential duplicates: " $1 " files with " $2 " lines"}'
+Use Glob tool: Glob(pattern: "**/*.{ts,js}", exclude: "node_modules")
+
+For each file:
+1. Read(file_path: "[file]")
+2. Extract line count from Read output
+3. Group files by line count in Claude
+4. For groups with >2 files with same line count:
+   - Display: "Potential duplicates: [count] files with [lines] lines"
 ```
 
 **Interpretation**:
@@ -299,18 +381,32 @@ find . -type f \( -name "*.ts" -o -name "*.js" \) -not -path "*/node_modules/*" 
 ```bash
 # Count import statements per file (tight coupling indicator)
 echo "Files with high import counts (>15 = tight coupling):"
-for file in $(find . -name "*.ts" -o -name "*.js" -not -path "*/node_modules/*"); do
-  count=$(grep -c "^import\|^const.*require" "$file" 2>/dev/null || echo 0)
-  if [ "$count" -gt 15 ]; then
-    echo "$file: $count imports"
-  fi
-done
+
+Use Glob tool to find files:
+- Glob(pattern: "**/*.{ts,js}", exclude: "node_modules")
+
+For each file:
+1. Use Grep tool:
+   - Pattern: "^import|^const.*require"
+   - File: [current file]
+   - Output mode: "count"
+
+2. If count > 15:
+   - Display: "[file]: [count] imports"
+
+List all files with excessive imports.
 
 # Detect circular dependency candidates (mutual imports)
-rg "import.*from ['\"]\.\./" --type ts --type js -l | while read file; do
-  dir=$(dirname "$file")
-  echo "Check $file for circular deps with files in $dir"
-done
+Use Grep tool:
+- Pattern: "import.*from ['\"]\\.\\.\/"
+- Type: ts, js
+- Output mode: "files_with_matches"
+
+For each file in results:
+1. Extract directory path in Claude (no dirname needed)
+2. Display: "Check [file] for circular deps with files in [dir]"
+
+List all files with potential circular imports.
 ```
 
 **Interpretation**:
@@ -320,17 +416,30 @@ done
 
 **Test-to-Code Ratio**:
 
-```bash
-# Compare test file sizes to implementation file sizes
-impl_lines=$(find ./src -name "*.ts" -o -name "*.js" -not -path "*/node_modules/*" | xargs wc -l | tail -1 | awk '{print $1}')
-test_lines=$(find ./tests -name "*.test.ts" -o -name "*.spec.ts" -o -name "*.test.js" | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}')
+```markdown
+**Implementation Lines:**
+Use Glob tool: Glob(pattern: "src/**/*.{ts,js}", exclude: "node_modules")
 
-if [ -n "$test_lines" ] && [ "$test_lines" -gt 0 ]; then
-  ratio=$(echo "scale=2; $test_lines / $impl_lines" | bc)
-  echo "Test-to-Code Ratio: $ratio:1 ($test_lines test lines / $impl_lines impl lines)"
-else
-  echo "Test-to-Code Ratio: 0:1 (NO TESTS FOUND)"
-fi
+For each file:
+1. Read(file_path: "[file]")
+2. Extract line count from Read output
+3. Sum all line counts in Claude → impl_lines
+
+**Test Lines:**
+Use Glob tool: Glob(pattern: "tests/**/*.{test.ts,spec.ts,test.js}")
+
+For each file:
+1. Read(file_path: "[file]")
+2. Extract line count from Read output
+3. Sum all line counts in Claude → test_lines
+
+**Calculate Ratio:**
+If test_lines > 0:
+1. Calculate: test_lines / impl_lines in Claude
+2. Format to 2 decimal places
+3. Display: "Test-to-Code Ratio: [ratio]:1 ([test_lines] test lines / [impl_lines] impl lines)"
+Else:
+- Display: "Test-to-Code Ratio: 0:1 (NO TESTS FOUND)"
 ```
 
 **Interpretation**:
@@ -344,36 +453,58 @@ Patterns suggesting AI-generated over-engineering:
 
 **1. Premature Abstraction** (interfaces with single implementation):
 
-```bash
-# Find interface/abstract definitions
-rg "^(export\s+)?(interface|abstract class)\s+\w+" --type ts -l > /tmp/interfaces.txt
+```markdown
+**Find Interfaces:**
+Use Grep tool:
+- Pattern: "^(export\\s+)?(interface|abstract class)\\s+\\w+"
+- Type: ts
+- Output mode: "files_with_matches"
 
-# Find implementations
-for iface in $(cat /tmp/interfaces.txt); do
-  name=$(grep -o "interface \w+" "$iface" | head -1 | awk '{print $2}')
-  impl_count=$(rg "implements $name|extends $name" --type ts -c | awk -F: '{sum+=$2} END {print sum}')
-  if [ "$impl_count" -eq 1 ]; then
-    echo "⚠️ Single implementation: $name in $iface"
-  fi
-done
+For each file:
+1. Read(file_path: "[file]")
+2. Parse interface/abstract class names in Claude (no grep -o needed)
+3. For each interface name found:
+   a. Use Grep tool:
+      - Pattern: "implements [name]|extends [name]"
+      - Type: ts
+      - Output mode: "count"
+   b. Sum counts across all files in Claude (no awk needed)
+   c. If total count == 1:
+      - Display: "⚠️ Single implementation: [name] in [file]"
+
+**IMPORTANT:** No temporary files. Store results in variables, process in Claude.
 ```
 
 **Red Flag**: >3 single-implementation interfaces suggests YAGNI violation
 
 **2. Gold-Plating** (excessive configuration):
 
-```bash
-# Find configuration files
-config_files=$(find . -name "*.config.*" -o -name "*.conf" -o -name "*rc" -o -name "*.yaml" -o -name "*.toml")
+```markdown
+**Configuration Lines:**
+Use Glob tool:
+- Pattern 1: Glob(pattern: "**/*.config.*")
+- Pattern 2: Glob(pattern: "**/*.{conf,yaml,toml}")
+- Pattern 3: Glob(pattern: "**/*rc")
 
-# Compare config size to actual code
-config_lines=$(echo "$config_files" | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}')
-code_lines=$(find ./src -name "*.ts" -o -name "*.js" | xargs wc -l | tail -1 | awk '{print $1}')
+For each file from all patterns:
+1. Read(file_path: "[file]")
+2. Extract line count from Read output
+3. Sum all line counts in Claude → config_lines
 
-if [ "$config_lines" -gt $((code_lines / 4)) ]; then
-  echo "🚨 Configuration bloat: $config_lines config lines vs $code_lines code lines"
-  echo "   (Config >25% of code suggests over-configuration)"
-fi
+**Code Lines:**
+Use Glob tool: Glob(pattern: "src/**/*.{ts,js}")
+
+For each file:
+1. Read(file_path: "[file]")
+2. Extract line count from Read output
+3. Sum all line counts in Claude → code_lines
+
+**Check for Bloat:**
+Calculate threshold: code_lines / 4 in Claude
+
+If config_lines > threshold:
+- Display: "🚨 Configuration bloat: [config_lines] config lines vs [code_lines] code lines"
+- Display: "   (Config >25% of code suggests over-configuration)"
 ```
 
 **Red Flag**: Configuration exceeding 25% of code size
@@ -393,33 +524,50 @@ rg "export (const|function) \w+.*=.*\(\)" --type ts --type js | head -10
 
 **4. Speculative Generalization** (unused abstraction):
 
-```bash
-# Find generic/template types rarely used
-rg "<T>|<K, V>|<TEntity>" --type ts -l > /tmp/generics.txt
+```markdown
+**Find Generic Files:**
+Use Grep tool:
+- Pattern: "<T>|<K, V>|<TEntity>"
+- Type: ts
+- Output mode: "files_with_matches"
 
-for file in $(cat /tmp/generics.txt); do
-  usage=$(rg "$(basename $file .ts)" --type ts -c | awk -F: '{sum+=$2} END {print sum}')
-  if [ "$usage" -lt 3 ]; then
-    echo "⚠️ Rarely used generic: $file (used $usage times)"
-  fi
-done
+For each file:
+1. Extract filename without extension in Claude (no basename needed)
+2. Use Grep tool to count usage:
+   - Pattern: "[filename]" (the extracted name)
+   - Type: ts
+   - Output mode: "count"
+3. Sum counts across all files in Claude (no awk needed)
+4. If total usage < 3:
+   - Display: "⚠️ Rarely used generic: [file] (used [usage] times)"
+
+**IMPORTANT:** No temporary files. Process results in Claude.
 ```
 
 **Red Flag**: Generics/templates used <3 times across codebase
 
 **5. Middleware Proliferation** (interceptors without interception):
 
-```bash
+```markdown
 # Find middleware/interceptor definitions
-rg "(middleware|interceptor|hook|plugin).*function|class.*Middleware" --type ts --type js -c
+Use Grep tool:
+- Pattern: "(middleware|interceptor|hook|plugin).*function|class.*Middleware"
+- Type: ts, js
+- Output mode: "count"
+
+Display count of middleware definitions per file.
 
 # Check if middleware list exceeds actual cross-cutting concerns
-middleware_count=$(rg "use.*middleware|registerInterceptor|addHook" --type ts --type js -c | awk -F: '{sum+=$2} END {print sum}')
+Use Grep tool:
+- Pattern: "use.*middleware|registerInterceptor|addHook"
+- Type: ts, js
+- Output mode: "count"
 
-if [ "$middleware_count" -gt 10 ]; then
-  echo "⚠️ Middleware proliferation: $middleware_count middleware registrations"
-  echo "   (Review for middleware that could be direct implementations)"
-fi
+Sum all counts across files in Claude → middleware_count
+
+If middleware_count > 10:
+- Display: "⚠️ Middleware proliferation: [middleware_count] middleware registrations"
+- Display: "   (Review for middleware that could be direct implementations)"
 ```
 
 **Red Flag**: >10 middleware/interceptors in small-to-medium project
@@ -433,7 +581,7 @@ Specific patterns to manually verify:
   - Action: Remove interface, use concrete class directly
 
 - [ ] **Deeply Nested Directories**: Source directories >4 levels deep
-  - Check: `find ./src -type d | awk -F/ '{print NF-2}' | sort -rn | head -1`
+  - Check: Use Glob to find all src directories and calculate depth in Claude
   - Action: Flatten structure, group by feature not file type
 
 - [ ] **Excessive Call Chains**: Methods calling methods >5 deep (A→B→C→D→E→F)

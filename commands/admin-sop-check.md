@@ -21,11 +21,15 @@ Use the CLAUDE_PLUGIN_ROOT environment variable (provided by Claude Code plugin 
 ```bash
 # Step 1: Resolve plugin root
 if [ -z "${CLAUDE_PLUGIN_ROOT}" ]; then
-  echo "❌ Error: CLAUDE_PLUGIN_ROOT not set. Plugin may not be installed correctly."
+  # Output error directly
   exit 1
 fi
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT}"
 ```
+
+If CLAUDE_PLUGIN_ROOT is not set:
+
+❌ Error: CLAUDE_PLUGIN_ROOT not set. Plugin may not be installed correctly.
 
 ## Step 2: Parse Arguments
 
@@ -42,25 +46,14 @@ If no argument provided:
 For each SOP, check in priority order:
 
 ```bash
-# Pseudo-code for resolution logic
-function resolve_sop() {
-  local sop_name=$1
-  local locations=(
-    ".rptc/sop/${sop_name}.md"
-    "$HOME/.claude/global/sop/${sop_name}.md"
-    "$PLUGIN_ROOT/sop/${sop_name}.md"
-  )
-
-  for location in "${locations[@]}"; do
-    if [ -f "$location" ]; then
-      echo "FOUND: $location"
-      return 0
-    fi
-  done
-
-  echo "NOT FOUND"
-  return 1
-}
+# Resolution logic using file existence checks
+# Priority order:
+# 1. .rptc/sop/${SOP_NAME}.md (project level)
+# 2. ~/.claude/global/sop/${SOP_NAME}.md (user global)
+# 3. ${PLUGIN_ROOT}/sop/${SOP_NAME}.md (plugin default)
+#
+# Use [ -f ] checks for each location
+# Output results directly in markdown (no echo)
 ```
 
 ## Step 4: Check Specific SOP (If Provided)
@@ -68,83 +61,110 @@ function resolve_sop() {
 If user provided a SOP name:
 
 ```bash
-echo "═══════════════════════════════════════════════════════"
-echo "🔍 SOP Resolution Check: ${SOP_NAME}"
-echo "═══════════════════════════════════════════════════════"
-echo ""
-echo "Checking in priority order:"
-echo ""
-
-# Check each location
-echo "1. Project level (.rptc/sop/):"
-if [ -f ".rptc/sop/${SOP_NAME}.md" ]; then
-  echo "   ✓ FOUND: .rptc/sop/${SOP_NAME}.md"
-  echo "   ⚡ This file will be used (highest priority)"
-
-  # Show file info using Read tool (cross-platform compatible)
-  echo ""
-  echo "   Use Read tool to verify file:"
-  echo "   Read(file_path: \".rptc/sop/${SOP_NAME}.md\")"
-  echo "   📍 File exists and is readable"
-
-  # Show first few lines as preview
-  echo ""
-  echo "   Preview (first 5 lines):"
-  # Claude: Use Read tool with limit parameter
-  # Read(file_path: ".rptc/sop/${SOP_NAME}.md", limit: 5)
-  # Prefix each line with "   │ " in output
-
-  exit 0  # Found, no need to check further
-else
-  echo "   ✗ Not found"
-fi
-
-echo ""
-echo "2. User global level (~/.claude/global/sop/):"
-if [ -f "$HOME/.claude/global/sop/${SOP_NAME}.md" ]; then
-  echo "   ✓ FOUND: $HOME/.claude/global/sop/${SOP_NAME}.md"
-  echo "   ⚡ This file will be used (user default)"
-
-  # Show file info using Read tool (cross-platform compatible)
-  echo ""
-  echo "   Use Read tool to verify file:"
-  echo "   Read(file_path: \"$HOME/.claude/global/sop/${SOP_NAME}.md\")"
-  echo "   📍 File exists and is readable"
-
-  exit 0  # Found
-else
-  echo "   ✗ Not found"
-fi
-
-echo ""
-echo "3. Plugin default level ($PLUGIN_ROOT/sop/):"
-if [ -f "$PLUGIN_ROOT/sop/${SOP_NAME}.md" ]; then
-  echo "   ✓ FOUND: $PLUGIN_ROOT/sop/${SOP_NAME}.md"
-  echo "   ⚡ This file will be used (plugin default)"
-
-  # Show file info (simplified for cross-platform compatibility)
-  echo "   📍 File exists and is readable"
-  echo "   📦 Plugin version"
-else
-  echo "   ✗ ERROR: SOP not found in plugin!"
-  echo "   ⚠️  This may indicate a plugin issue"
-fi
-
-echo ""
-echo "═══════════════════════════════════════════════════════"
+# Store SOP name from argument
+SOP_NAME="$1"
 ```
+
+Output header:
+
+═══════════════════════════════════════════════════════
+🔍 SOP Resolution Check: ${SOP_NAME}
+═══════════════════════════════════════════════════════
+
+Checking in priority order:
+
+**1. Project level (.rptc/sop/):**
+
+```bash
+# Check project SOP
+if [ -f ".rptc/sop/${SOP_NAME}.md" ]; then
+  # Found at project level - highest priority
+  PROJECT_SOP_FOUND=true
+else
+  PROJECT_SOP_FOUND=false
+fi
+```
+
+If PROJECT_SOP_FOUND is true:
+
+   ✓ FOUND: .rptc/sop/${SOP_NAME}.md
+   ⚡ This file will be used (highest priority)
+
+   Use Read tool to verify file:
+   Read(file_path: ".rptc/sop/${SOP_NAME}.md")
+   📍 File exists and is readable
+
+   Preview (first 5 lines):
+
+Use Read tool with limit:
+Read(file_path: ".rptc/sop/${SOP_NAME}.md", limit: 5)
+
+Display each line prefixed with "   │ "
+
+Exit after displaying (found at highest priority).
+
+If PROJECT_SOP_FOUND is false:
+
+   ✗ Not found
+
+**2. User global level (~/.claude/global/sop/):**
+
+```bash
+# Check user global SOP
+if [ -f "$HOME/.claude/global/sop/${SOP_NAME}.md" ]; then
+  USER_SOP_FOUND=true
+else
+  USER_SOP_FOUND=false
+fi
+```
+
+If USER_SOP_FOUND is true:
+
+   ✓ FOUND: $HOME/.claude/global/sop/${SOP_NAME}.md
+   ⚡ This file will be used (user default)
+
+   Use Read tool to verify file:
+   Read(file_path: "$HOME/.claude/global/sop/${SOP_NAME}.md")
+   📍 File exists and is readable
+
+Exit after displaying (found at user level).
+
+If USER_SOP_FOUND is false:
+
+   ✗ Not found
+
+**3. Plugin default level ($PLUGIN_ROOT/sop/):**
+
+```bash
+# Check plugin SOP
+if [ -f "$PLUGIN_ROOT/sop/${SOP_NAME}.md" ]; then
+  PLUGIN_SOP_FOUND=true
+else
+  PLUGIN_SOP_FOUND=false
+fi
+```
+
+If PLUGIN_SOP_FOUND is true:
+
+   ✓ FOUND: $PLUGIN_ROOT/sop/${SOP_NAME}.md
+   ⚡ This file will be used (plugin default)
+
+   📍 File exists and is readable
+   📦 Plugin version
+
+If PLUGIN_SOP_FOUND is false:
+
+   ✗ ERROR: SOP not found in plugin!
+   ⚠️  This may indicate a plugin issue
+
+═══════════════════════════════════════════════════════
 
 ## Step 5: Check All SOPs (If No Argument)
 
 If user didn't provide a specific SOP:
 
 ```bash
-echo "═══════════════════════════════════════════════════════"
-echo "🔍 SOP Resolution Check: All SOPs"
-echo "═══════════════════════════════════════════════════════"
-echo ""
-
-# List of standard SOPs
+# List of standard SOPs to check
 SOPS=(
   "testing-guide"
   "architecture-patterns"
@@ -156,74 +176,102 @@ SOPS=(
   "post-tdd-refactoring"
   "todowrite-guide"
 )
-
-# Claude: Use Read tool for SOP resolution (file existence)
-# For each SOP in SOPS array:
-# 1. Try Read(".rptc/sop/${sop}.md") → if succeeds: echo "  ⚡ Project (.rptc/sop/)"
-# 2. Else try Read("~/.claude/global/sop/${sop}.md") → if succeeds: echo "  ⚡ User (~/.claude/global/sop/)"
-# 3. Else try Read("${PLUGIN_ROOT}/sop/${sop}.md") → if succeeds: echo "  ⚡ Plugin (default)"
-# 4. Else: echo "  ✗ NOT FOUND (ERROR)"
-#
-# Output format for each SOP:
-# • ${sop}.md
-#   ⚡ [Resolution location]
-#
-# (Process all 9 SOPs: testing-guide, architecture-patterns, frontend-guidelines,
-#  git-and-deployment, languages-and-style, security-and-performance,
-#  flexible-testing-guide, post-tdd-refactoring, todowrite-guide)
-
-echo "═══════════════════════════════════════════════════════"
 ```
+
+Output header:
+
+═══════════════════════════════════════════════════════
+🔍 SOP Resolution Check: All SOPs
+═══════════════════════════════════════════════════════
+
+For each SOP in SOPS array:
+
+```bash
+# Check resolution for this SOP
+if [ -f ".rptc/sop/${sop}.md" ]; then
+  LOCATION="Project (.rptc/sop/)"
+elif [ -f "$HOME/.claude/global/sop/${sop}.md" ]; then
+  LOCATION="User (~/.claude/global/sop/)"
+elif [ -f "${PLUGIN_ROOT}/sop/${sop}.md" ]; then
+  LOCATION="Plugin (default)"
+else
+  LOCATION="NOT FOUND (ERROR)"
+fi
+```
+
+For each SOP, output:
+
+• ${sop}.md
+  ⚡ ${LOCATION}
+
+After processing all 9 SOPs:
+
+═══════════════════════════════════════════════════════
 
 ## Step 6: Provide Override Instructions
 
-```bash
-echo ""
-echo "💡 To override SOPs:"
-echo ""
-echo "For this project only:"
-echo "  /rptc:admin-init --copy-sops"
-echo "  # Copies SOPs to .rptc/sop/ for customization"
-echo ""
-echo "For all your projects:"
-echo "  /rptc:admin-init --copy-sops --global"
-echo "  # Copies SOPs to ~/.claude/global/sop/ as defaults"
-echo ""
-echo "Manual copy:"
-echo "  mkdir -p .rptc/sop"
-echo "  cp \"$PLUGIN_ROOT/sop/testing-guide.md\" .rptc/sop/"
-echo "  # Edit .rptc/sop/testing-guide.md"
-echo ""
-```
+Output override instructions:
+
+💡 To override SOPs:
+
+For this project only:
+  /rptc:admin-init --copy-sops
+  # Copies SOPs to .rptc/sop/ for customization
+
+For all your projects:
+  /rptc:admin-init --copy-sops --global
+  # Copies SOPs to ~/.claude/global/sop/ as defaults
+
+Manual copy:
+  mkdir -p .rptc/sop
+  cp "$PLUGIN_ROOT/sop/testing-guide.md" .rptc/sop/
+  # Edit .rptc/sop/testing-guide.md
 
 ## Step 7: Compare Versions (Advanced)
 
 If multiple versions exist (project + user or user + plugin):
 
 ```bash
-echo "⚙️  Multiple Versions Detected:"
-echo ""
-echo "Showing differences between versions:"
-echo ""
-
-# If both project and user/plugin exist, show diff summary
+# Check if both project and user global SOPs exist
 if [ -f ".rptc/sop/${SOP_NAME}.md" ] && [ -f "$HOME/.claude/global/sop/${SOP_NAME}.md" ]; then
-  echo "Comparing:"
-  echo "  Active:   .rptc/sop/${SOP_NAME}.md"
-  echo "  Fallback: $HOME/.claude/global/sop/${SOP_NAME}.md"
-  echo ""
-
-  # Show brief diff stats
-  LINES_DIFF=$(diff .rptc/sop/${SOP_NAME}.md "$HOME/.claude/global/sop/${SOP_NAME}.md" 2>/dev/null | grep -c "^[<>]")
-
-  if [ "$LINES_DIFF" -gt 0 ]; then
-    echo "  📊 ${LINES_DIFF} lines differ between versions"
-    echo "  💡 Run 'diff .rptc/sop/${SOP_NAME}.md ~/.claude/global/sop/${SOP_NAME}.md' to see details"
-  else
-    echo "  ✓ Files are identical"
-  fi
+  BOTH_EXIST=true
+else
+  BOTH_EXIST=false
 fi
 ```
+
+If BOTH_EXIST is true:
+
+⚙️  Multiple Versions Detected:
+
+Showing differences between versions:
+
+Comparing:
+  Active:   .rptc/sop/${SOP_NAME}.md
+  Fallback: $HOME/.claude/global/sop/${SOP_NAME}.md
+
+Use Read tool to compare:
+
+```
+Read(file_path: ".rptc/sop/${SOP_NAME}.md") → PROJECT_CONTENT
+Read(file_path: "$HOME/.claude/global/sop/${SOP_NAME}.md") → GLOBAL_CONTENT
+```
+
+Compare PROJECT_CONTENT and GLOBAL_CONTENT:
+- Count differing lines between the two versions
+- Store count → LINES_DIFF
+
+If LINES_DIFF > 0:
+
+  📊 ${LINES_DIFF} lines differ between versions
+
+  💡 Use Read tool to view both files:
+     - Read(.rptc/sop/${SOP_NAME}.md)
+     - Read($HOME/.claude/global/sop/${SOP_NAME}.md)
+
+If LINES_DIFF == 0:
+
+  ✓ Files are identical
 
 ## Output Guidelines
 

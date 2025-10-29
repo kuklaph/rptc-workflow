@@ -26,53 +26,66 @@ Use the CLAUDE_PLUGIN_ROOT environment variable (provided by Claude Code plugin 
 ```bash
 # Step 0: Resolve plugin root
 if [ -z "${CLAUDE_PLUGIN_ROOT}" ]; then
-  echo "❌ Error: CLAUDE_PLUGIN_ROOT not set. Plugin may not be installed correctly."
   exit 1
 fi
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT}"
 ```
 
+If CLAUDE_PLUGIN_ROOT is not set:
+
+❌ Error: CLAUDE_PLUGIN_ROOT not set. Plugin may not be installed correctly.
+
 ## Step 1: Initial Health Check
 
-```bash
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🔍 RPTC Workspace Verification"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
-echo "Plugin location: $PLUGIN_ROOT"
-echo ""
-echo "Checking workspace health..."
-echo ""
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔍 RPTC Workspace Verification
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+Plugin location: ${PLUGIN_ROOT}
+
+Checking workspace health...
+
+**Check if workspace is initialized:**
+
+```bash
 # Check if workspace is initialized at all
 if [ ! -f ".claude/settings.json" ]; then
-  echo "❌ ERROR: Workspace not initialized"
-  echo ""
-  echo "This directory hasn't been set up for RPTC."
-  echo ""
-  echo "Run: /rptc:admin-init"
   exit 1
 fi
-
-# Check if settings.json has rptc section
-if ! grep -q '"rptc"' .claude/settings.json; then
-  echo "❌ ERROR: No RPTC configuration found in .claude/settings.json"
-  echo ""
-  echo "This workspace has Claude settings but no RPTC config."
-  echo ""
-  echo "Run: /rptc:admin-init"
-  exit 1
-fi
-
-echo "✓ Workspace is initialized"
-echo ""
 ```
+
+If .claude/settings.json doesn't exist:
+
+❌ ERROR: Workspace not initialized
+
+This directory hasn't been set up for RPTC.
+
+Run: /rptc:admin-init
+
+**Verify RPTC configuration exists:**
+
+Use Read tool to parse JSON:
+Read(".claude/settings.json")
+
+Check if "rptc" key exists in the JSON.
+
+If "rptc" key is missing:
+
+❌ ERROR: No RPTC configuration found in .claude/settings.json
+
+This workspace has Claude settings but no RPTC config.
+
+Run: /rptc:admin-init
+
+If valid workspace found:
+
+✓ Workspace is initialized
 
 ## Step 2: Load Current State
 
 ```bash
 # Plugin version (update this with each release)
-PLUGIN_VERSION="2.2.3"
+PLUGIN_VERSION="2.2.4"
 ```
 
 **Configuration Extraction** (replaced jq dependency with Read tool + Claude parsing):
@@ -94,86 +107,88 @@ PLUGIN_VERSION="2.2.3"
 # - rptc.discord.notificationsEnabled → DISCORD_ENABLED (default: false)
 # Store these values for use in subsequent steps.
 
-```bash
-
-echo "Workspace version: v${WORKSPACE_VERSION}"
-echo "Plugin version:    v${PLUGIN_VERSION}"
-echo ""
 ```
+
+Workspace version: v${WORKSPACE_VERSION}
+Plugin version:    v${PLUGIN_VERSION}
 
 ## Step 3: Version Check & Changelog
 
 ```bash
 if [ "$WORKSPACE_VERSION" = "$PLUGIN_VERSION" ]; then
-  echo "✓ Workspace version is current (v${WORKSPACE_VERSION})"
-  echo ""
-  echo "Running comprehensive verification anyway..."
-  echo ""
+  VERSION_CURRENT=1
 else
-  echo "🔄 Upgrade available: v${WORKSPACE_VERSION} → v${PLUGIN_VERSION}"
-  echo ""
-
-  # Show relevant changelogs
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "📋 What's New"
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-
-  case "$WORKSPACE_VERSION" in
-    "1.0."*|"1.0.0"|"1.0.1"|"1.0.2"|"1.0.3"|"1.0.4"|"1.0.5"|"1.0.6")
-      echo "v1.0.7 - v1.0.9: Configuration system, thinking modes"
-      echo "v1.1.0: Version tracking, SOP path migration, upgrade command"
-      echo "v1.1.1: Fixed Windows backslash issue, shortened plugin name"
-      echo ""
-      ;;
-    "1.0.7"|"1.0.8"|"1.0.9")
-      echo "v1.1.0: Version tracking, SOP path migration, upgrade command"
-      echo "v1.1.1: Fixed Windows backslash issue, shortened plugin name"
-      echo ""
-      ;;
-    "1.1.0")
-      echo "v1.1.1: Fixed Windows backslash issue, shortened plugin name"
-      echo ""
-      ;;
-    "1.1.1"|"1.1.2"|"1.1.3"|"1.1.4"|"1.1.5"|"1.1.6"|"1.1.7"|"1.1.8"|"1.1.9"|"1.1.10")
-      echo "v1.2.0: TodoWrite integration, blocking validation checkpoints, comprehensive quality gates"
-      echo "v2.0.0: Efficiency agent rewrite, post-TDD refactoring SOP, Discord notifications"
-      echo ""
-      ;;
-    "1.2.0")
-      echo "v2.0.0: Efficiency agent rewrite, post-TDD refactoring SOP, Discord notifications"
-      echo ""
-      ;;
-    "2.0.0")
-      echo "v2.0.1: Security agent streamlined, admin config display enhanced"
-      echo "v2.1.0: BREAKING: Simplified research workflow, GitHub URL installation"
-      echo "v2.1.1: Windows compatibility fixes, context window efficiency"
-      echo ""
-      ;;
-    "2.0.1")
-      echo "v2.1.0: BREAKING: Simplified research workflow, GitHub URL installation"
-      echo "v2.1.1: Windows compatibility fixes, context window efficiency"
-      echo ""
-      ;;
-    "2.1.0"|"2.1.1")
-      echo "v2.2.0: Bug fixes and cohesiveness improvements"
-      echo ""
-      ;;
-  esac
-
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
+  VERSION_CURRENT=0
 fi
 ```
 
-## Step 4: Comprehensive Workspace Verification
+**Display version status:**
+
+If versions match (VERSION_CURRENT=1):
+
+✓ Workspace version is current (v${WORKSPACE_VERSION})
+
+Running comprehensive verification anyway...
+
+If upgrade available (VERSION_CURRENT=0):
+
+🔄 Upgrade available: v${WORKSPACE_VERSION} → v${PLUGIN_VERSION}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 What's New
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**Show relevant changelogs based on WORKSPACE_VERSION:**
 
 ```bash
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🔍 Verifying Workspace Structure"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
+case "$WORKSPACE_VERSION" in
+  "1.0."*|"1.0.0"|"1.0.1"|"1.0.2"|"1.0.3"|"1.0.4"|"1.0.5"|"1.0.6")
+    CHANGELOG="v1.0.7 - v1.0.9: Configuration system, thinking modes
+v1.1.0: Version tracking, SOP path migration, upgrade command
+v1.1.1: Fixed Windows backslash issue, shortened plugin name"
+    ;;
+  "1.0.7"|"1.0.8"|"1.0.9")
+    CHANGELOG="v1.1.0: Version tracking, SOP path migration, upgrade command
+v1.1.1: Fixed Windows backslash issue, shortened plugin name"
+    ;;
+  "1.1.0")
+    CHANGELOG="v1.1.1: Fixed Windows backslash issue, shortened plugin name"
+    ;;
+  "1.1.1"|"1.1.2"|"1.1.3"|"1.1.4"|"1.1.5"|"1.1.6"|"1.1.7"|"1.1.8"|"1.1.9"|"1.1.10")
+    CHANGELOG="v1.2.0: TodoWrite integration, blocking validation checkpoints, comprehensive quality gates
+v2.0.0: Efficiency agent rewrite, post-TDD refactoring SOP, Discord notifications"
+    ;;
+  "1.2.0")
+    CHANGELOG="v2.0.0: Efficiency agent rewrite, post-TDD refactoring SOP, Discord notifications"
+    ;;
+  "2.0.0")
+    CHANGELOG="v2.0.1: Security agent streamlined, admin config display enhanced
+v2.1.0: BREAKING: Simplified research workflow, GitHub URL installation
+v2.1.1: Windows compatibility fixes, context window efficiency"
+    ;;
+  "2.0.1")
+    CHANGELOG="v2.1.0: BREAKING: Simplified research workflow, GitHub URL installation
+v2.1.1: Windows compatibility fixes, context window efficiency"
+    ;;
+  "2.1.0"|"2.1.1")
+    CHANGELOG="v2.2.0: Bug fixes and cohesiveness improvements"
+    ;;
+esac
+```
 
+Output changelog (if VERSION_CURRENT=0):
+
+${CHANGELOG}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+## Step 4: Comprehensive Workspace Verification
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔍 Verifying Workspace Structure
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+```bash
 # Track issues
 ISSUES_FOUND=0
 FIXES_TO_APPLY=()
@@ -194,27 +209,33 @@ EXPECTED_DOC_DIRS=(
   "${DOCS_LOC}/patterns"
   "${DOCS_LOC}/api"
 )
+```
 
-# 1. Check directory structure
-echo "📁 Directory Structure:"
-echo ""
+**1. Check directory structure:**
 
+📁 Directory Structure:
+
+```bash
 for dir in "${EXPECTED_ARTIFACT_DIRS[@]}" "${EXPECTED_DOC_DIRS[@]}"; do
   if [ -d "$dir" ]; then
-    echo "  ✓ $dir"
+    DIR_STATUS="✓"
   else
-    echo "  ✗ $dir (missing)"
+    DIR_STATUS="✗"
     ISSUES_FOUND=$((ISSUES_FOUND + 1))
     FIXES_TO_APPLY+=("mkdir:$dir")
   fi
 done
+```
 
-echo ""
+For each directory, output:
+- If exists: `  ✓ ${dir}`
+- If missing: `  ✗ ${dir} (missing)`
 
-# 2. Check for non-standard directory names (potential user customizations)
-echo "🔍 Checking for customized directory names:"
-echo ""
+**2. Check for non-standard directory names:**
 
+🔍 Checking for customized directory names:
+
+```bash
 CUSTOM_DIRS_FOUND=0
 
 # Check if user renamed 'complete' to something else
@@ -223,424 +244,516 @@ if [ "$ARTIFACT_LOC" = ".rptc" ]; then
   if [ ! -d ".rptc/complete" ]; then
     # Look for alternative names
     if [ -d ".rptc/archive" ]; then
-      echo "  ⚠️  Found: .rptc/archive (expected: .rptc/complete)"
-      echo "      This might be an intentional customization."
       CUSTOM_DIRS_FOUND=1
       USER_DECISIONS+=("rename_archive_to_complete")
     elif [ -d ".rptc/archived" ]; then
-      echo "  ⚠️  Found: .rptc/archived (expected: .rptc/complete)"
-      echo "      This might be an intentional customization."
       CUSTOM_DIRS_FOUND=1
       USER_DECISIONS+=("rename_archived_to_complete")
     elif [ -d ".rptc/done" ]; then
-      echo "  ⚠️  Found: .rptc/done (expected: .rptc/complete)"
-      echo "      This might be an intentional customization."
       CUSTOM_DIRS_FOUND=1
       USER_DECISIONS+=("rename_done_to_complete")
     fi
   fi
 fi
-
-if [ $CUSTOM_DIRS_FOUND -eq 0 ]; then
-  echo "  ✓ No directory name customizations detected"
-fi
-
-echo ""
-
-# 3. Check configuration file completeness
-echo "⚙️  Configuration Verification:"
-echo ""
 ```
 
-**Field Existence Check** (replaced jq dependency with Read tool + Claude parsing):
+For each alternative directory found, output:
+- If .rptc/archive exists: `  ⚠️  Found: .rptc/archive (expected: .rptc/complete)\n      This might be an intentional customization.`
+- If .rptc/archived exists: `  ⚠️  Found: .rptc/archived (expected: .rptc/complete)\n      This might be an intentional customization.`
+- If .rptc/done exists: `  ⚠️  Found: .rptc/done (expected: .rptc/complete)\n      This might be an intentional customization.`
 
-# Claude: Use Read tool to parse JSON
-# Read(".claude/settings.json")
-# Check which of these fields are missing in the rptc configuration:
-# - rptc._rptcVersion
-# - rptc.defaultThinkingMode
-# - rptc.artifactLocation
-# - rptc.docsLocation
-# - rptc.testCoverageTarget
-# - rptc.maxPlanningAttempts
-# - rptc.customSopPath
-# - rptc.qualityGatesEnabled
-# - rptc.researchOutputFormat
-# - rptc.htmlReportTheme
-# - rptc.verificationMode
-# - rptc.tdgMode
-# - rptc.discord (object with webhookUrl, notificationsEnabled, verbosity)
-#
-# For each missing field, add to MISSING_FIELDS array.
-# Then execute the following bash logic:
+If CUSTOM_DIRS_FOUND=0, output:
+`  ✓ No directory name customizations detected`
+
+**3. Check configuration file completeness:**
+
+⚙️  Configuration Verification:
+
+**Field Existence Check** (use Read tool + Claude parsing):
+
+Use Read tool to parse JSON:
+Read(".claude/settings.json")
+
+Check which of these fields are missing in the rptc configuration:
+- rptc._rptcVersion
+- rptc.defaultThinkingMode
+- rptc.artifactLocation
+- rptc.docsLocation
+- rptc.testCoverageTarget
+- rptc.maxPlanningAttempts
+- rptc.customSopPath
+- rptc.qualityGatesEnabled
+- rptc.researchOutputFormat
+- rptc.htmlReportTheme
+- rptc.verificationMode
+- rptc.tdgMode
+- rptc.discord (object with webhookUrl, notificationsEnabled, verbosity)
+
+For each missing field, add to MISSING_FIELDS array.
 
 ```bash
-  if [ ${#MISSING_FIELDS[@]} -gt 0 ]; then
-    echo "  ✗ Missing config fields: ${MISSING_FIELDS[*]}"
-    ISSUES_FOUND=$((ISSUES_FOUND + ${#MISSING_FIELDS[@]}))
-    FIXES_TO_APPLY+=("add_missing_config_fields")
-  else
-    echo "  ✓ All configuration fields present"
-  fi
+if [ ${#MISSING_FIELDS[@]} -gt 0 ]; then
+  ISSUES_FOUND=$((ISSUES_FOUND + ${#MISSING_FIELDS[@]}))
+  FIXES_TO_APPLY+=("add_missing_config_fields")
+fi
+```
 
-  # Check for customized values (informational)
-  echo ""
-  echo "  Current configuration:"
-  echo "    • artifactLocation: $ARTIFACT_LOC"
-  echo "    • docsLocation: $DOCS_LOC"
-  echo "    • testCoverageTarget: $COVERAGE_TARGET"
-  echo "    • maxPlanningAttempts: $MAX_ATTEMPTS"
-  echo "    • customSopPath: $CUSTOM_SOP_PATH"
-  echo "    • defaultThinkingMode: $THINKING_MODE"
-  echo "    • researchOutputFormat: $RESEARCH_OUTPUT_FORMAT"
-  echo "    • htmlReportTheme: $HTML_REPORT_THEME"
-  echo "    • verificationMode: $VERIFICATION_MODE"
-  echo "    • tdgMode: $TDD_MODE"
-  echo "    • discord.notificationsEnabled: $DISCORD_ENABLED"
+If missing fields found, output:
+`  ✗ Missing config fields: ${MISSING_FIELDS[*]}`
 
-echo ""
+If all fields present, output:
+`  ✓ All configuration fields present`
 
-# 4. Check for important files
-echo "📄 Important Files:"
-echo ""
+Then output current configuration:
 
+  Current configuration:
+    • artifactLocation: ${ARTIFACT_LOC}
+    • docsLocation: ${DOCS_LOC}
+    • testCoverageTarget: ${COVERAGE_TARGET}
+    • maxPlanningAttempts: ${MAX_ATTEMPTS}
+    • customSopPath: ${CUSTOM_SOP_PATH}
+    • defaultThinkingMode: ${THINKING_MODE}
+    • researchOutputFormat: ${RESEARCH_OUTPUT_FORMAT}
+    • htmlReportTheme: ${HTML_REPORT_THEME}
+    • verificationMode: ${VERIFICATION_MODE}
+    • tdgMode: ${TDD_MODE}
+    • discord.notificationsEnabled: ${DISCORD_ENABLED}
+
+**4. Check for important files:**
+
+📄 Important Files:
+
+```bash
 # Check .rptc/CLAUDE.md
 if [ -f "${ARTIFACT_LOC}/CLAUDE.md" ]; then
-  echo "  ✓ ${ARTIFACT_LOC}/CLAUDE.md"
+  CLAUDE_MD_EXISTS=1
 else
-  echo "  ✗ ${ARTIFACT_LOC}/CLAUDE.md (missing)"
   ISSUES_FOUND=$((ISSUES_FOUND + 1))
   USER_DECISIONS+=("create_rptc_claude_md")
+  CLAUDE_MD_EXISTS=0
 fi
+```
 
-# Check .gitignore has Claude entries
+If CLAUDE_MD_EXISTS=1, output:
+`  ✓ ${ARTIFACT_LOC}/CLAUDE.md`
+
+If CLAUDE_MD_EXISTS=0, output:
+`  ✗ ${ARTIFACT_LOC}/CLAUDE.md (missing)`
+
+**Check .gitignore:**
+
+Use Grep tool to check .gitignore:
+Grep(pattern: ".claude/settings.local.json", path: ".gitignore", output_mode: "files_with_matches")
+
+```bash
 if [ -f ".gitignore" ]; then
-  if grep -q ".claude/settings.local.json" .gitignore; then
-    echo "  ✓ .gitignore has Claude entries"
+  # Use grep result from above
+  if [ -n "$GREP_RESULT" ]; then
+    GITIGNORE_OK=1
   else
-    echo "  ⚠️  .gitignore missing Claude entries"
     USER_DECISIONS+=("add_gitignore_entries")
+    GITIGNORE_OK=0
   fi
 else
-  echo "  ℹ️  No .gitignore found (optional)"
+  GITIGNORE_MISSING=1
 fi
+```
 
-echo ""
+If GITIGNORE_OK=1, output:
+`  ✓ .gitignore has Claude entries`
 
+If GITIGNORE_OK=0, output:
+`  ⚠️  .gitignore missing Claude entries`
+
+If GITIGNORE_MISSING=1, output:
+`  ℹ️  No .gitignore found (optional)`
+
+**Special migration check:**
+
+```bash
 # Special migration check for v1.0.x users
 if [ -d ".claude/sop" ] && [ "$CUSTOM_SOP_PATH" != ".claude/sop" ]; then
-  echo ""
-  echo "  ⚠️  Legacy SOP location detected: .claude/sop/"
-  echo "      Plugin now defaults to: .rptc/sop/"
   SOP_ISSUES=1
   USER_DECISIONS+=("migrate_sop_location")
 fi
+```
 
-echo ""
+If SOP_ISSUES=1, output:
 
-# Summary
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "📊 Verification Summary"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
+  ⚠️  Legacy SOP location detected: .claude/sop/
+      Plugin now defaults to: .rptc/sop/
 
+**5. Summary:**
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 Verification Summary
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+```bash
 if [ $ISSUES_FOUND -eq 0 ] && [ ${#USER_DECISIONS[@]} -eq 0 ]; then
-  echo "✅ Workspace is healthy!"
-  echo ""
-
+  WORKSPACE_HEALTHY=1
   # Still need to update version if behind
   if [ "$WORKSPACE_VERSION" != "$PLUGIN_VERSION" ]; then
-    echo "Only version update needed."
     FIXES_TO_APPLY+=("update_version_only")
+    VERSION_ONLY=1
   else
-    echo "No issues found. Everything is up to date."
     exit 0
   fi
 else
-  echo "Found $ISSUES_FOUND issue(s) that can be auto-fixed"
-  echo "Found ${#USER_DECISIONS[@]} item(s) that need your decision"
-  echo ""
+  WORKSPACE_HEALTHY=0
 fi
 ```
 
-## Step 5: Handle User Decisions (Interactive)
+If WORKSPACE_HEALTHY=1 and VERSION_ONLY=0, output:
+`✅ Workspace is healthy!\n\nNo issues found. Everything is up to date.`
+Then exit.
+
+If WORKSPACE_HEALTHY=1 and VERSION_ONLY=1, output:
+`✅ Workspace is healthy!\n\nOnly version update needed.`
+
+If WORKSPACE_HEALTHY=0, output:
+`Found ${ISSUES_FOUND} issue(s) that can be auto-fixed\nFound ${#USER_DECISIONS[@]} item(s) that need your decision`
+
+## Step 5: Handle User Decisions (Conversational)
 
 ```bash
 if [ ${#USER_DECISIONS[@]} -gt 0 ]; then
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "👤 User Decisions Required"
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-  echo "These items might be intentional customizations."
-  echo "Please review each one:"
-  echo ""
-
-  for decision in "${USER_DECISIONS[@]}"; do
-    case "$decision" in
-      rename_archive_to_complete)
-        echo "1. Directory name: .rptc/archive → .rptc/complete"
-        echo "   Current: .rptc/archive"
-        echo "   Standard: .rptc/complete"
-        echo ""
-        read -p "   Rename to standard name? [y/N]: " RENAME_CHOICE
-        if [[ "$RENAME_CHOICE" =~ ^[Yy]$ ]]; then
-          FIXES_TO_APPLY+=("mv:.rptc/archive:.rptc/complete")
-        else
-          echo "   ✓ Keeping .rptc/archive (your customization preserved)"
-        fi
-        echo ""
-        ;;
-
-      rename_archived_to_complete)
-        echo "1. Directory name: .rptc/archived → .rptc/complete"
-        echo "   Current: .rptc/archived"
-        echo "   Standard: .rptc/complete"
-        echo ""
-        read -p "   Rename to standard name? [y/N]: " RENAME_CHOICE
-        if [[ "$RENAME_CHOICE" =~ ^[Yy]$ ]]; then
-          FIXES_TO_APPLY+=("mv:.rptc/archived:.rptc/complete")
-        else
-          echo "   ✓ Keeping .rptc/archived (your customization preserved)"
-        fi
-        echo ""
-        ;;
-
-      rename_done_to_complete)
-        echo "1. Directory name: .rptc/done → .rptc/complete"
-        echo "   Current: .rptc/done"
-        echo "   Standard: .rptc/complete"
-        echo ""
-        read -p "   Rename to standard name? [y/N]: " RENAME_CHOICE
-        if [[ "$RENAME_CHOICE" =~ ^[Yy]$ ]]; then
-          FIXES_TO_APPLY+=("mv:.rptc/done:.rptc/complete")
-        else
-          echo "   ✓ Keeping .rptc/done (your customization preserved)"
-        fi
-        echo ""
-        ;;
-
-      create_rptc_claude_md)
-        echo "2. Missing file: ${ARTIFACT_LOC}/CLAUDE.md"
-        echo "   This file contains RPTC workflow instructions."
-        echo "   It was either deleted or never created."
-        echo ""
-        read -p "   Create it now? [Y/n]: " CREATE_CHOICE
-        if [[ ! "$CREATE_CHOICE" =~ ^[Nn]$ ]]; then
-          FIXES_TO_APPLY+=("create:rptc_claude_md")
-        else
-          echo "   ✓ Skipped (you can create it later with /rptc:admin-init)"
-        fi
-        echo ""
-        ;;
-
-      add_gitignore_entries)
-        echo "3. .gitignore missing Claude entries"
-        echo "   Recommended entries:"
-        echo "     .claude/settings.local.json"
-        echo "     .claude/.env*"
-        echo ""
-        read -p "   Add these entries? [Y/n]: " GITIGNORE_CHOICE
-        if [[ ! "$GITIGNORE_CHOICE" =~ ^[Nn]$ ]]; then
-          FIXES_TO_APPLY+=("update:gitignore")
-        else
-          echo "   ✓ Skipped"
-        fi
-        echo ""
-        ;;
-
-      migrate_sop_location)
-        echo "4. SOP location migration: .claude/sop/ → .rptc/sop/"
-        echo "   In v1.1.0, the default SOP location changed."
-        echo ""
-        echo "   Options:"
-        echo "     [m] Move .claude/sop/ → .rptc/sop/ (recommended)"
-        echo "     [k] Keep .claude/sop/ and update config to use it"
-        echo "     [s] Skip (handle manually)"
-        echo ""
-        read -p "   What would you like to do? [m/k/s]: " SOP_CHOICE
-
-        case "$SOP_CHOICE" in
-          m|M)
-            if [ -d ".rptc/sop" ]; then
-              echo "   ⚠️  .rptc/sop/ already exists. Please merge manually."
-            else
-              FIXES_TO_APPLY+=("mv:.claude/sop:.rptc/sop")
-              echo "   ✓ Will move .claude/sop/ → .rptc/sop/"
-            fi
-            ;;
-          k|K)
-            FIXES_TO_APPLY+=("config:customSopPath:.claude/sop")
-            echo "   ✓ Will update config to use .claude/sop/"
-            ;;
-          *)
-            echo "   ✓ Skipped (handle manually)"
-            ;;
-        esac
-        echo ""
-        ;;
-    esac
-  done
+  NEED_USER_INPUT=1
+else
+  NEED_USER_INPUT=0
 fi
 ```
+
+If NEED_USER_INPUT=1, present ALL issues in a single conversational response:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+👤 User Decisions Required
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+I've analyzed your workspace and found items that may need attention. These might be intentional customizations.
+
+**Build issue list from USER_DECISIONS array:**
+
+For each decision in USER_DECISIONS, format as follows:
+
+**If "rename_archive_to_complete":**
+Issue 1: Directory Name
+  • Current: .rptc/archive
+  • Standard: .rptc/complete
+  • Recommendation: Rename for consistency
+
+**If "rename_archived_to_complete":**
+Issue 1: Directory Name
+  • Current: .rptc/archived
+  • Standard: .rptc/complete
+  • Recommendation: Rename for consistency
+
+**If "rename_done_to_complete":**
+Issue 1: Directory Name
+  • Current: .rptc/done
+  • Standard: .rptc/complete
+  • Recommendation: Rename for consistency
+
+**If "create_rptc_claude_md":**
+Issue 2: Missing File
+  • File: ${ARTIFACT_LOC}/CLAUDE.md
+  • Purpose: RPTC workflow instructions
+  • Recommendation: Create from template
+
+**If "add_gitignore_entries":**
+Issue 3: .gitignore Entries
+  • Missing: .claude/settings.local.json, .claude/.env*
+  • Purpose: Protect sensitive Claude settings
+  • Recommendation: Add entries
+
+**If "migrate_sop_location":**
+Issue 4: SOP Location Migration
+  • Current: .claude/sop/
+  • Standard: .rptc/sop/
+  • Note: v1.1.0 changed default location
+  • Options:
+    - [move] Move .claude/sop/ → .rptc/sop/ (recommended)
+    - [keep] Keep .claude/sop/ and update config
+    - [skip] Handle manually later
+
+**Present options:**
+
+Please choose how to handle these items:
+
+1. Reply 'auto-fix' to apply all recommended changes
+2. Reply 'skip-all' to keep current configuration
+3. Reply with specific choices for each issue (comma-separated):
+   - Directory: [rename] or [keep]
+   - CLAUDE.md: [create] or [skip]
+   - .gitignore: [add] or [skip]
+   - SOP location: [move], [keep], or [skip]
+
+   Example: "rename, create, add, move"
+
+**Wait for user response** (conversational, not bash read)
+
+**After receiving user's response, parse it:**
+
+```bash
+# Parse user response and populate FIXES_TO_APPLY
+# This bash runs after you've received and interpreted the user's choice
+
+case "$USER_RESPONSE" in
+  *auto-fix*|*auto*|*fix*)
+    # Apply all recommended fixes
+    for decision in "${USER_DECISIONS[@]}"; do
+      case "$decision" in
+        rename_archive_to_complete)
+          FIXES_TO_APPLY+=("mv:.rptc/archive:.rptc/complete")
+          ;;
+        rename_archived_to_complete)
+          FIXES_TO_APPLY+=("mv:.rptc/archived:.rptc/complete")
+          ;;
+        rename_done_to_complete)
+          FIXES_TO_APPLY+=("mv:.rptc/done:.rptc/complete")
+          ;;
+        create_rptc_claude_md)
+          FIXES_TO_APPLY+=("create:rptc_claude_md")
+          ;;
+        add_gitignore_entries)
+          FIXES_TO_APPLY+=("update:gitignore")
+          ;;
+        migrate_sop_location)
+          if [ -d ".rptc/sop" ]; then
+            # Can't auto-move if target exists
+            SOP_MERGE_NEEDED=1
+          else
+            FIXES_TO_APPLY+=("mv:.claude/sop:.rptc/sop")
+          fi
+          ;;
+      esac
+    done
+    ;;
+
+  *skip-all*|*skip*)
+    # User wants to keep everything as-is
+    # Clear FIXES_TO_APPLY of any user-decision items
+    ;;
+
+  *)
+    # Parse individual choices from user's message
+    # Extract keywords: rename/keep, create/skip, add/skip, move/keep/skip
+    # Based on extracted choices, populate FIXES_TO_APPLY array
+    ;;
+esac
+```
+
+**Note to Claude:** Parse the user's natural language response and translate it into bash variable assignments. The bash logic above shows the structure, but YOU determine what the user wants based on their message.
+
+If user chose to apply fixes, output confirmation:
+
+✓ Applying your requested changes...
+
+If user chose skip-all, output:
+
+✓ Keeping current configuration (no changes applied)
+
+If SOP_MERGE_NEEDED=1, output:
+
+⚠️  Warning: .rptc/sop/ already exists. SOP migration skipped.
+    Please merge .claude/sop/ and .rptc/sop/ manually if needed.
 
 ## Step 6: Create Backup
 
 ```bash
 if [ ${#FIXES_TO_APPLY[@]} -gt 0 ]; then
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "📦 Creating Backup"
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-
+  NEED_BACKUP=1
   # Backup settings.json
   cp .claude/settings.json .claude/settings.json.backup
-  echo "✓ Backup created: .claude/settings.json.backup"
-  echo ""
+else
+  NEED_BACKUP=0
 fi
 ```
+
+If NEED_BACKUP=1, output:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📦 Creating Backup
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ Backup created: .claude/settings.json.backup
 
 ## Step 7: Apply Fixes
 
 ```bash
 if [ ${#FIXES_TO_APPLY[@]} -gt 0 ]; then
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "🔧 Applying Fixes"
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-
-  for fix in "${FIXES_TO_APPLY[@]}"; do
-    # Parse fix command
-    FIX_TYPE="${fix%%:*}"
-    FIX_ARGS="${fix#*:}"
-
-    case "$FIX_TYPE" in
-      mkdir)
-        mkdir -p "$FIX_ARGS"
-        echo "✓ Created directory: $FIX_ARGS"
-        ;;
-
-      mv)
-        SRC="${FIX_ARGS%%:*}"
-        DEST="${FIX_ARGS#*:}"
-        mv "$SRC" "$DEST"
-        echo "✓ Renamed: $SRC → $DEST"
-        ;;
-
-      create)
-        if [ "$FIX_ARGS" = "rptc_claude_md" ]; then
-          if [ -f "$PLUGIN_ROOT/docs/PROJECT_TEMPLATE.md" ]; then
-            cp "$PLUGIN_ROOT/docs/PROJECT_TEMPLATE.md" "${ARTIFACT_LOC}/CLAUDE.md"
-            echo "✓ Created: ${ARTIFACT_LOC}/CLAUDE.md"
-          else
-            echo "⚠️  Template not found, skipping ${ARTIFACT_LOC}/CLAUDE.md creation"
-          fi
-        fi
-        ;;
-
-      update)
-        if [ "$FIX_ARGS" = "gitignore" ]; then
-          if ! grep -q ".claude/settings.local.json" .gitignore; then
-            echo "" >> .gitignore
-            echo "# Claude settings" >> .gitignore
-            echo ".claude/settings.local.json  # Local overrides" >> .gitignore
-            echo ".claude/.env*               # Secrets" >> .gitignore
-            echo "✓ Updated: .gitignore"
-          fi
-        fi
-        ;;
-
-      config)
-        CONFIG_KEY="${FIX_ARGS%%:*}"
-        CONFIG_VAL="${FIX_ARGS#*:}"
-```
-
-# Claude: Use Read tool to update JSON field
-# Read(".claude/settings.json")
-# Update: rptc.${CONFIG_KEY} = "${CONFIG_VAL}"
-# Use Edit tool to write back the modified JSON (preserve structure)
-
-```bash
-        echo "✓ Updated config: $CONFIG_KEY = \"$CONFIG_VAL\""
-        ;;
-
-      add_missing_config_fields)
-```
-
-# Claude: Use Read tool to add missing config fields
-# Read(".claude/settings.json")
-# Add missing fields with these defaults (preserve existing values):
-# - rptc._rptcVersion = "$PLUGIN_VERSION"
-# - rptc.defaultThinkingMode = "think"
-# - rptc.artifactLocation = ".rptc"
-# - rptc.docsLocation = "docs"
-# - rptc.testCoverageTarget = 85
-# - rptc.maxPlanningAttempts = 10
-# - rptc.customSopPath = ".rptc/sop"
-# - rptc.qualityGatesEnabled = false
-# - rptc.researchOutputFormat = "html"
-# - rptc.htmlReportTheme = "dark"
-# - rptc.verificationMode = "focused"
-# - rptc.tdgMode = "disabled"
-# - rptc.discord = {"webhookUrl": "", "notificationsEnabled": false, "verbosity": "summary"}
-# Use Edit tool to write updated JSON back to file
-
-```bash
-        echo "✓ Added missing configuration fields"
-        ;;
-
-      update_version_only)
-```
-
-# Claude: Use Read tool to update version field
-# Read(".claude/settings.json")
-# Update: rptc._rptcVersion = "$PLUGIN_VERSION"
-# Use Edit tool to write back the modified JSON (preserve structure)
-
-```bash
-        echo "✓ Updated version: v${WORKSPACE_VERSION} → v${PLUGIN_VERSION}"
-        ;;
-    esac
-  done
-
-  echo ""
+  APPLYING_FIXES=1
+else
+  APPLYING_FIXES=0
 fi
 ```
+
+If APPLYING_FIXES=1, output:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔧 Applying Fixes
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+```bash
+for fix in "${FIXES_TO_APPLY[@]}"; do
+  # Parse fix command
+  FIX_TYPE="${fix%%:*}"
+  FIX_ARGS="${fix#*:}"
+
+  case "$FIX_TYPE" in
+    mkdir)
+      mkdir -p "$FIX_ARGS"
+      FIX_MSG="✓ Created directory: $FIX_ARGS"
+      ;;
+
+    mv)
+      SRC="${FIX_ARGS%%:*}"
+      DEST="${FIX_ARGS#*:}"
+      mv "$SRC" "$DEST"
+      FIX_MSG="✓ Renamed: $SRC → $DEST"
+      ;;
+
+    create)
+      if [ "$FIX_ARGS" = "rptc_claude_md" ]; then
+        if [ -f "$PLUGIN_ROOT/docs/PROJECT_TEMPLATE.md" ]; then
+          cp "$PLUGIN_ROOT/docs/PROJECT_TEMPLATE.md" "${ARTIFACT_LOC}/CLAUDE.md"
+          FIX_MSG="✓ Created: ${ARTIFACT_LOC}/CLAUDE.md"
+        else
+          FIX_MSG="⚠️  Template not found, skipping ${ARTIFACT_LOC}/CLAUDE.md creation"
+        fi
+      fi
+      ;;
+
+    update)
+      if [ "$FIX_ARGS" = "gitignore" ]; then
+        GITIGNORE_CHECK=0
+      fi
+      ;;
+
+    config)
+      CONFIG_KEY="${FIX_ARGS%%:*}"
+      CONFIG_VAL="${FIX_ARGS#*:}"
+```
+
+For 'update:gitignore', use Grep tool first:
+Grep(pattern: ".claude/settings.local.json", path: ".gitignore", output_mode: "files_with_matches")
+
+```bash
+      if [ -z "$GREP_RESULT" ]; then
+        # Entry not found, add it
+        {
+          echo ""
+          echo "# Claude settings"
+          echo ".claude/settings.local.json  # Local overrides"
+          echo ".claude/.env*               # Secrets"
+        } >> .gitignore
+        FIX_MSG="✓ Updated: .gitignore"
+      fi
+      ;;
+
+    config)
+      # Already handled by CONFIG_KEY/CONFIG_VAL above
+```
+
+For 'config:*', use Read and Edit tools:
+Read(".claude/settings.json")
+Update: rptc.${CONFIG_KEY} = "${CONFIG_VAL}"
+Use Edit tool to write back the modified JSON (preserve structure)
+
+```bash
+      FIX_MSG="✓ Updated config: $CONFIG_KEY = \"$CONFIG_VAL\""
+      ;;
+
+    add_missing_config_fields)
+```
+
+For 'add_missing_config_fields', use Read and Edit tools:
+Read(".claude/settings.json")
+Add missing fields with these defaults (preserve existing values):
+- rptc._rptcVersion = "$PLUGIN_VERSION"
+- rptc.defaultThinkingMode = "think"
+- rptc.artifactLocation = ".rptc"
+- rptc.docsLocation = "docs"
+- rptc.testCoverageTarget = 85
+- rptc.maxPlanningAttempts = 10
+- rptc.customSopPath = ".rptc/sop"
+- rptc.qualityGatesEnabled = false
+- rptc.researchOutputFormat = "html"
+- rptc.htmlReportTheme = "dark"
+- rptc.verificationMode = "focused"
+- rptc.tdgMode = "disabled"
+- rptc.discord = {"webhookUrl": "", "notificationsEnabled": false, "verbosity": "summary"}
+Use Edit tool to write updated JSON back to file
+
+```bash
+      FIX_MSG="✓ Added missing configuration fields"
+      ;;
+
+    update_version_only)
+```
+
+For 'update_version_only', use Read and Edit tools:
+Read(".claude/settings.json")
+Update: rptc._rptcVersion = "$PLUGIN_VERSION"
+Use Edit tool to write back the modified JSON (preserve structure)
+
+```bash
+      FIX_MSG="✓ Updated version: v${WORKSPACE_VERSION} → v${PLUGIN_VERSION}"
+      ;;
+  esac
+done
+```
+
+**Output each fix message as it's applied:**
+
+For each FIX_MSG generated above, output:
+${FIX_MSG}
 
 ## Step 8: Final Summary
 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Upgrade & Verification Complete
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 ```bash
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "✅ Upgrade & Verification Complete"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
-
 if [ "$WORKSPACE_VERSION" != "$PLUGIN_VERSION" ]; then
-  echo "Version: v${WORKSPACE_VERSION} → v${PLUGIN_VERSION}"
+  VERSION_STATUS="Version: v${WORKSPACE_VERSION} → v${PLUGIN_VERSION}"
 else
-  echo "Version: v${PLUGIN_VERSION} (verified)"
+  VERSION_STATUS="Version: v${PLUGIN_VERSION} (verified)"
 fi
-
-echo ""
 
 if [ ${#FIXES_TO_APPLY[@]} -gt 0 ]; then
-  echo "Applied ${#FIXES_TO_APPLY[@]} fix(es)"
-  echo "Backup: .claude/settings.json.backup"
-  echo ""
+  FIXES_APPLIED="${#FIXES_TO_APPLY[@]}"
+  HAS_BACKUP=1
+else
+  FIXES_APPLIED=0
+  HAS_BACKUP=0
 fi
-
-echo "Next steps:"
-echo "  • Review configuration: /rptc:admin-config"
-echo "  • Verify SOP paths: /rptc:admin-sop-check"
-echo ""
 
 if [ -f ".claude/settings.json.backup" ]; then
-  echo "To rollback (if needed):"
-  echo "  mv .claude/settings.json.backup .claude/settings.json"
-  echo ""
+  BACKUP_EXISTS=1
+else
+  BACKUP_EXISTS=0
 fi
-
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 ```
+
+**Output final summary:**
+
+${VERSION_STATUS}
+
+If FIXES_APPLIED > 0, output:
+`Applied ${FIXES_APPLIED} fix(es)\nBackup: .claude/settings.json.backup`
+
+Next steps:
+  • Review configuration: /rptc:admin-config
+  • Verify SOP paths: /rptc:admin-sop-check
+
+If BACKUP_EXISTS=1, output:
+
+To rollback (if needed):
+  mv .claude/settings.json.backup .claude/settings.json
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ## Error Handling
 

@@ -142,121 +142,109 @@ fi
 
 **Collect files to analyze**:
 
-```bash
-# Create list of code files
-if [ "$TARGET_TYPE" = "file" ]; then
-  CODE_FILES=("$TARGET_PATH")
-  echo "📄 Target: 1 file"
-elif [ "$TARGET_TYPE" = "directory" ]; then
-  # Find code files (common extensions)
-  CODE_FILES=($(find "$TARGET_PATH" -type f \( \
-    -name "*.js" -o \
-    -name "*.ts" -o \
-    -name "*.jsx" -o \
-    -name "*.tsx" -o \
-    -name "*.py" -o \
-    -name "*.java" -o \
-    -name "*.go" -o \
-    -name "*.cs" -o \
-    -name "*.rb" -o \
-    -name "*.php" \
-  \) -not -path "*/node_modules/*" -not -path "*/.git/*"))
+**Collect code files**:
 
-  echo "📄 Target: ${#CODE_FILES[@]} files found"
-fi
+If `TARGET_TYPE` is "file":
+- Set CODE_FILES to single file: `$TARGET_PATH`
+- Display: "📄 Target: 1 file"
 
-echo ""
+If `TARGET_TYPE` is "directory":
+- Use Glob tool to find code files in `$TARGET_PATH`:
+  - Pattern 1: `**/*.{js,ts,jsx,tsx}` (JavaScript/TypeScript files)
+  - Pattern 2: `**/*.{py,java,go,cs,rb,php}` (Other languages)
+  - Exclude: Skip any results containing `/node_modules/` or `/.git/` in path
+- Combine all results from both Glob calls into CODE_FILES list
+- Display: "📄 Target: [N] files found"
 
-# Validate files found
-if [ ${#CODE_FILES[@]} -eq 0 ]; then
-  echo "❌ Error: No code files found in path"
-  echo ""
-  echo "Path: $TARGET_PATH"
-  echo ""
-  echo "Make sure the path contains code files (.js, .ts, .py, .java, .go, etc.)"
-  exit 1
-fi
+Display blank line.
+
+**Validate files found**:
+
+If CODE_FILES list is empty:
+```text
+❌ Error: No code files found in path
+
+Path: [TARGET_PATH]
+
+Make sure the path contains code files (.js, .ts, .py, .java, .go, etc.)
 ```
+
+Exit with error if no files found.
 
 ### Step 1b: Check for Tests
 
 **Detect test coverage**:
 
-```bash
-# Check if tests exist for these files
-TESTS_FOUND=false
-MISSING_TESTS=()
+Initialize tracking:
+- TESTS_FOUND = false
+- MISSING_TESTS = empty list
 
-echo "🧪 Checking for test coverage..."
-echo ""
+Display:
+```text
+🧪 Checking for test coverage...
 
-for file in "${CODE_FILES[@]}"; do
-  # Derive potential test file names
-  base_name=$(basename "$file" | sed 's/\.[^.]*$//')
-  dir_name=$(dirname "$file")
-
-  # Common test file patterns
-  test_patterns=(
-    "${dir_name}/${base_name}.test.*"
-    "${dir_name}/${base_name}.spec.*"
-    "${dir_name}/__tests__/${base_name}.*"
-    "tests/*/${base_name}.*"
-    "test/*/${base_name}.*"
-  )
-
-  # Check if any test file exists
-  test_exists=false
-  for pattern in "${test_patterns[@]}"; do
-    if ls $pattern 2>/dev/null | grep -q .; then
-      test_exists=true
-      TESTS_FOUND=true
-      break
-    fi
-  done
-
-  if [ "$test_exists" = false ]; then
-    MISSING_TESTS+=("$file")
-  fi
-done
-
-# Report test status
-if [ "$TESTS_FOUND" = true ]; then
-  if [ ${#MISSING_TESTS[@]} -gt 0 ]; then
-    echo "⚠️  Partial test coverage detected"
-    echo ""
-    echo "Files without tests (${#MISSING_TESTS[@]}):"
-    for file in "${MISSING_TESTS[@]}"; do
-      echo "  - $file"
-    done
-    echo ""
-    echo "⚠️  Warning: Simplifying code without tests is risky!"
-    echo "   Changes may introduce bugs without detection."
-    echo ""
-  else
-    echo "✅ All files have test coverage"
-    echo ""
-  fi
-else
-  echo "🚨 No tests found for any files!"
-  echo ""
-  echo "⚠️  CRITICAL WARNING: Simplifying code without tests is VERY risky!"
-  echo "   You will have NO verification that behavior is preserved."
-  echo ""
-  echo "Recommendation: Write tests first, then simplify."
-  echo ""
-
-  # Require explicit confirmation if no tests
-  if [ "$AUTO_APPROVE" = false ]; then
-    read -p "Continue without tests? [y/N]: " confirm
-    if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
-      echo ""
-      echo "Aborting. Write tests first, then re-run this command."
-      exit 0
-    fi
-    echo ""
-  fi
-fi
 ```
+
+For each code file in CODE_FILES:
+
+1. **Extract file info** (parse in Claude, no bash needed):
+   - Get filename without extension (e.g., "helper.js" → "helper")
+   - Get directory path (e.g., "src/utils/helper.js" → "src/utils")
+
+2. **Check for test files using Glob tool** (try all common patterns):
+   - Pattern 1: `[dir]/[base].test.*`
+   - Pattern 2: `[dir]/[base].spec.*`
+   - Pattern 3: `[dir]/__tests__/[base].*`
+   - Pattern 4: `tests/**/[base].*`
+   - Pattern 5: `test/**/[base].*`
+
+3. **Determine if tests exist**:
+   - If ANY Glob returns results → tests exist for this file
+     - Set TESTS_FOUND = true
+   - If NO Glob returns results → add file to MISSING_TESTS list
+
+**Report test status**:
+
+If TESTS_FOUND is true:
+  - If MISSING_TESTS list is not empty:
+    ```text
+    ⚠️  Partial test coverage detected
+
+    Files without tests ([count]):
+      - [file1]
+      - [file2]
+
+    ⚠️  Warning: Simplifying code without tests is risky!
+       Changes may introduce bugs without detection.
+
+    ```
+  - If MISSING_TESTS list is empty:
+    ```text
+    ✅ All files have test coverage
+
+    ```
+
+If TESTS_FOUND is false:
+  ```text
+  🚨 No tests found for any files!
+
+  ⚠️  CRITICAL WARNING: Simplifying code without tests is VERY risky!
+     You will have NO verification that behavior is preserved.
+
+  Recommendation: Write tests first, then simplify.
+
+  ```
+
+  If `AUTO_APPROVE` is false:
+    - Prompt user: "Continue without tests? [y/N]: "
+    - If user responds anything other than "y" or "Y":
+      ```text
+
+      Aborting. Write tests first, then re-run this command.
+      ```
+      Exit command.
+    - If user responds "y" or "Y":
+      Display blank line and continue.
 
 ### Step 1c: Perform Analysis
 
@@ -347,98 +335,109 @@ Provide a structured report with:
 [End of delegation]
 ```
 
-**If `--deep` flag is NOT set**, use basic bash analysis:
+**If `--deep` flag is NOT set**, use basic analysis:
 
-```bash
-echo "Mode: BASIC (Bash-based analysis)"
-echo ""
-echo "For comprehensive analysis, use --deep flag to invoke Efficiency Agent."
-echo ""
+Display:
+```text
+Mode: BASIC (Bash-based analysis)
 
-# Basic metrics collection
-echo "📊 Basic Complexity Metrics:"
-echo ""
+For comprehensive analysis, use --deep flag to invoke Efficiency Agent.
 
-# Lines of code
-total_lines=0
-for file in "${CODE_FILES[@]}"; do
-  lines=$(wc -l < "$file")
-  total_lines=$((total_lines + lines))
-  echo "  $file: $lines lines"
-done
+📊 Basic Complexity Metrics:
 
-echo ""
-echo "Total Lines: $total_lines"
-echo ""
+```
 
-# Basic pattern detection
-echo "🔍 Basic Pattern Detection:"
-echo ""
+**Lines of code analysis**:
 
-# Unused imports (basic heuristic)
-echo "Checking for potential unused imports..."
-unused_count=0
-for file in "${CODE_FILES[@]}"; do
-  # This is a simplified check - not perfect but helpful
-  imports=$(grep -E "^import|^from.*import" "$file" 2>/dev/null | wc -l)
-  if [ "$imports" -gt 20 ]; then
-    echo "  ⚠️  $file: $imports imports (may have unused)"
-    unused_count=$((unused_count + 1))
-  fi
-done
+Initialize: total_lines = 0
 
-if [ "$unused_count" -eq 0 ]; then
-  echo "  ✅ No files with excessive imports"
-fi
-echo ""
+For each code file in CODE_FILES:
+1. Use Read tool: `Read(file_path: "[file]")`
+2. Extract line count from Read tool output
+3. Add to total_lines (calculate in Claude)
+4. Display: "  [file]: [lines] lines"
 
-# Long files (>500 lines)
-echo "Checking for oversized files (>500 lines)..."
-long_files=0
-for file in "${CODE_FILES[@]}"; do
-  lines=$(wc -l < "$file")
-  if [ "$lines" -gt 500 ]; then
-    echo "  🚨 $file: $lines lines (exceeds 500 line limit)"
-    long_files=$((long_files + 1))
-  fi
-done
+After all files processed:
+```text
 
-if [ "$long_files" -eq 0 ]; then
-  echo "  ✅ All files within size limits"
-fi
-echo ""
+Total Lines: [total_lines]
 
-# Dead code indicators
-echo "Checking for dead code indicators..."
-dead_code=false
+🔍 Basic Pattern Detection:
 
-# Commented-out code
-for file in "${CODE_FILES[@]}"; do
-  commented=$(grep -E "^\\s*//\\s*(function|const|class|def)" "$file" 2>/dev/null | wc -l)
-  if [ "$commented" -gt 3 ]; then
-    echo "  ⚠️  $file: $commented commented-out definitions"
-    dead_code=true
-  fi
-done
+Checking for potential unused imports...
+```
 
-if [ "$dead_code" = false ]; then
-  echo "  ✅ No obvious dead code detected"
-fi
-echo ""
+**Import counting analysis**:
 
-# Summary
-echo "═══════════════════════════════════════════════════════"
-echo ""
-echo "📋 Basic Analysis Summary:"
-echo ""
-echo "  Files analyzed: ${#CODE_FILES[@]}"
-echo "  Total lines: $total_lines"
-echo "  Oversized files: $long_files"
-echo "  Potential issues detected: Yes"
-echo ""
-echo "💡 Recommendation: Use --deep flag for comprehensive analysis"
-echo "   /rptc:helper:simplify $TARGET_PATH --deep"
-echo ""
+Initialize: unused_count = 0
+
+For each code file in CODE_FILES:
+1. Use Grep tool:
+   - Pattern: `^import|^from.*import`
+   - File: [current file]
+   - Output mode: "count"
+2. If count > 20:
+   - Display: "  ⚠️  [file]: [count] imports (may have unused)"
+   - Increment unused_count
+
+If unused_count is 0:
+  Display: "  ✅ No files with excessive imports"
+
+Display blank line.
+
+Display: "Checking for oversized files (>500 lines)..."
+
+**File size analysis**:
+
+Initialize: long_files = 0
+
+For each code file in CODE_FILES:
+1. Use Read tool: `Read(file_path: "[file]")`
+2. Extract line count from Read tool output
+3. If count > 500:
+   - Display: "  🚨 [file]: [count] lines (exceeds 500 line limit)"
+   - Increment long_files
+
+If long_files is 0:
+  Display: "  ✅ All files within size limits"
+
+Display blank line.
+
+Display: "Checking for dead code indicators..."
+
+**Dead code analysis**:
+
+Initialize: dead_code = false
+
+For each code file in CODE_FILES:
+1. Use Grep tool:
+   - Pattern: `^\\s*//\\s*(function|const|class|def)`
+   - File: [current file]
+   - Output mode: "count"
+2. If count > 3:
+   - Display: "  ⚠️  [file]: [count] commented-out definitions"
+   - Set dead_code = true
+
+If dead_code is false:
+  Display: "  ✅ No obvious dead code detected"
+
+Display blank line.
+
+**Summary**:
+
+```text
+═══════════════════════════════════════════════════════
+
+📋 Basic Analysis Summary:
+
+  Files analyzed: [count of CODE_FILES]
+  Total lines: [total_lines]
+  Oversized files: [long_files]
+  Potential issues detected: Yes
+
+💡 Recommendation: Use --deep flag for comprehensive analysis
+   /rptc:helper:simplify [TARGET_PATH] --deep
+
 ```
 
 ## Step 2: User Approval Gate

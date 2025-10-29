@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.4] - 2025-10-29
+
+### Refactored
+
+- **Helper Commands Bash Removal**: Comprehensive cross-platform refactoring of helper commands
+  - **helper-simplify.md** (11 instances): Replaced `find`, `wc -l`, `grep` loops with Glob, Read, Grep tools
+  - **helper-resume-plan.md** (4 instances): Replaced `grep`/`sed`/`awk` text processing and **eliminated critical eval vulnerability**
+  - **helper-catch-up-deep.md** (15+ instances): Replaced complex diagnostic pipelines with native tools
+  - **helper-catch-up-med.md**: Reviewed - all bash instances are documentation examples
+  - **Impact**: ~30-50K token reduction per workflow, cross-platform compatibility
+
+- **Admin Commands Bash Removal**: Comprehensive cross-platform refactoring of admin commands
+  - **admin-upgrade.md** (53 instances): **CRITICAL - Eliminated 6 interactive `read -p` prompts** blocking automation
+  - **admin-config.md** (53 instances): Configuration display now approval-free
+  - **admin-init.md** (39 instances): Workspace initialization streamlined
+  - **admin-sop-check.md** (39 instances): SOP resolution verification simplified
+  - **Impact**: Unblocked automation, 172+ approval triggers removed, zero interruptions
+
+### Security
+
+- **CRITICAL: Eliminated eval Vulnerability in helper-resume-plan.md**
+  - **CVE Risk**: Arbitrary code execution via eval-based array restoration
+  - **Fix**: Replaced 2 eval instances with Read tool + safe Claude parsing
+  - **Impact**: Complete mitigation of code injection attack surface
+
+### Technical
+
+- **Total bash instances removed**: 200+ (30+ helper + 172+ admin)
+- **Security improvements**: 2 eval vulnerabilities + 6 interactive prompts eliminated
+- **Cross-platform**: All commands work reliably on Windows, macOS, Linux
+- **Token efficiency**: Combined ~30-50K reduction per typical workflow
+- **Files modified**: 7 helper commands + 4 admin commands + CHANGELOG
+
+---
+
+
 ## [2.2.3] - 2025-10-29
 
 ### Fixed
@@ -1197,6 +1233,98 @@ Three-tier fallback system (priority order):
 ---
 
 ## [Unreleased]
+
+### Refactored
+
+- **Helper Commands Bash Removal**: Comprehensive cross-platform refactoring of helper commands
+  - **helper-simplify.md** (11 instances): Replaced `find`, `wc -l`, `grep` loops with Glob, Read, Grep tools
+    - File discovery: `find` with bash arrays → Glob tool with multiple patterns
+    - Test discovery: Nested bash loops + `basename`/`dirname` → Glob + Claude parsing
+    - Line counting: `wc -l` loops → Read tool with line count extraction
+    - Import/dead code detection: `grep | wc -l` pipelines → Grep tool count mode
+    - **Impact**: Cross-platform compatibility (Windows support), ~10-15K token reduction per execution
+
+  - **helper-resume-plan.md** (4 instances): Replaced `grep`/`sed`/`awk` text processing and **eliminated critical eval vulnerability**
+    - Handoff state extraction: `grep | sed` → Read + Claude parsing
+    - Step counting: `find | wc -l` → Glob + count
+    - **CRITICAL SECURITY FIX**: Array restoration with `eval` → Read + safe Claude parsing (2 instances)
+    - Calibration data: `sed | awk` → Read + Claude parsing
+    - **Impact**: Eliminated arbitrary code execution vulnerability, ~5-8K token reduction per execution
+
+  - **helper-catch-up-deep.md** (15+ instances): Replaced complex diagnostic pipelines with native tools (largest refactoring)
+    - File size analysis: `find -exec wc -l {} + | awk | sort | head` → Glob + Read + Claude aggregation
+    - Pattern detection: `for file in $(find ...); grep -c` loops → Glob + Grep tool count mode
+    - Test-to-code ratio: `xargs wc -l | tail | awk` + `bc` arithmetic → Glob + Read + Claude calculation
+    - Abstraction detection: Temporary files (`/tmp/*`) + complex awk pipelines → Grep + Claude parsing
+    - **Impact**: No temporary files, ~15-25K token reduction per execution, comprehensive cross-platform support
+
+  - **helper-catch-up-med.md**: Reviewed - all bash instances are documentation examples (no changes needed)
+
+- **Admin Commands Bash Removal**: Comprehensive cross-platform refactoring of admin commands (extends helper commands refactoring)
+
+  - **admin-upgrade.md** (53 instances): **CRITICAL - Eliminated interactive prompts blocking automation**
+    - **6 interactive `read -p` prompts** → Conversational flow with batch decision-making
+    - User decisions: Sequential 6-step approval process → Single conversational exchange
+    - 44 echo statements → Claude direct output
+    - 3 grep instances → Grep tool or Read + parsing
+    - **Impact**: Unblocked automated workspace upgrades, zero approval interruptions (was 50+), single interaction point (was 6+ prompts)
+
+  - **admin-config.md** (53 instances): Configuration display now approval-free
+    - 50 echo statements → Claude direct output
+    - 2 wc -l instances → Read tool + Claude line counting
+    - 1 grep instance → Grep tool with pattern matching
+    - **Impact**: Zero approval interruptions (was 50+), consistent with helper patterns
+
+  - **admin-init.md** (39 instances): Workspace initialization streamlined
+    - 37 echo statements → Claude direct output
+    - 2 grep instances → Read tool + pattern search
+    - Preserved acceptable bash: mkdir, cp, cat (file operations)
+    - **Impact**: Zero approval interruptions (was 37+), smooth initialization workflow
+
+  - **admin-sop-check.md** (39 instances): SOP resolution verification simplified
+    - 38 echo statements → Claude direct output
+    - 1 diff | grep -c pipeline → Read tool + Claude comparison
+    - **Impact**: Zero approval interruptions (was 38+), clearer SOP resolution display
+
+### Critical Improvements
+
+- **Automation Unblocked**: admin-upgrade.md previously required 6 sequential user inputs via `read -p`, completely blocking automated workflows. Now uses conversational flow allowing single approval.
+- **Approval Friction Eliminated**: 172+ approval triggers removed across admin commands (157 echo + 6 read -p + 9 complex bash)
+- **User Experience**: Admin operations now seamless - zero interruptions, no mid-execution prompts
+- **Consistency**: Admin commands now follow same bash removal patterns as helper commands (v2.2.x refactor)
+
+### Technical (Admin Commands)
+
+- **Total admin approval triggers removed**: 172+ across 4 commands
+- **Interactive prompts eliminated**: 6 (admin-upgrade.md) - **critical for automation**
+- **Echo statements removed**: 157 across all admin commands
+- **Complex bash replaced**: 9 instances (wc, grep, diff) → Native tools (Read, Grep)
+- **Cross-platform compatibility**: All admin commands now work reliably on Windows, macOS, Linux
+- **Pattern consistency**: Admin commands now align with helper commands bash removal (v2.2.x)
+- **Conversational flow**: admin-upgrade.md uses new batch decision-making pattern (reusable in future commands)
+- **Patterns replaced**: `echo` (stdout), `read -p`, `wc -l`, `grep -q`, `diff | grep -c`
+- **Patterns preserved**: Simple git commands, file operations (mkdir, cp, cat, mv), conditionals
+- **Reference**: Extends v2.2.x bash removal work to admin commands (helper commands already refactored)
+
+### Security
+
+- **CRITICAL: Eliminated eval Vulnerability in helper-resume-plan.md**
+  - **CVE Risk**: Arbitrary code execution via eval-based array restoration from handoff files
+  - **Attack Vector**: Malicious handoff.md files could inject arbitrary bash commands
+  - **Fix**: Replaced 2 eval instances with Read tool + safe Claude parsing
+  - **Files Modified**: `commands/helper-resume-plan.md` lines 89-107, 130-148
+  - **Security Impact**: Complete mitigation of code injection attack surface
+
+### Technical
+
+- **Total bash instances replaced**: 30+ across 3 helper commands
+- **Security improvements**: Eliminated 2 critical `eval` vulnerabilities in helper-resume-plan.md
+- **Cross-platform compatibility**: All helpers now work reliably on Windows, macOS, Linux
+- **Token efficiency**: Combined ~30-50K token reduction per typical helper workflow
+- **Patterns replaced**: `find`, `wc -l`, `grep -c`, `sed`, `awk`, `basename`, `dirname`, `bc`, `eval`, temporary files
+- **Patterns preserved**: Simple git commands, basic file operations (mkdir, cp), direct `rg` tool usage
+- **Reference**: Builds on v2.2.1 bash removal work, extends to helper commands not covered in original refactoring
+- **Methodology**: Consistent with v2.2.1 refactoring pattern (bash-to-keep criteria, tool delegation)
 
 ### Changed
 

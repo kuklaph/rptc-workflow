@@ -110,76 +110,151 @@ fi
 
 **Extract checkpoint data from handoff.md:**
 
-```bash
-# Extract key information from handoff.md
-COMPLETED_STEP=$(grep "^\*\*Completed Steps\*\*:" "$HANDOFF_FILE" | sed 's/.*Steps 1-\([0-9]*\).*/\1/')
-NEXT_STEP=$((COMPLETED_STEP + 1))
+**Read handoff file:**
 
-# Extract total steps by counting step files
-TOTAL_STEPS=$(find "$PLAN_DIR" -name "step-*.md" | wc -l)
+```
+Use Read tool: Read(file_path: "$HANDOFF_FILE")
+```
 
-HANDOFF_REASON=$(grep "^\*\*Trigger Reason\*\*:" "$HANDOFF_FILE" | cut -d: -f2- | xargs)
+**Parse handoff state in Claude:**
 
-echo "📖 Loading handoff state..."
-echo ""
-echo "   Completed: Steps 1-${COMPLETED_STEP}"
-echo "   Next Step: ${NEXT_STEP}"
-echo "   Remaining: $((TOTAL_STEPS - COMPLETED_STEP)) steps"
-echo "   Reason: ${HANDOFF_REASON}"
-echo ""
+From the Read output, extract:
+
+1. **Completed Steps**: Find line starting with "**Completed Steps**:" and extract the number N from "Steps 1-N"
+   - Store as COMPLETED_STEP
+2. **Next Step**: Calculate COMPLETED_STEP + 1 in Claude
+   - Store as NEXT_STEP
+3. **Trigger Reason**: Find line starting with "**Trigger Reason**:" and extract text after the colon (trimmed)
+   - Store as HANDOFF_REASON
+
+**Count total steps:**
+
+```
+Use Glob tool: Glob(pattern: "$PLAN_DIR/step-*.md")
+Count the number of results returned → TOTAL_STEPS
+```
+
+**Display extracted state:**
+
+```text
+📖 Loading handoff state...
+
+   Completed: Steps 1-[COMPLETED_STEP]
+   Next Step: [NEXT_STEP]
+   Remaining: [TOTAL_STEPS - COMPLETED_STEP] steps
+   Reason: [HANDOFF_REASON]
 ```
 
 #### Step 1b: Restore Historical Usage Data
 
 **Extract and restore STEP_CONTEXT_USAGE array:**
 
-```bash
-# Extract historical usage array from handoff.md
-HISTORICAL_USAGE=$(sed -n '/STEP_CONTEXT_USAGE=/p' "$HANDOFF_FILE" | sed 's/STEP_CONTEXT_USAGE=//')
+**Read handoff file** (reuse from Step 1a if available):
 
-# Convert to array
-declare -a STEP_CONTEXT_USAGE
-eval "STEP_CONTEXT_USAGE=$HISTORICAL_USAGE"
+```
+Use Read tool: Read(file_path: "$HANDOFF_FILE")
+```
 
-echo "📊 Historical usage data restored:"
-echo "   Data Points: ${#STEP_CONTEXT_USAGE[@]}"
-if [ "${#STEP_CONTEXT_USAGE[@]}" -ge 3 ]; then
-  echo "   Last 3 Steps:"
-  echo "     Step $((${#STEP_CONTEXT_USAGE[@]} - 2)): ${STEP_CONTEXT_USAGE[-3]} tokens"
-  echo "     Step $((${#STEP_CONTEXT_USAGE[@]} - 1)): ${STEP_CONTEXT_USAGE[-2]} tokens"
-  echo "     Step ${#STEP_CONTEXT_USAGE[@]}:         ${STEP_CONTEXT_USAGE[-1]} tokens"
-fi
-echo ""
+**Parse context usage array in Claude (NO EVAL - SECURITY FIX):**
+
+From the Read output:
+
+1. Find line containing "STEP_CONTEXT_USAGE="
+2. Extract the array values after the equals sign (format: "(value1 value2 value3)")
+3. Parse the parentheses-enclosed values into a list (extract text between parentheses, split by spaces)
+4. Store as STEP_CONTEXT_USAGE array for use in token tracking
+
+**Example parsing:**
+- Input line: `STEP_CONTEXT_USAGE=(15000 23000 18000)`
+- Parse: Extract numbers between parentheses → "15000 23000 18000"
+- Split by spaces → [15000, 23000, 18000]
+- Result: STEP_CONTEXT_USAGE array with 3 elements
+
+**CRITICAL:** Parse the array safely in Claude. **NEVER use eval** as it creates arbitrary code execution vulnerability if handoff file is corrupted.
+
+**Display restored usage data:**
+
+```text
+📊 Historical usage data restored:
+   Data Points: [count of STEP_CONTEXT_USAGE array]
+```
+
+If STEP_CONTEXT_USAGE has 3 or more elements, also display:
+```text
+   Last 3 Steps:
+     Step [count - 2]: [third-to-last value] tokens
+     Step [count - 1]: [second-to-last value] tokens
+     Step [count]:     [last value] tokens
 ```
 
 #### Step 1c: Restore Calibration Data
 
 **Extract and restore prediction calibration:**
 
-```bash
-# Extract calibration multiplier
-CALIBRATION_MULTIPLIER=$(sed -n '/CALIBRATION_MULTIPLIER=/p' "$HANDOFF_FILE" | awk -F'=' '{print $2}')
+**Read handoff file** (reuse from previous reads if available):
 
-echo "🎯 Calibration restored:"
-echo "   Multiplier: ${CALIBRATION_MULTIPLIER}×"
-echo ""
+```
+Use Read tool: Read(file_path: "$HANDOFF_FILE")
+```
 
-# Extract prediction errors array
-PREDICTION_ERRORS_STR=$(sed -n '/PREDICTION_ERRORS=/p' "$HANDOFF_FILE" | sed 's/PREDICTION_ERRORS=//')
-declare -a PREDICTION_ERRORS
-eval "PREDICTION_ERRORS=$PREDICTION_ERRORS_STR"
+**Parse calibration multiplier in Claude:**
 
-echo "   Prediction Errors: ${#PREDICTION_ERRORS[@]}" data points"
-if [ "${#PREDICTION_ERRORS[@]}" -gt 0 ]; then
-  # Calculate average error
-  ERROR_SUM=0
-  for error in "${PREDICTION_ERRORS[@]}"; do
-    ERROR_SUM=$(awk "BEGIN {printf \"%.1f\", $ERROR_SUM + $error}")
-  done
-  AVG_ERROR=$(awk "BEGIN {printf \"%.1f\", $ERROR_SUM / ${#PREDICTION_ERRORS[@]}}")
-  echo "   Average Error: ${AVG_ERROR}%"
-fi
-echo ""
+From the Read output:
+
+1. Find line containing "CALIBRATION_MULTIPLIER="
+2. Extract the numeric value after the equals sign
+3. Store as CALIBRATION_MULTIPLIER for prediction adjustments
+
+**Example parsing:**
+- Input line: `CALIBRATION_MULTIPLIER=1.15`
+- Parse: Extract text after "=" → "1.15"
+- Result: CALIBRATION_MULTIPLIER = 1.15
+
+**Parse prediction errors array in Claude (NO EVAL - SECURITY FIX):**
+
+From the Read output:
+
+1. Find line containing "PREDICTION_ERRORS="
+2. Extract the array values after the equals sign (format: "(value1 value2 value3)")
+3. Parse the parentheses-enclosed values into a list (extract text between parentheses, split by spaces)
+4. Store as PREDICTION_ERRORS array
+
+**Example parsing:**
+- Input line: `PREDICTION_ERRORS=(5.2 -3.1 7.8)`
+- Parse: Extract text between parentheses → "5.2 -3.1 7.8"
+- Split by spaces → [5.2, -3.1, 7.8]
+- Result: PREDICTION_ERRORS array with 3 elements
+
+**CRITICAL:** Parse array safely in Claude. **NEVER use eval** as it creates arbitrary code execution vulnerability.
+
+**Calculate average error in Claude (no awk):**
+
+If PREDICTION_ERRORS array has at least 1 element:
+
+1. Sum all values in PREDICTION_ERRORS array
+2. Divide by count of values
+3. Format to 1 decimal place
+4. Store as AVG_ERROR
+
+**Example calculation:**
+- Input: PREDICTION_ERRORS = [5.2, -3.1, 7.8]
+- Sum: 5.2 + (-3.1) + 7.8 = 9.9
+- Count: 3
+- Average: 9.9 / 3 = 3.3
+- Formatted: "3.3"
+
+**Display calibration data:**
+
+```text
+🎯 Calibration restored:
+   Multiplier: [CALIBRATION_MULTIPLIER]×
+
+   Prediction Errors: [count of PREDICTION_ERRORS] data points
+```
+
+If PREDICTION_ERRORS has at least 1 element, also display:
+```text
+   Average Error: [AVG_ERROR]%
 ```
 
 #### Step 1d: Initialize Fresh Context
