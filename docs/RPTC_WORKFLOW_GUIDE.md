@@ -14,7 +14,7 @@ bash setup-rptc-workflow.sh
 /rptc:helper-catch-up-med                    # Get context
 /rptc:research "topic to explore"   # Interactive discovery
 /rptc:plan "@research.md"             # Collaborative planning
-/rptc:tdd "@plan.md"                  # TDD implementation
+/rptc:tdd "@plan/"                    # TDD implementation (directory format)
 /rptc:commit pr                       # Verify and ship
 ```
 
@@ -40,7 +40,7 @@ bash setup-rptc-workflow.sh
 
 ---
 
-## Architecture Overview (v1.2.0+)
+## Architecture Overview (v2.0.0+)
 
 ### Incremental Sub-Agent Delegation
 
@@ -51,51 +51,69 @@ RPTC uses an **incremental sub-agent architecture** that dramatically improves t
 - **Immediate file persistence** (not at end)
 - **Better timeout handling** (distributed work)
 - **Scalable for complex features** (modular directory structure)
+- **No file size limits** (unlimited steps per plan)
 
 **How It Works:**
 
-1. **Planning Phase** - Intelligent format selection:
-   - Simple features (≤2 steps) → Monolithic `.md` file
-   - Complex features (>2 steps) → Directory with sub-agents
-     - Overview Generator → `overview.md`
-     - Step Generators (one per step) → `step-01.md`, `step-02.md`, etc.
-     - Cohesiveness Reviewer → validates consistency
+1. **Planning Phase** - Directory format with sub-agents:
+   - Overview Generator → `overview.md`
+   - Step Generators (one per step) → `step-01.md`, `step-02.md`, etc.
+   - Cohesiveness Reviewer → validates consistency
    - Files saved immediately as generated (recovery if interrupted)
 
 2. **TDD Phase** - Selective context loading:
-   - Monolithic: Loads entire plan
-   - Directory: Loads `overview.md` + current `step-NN.md` only
+   - Loads `overview.md` + current `step-NN.md` only
    - **Result**: 79% less context per step
+   - Supports unlimited steps with auto-handoff
 
 3. **Research Phase** - Parallel sub-agent execution:
    - Discovery Q&A + Codebase exploration + Web research (if needed)
    - All run concurrently where possible
    - Intelligent web search triggering (unfamiliar topics only)
 
-**Directory Structure:**
+### Plan Format (v2.0.0+)
 
+All plans use **directory format** with incremental sub-agent delegation:
+
+**Directory Structure:**
 ```text
-.rptc/plans/
-├── simple-feature.md              # Monolithic (≤2 steps)
-└── complex-feature/               # Directory (>2 steps)
-    ├── overview.md                # Test strategy, risks, acceptance
-    ├── step-01.md                 # Step 1 details
-    ├── step-02.md                 # Step 2 details
-    └── step-03.md                 # Step 3 details
+.rptc/plans/[feature-name]/
+├── overview.md          # Feature context, test strategy, acceptance criteria
+├── step-01.md          # First implementation step
+├── step-02.md          # Second implementation step
+└── step-NN.md          # Additional steps as needed
 ```
 
-**Usage Examples:**
+**Benefits:**
+- Token-efficient (each step isolated in sub-agent context)
+- Scalable (no file size limits)
+- Resumable (can pause/resume at any step)
+- Clear progress tracking (one file per step)
+
+**Usage Example:**
 
 ```bash
-# Plan command auto-selects format
+# Plan command generates directory format
 /rptc:plan "add user authentication"
 
-# TDD command auto-detects format
-/rptc:tdd "@user-authentication.md"      # Monolithic
-/rptc:tdd "@user-authentication/"        # Directory
+# TDD command loads directory with trailing slash
+/rptc:tdd "@user-authentication/"
 ```
 
-**Agentic Patterns Used**: This architecture leverages all 5 of [Anthropic's Agentic Patterns](#anthropics-five-agentic-patterns) - prompt chaining (phase transitions), routing (format selection), parallelization (sub-agent delegation), orchestrator-workers (plan generation), and evaluator-optimizer (quality gates).
+**Agentic Patterns Used**: This architecture leverages all 5 of [Anthropic's Agentic Patterns](#anthropics-five-agentic-patterns) - prompt chaining (phase transitions), routing (complexity-based delegation), parallelization (sub-agent delegation), orchestrator-workers (plan generation), and evaluator-optimizer (quality gates).
+
+### Legacy Monolithic Plans (Pre-v2.0.0)
+
+**Deprecated**: Monolithic single-file plans (`.rptc/plans/feature.md`) are no longer generated.
+
+**If you have legacy monolithic plans**:
+- Executing them with `/rptc:tdd "@plan.md"` will show a migration error
+- Migration options:
+  1. **Regenerate**: Run `/rptc:plan` with the same feature description (creates directory format)
+  2. **Manual conversion**: Create directory structure and split content into overview.md + step files
+  3. **Temporary downgrade**: Use v1.2.0 (deprecated, not recommended)
+
+**Breaking change introduced**: v2.0.0 (October 24, 2025)
 
 ---
 
@@ -136,10 +154,10 @@ Reference: [Anthropic's Agentic Patterns Documentation](https://docs.anthropic.c
 
 **Definition**: Single classifier prompt routes to specialized sub-prompts based on input type
 
-**RPTC Uses This**: Complexity-based plan format selection
-- Simple features (≤2 steps) → Monolithic plan format
-- Complex features (>2 steps) → Directory format with sub-agents
-- Automatic format detection based on feature analysis
+**RPTC Uses This**: Complexity-based sub-agent delegation
+- Research phase: Routes to web research agent for unfamiliar topics
+- Planning phase: Routes to step generators based on complexity
+- TDD phase: Routes to quality gate agents (efficiency, security) based on configuration
 
 **Best For**: Varied inputs requiring different handling strategies
 
@@ -279,7 +297,7 @@ All developers follow the same Research→Plan→TDD→Commit flow. Onboarding s
 - **Workflows**: Phase transitions (Research → Plan → TDD → Commit) are predefined
 - **Agent Patterns**: Within phases, RPTC uses all 5 Anthropic patterns strategically
   - Prompt Chaining: Phase output feeds next phase
-  - Routing: Format selection based on complexity
+  - Routing: Complexity-based sub-agent delegation
   - Parallelization: Sub-agent delegation for independent work
   - Orchestrator-Workers: Planning command orchestrates generators
   - Evaluator-Optimizer: Quality gates and TDD iteration
@@ -431,14 +449,9 @@ Ask yourself:
 
 4. **PM Approval for Master Planner**: You explicitly approve delegation
 
-5. **Master Feature Planner**: Creates comprehensive TDD-ready plan (v1.2.0+ uses intelligent format selection)
+5. **Master Feature Planner**: Creates comprehensive TDD-ready plan (v2.0.0+ directory format only)
 
-   **Simple features (≤2 steps) - Monolithic format:**
-   - Single `.md` file with all content
-   - Traditional approach for backward compatibility
-   - Saved as `.rptc/plans/[name].md`
-
-   **Complex features (>2 steps) - Directory format:**
+   **Directory format with sub-agent delegation:**
    - Incremental sub-agent delegation
    - `overview.md` (test strategy, acceptance criteria, risks)
    - `step-01.md` through `step-NN.md` (individual step details)
@@ -451,14 +464,13 @@ Ask yourself:
    - File creation/modification list
    - Dependencies and risks
    - Acceptance criteria
+   - Implementation constraints
 
 6. **Plan Review**: You review, request modifications, and approve
 
 7. **PM Sign-Off**: Explicit approval before plan is saved
 
-**Output**:
-- Monolithic: `.rptc/plans/[name].md`
-- Directory: `.rptc/plans/[name]/` (overview.md + step-NN.md files)
+**Output**: `.rptc/plans/[name]/` (overview.md + step-NN.md files)
 
 **When to use**:
 
@@ -475,22 +487,19 @@ Ask yourself:
 
 ---
 
-### 3. TDD Phase: `/rptc:tdd "@plan.md"` or `"@plan-dir/"`
+### 3. TDD Phase: `/rptc:tdd "@plan-dir/"`
 
 **Purpose**: Test-driven implementation with quality gates
 
 **What happens**:
 
-1. **Load Plan**: Reads implementation plan (auto-detects format)
+1. **Load Plan**: Reads implementation plan directory
 
-   **Monolithic format** (`.md` file):
-   - Loads entire plan into context
-   - Traditional approach
-
-   **Directory format** (`/` directory) - **79% token reduction:**
+   **Directory format** - **79% token reduction:**
    - Loads `overview.md` once (test strategy, acceptance criteria)
    - For each step: loads only `step-NN.md` (not entire plan)
    - Dramatically reduces context size per step
+   - Supports unlimited steps with auto-handoff
 
 2. **TDD Cycle for Each Step**:
 
@@ -1099,10 +1108,10 @@ These agents have specialized prompts and capabilities for specific tasks.
 # - Creates initial scaffold
 # - Asks clarifying questions
 # - You approve Master Feature Planner delegation
-# - Presents comprehensive plan
+# - Presents comprehensive plan (directory format)
 # - You approve plan
 
-> /rptc:tdd "@user-avatar-upload.md"
+> /rptc:tdd "@user-avatar-upload/"
 
 # Claude executes with quality gates (with your approval)
 
@@ -1136,11 +1145,11 @@ These agents have specialized prompts and capabilities for specific tasks.
 # - Creates scaffold
 # - Asks clarifying questions
 # - You approve Master Planner delegation
-# - Presents detailed plan
+# - Presents detailed plan (directory format)
 # - You approve plan
 
 # TDD implementation
-> /rptc:tdd "@payment-processing.md"
+> /rptc:tdd "@payment-processing/"
 
 # Claude:
 # - Executes each step (RED → GREEN → REFACTOR)
@@ -1160,7 +1169,7 @@ These agents have specialized prompts and capabilities for specific tasks.
 
 ```bash
 # Mid-implementation, requirements change
-> /rptc:helper-update-plan "@payment-processing.md" "add PayPal support"
+> /rptc:helper-update-plan "@payment-processing/" "add PayPal support"
 
 # Claude:
 # - Loads current plan
@@ -1169,7 +1178,7 @@ These agents have specialized prompts and capabilities for specific tasks.
 # - You review and approve
 
 # Continue implementation with updated plan
-> /rptc:tdd "@payment-processing.md"
+> /rptc:tdd "@payment-processing/"
 ```
 
 **When**: Requirements evolve, new considerations discovered
@@ -1188,16 +1197,16 @@ Is it a bug fix?
 └─ Yes → /rptc:tdd "bug description"
 
 Is it a simple change in familiar code?
-└─ Yes → /rptc:plan "description" → /rptc:tdd "@plan.md"
+└─ Yes → /rptc:plan "description" → /rptc:tdd "@plan/"
 
 Is it complex or unfamiliar?
-└─ Yes → /rptc:research "topic" → /rptc:plan "@research.md" → /rptc:tdd "@plan.md"
+└─ Yes → /rptc:research "topic" → /rptc:plan "@research.md" → /rptc:tdd "@plan/"
 
 Need to modify existing plan?
-└─ Yes → /rptc:helper-update-plan "@plan.md" "changes"
+└─ Yes → /rptc:helper-update-plan "@plan/" "changes"
 
 Resuming previous work?
-└─ Yes → /rptc:helper-resume-plan "@plan.md"
+└─ Yes → /rptc:helper-resume-plan "@plan/"
 
 Ready to ship?
 └─ Yes → /rptc:commit [pr]
@@ -1252,14 +1261,15 @@ your-project/
 │   ├── research/              # Active research findings
 │   │   ├── payment-processing.md
 │   │   └── user-authentication.md
-│   ├── plans/                 # Implementation plans
-│   │   ├── simple-feature.md                    # Monolithic (≤2 steps)
-│   │   ├── complex-feature/                     # Directory (>2 steps)
-│   │   │   ├── overview.md                      # Test strategy, risks
-│   │   │   ├── step-01.md
-│   │   │   ├── step-02.md
-│   │   │   └── step-03.md
-│   │   └── payment-processing.md
+│   ├── plans/                 # Implementation plans (directory format only, v2.0.0+)
+│   │   ├── user-authentication/                 # Directory format
+│   │   │   ├── overview.md                      # Test strategy, risks, acceptance
+│   │   │   ├── step-01.md                       # Step 1 details
+│   │   │   ├── step-02.md                       # Step 2 details
+│   │   │   └── step-03.md                       # Step 3 details
+│   │   └── payment-processing/
+│   │       ├── overview.md
+│   │       └── step-01.md
 │   └── complete/              # Completed work (v1.1.0+, was 'archive')
 │
 ├── .claude/
@@ -1303,7 +1313,7 @@ your-project/
 
 ### Q: Plan needs changes mid-implementation
 
-**A**: Use `/rptc:helper-update-plan "@plan.md" "your changes"`
+**A**: Use `/rptc:helper-update-plan "@plan/" "your changes"`
 
 ### Q: Forgot what we researched
 
@@ -1311,7 +1321,7 @@ your-project/
 
 ### Q: Resuming work after a break
 
-**A**: Use `/rptc:helper-resume-plan "@plan.md"` for smart context restoration
+**A**: Use `/rptc:helper-resume-plan "@plan/"` for smart context restoration
 
 ### Q: Want to see what Master agents do
 
@@ -1344,7 +1354,7 @@ After using this workflow:
 
    ```bash
    /rptc:plan "add calculator functionality"
-   /rptc:tdd "@calculator-functionality.md"
+   /rptc:tdd "@calculator-functionality/"
    /rptc:commit
    ```
 
@@ -1354,7 +1364,7 @@ After using this workflow:
    /rptc:helper-catch-up-med
    /rptc:research "complex topic"
    /rptc:plan "@complex-topic.md"
-   /rptc:tdd "@complex-topic.md"
+   /rptc:tdd "@complex-topic/"
    /rptc:commit pr
    ```
 

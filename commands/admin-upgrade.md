@@ -72,7 +72,7 @@ echo ""
 
 ```bash
 # Plugin version (update this with each release)
-PLUGIN_VERSION="2.2.1"
+PLUGIN_VERSION="2.2.2"
 ```
 
 **Configuration Extraction** (replaced jq dependency with Read tool + Claude parsing):

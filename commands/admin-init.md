@@ -188,7 +188,7 @@ if [ ! -f ".claude/settings.json" ]; then
   cat > .claude/settings.json <<'EOF'
 {
   "rptc": {
-    "_rptcVersion": "2.2.1",
+    "_rptcVersion": "2.2.2",
     "defaultThinkingMode": "think",
     "artifactLocation": ".rptc",
     "docsLocation": "docs",
@@ -234,7 +234,7 @@ else
 
 ```json
 "rptc": {
-  "_rptcVersion": "2.2.1",
+  "_rptcVersion": "2.2.2",
   "defaultThinkingMode": "think",
   "artifactLocation": ".rptc",
   "docsLocation": "docs",

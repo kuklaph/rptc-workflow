@@ -388,10 +388,36 @@ To create a plan: /rptc:plan "[feature description]"
 
 **If no plan provided** (simple work item description):
 
-1. Create quick implementation plan (directory format)
-2. Define test scenarios
-3. List steps (create step files)
-4. Proceed with TDD (sub-agent delegation)
+**On-the-Fly Plan Generation:**
+
+1. **Create minimal directory structure**:
+   - Ask user to clarify feature/work item scope (if ambiguous)
+   - Generate plan slug from description: `[work-item-slug]`
+   - Create directory: `.rptc/plans/[work-item-slug]/`
+
+2. **Generate quick scaffold**:
+   - Create `overview.md`:
+     - Feature description
+     - Basic test strategy (happy path + error handling)
+     - Acceptance criteria
+   - Create `step-01.md` (typically single-step for simple work):
+     - Purpose
+     - Tests to write first
+     - Files to create/modify
+     - Implementation guidance
+
+3. **Flow into explicit delegation**:
+   Once scaffold created, execution flows into **Phase 1a: Directory Format - Sub-Agent Delegation** (line 1325) with the generated plan structure.
+
+   The explicit Task tool invocation pattern from Phase 1a handles all TDD execution—no special on-the-fly handling needed.
+
+**On-the-Fly Characteristics:**
+- **When Used**: User provides simple description instead of plan reference (e.g., `/rptc:tdd "add user login"`)
+- **Plan Structure**: Minimal directory (overview.md + step-01.md typically)
+- **Delegation**: Same explicit Phase 1a pattern established in Step 2
+- **Difference**: Plan created just-in-time vs. pre-existing from `/rptc:plan`
+
+**No Special Delegation Required**: The on-the-fly path creates a minimal plan directory, sets the appropriate variables (`PLAN_FORMAT="directory"`, `PLAN_DIR=...`), then flows into Phase 1a's unified delegation logic. All three paths (normal, resume, on-the-fly) converge at Phase 1a.
 
 **CRITICAL - Plan Synchronization**:
 
@@ -1280,6 +1306,51 @@ fi
 
 ---
 
+## Phase 0d: Delegation Validation Checkpoint (Defense in Depth)
+
+**Purpose**: Confirm TDD Executor Agent infrastructure is intact before execution.
+
+**Timing**: After all configuration loaded, before Phase 1 execution loop.
+
+**Why This Exists**: Steps 2-4 enforce explicit Task tool delegation patterns. This checkpoint detects infrastructure corruption:
+- Plugin installation incomplete (agent file missing)
+- File system corruption (agent definition deleted)
+- Installation/upgrade failures (partial file copy)
+
+**This is defense-in-depth validation - provides early failure detection with clear diagnostics.**
+
+```bash
+echo "🔍 Validating TDD infrastructure..."
+echo ""
+
+# Check agent definition exists
+AGENT_FILE="${CLAUDE_PLUGIN_ROOT}/agents/tdd-executor-agent.md"
+if [ ! -f "$AGENT_FILE" ]; then
+  echo "❌ CRITICAL ERROR: TDD Executor Agent definition not found"
+  echo ""
+  echo "   Expected: ${AGENT_FILE}"
+  echo ""
+  echo "This indicates:"
+  echo "  - Plugin installation incomplete or corrupted"
+  echo "  - Agent definition file deleted"
+  echo "  - File system corruption"
+  echo ""
+  echo "Fix: Reinstall RPTC plugin"
+  echo "  claude plugin uninstall rptc-workflow"
+  echo "  claude plugin install rptc-workflow"
+  echo ""
+  exit 1
+fi
+
+echo "✅ TDD infrastructure validated"
+echo "   - Agent: ${AGENT_FILE}"
+echo ""
+```
+
+**Phase 0d Complete** - All infrastructure verified, ready for TDD execution.
+
+---
+
 ### Phase 1: TDD Cycle for Each Step (REQUIRED)
 
 ```bash
@@ -1999,50 +2070,83 @@ echo ""
 
 #### Step N: Delegate to TDD Sub-Agent
 
-**Create TDD Sub-Agent** with this prompt:
+**Delegate to TDD Executor Agent** via Task tool:
+
+Use the Task tool with subagent_type="rptc:tdd-executor-agent":
+
+**Prompt:**
 
 ```text
 Use $THINKING_MODE thinking mode for this TDD implementation step.
 
-You are a TDD EXECUTION SUB-AGENT for a single implementation step.
+You are a TDD EXECUTION AGENT for a single implementation step.
 
-Your mission: Execute RED → GREEN → REFACTOR cycle for Step $STEP_NUM ONLY.
+Your mission: Execute RED → GREEN → REFACTOR → VERIFY cycle for Step $STEP_NUM ONLY.
 
 ## Overall Feature Context (from overview)
 
-[Pass entire OVERVIEW content from overview.md]
+**Feature:** [From overview.md - feature description]
+**Purpose:** [From overview.md - why we're building this]
+**Test Strategy:** [From overview.md - testing approach summary]
+**Acceptance Criteria:** [From overview.md - definition of done]
 
-## Your Step (Step $STEP_NUM)
+## Current Step Details (from step-$STEP_NUM.md)
 
-[Pass entire STEP_CONTENT from step-0N.md]
+**Step Number:** $STEP_NUM of $TOTAL_STEPS
+**Step Purpose:** [From step file - what this step accomplishes]
+**Prerequisites:** [From step file - dependencies]
+**Test Scenarios:** [From step file - tests to write section]
+**Expected Outcome:** [From step file - what should work after completion]
 
-## Cumulative File Changes (from prior steps)
+## Cumulative Context (Previous Steps)
 
-Files modified/created in Steps 1 through $STEP_NUM-1:
-[Pass list of files with brief description of changes]
+[Summary of Steps 1 through $STEP_NUM-1 if any]
 
-If this is Step 1: "No prior changes (first step)"
+**Files Modified So Far:**
+[List files modified/created in previous steps with brief descriptions]
+
+**If this is Step 1:** "No prior changes (first step)"
 
 ## Implementation Constraints
 
-${CONSTRAINTS}
+$CONSTRAINTS
 
 **CRITICAL**: These constraints MUST be respected during implementation.
-- If constraints conflict with your intended approach, STOP and request clarification from main TDD executor
-- Constraints ensure code quality, maintainability, and adherence to project standards
+- If constraints conflict with your intended approach, STOP and request clarification
+- Constraints ensure code quality, maintainability, and project standards adherence
 - Violating constraints may result in implementation rejection during refactoring phase
-- If constraints are unclear or contradictory, document concern and request PM guidance before proceeding
+- If constraints are unclear or contradictory, document concern and request PM guidance
 
-**Graceful Handling**: If constraints section shows "No specific constraints defined," apply standard best practices:
+**Graceful Handling**: If no specific constraints defined, apply standard best practices:
 - KISS (Keep It Simple) principle
 - YAGNI (You Aren't Gonna Need It)
 - DRY (Don't Repeat Yourself) after 3rd occurrence
 - File size < 500 lines when practical
 - Function size < 50 lines when practical
 
-## Execute TDD Cycle
+## Configuration
 
-**CRITICAL**: Follow TDD methodology strictly.
+- **Thinking Mode:** $THINKING_MODE
+- **Coverage Target:** $COVERAGE_TARGET%
+- **Artifact Location:** $ARTIFACT_LOC
+- **Max Auto-Iteration Attempts:** $MAX_ATTEMPTS
+
+## SOPs to Reference (Use Fallback Chain)
+
+**Standard Operating Procedures** (check in order):
+1. .rptc/sop/testing-guide.md (project-specific)
+2. ~/.claude/global/sop/testing-guide.md (user global)
+3. ${CLAUDE_PLUGIN_ROOT}/sop/testing-guide.md (plugin default)
+
+**Key SOPs for TDD:**
+- testing-guide.md - TDD methodology, test patterns, coverage strategies
+- flexible-testing-guide.md - AI-generated code assertion patterns
+- architecture-patterns.md - Code organization, design patterns
+- security-and-performance.md - Security best practices, performance requirements
+
+**Project Overrides**: Check CLAUDE.md for project-specific patterns and deviations
+
+## Your Task: Execute TDD Cycle for THIS Step Only
 
 ### 1. RED Phase: Write ALL Tests First
 
@@ -2053,7 +2157,7 @@ ${CONSTRAINTS}
    - Happy path tests
    - Edge case tests
    - Error condition tests
-   - Follow project's test conventions
+   - Follow project's test conventions (check CLAUDE.md)
 3. Verify tests FAIL for right reasons
 4. Show failure output
 
@@ -2118,10 +2222,11 @@ Now that tests are green, improve the code.
    - Extract functions
    - Add clarifying comments
    - Simplify complex logic
+   - Respect implementation constraints
 
 2. **Run tests after EACH refactor**:
    - Ensure tests still pass
-   - If tests fail, fix and continue
+   - If tests fail, revert change and try different approach
 
 **Report REFACTOR Complete**:
 ```text
@@ -2133,23 +2238,56 @@ Improvements made:
 
 ✅ All tests still passing
 ✅ Code quality improved
+✅ Constraints respected
 ```
+
+### 4. VERIFY Phase: Final Checks
+
+1. **Run full test suite** (not just this step's tests)
+2. **Check coverage** for new/modified code
+3. **Verify constraints** all respected
+4. **Document any clarifications needed**
 
 ## Return Summary
 
-Provide this summary when returning control to main TDD executor:
+**When complete, report:**
 
-**Step $STEP_NUM Completion Report**:
-- Tests written: [X] tests
-- Tests passing: [X] tests (MUST be 100%)
-- Files modified: [list with brief descriptions]
-- Files created: [list with brief descriptions]
-- Coverage for this step: [Y]%
-- Refactorings applied: [list]
-- Blockers or notes: [any issues or important notes]
+```text
+✅ Step $STEP_NUM Complete
 
-**CRITICAL**: All tests MUST pass before returning. If blocked after $MAX_ATTEMPTS iterations, explain blocker and request guidance.
+**Tests Written:** [X] tests (all passing)
+**Files Modified/Created:**
+- [file1] - [brief description of changes]
+- [file2] - [brief description]
+
+**Coverage:** [X]% for new code (target: $COVERAGE_TARGET%)
+
+**Constraint Compliance:** [✅ All respected | ⚠️ Clarification needed on: [item]]
+
+**Ready for:** Step [N+1]
 ```
+
+**If clarifications needed:**
+- Document specific questions
+- Pause execution
+- Wait for main TDD executor guidance
+
+**CRITICAL**:
+- Tests MUST be written BEFORE implementation (RED-GREEN-REFACTOR order)
+- Use flexible-testing-guide.md for AI-generated code assertions
+- Respect all implementation constraints
+- Reference SOPs via fallback chain (don't duplicate content)
+- Report progress clearly at each phase
+
+Execute TDD cycle now.
+```
+
+**Wait for TDD Executor Agent to complete this step before proceeding to next step.**
+
+**If agent requests clarification or reports constraint violations:**
+- Review concern with PM
+- Update constraints if needed
+- Re-run this step with clarified guidance
 
 #### Step N: Process Sub-Agent Results
 

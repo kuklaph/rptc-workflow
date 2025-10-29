@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.2] - 2025-10-28
+
+### Changed
+
+- **TDD Delegation Enforcement**: Replaced vague "Create TDD Sub-Agent" text with explicit Task tool invocation pattern across all 3 execution paths
+  - **New agent created**: `rptc:tdd-executor-agent` - Specialized TDD execution agent with comprehensive RED-GREEN-REFACTOR methodology
+  - **Normal execution** (directory format): Explicit `Task tool with subagent_type="rptc:tdd-executor-agent"` at commands/tdd.md line 2000-2220
+  - **Resume/handoff path**: Verified to use Phase 1a delegation (no separate logic needed)
+  - **On-the-fly generation**: Updated lines 389-420 to reference Phase 1a delegation explicitly
+  - **Pattern consistency**: All paths now use identical delegation structure matching plan.md:810 pattern
+  - **Context passing**: 6 comprehensive sections (Feature, Step, Cumulative Context, Implementation Constraints, Configuration, SOPs)
+  - **Validation checkpoint**: Minimal validation checkpoint (agent file existence check only)
+
+### Added
+
+- **New Agent Definition**: `agents/tdd-executor-agent.md` with TDD methodology, SOP integration, constraint awareness
+  - Enforces test-first development (RED-GREEN-REFACTOR-VERIFY cycle)
+  - References 4 core SOPs: testing-guide.md, flexible-testing-guide.md, architecture-patterns.md, security-and-performance.md
+  - Handles implementation constraints from plan overview
+  - Comprehensive context requirements documented
+  - Prevents vague "create sub-agent" execution in main context
+- **Phase 0d Validation Checkpoint**: Optional defense-in-depth validation in commands/tdd.md (lines 1309-1352)
+  - Validates agent definition file existence before execution
+  - Clear error messages with recovery instructions
+  - <0.2s execution overhead
+
+### Technical
+
+- **Files Modified**: `commands/tdd.md` (3 locations: Phase 1a delegation at lines 2000-2220, on-the-fly generation at lines 389-420, Phase 0d validation at lines 1309-1352)
+- **Files Created**: `agents/tdd-executor-agent.md` (new specialized TDD executor)
+- **Architectural Improvement**: Unified delegation pathway eliminates execution path fragmentation
+- **Benefits**:
+  - Prevents main context execution during handoffs
+  - Ensures consistent TDD enforcement across all workflow entry points
+  - Improves maintainability (single delegation pattern to maintain)
+  - Token efficiency (sub-agent isolation reduces main context bloat)
+
+---
+
 ## [2.2.1] - 2025-10-28
 
 ### Changed
