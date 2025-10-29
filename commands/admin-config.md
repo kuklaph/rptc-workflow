@@ -140,7 +140,6 @@ Then read configuration:
   - rptc.htmlReportTheme → HTML_THEME (default: "dark")
   - rptc.verificationMode → VERIFICATION_MODE (default: "focused")
   - rptc.tdgMode → TDG_MODE (default: "disabled")
-  - rptc.qualityGatesEnabled → QUALITY_GATES (default: "false")
   - rptc.discord.notificationsEnabled → DISCORD_ENABLED (default: "false")
 
 After extracting values, output directly:
@@ -158,7 +157,6 @@ Current Configuration:
   HTML Report Theme:     ${HTML_THEME}
   Verification Mode:     ${VERIFICATION_MODE}
   TDG Mode:              ${TDG_MODE}
-  Quality Gates:         ${QUALITY_GATES}
   Discord Notifications: ${DISCORD_ENABLED}
 ```
 

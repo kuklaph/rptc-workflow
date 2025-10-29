@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.5] - 2025-10-29
+
+### Fixed
+
+- **Configuration System**: `tdgMode` and `verificationMode` settings now properly loaded from `.claude/settings.json`
+  - `tdgMode` config loading added in Step 0a (previously only `--tdg` flag worked)
+  - `verificationMode` config loading added in Step 0a (previously non-functional)
+- **Phase 1c TDG Delegation**: Implemented missing Test-Driven Generation sub-agent delegation
+  - Generates ~50 comprehensive test scenarios when TDG enabled
+  - Augments planned tests with edge cases, error conditions, and variations
+  - Integration point between test validation and TDD execution
+- **Phase 1d Independent Verification**: Implemented previously orphaned Phase 3.75
+  - Catches test overfitting and validates intent fulfillment
+  - Executes after GREEN phase (tests pass), before moving to next step
+  - Checks: intent fulfillment, coverage gaps, test gaming detection
+  - Renumbered from Phase 3.75 to Phase 1d (architectural correction)
+
+### Removed
+
+- **Dead Code Cleanup**: Removed `qualityGatesEnabled` setting (8 locations, 4 files)
+  - Never used in any command (quality gates are non-negotiable)
+  - Cleaned from: admin-init.md, admin-config.md, admin-upgrade.md, README.md
+
+### Changed
+
+- **Documentation**: Updated Phase 3.75 references to Phase 1d in workflow guide and SOPs
+
+---
+
+
 ## [2.2.4] - 2025-10-29
 
 ### Refactored

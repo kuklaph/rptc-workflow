@@ -3654,7 +3654,7 @@ Plan reference: .rptc/plans/[feature-name].md#test-strategy
 
 **See Also**:
 - **`/rptc:plan`** (`commands/plan.md`) - Planning phase integration, test strategy specification
-- **`/rptc:tdd`** (`commands/tdd.md`) - TDD cycle execution, Phase 3.75 verification guidance
+- **`/rptc:tdd`** (`commands/tdd.md`) - TDD cycle execution, Phase 1d verification guidance
 - **`/rptc:commit`** (`commands/commit.md`) - Documentation verification before commit
 - **Master Efficiency Agent** (`agents/master-efficiency-agent.md`) - Quality review of flexible assertions
 - **Master Security Agent** (`agents/master-security-agent.md`) - Security validation of test strategies

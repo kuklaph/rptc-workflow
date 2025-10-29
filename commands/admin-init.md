@@ -261,7 +261,7 @@ if [ ! -f ".claude/settings.json" ]; then
   cat > .claude/settings.json <<'EOF'
 {
   "rptc": {
-    "_rptcVersion": "2.2.4",
+    "_rptcVersion": "2.2.5",
     "defaultThinkingMode": "think",
     "artifactLocation": ".rptc",
     "docsLocation": "docs",
@@ -272,7 +272,6 @@ if [ ! -f ".claude/settings.json" ]; then
     "htmlReportTheme": "dark",
     "verificationMode": "focused",
     "tdgMode": "disabled",
-    "qualityGatesEnabled": false,
     "discord": {
       "webhookUrl": "",
       "notificationsEnabled": false,
@@ -324,7 +323,7 @@ Merging RPTC configuration into existing .claude/settings.json...
 
 ```json
 "rptc": {
-  "_rptcVersion": "2.2.4",
+  "_rptcVersion": "2.2.5",
   "defaultThinkingMode": "think",
   "artifactLocation": ".rptc",
   "docsLocation": "docs",
@@ -335,7 +334,6 @@ Merging RPTC configuration into existing .claude/settings.json...
   "htmlReportTheme": "dark",
   "verificationMode": "focused",
   "tdgMode": "disabled",
-  "qualityGatesEnabled": false,
   "discord": {
     "webhookUrl": "",
     "notificationsEnabled": false,

@@ -85,7 +85,7 @@ If valid workspace found:
 
 ```bash
 # Plugin version (update this with each release)
-PLUGIN_VERSION="2.2.4"
+PLUGIN_VERSION="2.2.5"
 ```
 
 **Configuration Extraction** (replaced jq dependency with Read tool + Claude parsing):
@@ -282,7 +282,6 @@ Check which of these fields are missing in the rptc configuration:
 - rptc.testCoverageTarget
 - rptc.maxPlanningAttempts
 - rptc.customSopPath
-- rptc.qualityGatesEnabled
 - rptc.researchOutputFormat
 - rptc.htmlReportTheme
 - rptc.verificationMode
@@ -677,7 +676,6 @@ Add missing fields with these defaults (preserve existing values):
 - rptc.testCoverageTarget = 85
 - rptc.maxPlanningAttempts = 10
 - rptc.customSopPath = ".rptc/sop"
-- rptc.qualityGatesEnabled = false
 - rptc.researchOutputFormat = "html"
 - rptc.htmlReportTheme = "dark"
 - rptc.verificationMode = "focused"

@@ -116,6 +116,8 @@ Check for project-specific testing strategies or code style overrides.
    - `rptc.defaultThinkingMode` → THINKING_MODE (default: "think")
    - `rptc.artifactLocation` → ARTIFACT_LOC (default: ".rptc")
    - `rptc.maxPlanningAttempts` → MAX_ATTEMPTS (default: 10)
+   - `rptc.tdgMode` → TDG_CONFIG (default: "disabled")
+   - `rptc.verificationMode` → VERIFICATION_MODE (default: "focused")
    - `rptc.discord.notificationsEnabled` → DISCORD_ENABLED (default: false)
    - `rptc.discord.webhookUrl` → DISCORD_WEBHOOK (default: "")
    - `rptc.discord.verbosity` → DISCORD_VERBOSITY (default: "summary")
@@ -2068,6 +2070,162 @@ echo ""
 
 ---
 
+### Phase 1c: TDG Mode - Generate Comprehensive Test Suite
+
+**Condition**: Only execute if `RUN_TDG=true` (set in Phase 0c)
+
+**Purpose**: Generate ~50 comprehensive test scenarios to augment planned tests
+
+---
+
+#### Step 1: Check TDG Mode
+
+```bash
+if [ "$RUN_TDG" != "true" ]; then
+  # Skip TDG, proceed to normal TDD execution
+  echo "⏩ Skipping TDG phase (not enabled)"
+else
+  echo ""
+  echo "════════════════════════════════════════════════════════"
+  echo "  PHASE 1c: TEST-DRIVEN GENERATION (TDG)"
+  echo "════════════════════════════════════════════════════════"
+  echo ""
+  echo "Generating comprehensive test suite (~50 scenarios)..."
+  echo "Time: ~5 minutes"
+  echo ""
+fi
+```
+
+#### Step 2: Prepare TDG Context (If Enabled)
+
+**Only execute if TDG is enabled:**
+
+```bash
+if [ "$RUN_TDG" = "true" ]; then
+  # Load TDG template if exists
+  TDG_TEMPLATE_FILE="${CLAUDE_PLUGIN_ROOT}/templates/tdg-prompt.md"
+  if [ -f "$TDG_TEMPLATE_FILE" ]; then
+    TDG_TEMPLATE=$(cat "$TDG_TEMPLATE_FILE")
+  else
+    TDG_TEMPLATE="Generate comprehensive test scenarios covering edge cases, error conditions, and variations."
+  fi
+
+  # Extract current step's test scenarios from step file
+  STEP_TEST_SECTION="[Extract test scenarios section from current step file]"
+
+  echo "📋 Preparing TDG context for Step ${STEP_NUM}..."
+  echo ""
+fi
+```
+
+#### Step 3: Delegate to TDG Sub-Agent
+
+**Use Task tool to generate additional test scenarios:**
+
+If TDG is enabled, delegate to a general-purpose agent for test generation:
+
+```text
+# Only show this delegation if RUN_TDG=true
+
+Use the Task tool with subagent_type="general-purpose":
+
+Prompt:
+## Test-Driven Generation (TDG) Task
+
+You are tasked with generating comprehensive test scenarios to AUGMENT the planned tests for a TDD implementation step.
+
+## Feature Context
+
+**Feature**: [Feature name from overview]
+**Current Step**: Step [N] of [Total]
+**Step Purpose**: [What this step accomplishes]
+
+## Planned Test Scenarios (DO NOT DUPLICATE)
+
+The following tests are already planned:
+[List existing test scenarios from step file]
+
+## Your Task: Generate Additional Test Scenarios
+
+Generate approximately 50 additional test scenarios that:
+- DO NOT duplicate any of the planned tests above
+- Focus on edge cases (50-60% of generated tests)
+- Include error conditions (20-30% of generated tests)
+- Cover happy path variations (10-20% of generated tests)
+
+## Output Format
+
+Structure your output as:
+
+### Edge Cases
+1. Test: [scenario description]
+   Expected: [expected behavior]
+
+2. Test: [scenario description]
+   Expected: [expected behavior]
+
+[Continue for ~25-30 edge cases]
+
+### Error Conditions
+1. Test: [scenario description]
+   Expected: [error handling behavior]
+
+2. Test: [scenario description]
+   Expected: [error handling behavior]
+
+[Continue for ~10-15 error cases]
+
+### Happy Path Variations
+1. Test: [scenario description]
+   Expected: [successful behavior]
+
+2. Test: [scenario description]
+   Expected: [successful behavior]
+
+[Continue for ~5-10 variations]
+
+## Important Notes
+- Be specific and actionable
+- Focus on realistic scenarios
+- Consider performance implications
+- Think about concurrency if relevant
+- Include boundary conditions
+- Test state transitions
+- Verify cleanup/teardown scenarios
+
+Model: Use thinking mode from configuration (default: "think")
+```
+
+#### Step 4: Review and Integrate Generated Tests
+
+```bash
+if [ "$RUN_TDG" = "true" ]; then
+  echo ""
+  echo "✅ TDG Complete: Generated additional test scenarios"
+  echo ""
+  echo "Review generated tests:"
+  echo "  - Generated tests focus on: Edge cases, errors, variations"
+  echo "  - These AUGMENT (not replace) the planned tests"
+  echo "  - Total test coverage significantly increased"
+  echo ""
+
+  # Optional: Prompt for review
+  echo "⚠️  TDG Review Point"
+  echo ""
+  echo "Generated tests have been added to the test suite."
+  echo "The TDD sub-agent will implement both planned and generated tests."
+  echo ""
+  echo "Options:"
+  echo "  - Continue: Proceed with expanded test suite"
+  echo "  - Review: Examine generated tests before proceeding"
+  echo ""
+  echo "Proceeding with TDD implementation including all tests..."
+  echo ""
+fi
+```
+
+---
+
 #### Step N: Delegate to TDD Sub-Agent
 
 **Delegate to TDD Executor Agent** via Task tool:
@@ -2341,6 +2499,175 @@ Next: Step [N+1] - [Next step name]
 
 [If all steps complete:]
 All implementation steps complete! Proceeding to quality gates...
+```
+
+---
+
+## Phase 1d: Independent Verification (Post-GREEN)
+
+**Purpose**: Catch test overfitting and validate intent fulfillment after tests pass but before moving to next step or quality gates.
+
+**When Executed**: After each step's GREEN phase (tests pass), before proceeding to next step or quality gates
+
+**Configuration**: Controlled by `.claude/settings.json` → `rptc.verificationMode`
+- `"focused"` (default): Verify intent/coverage/overfitting only (<5 min)
+- `"disabled"`: Skip verification (for backward compatibility or speed)
+
+### Step 1: Check Verification Mode
+
+Check if verification is enabled (based on VERIFICATION_MODE loaded in Step 0a):
+
+```bash
+if [ "$VERIFICATION_MODE" = "disabled" ]; then
+  echo ""
+  echo "⏩ Verification: Disabled (config: verificationMode='disabled')"
+  echo "   Proceeding directly to next step..."
+  echo ""
+  # Continue to next step without verification
+else
+  echo ""
+  echo "════════════════════════════════════════════════════════"
+  echo "  PHASE 1d: INDEPENDENT VERIFICATION"
+  echo "════════════════════════════════════════════════════════"
+  echo ""
+  echo "Mode: $VERIFICATION_MODE"
+  echo "Purpose: Catch test overfitting and validate intent fulfillment"
+  echo "Time Limit: <5 minutes per step"
+  echo ""
+fi
+```
+
+### Step 2: Prepare Verification Context (if enabled)
+
+If verification is enabled, prepare context for verification:
+
+```text
+## Verification Context for Step $STEP_NUM
+
+**Step Name:** [Extract from current step]
+**Step Purpose:** [Extract from step file]
+
+## Planned Test Scenarios
+
+[Extract from step file "Tests to Write First" section]
+
+## Implementation Summary
+
+**Files Modified:** [List files modified in this step]
+**Files Created:** [List files created in this step]
+**Tests Status:** ✅ All tests passing
+**Coverage:** [X]% for this step
+
+## Verification Checklist
+
+Please perform the following verification checks:
+
+1. **Intent Fulfillment Check**:
+   - Does the implementation fully address the step's stated purpose?
+   - Are all acceptance criteria met?
+   - Any missing functionality?
+
+2. **Test Coverage Check**:
+   - Are all planned test scenarios actually implemented?
+   - Any edge cases missing from tests?
+   - Test-to-code ratio appropriate?
+
+3. **Overfitting Detection**:
+   - Does implementation hardcode expected test outputs?
+   - Any signs of "gaming" the tests?
+   - Is the code general-purpose or test-specific?
+
+4. **Code Quality Check**:
+   - Does the code follow project patterns?
+   - Any obvious inefficiencies or anti-patterns?
+   - Clear and maintainable?
+
+## Expected Output
+
+Return one of:
+- **PASS**: All checks pass, ready to proceed
+- **FAIL**: Critical issues found (specify which checks failed and why)
+- **NEEDS_CLARIFICATION**: Ambiguous requirements or edge cases need PM input
+```
+
+### Step 3: Delegate to Verification Sub-Agent (if enabled)
+
+If verification is enabled, delegate to a focused sub-agent:
+
+```markdown
+Use the Task tool with subagent_type="general-purpose":
+
+**Prompt:**
+You are an independent verification specialist. Review the implementation for Step $STEP_NUM against its requirements.
+
+[Include Verification Context from Step 2]
+
+Perform a focused verification (<5 minutes) checking:
+1. Intent fulfillment
+2. Test coverage completeness
+3. No test overfitting
+4. Basic code quality
+
+Return: PASS | FAIL | NEEDS_CLARIFICATION with brief explanation.
+
+**Thinking mode:** think (focused, fast verification)
+```
+
+### Step 4: Process Verification Result (if enabled)
+
+Handle the verification result:
+
+```bash
+# Parse verification result (if verification was performed)
+if [ "$VERIFICATION_MODE" != "disabled" ]; then
+  # Extract verification status from sub-agent response
+  VERIFICATION_STATUS="[Parse from sub-agent response]"
+
+  case "$VERIFICATION_STATUS" in
+    PASS)
+      echo ""
+      echo "✅ Verification: PASS"
+      echo "   All verification checks passed"
+      echo "   Step implementation validated independently"
+      echo ""
+      # Continue to next step normally
+      ;;
+
+    FAIL)
+      echo ""
+      echo "❌ Verification: FAIL"
+      echo ""
+      echo "[Display verification failure details]"
+      echo ""
+      echo "⚠️  Implementation requires rework based on verification findings."
+      echo ""
+      echo "Options:"
+      echo "1. Fix issues and re-run this step"
+      echo "2. Continue anyway (not recommended)"
+      echo "3. Get PM clarification"
+      echo ""
+      # Ask PM for decision on how to proceed
+      ;;
+
+    NEEDS_CLARIFICATION)
+      echo ""
+      echo "⚠️  Verification: Needs Clarification"
+      echo ""
+      echo "[Display clarification needs]"
+      echo ""
+      echo "Requesting PM review for ambiguous requirements..."
+      echo ""
+      # Ask PM for clarification before proceeding
+      ;;
+
+    *)
+      echo "⚠️  Unexpected verification result: $VERIFICATION_STATUS"
+      echo "   Proceeding with caution..."
+      ;;
+  esac
+fi
+
+echo "Proceeding to next phase..."
 ```
 
 ---
@@ -2902,215 +3229,7 @@ notify_discord "✨ **TDD Execution Complete**\nPlan: \`${PLAN_NAME}\`\nAll test
 
 ---
 
-### Phase 3.75: Independent Verification (Roadmap #18)
 
-**Purpose**: Catch test overfitting and validate intent fulfillment before proceeding to refactoring.
-
-**When Executed**: After GREEN phase (tests pass), before documentation and PM review
-
-**Configuration**: Controlled by `.claude/settings.json` → `rptc.verificationMode`
-- `"focused"` (default): Verify intent/coverage/overfitting only (<5 min)
-- `"disabled"`: Skip verification (backward compatibility)
-- `"exhaustive"`: Full verification (future enhancement, not yet implemented)
-
-**Anthropic 7-Step Workflow Integration**: This implements Step 6 (Verify Before Refactoring)
-
----
-
-#### Step 1: Check Verification Mode
-
-```bash
-# Claude: Extract verification mode from .claude/settings.json (use Read tool)
-# Store in VERIFICATION_MODE variable (default: "focused" if field missing)
-# Read(".claude/settings.json")
-# Extract: rptc.verificationMode → VERIFICATION_MODE
-
-if [ "$VERIFICATION_MODE" = "disabled" ]; then
-  echo ""
-  echo "⏩ Verification: Disabled (config: verificationMode='disabled')"
-  echo "   Proceeding directly to documentation phase..."
-  echo ""
-  # Skip to next phase
-  continue
-fi
-
-echo ""
-echo "════════════════════════════════════════════════════════"
-echo "  PHASE 3.75: INDEPENDENT VERIFICATION"
-echo "════════════════════════════════════════════════════════"
-echo ""
-echo "Mode: $VERIFICATION_MODE"
-echo "Purpose: Catch test overfitting and validate intent fulfillment"
-echo "Time Limit: <5 minutes per step"
-echo ""
-```
-
-#### Step 2: Prepare Verification Context
-
-```bash
-# Collect context for verification sub-agent
-VERIFICATION_CONTEXT=$(cat <<EOF
-## Step Context
-
-**Step Number:** $STEP_NUM
-**Step Purpose:** $(sed -n '/^## Purpose/,/^## /p' "$STEP_FILE" | head -n -1)
-
-## Planned Test Scenarios
-
-$(sed -n '/^## Tests to Write First/,/^## Files/p' "$STEP_FILE" | head -n -1)
-
-## Implementation Summary
-
-**Files Modified:**
-$(git diff --name-only HEAD 2>/dev/null || echo "Unable to detect changes")
-
-**Tests Passing:**
-[Test results from Phase 3 GREEN - all tests passed]
-
-## Verification Task
-
-Please complete the verification checklist:
-
-$(cat "${CLAUDE_PLUGIN_ROOT}/templates/verification-checklist.md")
-
-**Note on Test Assertions**: When reviewing tests, consider whether flexible assertions are appropriate for AI-generated or non-deterministic outputs:
-
-- **Use exact assertions** for: Security logic, API contracts, performance benchmarks, compliance requirements
-- **Consider flexible assertions** for: AI-generated text, code variations, reasoning explanations, multiple valid solution paths
-- **Decision framework**: See \`flexible-testing-guide.md\` (SOP) for guidance on when to use semantic similarity, behavioral testing, or exact assertions
-
-**Key Principle**: Exact assertions are the default. Flexible assertions require explicit justification and documentation.
-
----
-
-Review ONLY:
-1. Intent fulfillment (does implementation match step purpose?)
-2. Coverage gaps (are all planned tests implemented?)
-3. Overfitting detection (any hardcoded test gaming?)
-
-Time limit: 5 minutes
-EOF
-)
-```
-
-#### Step 3: Delegate to Verification Sub-Agent
-
-```bash
-# Use Task tool with focused verification sub-agent
-echo "🔍 Delegating to Verification Sub-Agent..."
-echo ""
-echo "Verification checks:"
-echo "  1. Intent Fulfillment (does implementation match plan purpose?)"
-echo "  2. Coverage Gaps (are all planned tests implemented?)"
-echo "  3. Overfitting Detection (any hardcoded test gaming?)"
-echo ""
-
-# Delegate using Task tool
-# In actual execution, this uses:
-# Task(prompt: VERIFICATION_CONTEXT, type: "verification", thinking_mode: "think")
-#
-# For documentation purposes, we describe expected behavior:
-# - Sub-agent receives full context (step purpose, planned tests, implementation files)
-# - Sub-agent completes verification checklist
-# - Returns structured result (PASS/FAIL/NEEDS_CLARIFICATION)
-
-# Simulate sub-agent call (actual implementation uses Task tool)
-# VERIFICATION_RESULT=$(task_delegation "$VERIFICATION_CONTEXT" "verification" "think")
-```
-
-#### Step 4: Process Verification Result
-
-```bash
-# Parse verification result
-VERIFICATION_STATUS=$(echo "$VERIFICATION_RESULT" | grep "Verification Result:" | awk '{print $NF}')
-
-case "$VERIFICATION_STATUS" in
-  PASS)
-    echo "✅ Verification: PASS"
-    echo ""
-    echo "$VERIFICATION_RESULT"
-    echo ""
-    echo "✅ All verification checks passed. Proceeding to documentation phase..."
-    echo ""
-    ;;
-
-  FAIL)
-    echo "❌ Verification: FAIL"
-    echo ""
-    echo "$VERIFICATION_RESULT"
-    echo ""
-    echo "❌ Verification identified gaps. Implementation requires rework."
-    echo ""
-    echo "Please review verification feedback above and address issues:"
-    echo "  1. Fix intent fulfillment gaps"
-    echo "  2. Add missing test scenarios"
-    echo "  3. Remove hardcoded test gaming"
-    echo ""
-    read -p "Continue after fixes? (y/n): " CONTINUE_VERIFY
-    if [ "$CONTINUE_VERIFY" != "y" ]; then
-      echo ""
-      echo "Pausing for implementation rework."
-      echo "Resume with: /rptc:helper-resume-plan"
-      echo ""
-      exit 0
-    fi
-    ;;
-
-  NEEDS_CLARIFICATION)
-    echo "⚠️  Verification: Needs Clarification"
-    echo ""
-    echo "$VERIFICATION_RESULT"
-    echo ""
-    echo "Verification sub-agent flagged ambiguities. PM review required."
-    echo ""
-    read -p "Proceed with manual PM review? (y/n): " PM_REVIEW
-    if [ "$PM_REVIEW" != "y" ]; then
-      echo ""
-      echo "Pausing for PM clarification."
-      echo "Resume with: /rptc:helper-resume-plan"
-      echo ""
-      exit 0
-    fi
-    echo ""
-    echo "Manual PM review approved. Proceeding..."
-    echo ""
-    ;;
-
-  *)
-    echo "⚠️  Verification: Unknown Result"
-    echo ""
-    echo "Verification sub-agent returned unexpected status: $VERIFICATION_STATUS"
-    echo ""
-    echo "Verification output:"
-    echo "$VERIFICATION_RESULT"
-    echo ""
-    echo "Falling back to manual PM review..."
-    echo ""
-    read -p "Manual review complete? (y/n): " MANUAL_REVIEW
-    if [ "$MANUAL_REVIEW" != "y" ]; then
-      echo ""
-      echo "Pausing for manual review."
-      echo "Resume with: /rptc:helper-resume-plan"
-      echo ""
-      exit 0
-    fi
-    ;;
-esac
-```
-
-#### Step 5: Log Verification Completion
-
-```bash
-echo ""
-echo "✅ Phase 3.75 Complete: Independent Verification"
-echo "   Status: $VERIFICATION_STATUS"
-echo "   Time: $(date '+%Y-%m-%d %H:%M:%S')"
-echo ""
-echo "Proceeding to Documentation Phase..."
-echo ""
-```
-
----
 
 ### Phase 3.5: Master Documentation Specialist Agent (AUTOMATIC)
 

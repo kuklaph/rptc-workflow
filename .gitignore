@@ -41,3 +41,7 @@ __pycache__/
 
 # OS files
 desktop.ini
+
+# Claude settings
+.claude/settings.local.json  # Local overrides
+.claude/.env*               # Secrets

@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 2.2.4
+**Version**: 2.2.5
 **Status**: Beta
 **License**: MIT
 
@@ -427,7 +427,6 @@ All RPTC configuration lives under the `rptc` namespace in `.claude/settings.jso
     "htmlReportTheme": "dark",
     "verificationMode": "focused",
     "tdgMode": "disabled",
-    "qualityGatesEnabled": false,
     "discord": {
       "webhookUrl": "",
       "notificationsEnabled": false,
@@ -451,7 +450,6 @@ All RPTC configuration lives under the `rptc` namespace in `.claude/settings.jso
 | `htmlReportTheme` | `"dark"` | HTML report theme: `"dark"` (GitHub Dark with WCAG AA compliance) |
 | `verificationMode` | `"focused"` | Independent verification after GREEN phase: `"focused"` (intent/coverage/overfitting only, <5 min), `"disabled"` (skip verification), `"exhaustive"` (future enhancement) |
 | `tdgMode` | `"disabled"` | Test-Driven Generation mode: `"disabled"` (default, use --tdg flag to enable), `"enabled"` (always use TDG), `"auto"` (future: heuristic-based) |
-| `qualityGatesEnabled` | `false` | Enable quality gate checkpoints (efficiency & security reviews) during TDD phase |
 | `discord.webhookUrl` | `""` | Discord webhook URL for notifications (format: `https://discord.com/api/webhooks/...`) |
 | `discord.notificationsEnabled` | `false` | Enable/disable Discord workflow notifications |
 | `discord.verbosity` | `"summary"` | Notification detail level: `"summary"` (milestones only), `"detailed"` (phase updates), `"verbose"` (all steps) |
