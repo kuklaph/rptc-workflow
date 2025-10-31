@@ -109,7 +109,7 @@ notify_discord() {
 - Only ONE task should be "in_progress" at a time
 - When user requests save (later message): dynamically add "Save research report" todo
 
-## Step 0d: Intelligent Query Analysis
+## Step 0d: Intelligent Query Analysis and Scope Confirmation
 
 **Analyze the research topic/query to determine research scope.**
 
@@ -136,25 +136,69 @@ notify_discord() {
    - Example: "How does our auth compare to OWASP standards?"
    - Example: "Should we refactor to use latest Next.js patterns?"
 
-**Classification Logic:**
+**Initial Classification Logic:**
 
 ```text
 IF (query contains codebase keywords AND web keywords):
-  RESEARCH_SCOPE = "hybrid"
+  INITIAL_SCOPE = "hybrid"
 ELSE IF (query contains web keywords):
-  RESEARCH_SCOPE = "web"
+  INITIAL_SCOPE = "web"
 ELSE IF (query contains codebase keywords):
-  RESEARCH_SCOPE = "codebase"
+  INITIAL_SCOPE = "codebase"
 ELSE:
-  RESEARCH_SCOPE = "codebase" (conservative default)
+  INITIAL_SCOPE = "codebase" (conservative default)
 ```
 
-**Set Variable**: RESEARCH_SCOPE = "codebase" | "web" | "hybrid"
+**Opportunity 1: Research Scope Confirmation Menu**
 
-**Display Classification**:
+Use AskUserQuestion tool to confirm research scope:
+
+```json
+{
+  "questions": [
+    {
+      "question": "Confirm research scope for '${TOPIC}' (detected: ${INITIAL_SCOPE})",
+      "header": "Scope",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Codebase",
+          "description": "Search local codebase only"
+        },
+        {
+          "label": "Web",
+          "description": "Web research only (via MCP or simulated)"
+        },
+        {
+          "label": "Both",
+          "description": "Codebase + Web research"
+        },
+        {
+          "label": "Auto",
+          "description": "Accept detected scope: ${INITIAL_SCOPE}"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Process selection:**
+
+```bash
+# Capture response
+RESEARCH_SCOPE="${answers[scope]}"
+
+# Handle "Auto" selection
+if [ "$RESEARCH_SCOPE" = "Auto" ]; then
+  RESEARCH_SCOPE="$INITIAL_SCOPE"
+fi
+```
+
+**Display Confirmation**:
 ```text
-📊 Query Analysis:
-  Research scope: [RESEARCH_SCOPE value]
+📊 Research Configuration:
+  Scope: [RESEARCH_SCOPE value]
   Agent(s): [Explore | master-research-agent | Both]
 ```
 
@@ -203,22 +247,150 @@ Load SOPs using fallback chain (highest priority first):
    - Ask: "Any specific aspects to focus on?"
    - Ask: "What will you use this research for?"
 
-2. **Scope Clarification** (only if needed)
-   - Ask: "Any constraints I should know about?"
-   - Ask: "Depth needed: Quick overview or comprehensive analysis?"
+2. **Opportunity 2: Research Depth Selection Menu**
+
+Use AskUserQuestion tool to select research depth:
+
+```json
+{
+  "questions": [
+    {
+      "question": "Select research depth level for '${TOPIC}'",
+      "header": "Depth",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Quick",
+          "description": "Surface-level overview (5-10 min)"
+        },
+        {
+          "label": "Standard",
+          "description": "Balanced depth (15-30 min) - recommended"
+        },
+        {
+          "label": "Comprehensive",
+          "description": "Deep dive with examples (45+ min)"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Process selection:**
+
+```bash
+# Capture response
+RESEARCH_DEPTH="${answers[depth]}"
+
+# Default to Standard if not specified
+if [ -z "$RESEARCH_DEPTH" ]; then
+  RESEARCH_DEPTH="Standard"
+fi
+```
 
 3. **Context Gathering** (based on RESEARCH_SCOPE):
    - If codebase research: "Which parts of the codebase should I focus on?"
    - If web research: "Any preferred sources or examples?"
    - If hybrid: Ask both
 
+**Opportunity 3: Research Focus Areas Menu (MULTI-SELECT)**
+
+Use AskUserQuestion tool to select research focus areas (multiple selections allowed):
+
+```json
+{
+  "questions": [
+    {
+      "question": "Select research focus areas for '${TOPIC}' (multiple selections allowed)",
+      "header": "Focus Areas",
+      "multiSelect": true,
+      "options": [
+        {
+          "label": "Implementation",
+          "description": "How to implement this feature"
+        },
+        {
+          "label": "Architecture",
+          "description": "Architectural patterns and structure"
+        },
+        {
+          "label": "Comparison",
+          "description": "Compare different approaches"
+        },
+        {
+          "label": "Performance",
+          "description": "Performance considerations"
+        },
+        {
+          "label": "Security",
+          "description": "Security best practices"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Process selection:**
+
+```bash
+# Capture response (comma-separated string or array)
+RESEARCH_FOCUS_AREAS="${answers[focus_areas]}"
+
+# Validate at least one selection
+if [ -z "$RESEARCH_FOCUS_AREAS" ]; then
+  echo "⚠️ No focus areas selected, defaulting to all areas"
+  RESEARCH_FOCUS_AREAS="Implementation,Architecture,Comparison,Performance,Security"
+fi
+
+# Convert to array for iteration if needed
+IFS=',' read -ra FOCUS_ARRAY <<< "$RESEARCH_FOCUS_AREAS"
+```
+
 4. **Manual Simulation Validation** (Optional but Recommended)
 
    For features involving data processing, algorithms, or complex logic:
 
-   **Ask PM**: "Would you like to manually simulate the behavior before planning?"
+**Opportunity 4: Manual Simulation Decision Menu**
 
-   **If PM says yes:**
+Use AskUserQuestion tool to confirm manual simulation:
+
+```json
+{
+  "questions": [
+    {
+      "question": "Enable manual research simulation for '${TOPIC}'?",
+      "header": "Simulation",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Yes",
+          "description": "Show interactive simulation dialog"
+        },
+        {
+          "label": "No",
+          "description": "Auto-generate simulated research (default)"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Process selection:**
+
+```bash
+# Capture response
+MANUAL_SIMULATION="${answers[simulation]}"
+
+# Default to No if not specified
+if [ -z "$MANUAL_SIMULATION" ]; then
+  MANUAL_SIMULATION="No"
+fi
+```
+
+   **If MANUAL_SIMULATION = "Yes":**
 
    a. **Identify Simulation Inputs**:
       - Ask: "Do you have real example inputs we can use for simulation?"
@@ -510,19 +682,58 @@ User can respond in next message if interested.
 
 **This phase only executes if user responds to casual save offer.**
 
-### Step 5a: Parse Save Request
+### Step 5a: Parse Save Request and Format Selection
 
-Detect format preference from user's message:
+**Opportunity 5: Research Output Format Menu**
 
-**Format detection patterns:**
+Use AskUserQuestion tool to select output format:
+
+```json
+{
+  "questions": [
+    {
+      "question": "Select research output format for '${TOPIC}'",
+      "header": "Format",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "HTML",
+          "description": "Generate HTML report (if skill available) - recommended"
+        },
+        {
+          "label": "Markdown",
+          "description": "Markdown only"
+        },
+        {
+          "label": "Both",
+          "description": "Both HTML and Markdown"
+        },
+        {
+          "label": "Skip",
+          "description": "Skip report generation"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Process selection:**
+
+```bash
+# Capture response
+OUTPUT_FORMAT="${answers[format]}"
+
+# Default to HTML if not specified
+if [ -z "$OUTPUT_FORMAT" ]; then
+  OUTPUT_FORMAT="HTML"
+fi
+```
+
+**Legacy format detection (if not using menu):**
 - "save as html" OR "html" → format=html
 - "save as md" OR "markdown" OR "md" → format=md
 - "both" → format=both
-
-**If format unclear** (e.g., "yes", "save it", "please save"):
-Ask: "Save as HTML or Markdown? (or both)"
-
-Wait for clarification before proceeding.
 
 ### Step 5b: Acknowledge and Add Todo
 
@@ -569,13 +780,69 @@ TOPIC_SLUG=$(echo "${RESEARCH_TOPIC}" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' 
 OUTPUT_DIR="${ARTIFACT_LOC}/research/${TOPIC_SLUG}"
 ```
 
-**Handle duplicates:**
-If directory exists, ask user:
-- Overwrite existing?
-- Create timestamped version?
-- Cancel save?
+**Opportunity 6: Duplicate Directory Handling Menu**
 
-If timestamped or first time:
+If directory already exists:
+
+```bash
+if [ -d "$OUTPUT_DIR" ]; then
+```
+
+Use AskUserQuestion tool to handle duplicate:
+
+```json
+{
+  "questions": [
+    {
+      "question": "Research directory already exists: ${OUTPUT_DIR}. How to proceed?",
+      "header": "Duplicate",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Overwrite",
+          "description": "Delete existing and create new"
+        },
+        {
+          "label": "Timestamp",
+          "description": "Create new with timestamp suffix (recommended)"
+        },
+        {
+          "label": "Cancel",
+          "description": "Abort research save"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Process selection:**
+
+```bash
+  # Capture response
+  DUPLICATE_ACTION="${answers[duplicate]}"
+
+  case "$DUPLICATE_ACTION" in
+    "Overwrite")
+      rm -rf "$OUTPUT_DIR"
+      mkdir -p "$OUTPUT_DIR"
+      echo "♻️ Overwriting existing research directory"
+      ;;
+    "Timestamp")
+      TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+      OUTPUT_DIR="${OUTPUT_DIR}-${TIMESTAMP}"
+      mkdir -p "$OUTPUT_DIR"
+      echo "📁 Creating timestamped directory: ${OUTPUT_DIR}"
+      ;;
+    "Cancel")
+      echo "❌ Research save cancelled by user"
+      exit 0
+      ;;
+  esac
+fi
+```
+
+If directory doesn't exist (first time):
 ```bash
 mkdir -p "${OUTPUT_DIR}"
 ```

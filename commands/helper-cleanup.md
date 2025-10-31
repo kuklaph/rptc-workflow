@@ -1,5 +1,5 @@
 ---
-description: Review and cleanup completed plans from $ARTIFACT_LOC/plans/
+description: Interactive cleanup of completed plans with batch and smart suggestion modes
 ---
 
 # RPTC Helper: Cleanup Completed Plans
@@ -78,22 +78,137 @@ For each completed plan found:
 
 ## Step 3: Interactive Review
 
-For each plan, ask user what to do:
+### Batch Strategy Selection (Opportunity 49)
+
+First, ask user how they want to review completed plans:
+
+Use the AskUserQuestion tool:
+
+```markdown
+AskUserQuestion(
+  questions: [{
+    question: "How would you like to review [N] completed plans?",
+    header: "Cleanup",
+    multiSelect: false,
+    options: [
+      {
+        label: "Individual",
+        description: "Review each plan individually - Decide for each plan"
+      },
+      {
+        label: "ArchiveAll",
+        description: "Archive all completed plans - Move all to complete/"
+      },
+      {
+        label: "Smart",
+        description: "Use smart suggestions (auto-categorize) - AI categorization"
+      },
+      {
+        label: "Preview",
+        description: "Show preview list first - See all plans before deciding"
+      }
+    ]
+  }]
+)
+```
+
+**Response handling**:
+
+Capture response to variable `BATCH_DECISION`.
+
+**If `ArchiveAll` selected**:
+
+```bash
+# Move all plans to complete/ directory
+mkdir -p "$ARTIFACT_LOC/complete"
+
+for plan in [COMPLETED_PLANS]; do
+  mv "$ARTIFACT_LOC/plans/$plan" "$ARTIFACT_LOC/complete/"
+done
+
+echo "✅ Archived [N] plans to $ARTIFACT_LOC/complete/"
+```
+
+**STOP EXECUTION** - Skip to Step 5 (Summary)
+
+**If `Smart` selected**:
+
+Analyze each plan and auto-categorize:
+
+- Plans completed > 30 days ago → Archive automatically
+- Plans with "architecture"/"design decision" → Prompt to promote
+- Plans completed < 7 days ago → Keep automatically
+- Edge cases → Prompt user for decision
+
+Then skip to Step 5 (Summary).
+
+**If `Preview` selected**:
+
+Show detailed list of all plans with metadata, then loop back to this menu.
+
+**If `Individual` selected**:
+
+Continue to per-plan review below.
+
+---
+
+### Per-Plan Review (Individual Mode)
+
+For each plan, show preview and ask user what to do:
 
 ```text
 📄 Plan: [plan-name].md
 
 [Show first 20 lines as preview]
-
-Options:
-1. [k] Keep in $ARTIFACT_LOC/plans/ (no action)
-2. [a] Archive to $ARTIFACT_LOC/complete/
-3. [p] Promote to $DOCS_LOC/decisions/
-4. [d] Delete (cannot be undone)
-5. [s] Skip (review later)
-
-What should we do with this plan? [k/a/p/d/s]:
 ```
+
+Use the AskUserQuestion tool:
+
+```markdown
+AskUserQuestion(
+  questions: [{
+    question: "What should we do with [plan-name].md?",
+    header: "Action",
+    multiSelect: false,
+    options: [
+      {
+        label: "Keep",
+        description: "[k] Keep in plans/ (no action) - Leave in plans directory"
+      },
+      {
+        label: "Archive",
+        description: "[a] Archive to complete/ - Move to completed plans"
+      },
+      {
+        label: "Promote",
+        description: "[p] Promote to docs/decisions/ - Make permanent documentation"
+      },
+      {
+        label: "Delete",
+        description: "[d] Delete permanently - Remove file (cannot undo)"
+      },
+      {
+        label: "Skip",
+        description: "[s] Skip (review later) - Decide later"
+      }
+    ]
+  }]
+)
+```
+
+**Response handling**:
+
+Capture response to variable `PLAN_ACTION`.
+
+**If `Keep` selected**: Continue to next plan (no action)
+
+**If `Archive` selected**: Execute Archive action (Step 4)
+
+**If `Promote` selected**: Execute Promote action (Step 4)
+
+**If `Delete` selected**: Continue to Delete Confirmation (below)
+
+**If `Skip` selected**: Continue to next plan (no action)
 
 ## Step 4: Execute Actions
 
@@ -121,14 +236,51 @@ echo "   mv $ARTIFACT_LOC/plans/[name].md $ARTIFACT_LOC/complete/"
 
 ### Delete (d)
 
-```bash
-# Ask for confirmation
-echo "⚠️  Are you sure? This cannot be undone. [y/N]:"
+**Delete Confirmation (Opportunity 51 - CRITICAL SAFETY GATE)**:
 
-# If confirmed:
-rm $ARTIFACT_LOC/plans/[name].md
-echo "✅ Deleted [name].md"
+Use the AskUserQuestion tool:
+
+```markdown
+AskUserQuestion(
+  questions: [{
+    question: "⚠️ Delete [name].md permanently? This cannot be undone.",
+    header: "Delete?",
+    multiSelect: false,
+    options: [
+      {
+        label: "Confirm",
+        description: "Yes, delete permanently - Remove file"
+      },
+      {
+        label: "Cancel",
+        description: "No, keep the file - Don't delete"
+      }
+    ]
+  }]
+)
 ```
+
+**Response handling**:
+
+Capture response to variable `DELETE_CONFIRM`.
+
+**If `Confirm` selected**:
+
+```bash
+rm "$ARTIFACT_LOC/plans/[name].md"
+echo "✅ Deleted [name].md permanently"
+
+# Log deletion for audit trail
+echo "$(date): Deleted [name].md" >> "$ARTIFACT_LOC/cleanup.log"
+```
+
+**If `Cancel` selected**:
+
+```text
+ℹ️  Deletion cancelled - keeping [name].md
+```
+
+Continue to next plan.
 
 ### Keep or Skip
 
@@ -186,6 +338,7 @@ When reviewing a plan, provide smart suggestions based on content:
 
 ## Notes
 
-- **Batch mode**: If user says "archive all" or "promote all", process all plans with that action (but confirm first)
+- **Batch mode**: Implemented via Step 3 interactive menu (archive all, keep all, smart suggestions, or individual review)
+- **Smart suggestions**: AI analyzes content and recommends actions based on plan age, complexity, and significance
 - **Undo**: Remind user that git tracks changes, so accidental deletions can be recovered if committed
 - **Frequency**: Suggest running this command monthly or when `$ARTIFACT_LOC/plans/` has > 10 completed plans

@@ -238,9 +238,126 @@ Based on comprehensive analysis:
 **Ready for**: [Very specific task recommendations based on deep understanding]
 ```
 
-### 11. Code Complexity Assessment (Optional Comprehensive Deep-Dive)
+### 11. Complexity Analysis Focus (Optional)
+
+Before running comprehensive complexity assessment, let user select focus areas:
+
+```markdown
+AskUserQuestion(
+  question: "Which complexity analysis areas should we explore?",
+  header: "Analysis",
+  options: [
+    {
+      label: "Skip complexity assessment",
+      description: "Skip Section 12 entirely, show final summary",
+      value: "skip"
+    },
+    {
+      label: "Run full complexity assessment",
+      description: "Execute all 6 analysis areas (15-30 min)",
+      value: "full"
+    },
+    {
+      label: "File Size Analysis",
+      description: "Detect files >500 lines, modularity issues",
+      value: "file_size"
+    },
+    {
+      label: "Function Complexity Analysis",
+      description: "Cyclomatic complexity, function length",
+      value: "functions"
+    },
+    {
+      label: "Abstraction Depth Analysis",
+      description: "Inheritance chains, premature abstractions",
+      value: "abstractions"
+    },
+    {
+      label: "Code Duplication Detection",
+      description: "DRY violations, copy-paste patterns",
+      value: "duplication"
+    },
+    {
+      label: "Dependency Complexity Analysis",
+      description: "Import counts, circular dependencies",
+      value: "dependencies"
+    },
+    {
+      label: "Test-to-Code Ratio Analysis",
+      description: "Coverage ratio, test quality",
+      value: "tests"
+    }
+  ],
+  multiSelect: true
+)
+```
+
+Capture response in `ANALYSIS_AREAS` variable (array for multi-select).
+
+**Handle Selection:**
+
+```bash
+if [[ "$ANALYSIS_AREAS" == "skip" ]]; then
+  echo ""
+  echo "⏭️ Skipping complexity assessment..."
+  echo ""
+  # Jump to final summary (Section 10 content)
+
+elif [[ "$ANALYSIS_AREAS" == "full" ]]; then
+  echo ""
+  echo "Running full complexity assessment..."
+  echo ""
+  # Execute all 6 sections (existing Section 12 content)
+  # Lines 247-661: All complexity metrics
+
+else
+  echo ""
+  echo "Running selected complexity analyses..."
+  echo ""
+
+  # Execute selected areas only
+  if [[ " ${ANALYSIS_AREAS[@]} " =~ " file_size " ]]; then
+    echo "### File Size Distribution"
+    # Execute File Size Analysis section (lines 247-275)
+  fi
+
+  if [[ " ${ANALYSIS_AREAS[@]} " =~ " functions " ]]; then
+    echo ""
+    echo "### Function Complexity"
+    # Execute Function Complexity section (lines 276-308)
+  fi
+
+  if [[ " ${ANALYSIS_AREAS[@]} " =~ " abstractions " ]]; then
+    echo ""
+    echo "### Abstraction Depth"
+    # Execute Abstraction Depth section (lines 309-336)
+  fi
+
+  if [[ " ${ANALYSIS_AREAS[@]} " =~ " duplication " ]]; then
+    echo ""
+    echo "### Code Duplication"
+    # Execute Duplication Detection section (lines 337-378)
+  fi
+
+  if [[ " ${ANALYSIS_AREAS[@]} " =~ " dependencies " ]]; then
+    echo ""
+    echo "### Dependency Complexity"
+    # Execute Dependency Complexity section (lines 379-417)
+  fi
+
+  if [[ " ${ANALYSIS_AREAS[@]} " =~ " tests " ]]; then
+    echo ""
+    echo "### Test-to-Code Ratio"
+    # Execute Test Ratio section (lines 418-449)
+  fi
+fi
+```
+
+### 12. Code Complexity Assessment (Conditional)
 
 Automated analysis to identify technical debt and AI-generated over-engineering.
+
+**Note:** This section executes based on user selection in Step 11.
 
 #### Complexity Metrics
 

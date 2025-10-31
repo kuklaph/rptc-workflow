@@ -55,8 +55,54 @@ Existing Steps: [N]
 
 Test Strategy: [summary]
 Acceptance Criteria: [summary]
+```
 
-What would you like to update?
+**Opportunity 57: Update Type Selection**
+
+Use the AskUserQuestion tool to present an interactive menu:
+
+```json
+{
+  "questions": [
+    {
+      "question": "What aspect of the plan needs updating?",
+      "header": "Update",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Steps",
+          "description": "Add or modify implementation steps - Change step structure"
+        },
+        {
+          "label": "Tests",
+          "description": "Update test strategy - Modify test scenarios"
+        },
+        {
+          "label": "Criteria",
+          "description": "Change acceptance criteria - Update success criteria"
+        },
+        {
+          "label": "All",
+          "description": "Multiple changes needed - Several updates"
+        },
+        {
+          "label": "Custom",
+          "description": "Something else - Different type of change"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Capture the response to variable `UPDATE_TYPE` and use conditional logic to guide subsequent questions:
+
+- If "Steps": Focus on step modifications (proceed to Opportunity 58)
+- If "Tests": Focus on test strategy updates (skip step modification questions)
+- If "Criteria": Focus on acceptance criteria (skip step modification questions)
+- If "All": Ask all follow-up questions
+- If "Custom": Fall back to open-ended text input
+
 ```
 
 ### 2. Understand Changes Needed
@@ -74,7 +120,54 @@ What would you like to update?
 
 **Clarify scope**:
 
-- Ask: "Should this be new steps or modify existing?"
+**Opportunity 58: Step Modification Type** (only show if `UPDATE_TYPE` was "Steps" or "All")
+
+Use the AskUserQuestion tool to present an interactive menu:
+
+```json
+{
+  "questions": [
+    {
+      "question": "How should the steps be updated?",
+      "header": "Steps",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Add",
+          "description": "Add new steps - Insert additional steps"
+        },
+        {
+          "label": "Modify",
+          "description": "Modify existing steps - Change current steps"
+        },
+        {
+          "label": "Remove",
+          "description": "Remove steps - Delete steps"
+        },
+        {
+          "label": "Reorder",
+          "description": "Reorder steps - Change sequence"
+        },
+        {
+          "label": "Mixed",
+          "description": "Combination of changes - Multiple modifications"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Capture the response to variable `STEP_MOD_TYPE` and use conditional logic:
+
+- If "Add": Ask where to insert and what new step content should be
+- If "Modify": Present list of existing steps for selection
+- If "Remove": Present list with warning about dependencies
+- If "Reorder": Show current order and ask for new ordering
+- If "Mixed": Ask follow-up questions for each modification type
+
+Additional clarifying questions:
+
 - Ask: "Any new tests needed?"
 - Ask: "Impact on acceptance criteria?"
 
@@ -131,13 +224,50 @@ Type "yes" to apply, or provide modifications.
 - [Z] tests updated
 - Test strategy: [changed/unchanged]
 - Acceptance criteria: [changed/unchanged]
-
-**Do you approve these updates?**
-Type "yes" or "approved" to save updated plan.
-Type "modify" for additional changes.
-
-Waiting for your sign-off...
 ```
+
+**Opportunity 59: PM Approval**
+
+Use the AskUserQuestion tool to present an interactive menu:
+
+```json
+{
+  "questions": [
+    {
+      "question": "Do you approve these plan updates?",
+      "header": "Approve",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Approved",
+          "description": "✅ Yes, save the updated plan - Accept changes"
+        },
+        {
+          "label": "Modify",
+          "description": "📝 Make more changes - Continue editing"
+        },
+        {
+          "label": "Review",
+          "description": "👀 Review full updated plan - See complete plan"
+        },
+        {
+          "label": "Cancel",
+          "description": "❌ Cancel all updates - Discard changes"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Capture the response to variable `PM_APPROVAL` and use conditional logic:
+
+- If "Approved": Proceed to Step 6 (Save Updated Plan)
+- If "Modify": Return to Step 3 (Draft Plan Updates) with current state preserved
+- If "Review": Display complete plan with all updates, then re-ask approval question
+- If "Cancel": Exit without saving, display cancellation message
+
+**CRITICAL**: DO NOT save plan unless `PM_APPROVAL == "Approved"`. This is the final approval gate.
 
 **DO NOT save** until PM approves.
 

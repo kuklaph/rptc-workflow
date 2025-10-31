@@ -28,7 +28,65 @@ git log -5 --oneline # Recent commits
 - Current branch name (what's being worked on)
 - Staged/unstaged changes (current progress)
 
-### 4. Summary Report
+### 4. Depth Override (Optional)
+
+After quick catch-up completes, offer depth adjustment:
+
+```markdown
+AskUserQuestion(
+  question: "Quick catch-up complete. Adjust depth?",
+  header: "Depth",
+  options: [
+    {
+      label: "Show quick summary (current)",
+      description: "Display quick summary report and complete",
+      value: "quick"
+    },
+    {
+      label: "Upgrade to medium catch-up (5-10 min more)",
+      description: "Continue with architecture analysis and detailed history",
+      value: "medium"
+    },
+    {
+      label: "Upgrade to deep catch-up (15-30 min more)",
+      description: "Run full comprehensive analysis with complexity assessment",
+      value: "deep"
+    }
+  ],
+  multiSelect: false
+)
+```
+
+Capture response in `DEPTH_CHOICE` variable.
+
+**Handle Selection:**
+
+```bash
+if [ "$DEPTH_CHOICE" == "quick" ]; then
+  # Continue to Step 5 (Summary Report) - existing behavior
+  echo "Displaying quick summary..."
+
+elif [ "$DEPTH_CHOICE" == "medium" ]; then
+  echo ""
+  echo "⏫ Upgrading to medium catch-up..."
+  echo ""
+
+  # Execute medium catch-up Steps 4-6
+  # Step 4: Dependencies & Config (from helper-catch-up-med.md)
+  # Step 5: Research & Plans
+  # Step 6: Medium Summary Report
+
+elif [ "$DEPTH_CHOICE" == "deep" ]; then
+  echo ""
+  echo "⏫ Upgrading to deep catch-up..."
+  echo ""
+
+  # Execute ALL additional steps (medium + deep)
+  # Full comprehensive analysis from helper-catch-up-deep.md
+fi
+```
+
+### 5. Summary Report
 
 ```text
 📋 Quick Context Catch-Up

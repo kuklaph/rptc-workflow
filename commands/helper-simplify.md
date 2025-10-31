@@ -53,7 +53,7 @@ Standalone simplification tool for legacy code, technical debt, and existing com
 
 **Use these values throughout the command execution.**
 
-### Step 0b: Validate Arguments
+### Step 0b: Validate Arguments and Analysis Mode Selection
 
 **Parse command arguments**:
 
@@ -86,6 +86,62 @@ if [ -z "$TARGET_PATH" ]; then
   echo "  /rptc:helper:simplify src/utils/ --deep"
   echo "  /rptc:helper:simplify src/ --auto-approve"
   exit 1
+fi
+```
+
+**Opportunity 1: Analysis Mode Selection**
+
+If no `--deep` flag was provided, present analysis mode menu to user:
+
+```text
+Use AskUserQuestion tool:
+
+Question: "Select analysis depth for code simplification"
+Header: "Analysis Mode"
+Options:
+- Basic: "Basic analysis (quick scan)"
+  Description: "Fast check for obvious simplifications"
+- Deep: "Deep analysis (thorough review)"
+  Description: "Comprehensive complexity analysis with Master Efficiency Agent"
+- Auto: "Auto mode (recommended)"
+  Description: "Intelligent depth based on codebase size"
+MultiSelect: false
+
+Capture response to: ANALYSIS_MODE
+```
+
+**Process mode selection**:
+
+```bash
+# If user selected via menu (not flag), set DEEP_MODE based on choice
+if [ -z "$DEEP_MODE_SET_BY_FLAG" ]; then
+  case "$ANALYSIS_MODE" in
+    Basic)
+      DEEP_MODE=false
+      COMPLEXITY_THRESHOLD=15
+      echo "Using BASIC analysis mode"
+      ;;
+    Deep)
+      DEEP_MODE=true
+      COMPLEXITY_THRESHOLD=8
+      echo "Using DEEP analysis mode (Master Efficiency Agent)"
+      ;;
+    Auto)
+      # Calculate threshold based on codebase size
+      echo "Calculating optimal analysis depth..."
+      FILE_COUNT=$(find src -type f 2>/dev/null | wc -l)
+      if [ "$FILE_COUNT" -lt 50 ]; then
+        DEEP_MODE=true
+        COMPLEXITY_THRESHOLD=8
+        echo "Auto mode: Using DEEP analysis (small codebase: $FILE_COUNT files)"
+      else
+        DEEP_MODE=false
+        COMPLEXITY_THRESHOLD=12
+        echo "Auto mode: Using BASIC analysis (large codebase: $FILE_COUNT files)"
+      fi
+      ;;
+  esac
+  echo ""
 fi
 ```
 
@@ -235,16 +291,66 @@ If TESTS_FOUND is false:
 
   ```
 
-  If `AUTO_APPROVE` is false:
-    - Prompt user: "Continue without tests? [y/N]: "
-    - If user responds anything other than "y" or "Y":
-      ```text
+  **Opportunity 2: Test Warning Response**
 
-      Aborting. Write tests first, then re-run this command.
-      ```
-      Exit command.
-    - If user responds "y" or "Y":
-      Display blank line and continue.
+  If `AUTO_APPROVE` is false:
+
+    ```text
+    Use AskUserQuestion tool:
+
+    Question: "No tests found for files to simplify. How to proceed?"
+    Header: "No Tests"
+    Options:
+    - Continue: "Continue anyway (risky)"
+      Description: "Simplify without test coverage - behavior verification impossible"
+    - Skip: "Skip untested files"
+      Description: "Only simplify files with tests"
+    - Abort: "Abort operation"
+      Description: "Don't simplify anything - write tests first"
+    MultiSelect: false
+
+    Capture response to: TEST_WARNING_DECISION
+    ```
+
+    **Process test warning decision**:
+
+    ```bash
+    case "$TEST_WARNING_DECISION" in
+      Continue)
+        echo ""
+        echo "⚠️  WARNING: Proceeding without test coverage"
+        echo "   Changes will NOT be verified by tests!"
+        echo ""
+        # Continue to analysis
+        ;;
+      Skip)
+        echo ""
+        echo "Filtering to only include files with tests..."
+        # Filter CODE_FILES list to only include files with tests
+        # (Remove files in MISSING_TESTS list from CODE_FILES)
+        # If filtered list is empty, abort
+        if [ "${#CODE_FILES[@]}" -eq 0 ]; then
+          echo "❌ Error: No files with tests remaining after filter"
+          echo ""
+          echo "Write tests first, then re-run this command."
+          exit 1
+        fi
+        echo "Continuing with ${#CODE_FILES[@]} tested files"
+        echo ""
+        ;;
+      Abort)
+        echo ""
+        echo "Operation cancelled - add tests first"
+        echo ""
+        echo "Write tests, then re-run: /rptc:helper:simplify $TARGET_PATH"
+        exit 0
+        ;;
+    esac
+    ```
+
+  If `AUTO_APPROVE` is true:
+    - Display: "⚠️  AUTO-APPROVE enabled: Proceeding despite missing tests..."
+    - Display blank line and continue.
 
 ### Step 1c: Perform Analysis
 
@@ -478,38 +584,80 @@ Proceeding with automatic changes...
 
 **If `--auto-approve` flag is NOT set**:
 
-```text
-Review the proposed changes above.
+**Opportunity 3: Approval Gate (CRITICAL SAFETY)**
 
+```text
+Use AskUserQuestion tool:
+
+Question: "Review proposed simplifications. Ready to apply changes?"
+Header: "Approve Changes"
 Options:
-  [y] Apply all simplifications
-  [n] Cancel (no changes)
-  [s] Show detailed changes (before/after)
+- Apply: "Apply all changes"
+  Description: "Proceed with simplification - all proposed changes will be applied"
+- Review: "Review details again"
+  Description: "See detailed before/after for each proposed change"
+- ApplyPartial: "Select specific changes"
+  Description: "Choose which simplifications to apply (interactive selection)"
+- Cancel: "Cancel"
+  Description: "Don't modify any files - abort operation safely"
+MultiSelect: false
 
-Apply these simplifications? [y/n/s]:
+Capture response to: APPROVAL_DECISION
 ```
 
-**If user selects 's' (show details)**:
+**Process approval decision**:
 
-```text
-[Show detailed before/after for each proposed change]
-
-After review:
-  [y] Apply simplifications
-  [n] Cancel
-
-Apply? [y/n]:
-```
-
-**If user declines**:
-
-```text
-❌ Simplification cancelled by user
-
-No changes were made.
-
-To analyze with different settings:
-  /rptc:helper:simplify [path] --deep
+```bash
+case "$APPROVAL_DECISION" in
+  Apply)
+    echo ""
+    echo "✅ Approved - proceeding to Phase 3 (Apply Changes)"
+    echo ""
+    # Continue to Phase 3
+    ;;
+  Review)
+    echo ""
+    echo "═══════════════════════════════════════════════════════"
+    echo "  DETAILED CHANGE REVIEW"
+    echo "═══════════════════════════════════════════════════════"
+    echo ""
+    # Display detailed diff for each file
+    for file in "${PROPOSED_CHANGES[@]}"; do
+      echo "File: $file"
+      echo "─────────────────────────────────────────────────────"
+      # Show before/after comparison
+      echo "[Show detailed changes]"
+      echo ""
+    done
+    echo "═══════════════════════════════════════════════════════"
+    echo ""
+    # Loop back to approval menu (re-show AskUserQuestion)
+    ;;
+  ApplyPartial)
+    echo ""
+    echo "═══════════════════════════════════════════════════════"
+    echo "  SELECT CHANGES TO APPLY"
+    echo "═══════════════════════════════════════════════════════"
+    echo ""
+    # Show file-by-file selection menu
+    # For each proposed change, ask: "Apply this change? [y/n]"
+    # Build filtered list of approved changes
+    # Apply only selected changes
+    echo "✅ Partial selection complete"
+    echo "   Applying ${SELECTED_COUNT} of ${TOTAL_COUNT} changes"
+    echo ""
+    ;;
+  Cancel)
+    echo ""
+    echo "❌ Simplification cancelled by user"
+    echo ""
+    echo "No changes were made."
+    echo ""
+    echo "To analyze with different settings:"
+    echo "  /rptc:helper:simplify $TARGET_PATH --deep"
+    exit 0
+    ;;
+esac
 ```
 
 ## Step 3: Application Phase
@@ -644,74 +792,121 @@ fi
 ═══════════════════════════════════════════════════════
 
 ⚠️  Changes may have introduced bugs!
-
-Options:
-  [r] Rollback changes (restore from backup)
-  [k] Keep changes (investigate failures manually)
-  [d] Show diff (see what changed)
-
-What would you like to do? [r/k/d]:
 ```
 
-**If user selects 'r' (rollback)**:
-
-```bash
-echo ""
-echo "🔄 Rolling back changes..."
-echo ""
-
-# Restore from backup
-for file in "${CODE_FILES[@]}"; do
-  rel_path="${file#./}"
-  backup_path="$BACKUP_DIR/$rel_path"
-  if [ -f "$backup_path" ]; then
-    cp "$backup_path" "$file"
-    echo "  ✅ Restored: $file"
-  fi
-done
-
-echo ""
-echo "✅ Rollback complete - all files restored from backup"
-echo ""
-echo "Backup preserved at: $BACKUP_DIR"
-echo ""
-echo "To investigate, compare backup with attempted changes."
-```
-
-**If user selects 'k' (keep changes)**:
+**Opportunity 4: Test Failure Response**
 
 ```text
-⚠️  Keeping changes with failing tests
+Use AskUserQuestion tool:
 
-You are responsible for fixing test failures manually.
+Question: "Tests failed after simplification. How to recover?"
+Header: "Tests Failed"
+Options:
+- Revert: "Revert all changes"
+  Description: "Restore original code from backup - safest option"
+- RevertPartial: "Revert failed files only"
+  Description: "Keep changes that passed tests, restore only failed files"
+- Review: "Review test failures"
+  Description: "See detailed test output and what changed"
+- Force: "Keep changes anyway (dangerous)"
+  Description: "Not recommended - you'll need to fix failures manually"
+MultiSelect: false
 
-Backup available at: $BACKUP_DIR
-
-To restore manually:
-  cp -r $BACKUP_DIR/* ./
+Capture response to: TEST_FAIL_DECISION
 ```
 
-**If user selects 'd' (show diff)**:
+**Process test failure decision**:
 
 ```bash
-# Show diff for each file
-for file in "${CODE_FILES[@]}"; do
-  rel_path="${file#./}"
-  backup_path="$BACKUP_DIR/$rel_path"
+case "$TEST_FAIL_DECISION" in
+  Revert)
+    echo ""
+    echo "🔄 Rolling back changes..."
+    echo ""
 
-  echo ""
-  echo "Changes in: $file"
-  echo "─────────────────────────────────────────────────────"
-  diff -u "$backup_path" "$file" || true
-  echo ""
-done
+    # Restore from backup
+    for file in "${CODE_FILES[@]}"; do
+      rel_path="${file#./}"
+      backup_path="$BACKUP_DIR/$rel_path"
+      if [ -f "$backup_path" ]; then
+        cp "$backup_path" "$file"
+        echo "  ✅ Restored: $file"
+      fi
+    done
 
-# After showing diff, ask again
-echo "Options:"
-echo "  [r] Rollback changes"
-echo "  [k] Keep changes"
-echo ""
-read -p "Decision? [r/k]: " decision
+    echo ""
+    echo "✅ Rollback complete - all files restored from backup"
+    echo ""
+    echo "Backup preserved at: $BACKUP_DIR"
+    echo ""
+    echo "To investigate, compare backup with attempted changes."
+    exit 1
+    ;;
+  RevertPartial)
+    echo ""
+    echo "🔄 Rolling back only failed files..."
+    echo ""
+
+    # Restore only files with failing tests
+    # (Identify failed files from test output)
+    # Keep changes to files with passing tests
+    for file in "${FAILED_FILES[@]}"; do
+      rel_path="${file#./}"
+      backup_path="$BACKUP_DIR/$rel_path"
+      if [ -f "$backup_path" ]; then
+        cp "$backup_path" "$file"
+        echo "  ✅ Restored: $file"
+      fi
+    done
+
+    echo ""
+    echo "✅ Partial rollback complete"
+    echo "   Reverted: ${#FAILED_FILES[@]} files"
+    echo "   Kept changes: ${#PASSED_FILES[@]} files"
+    echo ""
+    exit 1
+    ;;
+  Review)
+    echo ""
+    echo "═══════════════════════════════════════════════════════"
+    echo "  TEST FAILURE DETAILS"
+    echo "═══════════════════════════════════════════════════════"
+    echo ""
+    # Display full test output with failures
+    echo "[Show detailed test output]"
+    echo ""
+    echo "═══════════════════════════════════════════════════════"
+    echo "  CHANGES MADE"
+    echo "═══════════════════════════════════════════════════════"
+    echo ""
+    # Show diff for each file
+    for file in "${CODE_FILES[@]}"; do
+      rel_path="${file#./}"
+      backup_path="$BACKUP_DIR/$rel_path"
+
+      echo ""
+      echo "Changes in: $file"
+      echo "─────────────────────────────────────────────────────"
+      diff -u "$backup_path" "$file" || true
+      echo ""
+    done
+    echo ""
+    # Loop back to test failure menu (re-show AskUserQuestion)
+    ;;
+  Force)
+    echo ""
+    echo "⚠️  WARNING: Keeping changes despite test failures"
+    echo ""
+    echo "You are responsible for fixing test failures manually."
+    echo ""
+    echo "Backup available at: $BACKUP_DIR"
+    echo ""
+    echo "To restore manually:"
+    echo "  cp -r $BACKUP_DIR/* ./"
+    echo ""
+    exit 0
+    ;;
+esac
 ```
 
 ### Step 4c: Success Report
@@ -800,8 +995,116 @@ This code is well-written and maintainable.
 Files analyzed: [N]
 Simplifiable: [X]
 Already optimal: [Y]
+```
 
-Proceed with simplifying [X] files? [y/n]:
+**Opportunity 5: Partial Simplification (Edge Case)**
+
+```text
+Use AskUserQuestion tool:
+
+Question: "Some files simplified successfully, others had issues. What to do?"
+Header: "Partial Success"
+Options:
+- Keep: "Keep successful changes"
+  Description: "Commit what worked - ${SUCCESS_COUNT} files improved"
+- RevertAll: "Revert everything"
+  Description: "All-or-nothing approach - discard all changes"
+- Review: "Review what succeeded vs failed"
+  Description: "See detailed status for each file"
+- Retry: "Retry failed files"
+  Description: "Try again with different settings or manual fixes"
+MultiSelect: false
+
+Capture response to: PARTIAL_DECISION
+```
+
+**Process partial simplification decision**:
+
+```bash
+case "$PARTIAL_DECISION" in
+  Keep)
+    echo ""
+    echo "✅ Keeping ${SUCCESS_COUNT} successful changes"
+    echo ""
+    echo "Successfully simplified:"
+    for file in "${SUCCESS_FILES[@]}"; do
+      echo "  ✅ $file"
+    done
+    echo ""
+    echo "Failed files (not modified):"
+    for file in "${FAILED_FILES[@]}"; do
+      echo "  ❌ $file"
+    done
+    echo ""
+    echo "You can retry failed files manually:"
+    echo "  /rptc:helper:simplify [failed_file] --deep"
+    echo ""
+    exit 0
+    ;;
+  RevertAll)
+    echo ""
+    echo "🔄 Reverting ALL changes (including successful ones)..."
+    echo ""
+
+    # Restore all files (even successful ones)
+    for file in "${CODE_FILES[@]}"; do
+      rel_path="${file#./}"
+      backup_path="$BACKUP_DIR/$rel_path"
+      if [ -f "$backup_path" ]; then
+        cp "$backup_path" "$file"
+        echo "  ✅ Restored: $file"
+      fi
+    done
+
+    echo ""
+    echo "✅ All changes reverted - back to original state"
+    echo ""
+    echo "Backup preserved at: $BACKUP_DIR"
+    exit 1
+    ;;
+  Review)
+    echo ""
+    echo "═══════════════════════════════════════════════════════"
+    echo "  DETAILED STATUS BREAKDOWN"
+    echo "═══════════════════════════════════════════════════════"
+    echo ""
+    echo "Successful Simplifications (${SUCCESS_COUNT} files):"
+    for file in "${SUCCESS_FILES[@]}"; do
+      echo "  ✅ $file"
+      echo "     Lines removed: [N]"
+      echo "     Complexity reduction: [X]%"
+      echo ""
+    done
+    echo ""
+    echo "Failed Simplifications (${#FAILED_FILES[@]} files):"
+    for file in "${FAILED_FILES[@]}"; do
+      echo "  ❌ $file"
+      echo "     Reason: [error description]"
+      echo ""
+    done
+    echo "═══════════════════════════════════════════════════════"
+    echo ""
+    # Loop back to partial simplification menu (re-show AskUserQuestion)
+    ;;
+  Retry)
+    echo ""
+    echo "🔄 Retrying failed files with different settings..."
+    echo ""
+    echo "Failed files to retry:"
+    for file in "${FAILED_FILES[@]}"; do
+      echo "  - $file"
+    done
+    echo ""
+    echo "Recommended: Try with --deep flag for comprehensive analysis"
+    echo ""
+    # Re-run simplification on failed files only
+    # With different analysis settings (e.g., force deep mode)
+    # Or exit and let user manually retry
+    echo "To retry manually:"
+    echo "  /rptc:helper:simplify [file] --deep"
+    exit 1
+    ;;
+esac
 ```
 
 ### Invalid File Types

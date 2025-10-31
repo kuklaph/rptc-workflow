@@ -10,7 +10,58 @@ You are executing the **RPTC Configuration Display** command.
 
 Display the current RPTC workflow configuration, showing where SOPs are being loaded from and what settings are active.
 
-## Step 1: Display Plugin Information
+## Step 1: Display Options Menu (Opportunity 44)
+
+First, ask the user what configuration information they want to see using AskUserQuestion:
+
+```markdown
+Use the AskUserQuestion tool with this configuration:
+
+{
+  "questions": [
+    {
+      "question": "What configuration information would you like to see?",
+      "header": "Display",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Everything - Full configuration and status",
+          "description": "Complete overview including plugin info, workspace status, settings, git integration, and recommendations"
+        },
+        {
+          "label": "Settings only - Current RPTC configuration",
+          "description": "Just the current RPTC settings values from .claude/settings.json"
+        },
+        {
+          "label": "SOPs only - SOP resolution paths",
+          "description": "Just SOP information and fallback chain resolution"
+        },
+        {
+          "label": "Problems only - Issues and recommendations",
+          "description": "Only show warnings, errors, and actionable recommendations"
+        },
+        {
+          "label": "Comparison - Compare with defaults",
+          "description": "Show current settings compared to plugin defaults"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Capture the response in DISPLAY_MODE variable:
+- "Everything - Full configuration and status" → DISPLAY_MODE="everything"
+- "Settings only - Current RPTC configuration" → DISPLAY_MODE="settings"
+- "SOPs only - SOP resolution paths" → DISPLAY_MODE="sops"
+- "Problems only - Issues and recommendations" → DISPLAY_MODE="problems"
+- "Comparison - Compare with defaults" → DISPLAY_MODE="comparison"
+
+If user cancels, default to DISPLAY_MODE="everything"
+
+## Step 2: Display Plugin Information (Conditional)
+
+If DISPLAY_MODE is "everything", "comparison", or "problems":
 
 Output the following header directly:
 
@@ -30,7 +81,9 @@ Then use Read tool to extract version:
 - Extract the "version" field from JSON
 - Output: "  X.Y.Z"
 
-## Step 2: Check Workspace Structure
+## Step 3: Check Workspace Structure (Conditional)
+
+If DISPLAY_MODE is "everything" or "problems":
 
 Check if RPTC workspace is initialized:
 
@@ -69,7 +122,9 @@ If WORKSPACE_EXISTS is false:
       Run: /rptc:admin-init
   ```
 
-## Step 4: Project Instructions
+## Step 4: Project Instructions (Conditional)
+
+If DISPLAY_MODE is "everything" or "problems":
 
 Check for project instructions:
 
@@ -115,7 +170,9 @@ Else (CLAUDE_FILE is empty):
       Run: /rptc:admin-init
   ```
 
-## Step 5: Plugin Settings
+## Step 5: Plugin Settings (Always Display)
+
+For all DISPLAY_MODE values, show settings (with different detail levels):
 
 Output directly:
 
@@ -160,7 +217,87 @@ Current Configuration:
   Discord Notifications: ${DISCORD_ENABLED}
 ```
 
-## Step 6: Git Integration Status
+## Step 6: SOP Information (Conditional)
+
+If DISPLAY_MODE is "everything" or "sops":
+
+Output directly:
+
+```
+
+SOP Resolution Paths:
+  (Fallback chain order)
+
+```
+
+For each SOP, check resolution:
+- testing-guide.md
+- architecture-patterns.md
+- frontend-guidelines.md
+- git-and-deployment.md
+- languages-and-style.md
+- security-and-performance.md
+- todowrite-guide.md
+
+For each SOP, use this resolution logic:
+
+```bash
+SOP_NAME="testing-guide"  # Example
+
+# Check project SOPs first
+if [ -f ".rptc/sop/${SOP_NAME}.md" ]; then
+  RESOLVED_PATH=".rptc/sop/${SOP_NAME}.md"
+  SOURCE="Project"
+# Then check user global SOPs
+elif [ -f "$HOME/.claude/global/sop/${SOP_NAME}.md" ]; then
+  RESOLVED_PATH="$HOME/.claude/global/sop/${SOP_NAME}.md"
+  SOURCE="User Global"
+# Finally use plugin default
+else
+  RESOLVED_PATH="${CLAUDE_PLUGIN_ROOT}/sop/${SOP_NAME}.md"
+  SOURCE="Plugin Default"
+fi
+```
+
+Output for each SOP:
+```
+  ${SOP_NAME}:
+    ✓ ${SOURCE}: ${RESOLVED_PATH}
+```
+
+## Step 7: Comparison Mode (Conditional)
+
+If DISPLAY_MODE is "comparison":
+
+Output directly:
+
+```
+
+Configuration Comparison:
+  (Current vs Plugin Defaults)
+
+```
+
+Compare current settings with plugin defaults:
+
+| Setting | Current Value | Plugin Default | Match |
+|---------|---------------|----------------|-------|
+| defaultThinkingMode | ${THINKING_MODE} | think | ✓/✗ |
+| artifactLocation | ${ARTIFACT_LOC} | .rptc | ✓/✗ |
+| docsLocation | ${DOCS_LOC} | docs | ✓/✗ |
+| testCoverageTarget | ${COVERAGE_TARGET} | 85 | ✓/✗ |
+| maxPlanningAttempts | ${MAX_ATTEMPTS} | 10 | ✓/✗ |
+| customSopPath | ${CUSTOM_SOP} | .rptc/sop | ✓/✗ |
+| researchOutputFormat | ${RESEARCH_FORMAT} | html | ✓/✗ |
+| htmlReportTheme | ${HTML_THEME} | dark | ✓/✗ |
+| verificationMode | ${VERIFICATION_MODE} | focused | ✓/✗ |
+| tdgMode | ${TDG_MODE} | disabled | ✓/✗ |
+
+Output each row with appropriate match indicator (✓ if matches default, ✗ if customized)
+
+## Step 8: Git Integration Status (Conditional)
+
+If DISPLAY_MODE is "everything" or "problems":
 
 Check git configuration:
 
@@ -197,7 +334,9 @@ If IS_GIT_REPO is true:
 If IS_GIT_REPO is false:
 - Output: "  ✗ Not a git repository"
 
-## Step 7: Recommendations
+## Step 9: Recommendations (Conditional)
+
+If DISPLAY_MODE is "everything" or "problems":
 
 Check what recommendations to provide:
 
@@ -247,9 +386,75 @@ Finally output:
 ═══════════════════════════════════════════════════════
 ```
 
+## Step 10: Export Configuration Menu (Opportunity 45)
+
+After displaying the configuration, ask if user wants to export using AskUserQuestion:
+
+```markdown
+Use the AskUserQuestion tool with this configuration:
+
+{
+  "questions": [
+    {
+      "question": "Would you like to export this configuration?",
+      "header": "Export",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "No - Just display",
+          "description": "No export needed, just showing the information"
+        },
+        {
+          "label": "Export as JSON - Save to file",
+          "description": "Save a copy of .claude/settings.json to a specified location"
+        },
+        {
+          "label": "Copy to clipboard - For sharing",
+          "description": "Copy configuration summary to clipboard for sharing"
+        },
+        {
+          "label": "Generate shareable config",
+          "description": "Create a sanitized config template (removes sensitive values)"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Capture the response in EXPORT_MODE variable:
+- "No - Just display" → EXPORT_MODE="skip"
+- "Export as JSON - Save to file" → EXPORT_MODE="json"
+- "Copy to clipboard - For sharing" → EXPORT_MODE="clipboard"
+- "Generate shareable config" → EXPORT_MODE="template"
+
+If user cancels, default to EXPORT_MODE="skip"
+
+### Handle Export Actions
+
+If EXPORT_MODE is "json":
+- Ask user for export file path (default: "rptc-config-export.json")
+- Use Write tool to copy .claude/settings.json to specified location
+- Output: "✅ Configuration exported to: [file_path]"
+
+If EXPORT_MODE is "clipboard":
+- Format configuration as readable text summary
+- Output: "✅ Configuration summary copied to clipboard (use Ctrl+V to paste)"
+- Note: Actual clipboard copy would require system integration
+
+If EXPORT_MODE is "template":
+- Read .claude/settings.json
+- Create sanitized version (remove sensitive fields like webhookUrl)
+- Save to "rptc-config-template.json"
+- Output: "✅ Shareable config template created: rptc-config-template.json"
+
+If EXPORT_MODE is "skip":
+- No action needed
+- Output: "ℹ️  Configuration display complete"
+
 ## Output Format
 
 - Use clear visual hierarchy with boxes and symbols
 - Show both existence (✓/✗) and counts
 - Provide file paths so user knows exactly where things are
-- Always end with actionable recommendations
+- Always end with actionable recommendations or export confirmation

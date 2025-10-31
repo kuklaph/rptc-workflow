@@ -363,6 +363,83 @@ Running quick catch-up for recent codebase changes only...
 
 Only need to check for codebase drift since handoff was created.
 
+### 2a. Confirm Catch-Up Depth (Interactive Menu - Handoff Mode)
+
+**Determine automatic selection**:
+
+For handoff mode: `AUTO_SELECTION="quick"` with explanation `"Handoff provides rich context"`
+
+**Build menu description**:
+
+```text
+Automatic selection: Quick based on handoff checkpoint.
+
+Context depth options:
+• Quick: Recent changes only (fastest, ~2-5K tokens)
+• Medium: Recent changes + key patterns (~5-10K tokens)
+• Deep: Full codebase context (~15-30K tokens)
+
+Handoff provides rich context. Quick catch-up recommended.
+You can override the automatic selection if needed.
+```
+
+**Use AskUserQuestion tool**:
+
+Use the AskUserQuestion tool to present catch-up depth options:
+
+```
+question: "Select Context Catch-Up Depth"
+header: "Catch-up"
+multiSelect: false
+options:
+  1. label: "Use automatic selection (Quick)"
+     description: "Handoff provides rich context. Only check recent codebase changes."
+  2. label: "Quick catch-up (faster, less context)"
+     description: "Recent changes only. Best when handoff is fresh (<7 days)."
+  3. label: "Medium catch-up (balanced depth)"
+     description: "Recent changes + key patterns. Use if moderate changes expected."
+  4. label: "Deep catch-up (slower, full context)"
+     description: "Full codebase context. Use if significant changes or handoff is stale."
+```
+
+**Handle user selection** (stored in response as `CATCHUP_CHOICE`):
+
+```bash
+# Claude stores selection in CATCHUP_CHOICE variable
+
+case "$CATCHUP_CHOICE" in
+  "Use automatic selection"*)
+    # Use AUTO_SELECTION determined above
+    SELECTED_DEPTH="quick"
+    echo "✓ Using automatic selection: Quick"
+    ;;
+  "Quick catch-up"*)
+    SELECTED_DEPTH="quick"
+    echo "✓ Override: Quick catch-up selected"
+    ;;
+  "Medium catch-up"*)
+    SELECTED_DEPTH="medium"
+    echo "✓ Override: Medium catch-up selected"
+    ;;
+  "Deep catch-up"*)
+    SELECTED_DEPTH="deep"
+    echo "✓ Override: Deep catch-up selected"
+    ;;
+esac
+
+echo ""
+```
+
+**Invoke selected catch-up command**:
+
+```text
+🔄 Running ${SELECTED_DEPTH} context catch-up...
+[Invoke corresponding helper-catch-up command based on SELECTED_DEPTH:
+  - quick: /rptc:helper-catch-up-quick
+  - medium: /rptc:helper-catch-up-med
+  - deep: /rptc:helper-catch-up-deep]
+```
+
 **If no handoff (standard plan analysis):**
 
 Based on remaining work, automatically decide:
@@ -386,6 +463,94 @@ Based on remaining work, automatically decide:
 ```text
 🔄 Running deep context catch-up...
 [Automatically invoke /rptc:helper-catch-up-deep]
+```
+
+### 2b. Confirm Catch-Up Depth (Interactive Menu - Standard Mode)
+
+**Determine automatic selection** based on remaining work:
+
+```bash
+# Determine automatic selection
+if [ "$REMAINING_STEPS" -le 2 ]; then
+  AUTO_SELECTION="quick"
+  AUTO_REASON="1-2 simple steps remain"
+elif [ "$REMAINING_STEPS" -le 5 ]; then
+  AUTO_SELECTION="medium"
+  AUTO_REASON="3-5 steps or moderate complexity"
+else
+  AUTO_SELECTION="deep"
+  AUTO_REASON="6+ steps or high complexity"
+fi
+```
+
+**Build menu description**:
+
+```text
+Automatic selection: ${AUTO_SELECTION^} (${AUTO_REASON}).
+
+Context depth options:
+• Quick: Recent changes only (fastest, ~2-5K tokens)
+• Medium: Recent changes + key patterns (~5-10K tokens)
+• Deep: Full codebase context (~15-30K tokens)
+
+You can override the automatic selection if needed.
+```
+
+**Use AskUserQuestion tool**:
+
+Use the AskUserQuestion tool to present catch-up depth options:
+
+```
+question: "Select Context Catch-Up Depth"
+header: "Catch-up"
+multiSelect: false
+options:
+  1. label: "Use automatic selection (${AUTO_SELECTION^})"
+     description: "Based on remaining work: ${AUTO_REASON}"
+  2. label: "Quick catch-up (faster, less context)"
+     description: "Recent changes only. Best for simple remaining work (1-2 steps)."
+  3. label: "Medium catch-up (balanced depth)"
+     description: "Recent changes + key patterns. Best for moderate work (3-5 steps)."
+  4. label: "Deep catch-up (slower, full context)"
+     description: "Full codebase context. Best for complex work (6+ steps) or stale plans."
+```
+
+**Handle user selection** (stored in response as `CATCHUP_CHOICE`):
+
+```bash
+# Claude stores selection in CATCHUP_CHOICE variable
+
+case "$CATCHUP_CHOICE" in
+  "Use automatic selection"*)
+    # Use AUTO_SELECTION determined above
+    SELECTED_DEPTH="$AUTO_SELECTION"
+    echo "✓ Using automatic selection: ${SELECTED_DEPTH^}"
+    ;;
+  "Quick catch-up"*)
+    SELECTED_DEPTH="quick"
+    echo "✓ Override: Quick catch-up selected"
+    ;;
+  "Medium catch-up"*)
+    SELECTED_DEPTH="medium"
+    echo "✓ Override: Medium catch-up selected"
+    ;;
+  "Deep catch-up"*)
+    SELECTED_DEPTH="deep"
+    echo "✓ Override: Deep catch-up selected"
+    ;;
+esac
+
+echo ""
+```
+
+**Invoke selected catch-up command**:
+
+```text
+🔄 Running ${SELECTED_DEPTH} context catch-up...
+[Invoke corresponding helper-catch-up command based on SELECTED_DEPTH:
+  - quick: /rptc:helper-catch-up-quick
+  - medium: /rptc:helper-catch-up-med
+  - deep: /rptc:helper-catch-up-deep]
 ```
 
 ### 3. Load Related Research (If Exists)
@@ -644,21 +809,97 @@ Attempting standard plan analysis as fallback...
 
 ### Handoff with Stale Context
 
-If handoff.md is >7 days old:
+If handoff.md is >7 days old, present interactive menu to user:
 
-```text
-⚠️  Stale Handoff Checkpoint Detected
+#### Step 1f: Handle Stale Handoff (Interactive Menu)
 
-Handoff created: [X] days ago
-Recommendation: Deep catch-up for safety
+**Check handoff age** (only if handoff mode):
 
-The codebase may have changed significantly since checkpoint.
-Upgrading catch-up depth: Quick → Deep
+```bash
+# Calculate handoff age in days
+# Claude: Read handoff file, extract creation timestamp, calculate days since creation
+# Store in HANDOFF_AGE_DAYS
 
-Reason: Long gap may cause context drift
+if [ "$RESUME_MODE" = "handoff" ] && [ "$HANDOFF_AGE_DAYS" -gt 7 ]; then
+  HANDOFF_STALE=true
+else
+  HANDOFF_STALE=false
+fi
 ```
 
-**Resolution**: Override catch-up depth to "deep" regardless of handoff presence.
+**If handoff is stale, present action menu**:
+
+```bash
+if [ "$HANDOFF_STALE" = true ]; then
+  echo "⚠️  Stale Handoff Checkpoint Detected"
+  echo ""
+  echo "   Handoff created: ${HANDOFF_AGE_DAYS} days ago"
+  echo "   Threshold: 7 days"
+  echo ""
+  echo "   The codebase may have changed significantly since checkpoint."
+  echo ""
+```
+
+**Use AskUserQuestion tool**:
+
+Use the AskUserQuestion tool to present stale handoff action options:
+
+```
+question: "Stale Handoff Detected (${HANDOFF_AGE_DAYS} days old)"
+header: "Stale Handoff"
+multiSelect: false
+options:
+  1. label: "Proceed with stale handoff (use deep catch-up)"
+     description: "Continue with existing checkpoint. Automatically upgrades catch-up to deep for safety. Best if codebase changes are minimal."
+  2. label: "Regenerate handoff (re-run TDD to create fresh checkpoint)"
+     description: "Create new checkpoint from current codebase state. Recommended if significant changes occurred. Requires re-running TDD command."
+  3. label: "Abort resume (cancel operation)"
+     description: "Cancel resume operation. Review changes manually before deciding how to proceed."
+```
+
+**Handle user selection** (stored in response as `STALE_ACTION`):
+
+```bash
+# Claude stores selection in STALE_ACTION variable
+
+case "$STALE_ACTION" in
+  "Proceed with stale handoff"*)
+    echo "⚠️  Proceeding with stale handoff..."
+    echo "   Upgrading catch-up depth: Quick → Deep (safety measure)"
+    echo ""
+    # Override AUTO_SELECTION for catch-up depth menu
+    AUTO_SELECTION="deep"
+    # Continue to Step 2a (catch-up depth menu) with deep as default
+    ;;
+
+  "Regenerate handoff"*)
+    echo "📝 To regenerate handoff checkpoint:"
+    echo ""
+    echo "   /rptc:tdd \"@${PLAN_NAME}/\""
+    echo ""
+    echo "   This will resume TDD execution and create a fresh handoff when needed."
+    echo ""
+    exit 0
+    ;;
+
+  "Abort resume"*)
+    echo "❌ Resume operation cancelled by user."
+    echo ""
+    exit 0
+    ;;
+esac
+
+else
+  # Handoff is fresh (<7 days), proceed normally
+  echo "✓ Handoff is fresh (${HANDOFF_AGE_DAYS} days old)"
+  echo ""
+fi
+```
+
+**Resolution**: User chooses action via menu:
+- **Proceed**: Overrides catch-up depth to "deep" for safety
+- **Regenerate**: Exits with instructions to re-run TDD
+- **Abort**: Exits gracefully
 
 ### Directory Format Mismatch
 

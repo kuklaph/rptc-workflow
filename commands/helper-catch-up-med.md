@@ -45,7 +45,75 @@ git diff main..HEAD --stat      # Changes from main
 - Review main config files
 - Note test framework setup
 
-### 6. Summary Report
+### 6. Summary Check
+
+Before displaying summary, prepare comprehensive context
+
+### 7. Depth Override (Optional)
+
+After medium catch-up completes, offer depth adjustment:
+
+```markdown
+AskUserQuestion(
+  question: "Medium catch-up complete. Adjust depth?",
+  header: "Depth",
+  options: [
+    {
+      label: "Show medium summary (current)",
+      description: "Display comprehensive medium summary and complete",
+      value: "medium"
+    },
+    {
+      label: "Quick summary instead (condensed)",
+      description: "Show simplified summary of key points only",
+      value: "quick"
+    },
+    {
+      label: "Upgrade to deep catch-up (15-30 min more)",
+      description: "Run full deep analysis with complexity assessment",
+      value: "deep"
+    }
+  ],
+  multiSelect: false
+)
+```
+
+Capture response in `DEPTH_CHOICE` variable.
+
+**Handle Selection:**
+
+```bash
+if [ "$DEPTH_CHOICE" == "medium" ]; then
+  # Continue to Step 8 (Summary Report) - existing behavior
+  echo "Displaying medium summary..."
+
+elif [ "$DEPTH_CHOICE" == "quick" ]; then
+  echo ""
+  echo "⏬ Showing condensed quick summary..."
+  echo ""
+
+  # Display simplified summary (extract key points from medium analysis)
+  echo "📋 Quick Context Summary"
+  echo ""
+  echo "**Project**: [name from medium analysis]"
+  echo "**Tech Stack**: [from medium analysis]"
+  echo "**Current Branch**: [from git status]"
+  echo ""
+  echo "**Recent Work** (last 15 commits):"
+  echo "[Condensed list from medium analysis]"
+  echo ""
+  echo "**Ready for**: [Quick recommendation based on medium context]"
+
+elif [ "$DEPTH_CHOICE" == "deep" ]; then
+  echo ""
+  echo "⏫ Upgrading to deep catch-up..."
+  echo ""
+
+  # Execute deep analysis Steps 7-11 (from helper-catch-up-deep.md)
+fi
+```
+
+### 8. Summary Report
 
 ```text
 📋 Medium Context Catch-Up

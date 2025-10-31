@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.0] - 2025-10-31
+
+### Added
+
+- **Enhanced User Experience with AskUserQuestion Integration**: Implemented standardized interactive menu prompts across all 14 RPTC workflow commands, replacing 62 instances of manual "please provide" text prompts with structured AskUserQuestion calls.
+
+  **Commands Enhanced** (62 total implementations):
+  - `admin-config.md` - 2 menu prompts for display options and export configuration
+  - `admin-init.md` - 5 menu prompts for project validation, SOP copying, config presets, .gitignore handling, and README documentation
+  - `admin-sop-check.md` - 3 menu prompts for SOP selection, resolution action, and multiple version handling
+  - `admin-upgrade.md` - 4 menu prompts for version upgrade confirmation, custom directory handling, config field updates, and backup strategy
+  - `commit.md` - 8 menu prompts for commit confirmation, coverage warning, linting errors, PR creation, test failure recovery, quality issues, branch selection, and commit message approval
+  - `helper-catch-up-deep.md` - 1 menu prompt (multi-select) for analysis focus areas
+  - `helper-catch-up-med.md` - 1 menu prompt for depth override
+  - `helper-catch-up-quick.md` - 1 menu prompt for depth override
+  - `helper-cleanup.md` - 3 menu prompts for batch action selection, individual plan action, and delete confirmation
+  - `helper-resume-plan.md` - 2 menu prompts for catch-up depth override and stale handoff action
+  - `helper-simplify.md` - 5 menu prompts for analysis mode, test warning, approval gate, test failure response, and partial simplification
+  - `helper-update-plan.md` - 3 menu prompts for update type, step modification type, and PM approval
+  - `plan.md` - 10 menu prompts for depth, simulation, thinking mode, existing plans, test strategy, approach, specifications, patterns, complexity, and step breakdown
+  - `research.md` - 6 menu prompts for scope, depth, format, simulation, duplicate handling, and focus areas (multi-select)
+  - `tdd.md` - 8 menu prompts for plan format detection, thinking mode, quality gates, test failure handling, step completion, coverage warnings, implementation approach, and handoff recovery
+
+  **Benefits**:
+  - Consistent UX across entire workflow
+  - Improved accessibility with structured menu options
+  - Better error handling and input validation
+  - Enhanced discoverability of command features
+  - Reduced cognitive load for users (clear choices vs. free-form input)
+  - Eliminated typos and ambiguous text responses
+  - Visual feedback at critical decision points
+
+  **Research Reference**: `.rptc/research/askuserquestion-opportunities-across-rptc-workflow/research.md`
+
+### Changed
+
+- **Command Interaction Pattern**: All workflow commands now use structured menu prompts instead of free-form text requests, improving consistency and reducing user errors.
+
+---
+
 ## [2.2.5] - 2025-10-29
 
 ### Fixed

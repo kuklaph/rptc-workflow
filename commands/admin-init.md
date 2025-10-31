@@ -214,11 +214,14 @@ If pattern **NOT found**:
 
 **Add RPTC reference to CLAUDE.md:**
 
-```bash
-# Create temp file in project directory (not /tmp/)
+```markdown
+# Create temp directory
 mkdir -p .rptc/.tmp
 
-cat > .rptc/.tmp/rptc_header.txt <<'EOF'
+# Create RPTC header content
+Use Write tool to create .rptc/.tmp/rptc_header.txt:
+
+Content:
 ## IMPORTANT: RPTC Workflow
 
 This project uses the RPTC (Research → Plan → TDD → Commit) workflow.
@@ -229,11 +232,13 @@ All development must follow the RPTC process defined in that file.
 
 ---
 
-EOF
 
-# Prepend to existing CLAUDE.md (using project temp directory)
-cat .rptc/.tmp/rptc_header.txt CLAUDE.md > .rptc/.tmp/claude_updated.md
-mv .rptc/.tmp/claude_updated.md CLAUDE.md
+# Prepend to existing CLAUDE.md
+Use Read tool to read existing CLAUDE.md
+Concatenate: rptc_header.txt content + existing CLAUDE.md content
+Use Write tool to write concatenated content to CLAUDE.md
+
+# Cleanup temp directory
 rm -rf .rptc/.tmp
 ```
 
@@ -253,35 +258,41 @@ If `$ROOT_CLAUDE_EXISTS` is false:
 
 Create or update `.claude/settings.json` with RPTC default configuration:
 
-```bash
+```markdown
 mkdir -p .claude
 
-if [ ! -f ".claude/settings.json" ]; then
+# Check if settings.json exists using Glob or Read with error handling
+Use Glob tool: Glob(pattern: ".claude/settings.json")
+
+If file does NOT exist:
   # Create new settings.json with RPTC defaults
-  cat > .claude/settings.json <<'EOF'
-{
-  "rptc": {
-    "_rptcVersion": "2.2.5",
-    "defaultThinkingMode": "think",
-    "artifactLocation": ".rptc",
-    "docsLocation": "docs",
-    "testCoverageTarget": 85,
-    "maxPlanningAttempts": 10,
-    "customSopPath": ".rptc/sop",
-    "researchOutputFormat": "html",
-    "htmlReportTheme": "dark",
-    "verificationMode": "focused",
-    "tdgMode": "disabled",
-    "discord": {
-      "webhookUrl": "",
-      "notificationsEnabled": false,
-      "verbosity": "summary"
+  Use Write tool to create .claude/settings.json:
+
+  Content:
+  {
+    "rptc": {
+      "_rptcVersion": "2.3.0",
+      "defaultThinkingMode": "think",
+      "artifactLocation": ".rptc",
+      "docsLocation": "docs",
+      "testCoverageTarget": 85,
+      "maxPlanningAttempts": 10,
+      "customSopPath": ".rptc/sop",
+      "researchOutputFormat": "html",
+      "htmlReportTheme": "dark",
+      "verificationMode": "focused",
+      "tdgMode": "disabled",
+      "discord": {
+        "webhookUrl": "",
+        "notificationsEnabled": false,
+        "verbosity": "summary"
+      }
     }
   }
-}
-EOF
+
   SETTINGS_CREATED=true
-else
+
+If file EXISTS:
   SETTINGS_CREATED=false
   SETTINGS_EXISTS=true
 fi
@@ -323,7 +334,7 @@ Merging RPTC configuration into existing .claude/settings.json...
 
 ```json
 "rptc": {
-  "_rptcVersion": "2.2.5",
+  "_rptcVersion": "2.3.0",
   "defaultThinkingMode": "think",
   "artifactLocation": ".rptc",
   "docsLocation": "docs",
