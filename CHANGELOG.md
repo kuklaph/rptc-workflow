@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.1] - 2025-11-01
+
+### Fixed
+
+- **master-simplicity-agent agent name**: Removed `rptc:` prefix from agent name in frontmatter (now `master-simplicity-agent` instead of `rptc:master-simplicity-agent`)
+- **Markdown formatting**: Improved readability with proper blank lines after list headings in master-simplicity-agent.md
+
+---
+
+
 ## [2.4.0] - 2025-10-31
 
 ### Changed
