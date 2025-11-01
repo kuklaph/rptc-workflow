@@ -271,7 +271,7 @@ If file does NOT exist:
   Content:
   {
     "rptc": {
-      "_rptcVersion": "2.3.0",
+      "_rptcVersion": "2.4.0",
       "defaultThinkingMode": "think",
       "artifactLocation": ".rptc",
       "docsLocation": "docs",

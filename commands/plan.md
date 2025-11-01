@@ -529,130 +529,246 @@ Before delegating to Master Feature Planner:
 
 ### Phase 4.5: CRITICAL SIMPLICITY GATE - AUTOMATIC ENFORCEMENT (MANDATORY)
 
+<!-- Architectural Note: This phase delegates to master-simplicity-agent for consistency
+     with Phase 5 quality gate pattern and to leverage isolated context for complex validations.
+     The agent has autonomous Edit tool access to simplify plans directly.
+
+     Differentiation: This runs PRE-planning (PREVENTION) to validate scaffolds.
+     master-efficiency-agent runs POST-TDD (REMEDIATION) to refactor implemented code. -->
+
 **CRITICAL SIMPLICITY GATE - AUTOMATIC ENFORCEMENT**
 
-Before delegating to Master Feature Planner, perform AUTOMATIC simplicity validation:
+Before delegating to Master Feature Planner, perform AUTOMATIC simplicity validation using specialized sub-agent.
 
-**Simplicity Gate Checkpoint - DO NOT SKIP**
-
-This gate PREVENTS over-engineering at the design phase. All checks are MANDATORY.
-
-**Gate 1: Pattern Search Requirement**
-
-Before proposing ANY new abstractions or components:
-
-1. **Search for 3 similar patterns** in the existing codebase:
-   ```bash
-   # Use Grep to find similar implementations
-   Grep "[relevant pattern keywords from scaffold]"
-   # Search across relevant file types
-   # Document findings: File paths, pattern descriptions
-   ```
-
-2. **Analyze found patterns**:
-   - How does existing code solve similar problems?
-   - What patterns are already established in this codebase?
-   - Can existing components be reused or extended?
-
-3. **Present findings to PM**:
-   ```text
-   🔍 Pattern Search Results:
-
-   Found [N] similar patterns:
-   1. [File:line] - [Pattern description]
-   2. [File:line] - [Pattern description]
-   3. [File:line] - [Pattern description]
-
-   **Recommendation**: [Reuse existing pattern | Adapt pattern X | Justify new approach]
-   ```
-
-**ENFORCEMENT**: You CANNOT proceed to Master Feature Planner delegation without completing pattern search and presenting findings to PM.
+**Update TodoWrite**: Mark "Perform automatic simplicity gate validation" as in_progress.
 
 ---
 
-**Gate 2: Abstraction Justification (Rule of Three)**
+**Agent Configuration**:
+- Thinking mode: [determined thinking mode]
+- Sub-agent type: rptc:master-simplicity-agent
+- Output: Modified scaffold returned inline (no file writes)
 
-For ANY proposed abstractions (classes, interfaces, factories, middleware, base classes):
+Use the Task tool with subagent_type="rptc:master-simplicity-agent":
 
-1. **Count use cases**:
-   - How many CONCRETE use cases exist RIGHT NOW (not speculative)?
-   - Are there 3+ actual implementations that would use this abstraction?
-
-2. **Apply Rule of Three**:
-   ```text
-   - 1 use case → NEVER abstract (inline implementation)
-   - 2 use cases → Consider duplication (maybe abstract if patterns nearly identical)
-   - 3+ use cases → Abstraction justified (DRY principle applies)
-   ```
-
-3. **Challenge abstractions**:
-   - If proposing base class/interface: "Can we inline this for now?"
-   - If proposing factory pattern: "Do we have 3+ object types to create?"
-   - If proposing middleware: "Is this simple operation being over-architected?"
-
-**ENFORCEMENT**: Flag any abstractions with <3 use cases. Ask PM: "This abstraction has only [N] use cases. Should we inline for now and extract when we have 3+ cases?"
-
----
-
-**Gate 3: Complexity Check**
-
-Evaluate proposed approach for unnecessary complexity:
-
-1. **Layer count**:
-   - How many layers of indirection? (e.g., Controller → Service → Repository → DAO)
-   - **RED FLAG**: >3 layers for simple CRUD operations
-   - **QUESTION PM**: "Do we need all these layers, or can we simplify?"
-
-2. **File count check**:
-   - How many NEW files in the scaffold?
-   - **RED FLAG**: >5 new files for a "simple" feature
-   - **QUESTION PM**: "Can this be done by modifying 1-2 existing files instead?"
-
-3. **Enterprise pattern detection**:
-   - Does scaffold propose: Abstract Factory, Builder, Strategy, Observer, Mediator?
-   - **RED FLAG**: Enterprise patterns for small projects or simple features
-   - **QUESTION PM**: "Do we need [pattern name], or is there a simpler approach?"
-
-**ENFORCEMENT**: For each RED FLAG, present to PM with simpler alternative.
-
----
-
-**Gate 4: Simplicity Principle Validation**
-
-Check scaffold against simplicity directives:
-
-1. **KISS Check**:
-   - Is this the SIMPLEST solution (not the most clever or flexible)?
-   - **ASK PM**: "Could a junior developer understand this approach on first reading?"
-
-2. **YAGNI Check**:
-   - Are we building for CURRENT requirements (not speculative future needs)?
-   - **ASK PM**: "Are we solving today's problem, or over-engineering for 'maybe later'?"
-
-3. **Explicit over Clever**:
-   - Is the approach explicit and readable (not concise but cryptic)?
-   - **ASK PM**: "Is this approach clear, or are we being too clever?"
-
-**ENFORCEMENT**: If ANY check fails, propose simpler alternative before proceeding.
-
----
-
-**Gate Completion**:
-
-After completing all 4 gates, update TodoWrite and inform PM:
+**Prompt:**
 
 ```text
-✅ Simplicity Gates Passed!
+Use [determined thinking mode] thinking mode for this simplicity gate validation.
 
-**Pattern Search**: [N] similar patterns found, alignment validated
-**Abstraction Check**: [All abstractions justified by 3+ use cases | Simplified X abstractions]
-**Complexity Check**: [No red flags | Addressed red flags: simplified Y]
-**Simplicity Principles**: KISS, YAGNI, Explicit validated
+You are a SIMPLICITY GATE ANALYZER SUB-AGENT for preventing over-engineering at the design phase.
 
-**Proceeding to Master Feature Planner delegation...**
+**Overall Feature Context**:
+- Feature: [feature description]
+- Research findings: [if applicable, from [ARTIFACT_LOC]/research/]
+- Tech stack: [project tech from CLAUDE.md or .context/project-overview.md]
+- Scaffold structure: [initial plan structure from Phase 2/3 with step summaries]
+- PM input: [clarifications and requirements from Phase 1]
+
+**Your Task**: Validate scaffold against 4 critical simplicity gates and apply autonomous simplifications.
+
+**4-Gate Analysis** (ALL MANDATORY):
+
+**Gate 1: Pattern Search Requirement**
+- Use Grep tool to search for 3 similar patterns in existing codebase
+- Search for: [relevant pattern keywords from scaffold]
+- Analyze found patterns: How does existing code solve similar problems?
+- Recommendation: Reuse existing pattern | Adapt pattern X | Justify new approach
+- **If existing patterns found**: Use Edit tool to modify scaffold to align with codebase patterns
+
+**Gate 2: Abstraction Justification (Rule of Three)**
+- Count concrete use cases for each proposed abstraction (classes, interfaces, factories)
+- Apply Rule of Three: 1 use case → inline, 2 → consider, 3+ → abstract
+- **If <3 use cases detected**: Use Edit tool to inline abstraction in scaffold
+
+**Gate 3: Complexity Check**
+- Layer count check: Flag if >3 layers for simple operations
+- File count check: Flag if >5 new files for "simple" feature
+- Enterprise pattern detection: Flag Abstract Factory, Builder, Strategy, Observer, Mediator in small projects
+- **If red flags detected**: Use Edit tool to simplify scaffold (reduce layers, merge files, remove enterprise patterns)
+
+**Gate 4: Simplicity Principle Validation**
+- KISS: Is this the simplest solution (not most clever/flexible)?
+- YAGNI: Building for current requirements (not speculative future)?
+- Explicit over Clever: Is approach clear and readable (not cryptic)?
+- **If principles violated**: Use Edit tool to simplify scaffold
+
+**SOPs to Reference** (use fallback chain):
+1. .rptc/sop/architecture-patterns.md
+2. ~/.claude/global/sop/architecture-patterns.md
+3. ${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md
+
+Reference: AI Over-Engineering Prevention section, Anti-pattern prohibition list, Simplicity checkpoint questions
+
+**Autonomous Modification Authority**:
+- You have FULL authority to use Edit tool to modify scaffold
+- Apply simplifications directly (no approval needed for pattern alignment, abstraction inlining, complexity reduction)
+- Document all modifications in output summary
+
+**Output Requirements**:
+
+Return modified scaffold inline with gate results summary:
+
+```text
+✅ Simplicity Gates Completed!
+
+**Gate 1 - Pattern Search**:
+[Found N similar patterns: file:line - description]
+[Applied modifications: aligned scaffold with pattern X from file.ext]
+
+**Gate 2 - Abstraction Check**:
+[Analyzed M abstractions: N justified (3+ use cases), X inlined (1-2 use cases)]
+[Applied modifications: inlined abstraction Y, removed premature interface Z]
+
+**Gate 3 - Complexity Check**:
+[Layer count: OK | Simplified from X to Y layers]
+[File count: OK | Merged A and B files]
+[Enterprise patterns: OK | Removed unnecessary pattern C]
+
+**Gate 4 - Simplicity Principles**:
+[KISS: validated | simplified approach to X]
+[YAGNI: validated | removed speculative feature Y]
+[Explicit: validated | replaced clever pattern Z with explicit code]
+
+**Modified Scaffold**:
+[Return complete scaffold structure with all simplifications applied]
+
+**Recommendation**: [Proceed to Master Feature Planner | Additional PM review needed for concern X]
 ```
 
-**Update TodoWrite**: Mark "Get PM approval for Master Feature Planner delegation" as in_progress (this was the final gate before delegation).
+**CRITICAL**:
+- Use Grep tool for pattern search (required for Gate 1)
+- Use Edit tool autonomously to apply simplifications (no approval needed)
+- Return modified scaffold inline (do NOT write any files)
+- If major architectural concerns detected: flag for PM review before proceeding
+```
+
+**End of delegation prompt**
+
+---
+
+**After sub-agent completes:**
+
+**Verification and Retry Logic:**
+
+```bash
+# Step 1: Parse sub-agent response for required sections
+GATE1_FOUND=$(echo "$SUBAGENT_RESPONSE" | grep -c "Gate 1 - Pattern Search" || echo "0")
+GATE2_FOUND=$(echo "$SUBAGENT_RESPONSE" | grep -c "Gate 2 - Abstraction Check" || echo "0")
+GATE3_FOUND=$(echo "$SUBAGENT_RESPONSE" | grep -c "Gate 3 - Complexity Check" || echo "0")
+GATE4_FOUND=$(echo "$SUBAGENT_RESPONSE" | grep -c "Gate 4 - Simplicity Principles" || echo "0")
+
+VERIFICATION_PASSED=false
+if [ "$GATE1_FOUND" -gt 0 ] && [ "$GATE2_FOUND" -gt 0 ] && \
+   [ "$GATE3_FOUND" -gt 0 ] && [ "$GATE4_FOUND" -gt 0 ]; then
+  VERIFICATION_PASSED=true
+fi
+
+# Step 2: Retry logic (if verification fails)
+RETRY_ATTEMPT=0
+MAX_RETRIES=1
+FALLBACK_TRIGGERED=false
+
+while [ "$VERIFICATION_PASSED" = false ] && [ "$RETRY_ATTEMPT" -lt "$MAX_RETRIES" ]; do
+  echo ""
+  echo "⚠️ Simplicity Gate sub-agent returned incomplete response."
+  echo "   Missing required gate analysis sections."
+  echo "   Retrying... (Attempt $((RETRY_ATTEMPT + 1)) of $MAX_RETRIES)"
+  echo ""
+
+  # Retry Task tool delegation (same prompt as original - lines 552-644)
+  # [Task tool invocation would be repeated here with same parameters]
+
+  # Re-verify retry response
+  GATE1_FOUND=$(echo "$SUBAGENT_RESPONSE" | grep -c "Gate 1 - Pattern Search" || echo "0")
+  GATE2_FOUND=$(echo "$SUBAGENT_RESPONSE" | grep -c "Gate 2 - Abstraction Check" || echo "0")
+  GATE3_FOUND=$(echo "$SUBAGENT_RESPONSE" | grep -c "Gate 3 - Complexity Check" || echo "0")
+  GATE4_FOUND=$(echo "$SUBAGENT_RESPONSE" | grep -c "Gate 4 - Simplicity Principles" || echo "0")
+
+  if [ "$GATE1_FOUND" -gt 0 ] && [ "$GATE2_FOUND" -gt 0 ] && \
+     [ "$GATE3_FOUND" -gt 0 ] && [ "$GATE4_FOUND" -gt 0 ]; then
+    VERIFICATION_PASSED=true
+    echo "✅ Retry successful - complete response received"
+  fi
+
+  RETRY_ATTEMPT=$((RETRY_ATTEMPT + 1))
+done
+
+# Step 3: Fallback to inline validation (if retry also fails)
+if [ "$VERIFICATION_PASSED" = false ]; then
+  echo ""
+  echo "════════════════════════════════════════════════════════"
+  echo "  ⚠️ FALLBACK: Using Inline Simplicity Validation"
+  echo "════════════════════════════════════════════════════════"
+  echo ""
+  echo "The Simplicity Gate sub-agent is currently unavailable"
+  echo "or returned incomplete results after retry."
+  echo ""
+  echo "Falling back to basic inline validation."
+  echo ""
+
+  FALLBACK_TRIGGERED=true
+
+  # INLINE FALLBACK: Basic simplicity checks without sub-agent
+  # (Simplified version of 4-gate analysis performed inline)
+
+  INLINE_FINDINGS=""
+
+  # Gate 1 - Pattern Search (basic check)
+  INLINE_FINDINGS="${INLINE_FINDINGS}Gate 1 - Pattern Search: SKIPPED (requires sub-agent)\n"
+  INLINE_FINDINGS="${INLINE_FINDINGS}Recommendation: Review codebase manually for similar patterns.\n\n"
+
+  # Gate 2 - Abstraction Check (basic heuristics)
+  ABSTRACTION_COUNT=$(echo "$PLAN_SCAFFOLD" | grep -c "interface\|abstract\|factory\|builder" || echo "0")
+  if [ "$ABSTRACTION_COUNT" -gt 3 ]; then
+    INLINE_FINDINGS="${INLINE_FINDINGS}Gate 2 - Abstraction Check: ⚠️ WARNING\n"
+    INLINE_FINDINGS="${INLINE_FINDINGS}Found ${ABSTRACTION_COUNT} potential abstractions. Verify each has 3+ use cases.\n\n"
+  else
+    INLINE_FINDINGS="${INLINE_FINDINGS}Gate 2 - Abstraction Check: ✅ PASSED\n"
+    INLINE_FINDINGS="${INLINE_FINDINGS}Abstraction count appears reasonable.\n\n"
+  fi
+
+  # Gate 3 - Complexity Check (step count heuristic)
+  STEP_COUNT=$(echo "$PLAN_SCAFFOLD" | grep -c "^## Step" || echo "0")
+  if [ "$STEP_COUNT" -gt 10 ]; then
+    INLINE_FINDINGS="${INLINE_FINDINGS}Gate 3 - Complexity Check: ⚠️ WARNING\n"
+    INLINE_FINDINGS="${INLINE_FINDINGS}Plan has ${STEP_COUNT} steps. Consider breaking into smaller features.\n\n"
+  else
+    INLINE_FINDINGS="${INLINE_FINDINGS}Gate 3 - Complexity Check: ✅ PASSED\n"
+    INLINE_FINDINGS="${INLINE_FINDINGS}Step count (${STEP_COUNT}) is manageable.\n\n"
+  fi
+
+  # Gate 4 - Simplicity Principles (reminder)
+  INLINE_FINDINGS="${INLINE_FINDINGS}Gate 4 - Simplicity Principles: ⚠️ MANUAL REVIEW NEEDED\n"
+  INLINE_FINDINGS="${INLINE_FINDINGS}Review plan against KISS, YAGNI, and explicit-over-clever principles.\n\n"
+
+  INLINE_FINDINGS="${INLINE_FINDINGS}RECOMMENDATION: Sub-agent unavailable. Manual review recommended before proceeding.\n"
+
+  SUBAGENT_RESPONSE="$INLINE_FINDINGS"
+fi
+```
+
+**Present Findings to PM:**
+
+```text
+═══════════════════════════════════════════════════════════
+  📋 CRITICAL SIMPLICITY GATE - FINDINGS
+═══════════════════════════════════════════════════════════
+
+Analysis Method: [if FALLBACK_TRIGGERED=true: "Inline validation (sub-agent unavailable)", else: "AI Sub-agent (master-simplicity-agent)"]
+
+[Display SUBAGENT_RESPONSE content]
+
+═══════════════════════════════════════════════════════════
+```
+
+**Update TodoWrite**: Mark "Perform automatic simplicity gate validation" as complete
+
+**Decision point**:
+1. **Review gate results**: Check if sub-agent (or inline fallback) flagged major concerns requiring PM review
+2. If recommendation = "Proceed": Continue to Phase 5 (Master Feature Planner delegation)
+3. If recommendation = "PM review needed": Present concerns to PM, get approval, then continue to Phase 5
+4. **Use modified scaffold**: Pass sub-agent's modified scaffold (or original if fallback) to Master Feature Planner in Phase 5
 
 **PROCEED TO PHASE 5** (Master Feature Planner delegation).
 

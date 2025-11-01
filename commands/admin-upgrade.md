@@ -85,7 +85,7 @@ If valid workspace found:
 
 ```bash
 # Plugin version (update this with each release)
-PLUGIN_VERSION="2.3.0"
+PLUGIN_VERSION="2.4.0"
 ```
 
 **Configuration Extraction** (replaced jq dependency with Read tool + Claude parsing):

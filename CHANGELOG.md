@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.0] - 2025-10-31
+
+### Changed
+- **Phase 4.5 (Critical Simplicity Gate) now uses master-simplicity-agent sub-agent delegation** for architectural consistency with Phase 5 quality gates
+  - Autonomous simplification capability: Agent can directly edit plan scaffolds using Edit tool
+  - Retry-fallback mechanism: Falls back to inline validation if sub-agent unavailable (preserves UX)
+  - Clear differentiation from master-efficiency-agent: Simplicity agent runs PREVENTION (pre-planning validation) while efficiency agent runs REMEDIATION (post-TDD refactoring)
+  - Context efficiency: Isolated sub-agent execution prevents main context bloat for large plans
+
+---
+
 ## [2.3.0] - 2025-10-31
 
 ### Added
