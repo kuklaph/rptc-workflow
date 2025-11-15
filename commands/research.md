@@ -243,9 +243,92 @@ Load SOPs using fallback chain (highest priority first):
 **Streamlined Process** (keep it concise - agents will do deep work):
 
 1. **Quick Understanding**
-   - Ask: "What are you trying to understand or accomplish?"
-   - Ask: "Any specific aspects to focus on?"
-   - Ask: "What will you use this research for?"
+
+Use the AskUserQuestion tool to gather initial context:
+
+```json
+{
+  "questions": [
+    {
+      "question": "What are you trying to understand or accomplish with this research?",
+      "header": "Goal",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Understand current implementation",
+          "description": "Learn how existing code handles this topic"
+        },
+        {
+          "label": "Evaluate new approach",
+          "description": "Research best practices or new patterns to adopt"
+        },
+        {
+          "label": "Compare options",
+          "description": "Compare different libraries, frameworks, or approaches"
+        },
+        {
+          "label": "Solve specific problem",
+          "description": "Research solution for a specific technical challenge"
+        }
+      ]
+    },
+    {
+      "question": "Are there specific aspects you want to focus on?",
+      "header": "Focus",
+      "multiSelect": true,
+      "options": [
+        {
+          "label": "Architecture",
+          "description": "System design and structure"
+        },
+        {
+          "label": "Performance",
+          "description": "Speed, efficiency, optimization"
+        },
+        {
+          "label": "Security",
+          "description": "Security implications and best practices"
+        },
+        {
+          "label": "Testing",
+          "description": "Testing strategies and approaches"
+        },
+        {
+          "label": "Integration",
+          "description": "How it integrates with existing systems"
+        },
+        {
+          "label": "No specific focus",
+          "description": "General research across all areas"
+        }
+      ]
+    },
+    {
+      "question": "What will you use this research for?",
+      "header": "Purpose",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Implementation planning",
+          "description": "Will inform detailed implementation plan"
+        },
+        {
+          "label": "Architecture decision",
+          "description": "Help decide on architectural approach"
+        },
+        {
+          "label": "Knowledge building",
+          "description": "Learning and documentation purposes"
+        },
+        {
+          "label": "Problem solving",
+          "description": "Solve immediate technical issue"
+        }
+      ]
+    }
+  ]
+}
+```
 
 2. **Opportunity 2: Research Depth Selection Menu**
 
@@ -289,10 +372,79 @@ if [ -z "$RESEARCH_DEPTH" ]; then
 fi
 ```
 
-3. **Context Gathering** (based on RESEARCH_SCOPE):
-   - If codebase research: "Which parts of the codebase should I focus on?"
-   - If web research: "Any preferred sources or examples?"
-   - If hybrid: Ask both
+3. **Context Gathering** (based on RESEARCH_SCOPE)
+
+**If RESEARCH_SCOPE contains "codebase" or "hybrid":**
+
+Use the AskUserQuestion tool for codebase context:
+
+```json
+{
+  "questions": [
+    {
+      "question": "Which parts of the codebase should I focus on for ${TOPIC}?",
+      "header": "Codebase Focus",
+      "multiSelect": true,
+      "options": [
+        {
+          "label": "Specific directory/module",
+          "description": "I'll specify directory or module names"
+        },
+        {
+          "label": "Related features",
+          "description": "Areas related to this feature"
+        },
+        {
+          "label": "Entire codebase",
+          "description": "Search across all code"
+        },
+        {
+          "label": "Recent changes",
+          "description": "Focus on recently modified files"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**If RESEARCH_SCOPE contains "web" or "hybrid":**
+
+Use the AskUserQuestion tool for web context:
+
+```json
+{
+  "questions": [
+    {
+      "question": "Any preferred sources or examples for web research on ${TOPIC}?",
+      "header": "Web Sources",
+      "multiSelect": true,
+      "options": [
+        {
+          "label": "Official docs",
+          "description": "Official documentation and specifications"
+        },
+        {
+          "label": "Industry examples",
+          "description": "Real-world implementations from companies"
+        },
+        {
+          "label": "Academic sources",
+          "description": "Research papers and academic sources"
+        },
+        {
+          "label": "Community resources",
+          "description": "Blog posts, tutorials, community guides"
+        },
+        {
+          "label": "No preference",
+          "description": "Search all available sources"
+        }
+      ]
+    }
+  ]
+}
+```
 
 **Opportunity 3: Research Focus Areas Menu (MULTI-SELECT)**
 
@@ -392,10 +544,57 @@ fi
 
    **If MANUAL_SIMULATION = "Yes":**
 
-   a. **Identify Simulation Inputs**:
-      - Ask: "Do you have real example inputs we can use for simulation?"
-      - If YES: Use actual data from codebase, database samples, or user-provided examples
-      - If NO: **CRITICAL FALLBACK** - Create synthetic/example data that represents realistic scenarios
+   a. **Identify Simulation Inputs**
+
+Use the AskUserQuestion tool to determine input source:
+
+```json
+{
+  "questions": [
+    {
+      "question": "Do you have real example inputs we can use for simulation of ${TOPIC}?",
+      "header": "Input Source",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Yes, real data",
+          "description": "I can provide actual data from codebase, database, or production"
+        },
+        {
+          "label": "No, use synthetic",
+          "description": "Generate synthetic/example data that represents realistic scenarios"
+        },
+        {
+          "label": "Mixed approach",
+          "description": "Some real data, supplement with synthetic where needed"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Process selection:**
+
+```bash
+# Capture response
+INPUT_SOURCE="${answers[input_source]}"
+
+case "$INPUT_SOURCE" in
+  "Yes, real data")
+    echo "📊 Using real example inputs from user"
+    # Request user to provide actual data
+    ;;
+  "No, use synthetic")
+    echo "🔬 Generating synthetic example data"
+    # Proceed to synthetic data guidance below
+    ;;
+  "Mixed approach")
+    echo "📊🔬 Using mixed real and synthetic data"
+    # Combine both approaches
+    ;;
+esac
+```
 
    b. **Synthetic Data Guidance** (when real inputs unavailable):
       ```pseudo
@@ -410,10 +609,43 @@ fi
       SYNTHETIC_INPUT_3: { amount: 10000.00, currency: "GBP", method: "invalid" }
       ```
 
-   c. **Manual Simulation Process**:
-      - Ask PM to walk through: "Given [input], what should happen step-by-step?"
-      - Document: "When [input] → Then [expected behavior]"
-      - Identify gaps: "What happens if [edge case]?"
+   c. **Manual Simulation Process** (Interactive Walkthrough)
+
+For each input (real or synthetic), engage PM in step-by-step walkthrough:
+
+Use the AskUserQuestion tool for each scenario:
+
+```json
+{
+  "questions": [
+    {
+      "question": "Given input: [SPECIFIC_INPUT], what should happen step-by-step?",
+      "header": "Walkthrough",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Describe steps",
+          "description": "I'll walk through the expected step-by-step behavior"
+        },
+        {
+          "label": "Show example",
+          "description": "I'll provide a real example or code snippet"
+        },
+        {
+          "label": "Defer to standard",
+          "description": "Follow standard/typical behavior for this pattern"
+        }
+      ]
+    }
+  ]
+}
+```
+
+After each walkthrough response:
+- **Document**: "When [input] → Then [expected behavior from PM]"
+- **Probe edge cases** using AskUserQuestion: "What should happen if [edge case]?"
+
+Repeat for each input scenario.
 
    d. **Document Findings**:
       - Inputs used (real or synthetic)
