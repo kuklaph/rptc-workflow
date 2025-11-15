@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.3] - 2025-11-15
+
+### Changed
+
+- **Research command now uses structured AskUserQuestion tool for all PM interactions**
+  - Phase 1 Quick Understanding: 3 structured question blocks (research goal, focus areas, purpose)
+  - Phase 1 Context Gathering: Conditional questions for codebase focus and web source preferences
+  - Phase 1 Manual Simulation: Input source selection (real data, synthetic, or mixed approach)
+  - Phase 1 Simulation Walkthrough: Structured scenario walkthrough with step-by-step options
+  - Improved UX with consistent menu-driven workflow throughout discovery phase
+  - Multi-select enabled for appropriate questions (focus areas, codebase focus, web sources)
+
+---
+
+
 ## [2.4.2] - 2025-11-15
 
 ### Changed
