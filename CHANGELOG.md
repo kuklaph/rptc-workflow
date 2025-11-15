@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.2] - 2025-11-15
+
+### Changed
+
+- **Plan command now uses structured AskUserQuestion tool for all PM interactions**
+  - Phase 2: Manual simulation approval with clear options
+  - Phase 3: Iterative clarification with multi-select area selection and structured sub-questions
+  - Phase 4: Delegation approval with thinking mode selection (configured default + override options)
+  - Phase 5: Directory overwrite confirmation
+  - All specification areas (I/O formats, business rules, edge cases, integration, performance, security) now have explicit AskUserQuestion directives
+  - Clarified internal analysis questions vs PM questions to prevent confusion
+  - Improved UX with consistent menu-driven workflow throughout planning phase
+
+---
+
+
 ## [2.4.1] - 2025-11-01
 
 ### Fixed
