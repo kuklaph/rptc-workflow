@@ -276,9 +276,31 @@ Create high-level plan structure:
 
    Before finalizing scaffold, optionally validate approach through simulation:
 
-   **Ask PM**: "Should we manually simulate this approach with example inputs?"
+   **Use the AskUserQuestion tool:**
 
-   **If PM says yes:**
+   ```json
+   {
+     "questions": [
+       {
+         "question": "Should we manually simulate this approach with example inputs to validate the plan scaffold?",
+         "header": "Simulation",
+         "multiSelect": false,
+         "options": [
+           {
+             "label": "Yes, simulate",
+             "description": "Walk through the scaffold with example inputs to catch design flaws early (5-10 min investment)"
+           },
+           {
+             "label": "No, skip simulation",
+             "description": "Skip simulation for this simple/well-understood feature"
+           }
+         ]
+       }
+     ]
+   }
+   ```
+
+   **If PM selects "Yes, simulate":**
 
    a. **Use Inputs from Research** (if available):
       - If research phase included simulation: Reference those inputs
@@ -292,10 +314,12 @@ Create high-level plan structure:
       INPUT_SCENARIO_3: [error case - describe in pseudo-code]
       ```
 
-   c. **Walk Through Proposed Steps**:
-      - For each step in scaffold: "Given [input], after this step, what's the state?"
-      - Verify: "Does this step sequence produce expected output?"
-      - Identify: "Any missing steps or unclear transitions?"
+   c. **Walk Through Proposed Steps** (Internal Analysis):
+      - **Internally analyze** for each step in scaffold: "Given [input], after this step, what's the state?"
+      - **Internally verify**: "Does this step sequence produce expected output?"
+      - **Internally identify**: "Any missing steps or unclear transitions?"
+
+      **Note**: These are analytical questions for your internal reasoning, NOT questions to ask the PM.
 
    d. **Refine Scaffold Based on Simulation**:
       - Add missing steps discovered during walkthrough
@@ -383,72 +407,483 @@ notify_discord "📐 **Scaffold Complete**\nSteps identified: ${TOTAL_STEPS}" "d
 
 **Update TodoWrite**: Mark "Ask clarifying questions to PM" as in_progress
 
-**Ask PM to refine the plan**:
+**Iterative clarification process using AskUserQuestion tool:**
 
-1. **Scope Validation**
+**Step 1: Identify areas needing clarification**
 
-   - Ask: "Does this step breakdown make sense?"
-   - Ask: "Are we missing any major steps?"
-   - Ask: "Should any steps be broken down further?"
+Use the AskUserQuestion tool to identify which areas the PM wants to discuss:
 
-2. **Requirement Clarification**
+```json
+{
+  "questions": [
+    {
+      "question": "Which areas of the plan scaffold would you like to refine or discuss in detail?",
+      "header": "Clarification Areas",
+      "multiSelect": true,
+      "options": [
+        {
+          "label": "Scope Validation",
+          "description": "Review step breakdown, identify missing steps, or break down complex steps further"
+        },
+        {
+          "label": "Requirement Clarification",
+          "description": "Clarify expected behavior, edge case handling, and component constraints"
+        },
+        {
+          "label": "Test Strategy",
+          "description": "Review test scenarios, coverage requirements, and testing priorities"
+        },
+        {
+          "label": "Technical Decisions",
+          "description": "Discuss library choices, file structure, and architectural patterns"
+        },
+        {
+          "label": "Specifications",
+          "description": "Define structured requirements (I/O formats, business rules, edge cases, etc.)"
+        },
+        {
+          "label": "None - Scaffold is clear",
+          "description": "Skip clarification and proceed to delegation approval"
+        }
+      ]
+    }
+  ]
+}
+```
 
-   - Ask: "For [specific step], what's the expected behavior?"
-   - Ask: "How should we handle [edge case]?"
-   - Ask: "Any specific constraints for [component]?"
+**Step 2: For each selected area, ask relevant questions**
 
-3. **Test Strategy Alignment**
+**If "Scope Validation" selected:**
 
-   - Ask: "Are these test scenarios comprehensive?"
-   - Ask: "Any specific cases we must cover?"
-   - Ask: "What's the priority: speed vs. coverage?"
-   - **Reference testing SOP** for test type recommendations
+Use the AskUserQuestion tool:
 
-4. **Technical Decisions**
-   - Ask: "Any preference on [technical choice]?"
-   - Ask: "Should we use [library A] or [library B]?"
-   - Ask: "New files or modify existing?"
-   - **Reference architecture SOP** for pattern recommendations
+```json
+{
+  "questions": [
+    {
+      "question": "Does the step breakdown make sense for this feature?",
+      "header": "Step Breakdown",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Yes, looks good",
+          "description": "The steps are logical and complete"
+        },
+        {
+          "label": "Missing steps",
+          "description": "There are steps we need to add"
+        },
+        {
+          "label": "Too granular",
+          "description": "Some steps should be combined"
+        },
+        {
+          "label": "Too coarse",
+          "description": "Some steps need to be broken down further"
+        }
+      ]
+    }
+  ]
+}
+```
 
-5. **Specification Emphasis** (Structured Requirements)
+**Based on PM response:**
+- **If "Yes, looks good"**: No changes needed, continue to next selected area
+- **If "Missing steps"**: Use AskUserQuestion to gather specifics about what steps to add
+- **If "Too granular"**: Use AskUserQuestion to identify which steps should be combined
+- **If "Too coarse"**: Use AskUserQuestion to identify which steps need breakdown
 
-   Ask PM to specify requirements across 6 critical areas:
+After gathering details via AskUserQuestion, update scaffold accordingly.
 
-   a. **Input/Output Formats**
-      - Ask: "What data structures do we accept/return?"
-      - Ask: "What are the API contracts or interface signatures?"
-      - Example format: Request/response schemas, function signatures, data models
+**If "Requirement Clarification" selected:**
 
-   b. **Business Rules**
-      - Ask: "What validation rules apply to inputs?"
-      - Ask: "What business logic constraints exist?"
-      - Example format: "Field X must be..." or "When Y happens, then..."
+For each step in the scaffold, use the AskUserQuestion tool to clarify specific requirements:
 
-   c. **Edge Cases**
-      - Ask: "What boundary conditions should we handle?"
-      - Ask: "What unusual but valid inputs could occur?"
-      - Example format: Empty arrays, null values, min/max boundaries, concurrent operations
+```json
+{
+  "questions": [
+    {
+      "question": "For [Step Name], what is the expected behavior?",
+      "header": "Step Behavior",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Standard behavior",
+          "description": "Follow typical patterns for this type of operation"
+        },
+        {
+          "label": "Custom behavior needed",
+          "description": "Specific behavior requirements apply (I'll provide details)"
+        }
+      ]
+    },
+    {
+      "question": "Are there any specific constraints or edge cases for [Step Name] we should handle?",
+      "header": "Constraints",
+      "multiSelect": true,
+      "options": [
+        {
+          "label": "Input validation",
+          "description": "Specific input validation rules apply"
+        },
+        {
+          "label": "Error handling",
+          "description": "Special error handling needed"
+        },
+        {
+          "label": "Edge cases",
+          "description": "Unusual scenarios to handle"
+        },
+        {
+          "label": "None",
+          "description": "Standard constraints apply"
+        }
+      ]
+    }
+  ]
+}
+```
 
-   d. **Integration Constraints**
-      - Ask: "What external dependencies or APIs are involved?"
-      - Ask: "What rate limits, quotas, or external constraints exist?"
-      - Example format: Third-party API limits, database constraints, service dependencies
+**If "Test Strategy" selected:**
 
-   e. **Performance Requirements**
-      - Ask: "What response time or throughput requirements exist?"
-      - Ask: "Are there scalability concerns?"
-      - Example format: "<100ms response", "handles 1000 req/sec", "supports 1M records"
+Use the AskUserQuestion tool (**Reference testing SOP** for test type recommendations):
 
-   f. **Security Compliance**
-      - Ask: "What authentication/authorization is needed?"
-      - Ask: "What data protection requirements apply?"
-      - Example format: OAuth scopes, RBAC rules, encryption requirements, PII handling
+```json
+{
+  "questions": [
+    {
+      "question": "Are the proposed test scenarios comprehensive for this feature?",
+      "header": "Test Coverage",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Yes, comprehensive",
+          "description": "The test scenarios cover all necessary cases"
+        },
+        {
+          "label": "Missing scenarios",
+          "description": "Additional test cases needed (I'll specify)"
+        },
+        {
+          "label": "Too extensive",
+          "description": "Some test scenarios can be simplified or removed"
+        }
+      ]
+    },
+    {
+      "question": "What is the priority for this feature's testing approach?",
+      "header": "Test Priority",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Speed",
+          "description": "Focus on fast test execution, minimal coverage overhead"
+        },
+        {
+          "label": "Coverage",
+          "description": "Maximize test coverage, execution speed is secondary"
+        },
+        {
+          "label": "Balanced",
+          "description": "Balance between speed and coverage (80%+ target)"
+        }
+      ]
+    }
+  ]
+}
+```
 
-   **Reference**: See architecture-patterns.md and security-and-performance.md SOPs for standards.
+**If "Technical Decisions" selected:**
 
-   **Note**: Not all sections apply to every feature. Skip if N/A.
+Use the AskUserQuestion tool (**Reference architecture SOP** for pattern recommendations):
 
-**KEEP ASKING** until PM is satisfied with the scaffold.
+```json
+{
+  "questions": [
+    {
+      "question": "Should we create new files or modify existing ones for this feature?",
+      "header": "File Strategy",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Modify existing",
+          "description": "Add to existing files when possible"
+        },
+        {
+          "label": "Create new",
+          "description": "Create new dedicated files for this feature"
+        },
+        {
+          "label": "Mixed approach",
+          "description": "Some new files, some modifications (I'll specify)"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**For library or pattern choices, use AskUserQuestion with context-specific options:**
+
+Example for library choice:
+```json
+{
+  "questions": [
+    {
+      "question": "Which [library type] should we use for [specific need]?",
+      "header": "Library Choice",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "[Library A]",
+          "description": "[Pros: lightweight, cons: limited features]"
+        },
+        {
+          "label": "[Library B]",
+          "description": "[Pros: full-featured, cons: larger bundle]"
+        },
+        {
+          "label": "No preference",
+          "description": "Use team's standard or most appropriate option"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**If "Specifications" selected:**
+
+Ask PM to specify requirements across 6 critical areas. For EACH area, use the AskUserQuestion tool as shown:
+
+**Specification Area 1: Input/Output Formats**
+
+Use the AskUserQuestion tool:
+
+```json
+{
+  "questions": [
+    {
+      "question": "What input/output format specifications should we define?",
+      "header": "I/O Formats",
+      "multiSelect": true,
+      "options": [
+        {
+          "label": "Data structures",
+          "description": "Define request/response schemas, function signatures, data models"
+        },
+        {
+          "label": "API contracts",
+          "description": "Specify API endpoints, parameters, and return types"
+        },
+        {
+          "label": "Validation schemas",
+          "description": "Define input validation rules and constraints"
+        },
+        {
+          "label": "None needed",
+          "description": "Standard I/O formats apply"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Specification Area 2: Business Rules**
+
+Use the AskUserQuestion tool:
+
+```json
+{
+  "questions": [
+    {
+      "question": "Are there specific business rules or validation constraints we must enforce?",
+      "header": "Business Rules",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Yes, specific rules",
+          "description": "I'll provide detailed business logic constraints"
+        },
+        {
+          "label": "Standard validation",
+          "description": "Use standard validation patterns for this type of feature"
+        },
+        {
+          "label": "No special rules",
+          "description": "No business rule constraints apply"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Specification Area 3: Edge Cases**
+
+Use the AskUserQuestion tool:
+
+```json
+{
+  "questions": [
+    {
+      "question": "What edge cases and boundary conditions should we explicitly handle?",
+      "header": "Edge Cases",
+      "multiSelect": true,
+      "options": [
+        {
+          "label": "Empty/null inputs",
+          "description": "Handle empty arrays, null values, undefined cases"
+        },
+        {
+          "label": "Boundary values",
+          "description": "Min/max boundaries, overflow/underflow cases"
+        },
+        {
+          "label": "Concurrent operations",
+          "description": "Race conditions, simultaneous access"
+        },
+        {
+          "label": "Standard handling",
+          "description": "Standard edge case handling is sufficient"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Specification Area 4: Integration Constraints**
+
+Use the AskUserQuestion tool:
+
+```json
+{
+  "questions": [
+    {
+      "question": "Are there external dependencies or integration constraints we need to consider?",
+      "header": "Integration",
+      "multiSelect": true,
+      "options": [
+        {
+          "label": "Third-party APIs",
+          "description": "External API dependencies with rate limits or quotas"
+        },
+        {
+          "label": "Database constraints",
+          "description": "Database limitations, transaction requirements"
+        },
+        {
+          "label": "Service dependencies",
+          "description": "Other microservices or internal services"
+        },
+        {
+          "label": "None",
+          "description": "No external dependencies"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Specification Area 5: Performance Requirements**
+
+Use the AskUserQuestion tool:
+
+```json
+{
+  "questions": [
+    {
+      "question": "Are there specific performance requirements or scalability concerns?",
+      "header": "Performance",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Yes, strict requirements",
+          "description": "Specific response time, throughput, or scalability targets (I'll specify)"
+        },
+        {
+          "label": "Standard performance",
+          "description": "Standard performance expectations apply"
+        },
+        {
+          "label": "No requirements",
+          "description": "Performance is not a critical concern for this feature"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Specification Area 6: Security Compliance**
+
+Use the AskUserQuestion tool:
+
+```json
+{
+  "questions": [
+    {
+      "question": "What security and compliance requirements apply to this feature?",
+      "header": "Security",
+      "multiSelect": true,
+      "options": [
+        {
+          "label": "Authentication/Authorization",
+          "description": "OAuth scopes, RBAC rules, permission checks needed"
+        },
+        {
+          "label": "Data protection",
+          "description": "Encryption requirements, PII handling, data privacy"
+        },
+        {
+          "label": "Input sanitization",
+          "description": "XSS prevention, SQL injection protection, input validation"
+        },
+        {
+          "label": "Standard security",
+          "description": "Standard security practices apply"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Reference**: See architecture-patterns.md and security-and-performance.md SOPs for standards.
+
+**Note**: Not all specification areas apply to every feature. Skip sections marked as "None" or "Standard".
+
+**Step 3: Check if PM is satisfied**
+
+After addressing selected areas, use the AskUserQuestion tool:
+
+```json
+{
+  "questions": [
+    {
+      "question": "Is the plan scaffold now clear and ready for Master Feature Planner delegation?",
+      "header": "Scaffold Status",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Yes, ready",
+          "description": "Scaffold is clear, proceed to delegation approval"
+        },
+        {
+          "label": "Need more clarification",
+          "description": "I have additional questions or areas to discuss"
+        }
+      ]
+    }
+  ]
+}
+```
+
+- **If "Yes, ready"**: Proceed to Phase 4
+- **If "Need more clarification"**: Return to Step 1 (identify areas needing clarification)
 
 **Update TodoWrite**: Mark "Ask clarifying questions to PM" as completed (complex path only)
 
@@ -466,6 +901,8 @@ Thinking mode already loaded in Step 0a configuration: [THINKING_MODE value]
 
 **Step 2: Ask for Permission**:
 
+Present context to PM:
+
 ```text
 📋 Plan Scaffold Complete!
 
@@ -474,8 +911,6 @@ I have a solid understanding of:
 - Test strategy approach
 - Technical decisions
 
-**Ready to delegate to Master Feature Planner Agent?**
-
 The Master Feature Planner will create a comprehensive, detailed plan including:
 - Step-by-step TDD implementation guide
 - Detailed test scenarios for each step
@@ -483,21 +918,55 @@ The Master Feature Planner will create a comprehensive, detailed plan including:
 - Acceptance criteria
 - Risk assessment
 
-💡 Thinking Mode:
-Will use configured mode: "[THINKING_MODE value]"
-
-Ready to delegate to Master Feature Planner?
-- Type "yes" or "approved" to proceed with configured mode
-- Type "wait" to refine scaffold further
-- To override thinking mode, say: "yes, use ultrathink" (or "think hard")
-
-Available modes: "think" (~4K), "think hard" (~10K), "ultrathink" (~32K)
-To change default: Edit .claude/settings.json → "rptc.defaultThinkingMode"
-
-Waiting for your sign-off...
+💡 Configured Thinking Mode: "[THINKING_MODE value]"
 ```
 
-**DO NOT create agent** until PM gives explicit approval.
+**Use the AskUserQuestion tool:**
+
+```json
+{
+  "questions": [
+    {
+      "question": "Ready to delegate to Master Feature Planner Agent?",
+      "header": "Delegation",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Approve with [THINKING_MODE]",
+          "description": "Proceed with configured thinking mode: [THINKING_MODE] (~4K/~10K/~32K tokens based on mode)"
+        },
+        {
+          "label": "Wait",
+          "description": "Refine the scaffold further before delegating to Master Feature Planner"
+        },
+        {
+          "label": "Approve with think",
+          "description": "Override to 'think' mode (~4K tokens, fast, suitable for most features)"
+        },
+        {
+          "label": "Approve with think hard",
+          "description": "Override to 'think hard' mode (~10K tokens, moderate complexity, detailed analysis)"
+        },
+        {
+          "label": "Approve with ultrathink",
+          "description": "Override to 'ultrathink' mode (~32K tokens, complex multi-factor analysis)"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Note**: Replace `[THINKING_MODE]` placeholder in the first option's label and description with the actual configured mode value.
+
+**Process PM response**:
+- **If "Approve with [THINKING_MODE]" selected**: Use configured THINKING_MODE value, proceed to Phase 4.5
+- **If "Wait" selected**: Return to Phase 3 for additional clarifying questions
+- **If "Approve with think" selected**: Override THINKING_MODE to "think", proceed to Phase 4.5
+- **If "Approve with think hard" selected**: Override THINKING_MODE to "think hard", proceed to Phase 4.5
+- **If "Approve with ultrathink" selected**: Override THINKING_MODE to "ultrathink", proceed to Phase 4.5
+
+**DO NOT create agent** until PM gives explicit approval (any "Approve" option).
 
 **Update TodoWrite**: Mark appropriate task as completed (complex: "Get PM approval for Master Feature Planner delegation", simple: "Get PM approval")
 
@@ -518,12 +987,11 @@ Before delegating to Master Feature Planner:
 **Required**: PM must explicitly approve agent creation
 
 **ENFORCEMENT**: If PM has NOT approved:
-1. Present plan scaffold clearly
-2. Ask: "Ready to delegate to Master Feature Planner?"
-3. Wait for explicit "yes" or "approved"
-4. NEVER create agent without permission
+1. Return to Phase 4 and use the AskUserQuestion tool to request delegation approval
+2. Wait for explicit approval response (any "Approve" option selected)
+3. NEVER create agent without permission
 
-**This is a NON-NEGOTIABLE gate. Master Feature Planner is a resource-intensive operation requiring explicit PM authorization.**
+**This is a NON-NEGOTIABLE gate. Master Feature Planner is a resource-intensive operation requiring explicit PM authorization via AskUserQuestion tool.**
 
 ---
 
@@ -825,21 +1293,32 @@ Starting incremental plan generation...
 
 3. **Check if feature directory already exists**:
    - Path: `[ARTIFACT_LOC]/plans/[feature-slug]/`
-   - **If directory exists**, ask PM:
-     ```text
-     ⚠️ Plan Directory Already Exists
+   - **If directory exists**, use AskUserQuestion tool:
 
-     Directory: [ARTIFACT_LOC]/plans/[feature-slug]/
-
-     Options:
-     1. Overwrite - Delete existing directory and create new plan
-     2. Abort - Keep existing plan, cancel planning operation
-
-     What would you like to do? (type "overwrite" or "abort")
+     ```json
+     {
+       "questions": [
+         {
+           "question": "A plan directory already exists at [ARTIFACT_LOC]/plans/[feature-slug]/. What would you like to do?",
+           "header": "Directory Exists",
+           "multiSelect": false,
+           "options": [
+             {
+               "label": "Overwrite",
+               "description": "Delete existing directory and create new plan from scratch"
+             },
+             {
+               "label": "Abort",
+               "description": "Keep existing plan and cancel this planning operation"
+             }
+           ]
+         }
+       ]
+     }
      ```
-   - **If PM says "overwrite"**: Delete existing directory with Bash `rm -rf`, proceed
-   - **If PM says "abort"**: Exit Phase 5 without creating plan, inform PM operation cancelled
-   - **Wait for PM response before proceeding**
+
+   - **If PM selects "Overwrite"**: Delete existing directory with Bash `rm -rf`, proceed
+   - **If PM selects "Abort"**: Exit Phase 5 without creating plan, inform PM operation cancelled
 
 4. **Create feature directory**:
    ```bash
