@@ -11,7 +11,7 @@ Arguments:
 
 - Directory plan: `/rptc:tdd "@plan-name/"` (REQUIRED format in v2.0.0+)
 - Monolithic plan: `/rptc:tdd "@plan-name.md"` (DEPRECATED - shows migration guide)
-- Work item (no plan): `/rptc:tdd "simple calculator"` (generates directory plan on-the-fly)
+- Simple mode: `/rptc:tdd "add login button"` (uses TodoWrite directly, no plan files)
 - With TDG mode: `/rptc:tdd "@plan-name/" --tdg` (AI-accelerated test generation)
 
 **Flags:**
@@ -171,6 +171,7 @@ notify_discord() {
 # Initialize variables
 PLAN_REF=""
 TDG_FLAG=false
+EXECUTION_MODE=""  # "directory", "simple", or error
 
 # Parse all arguments
 for arg in "$@"; do
@@ -182,7 +183,7 @@ for arg in "$@"; do
       PLAN_REF="$arg"
       ;;
     *)
-      # First non-flag argument is plan reference
+      # First non-flag argument is plan reference or simple description
       if [ -z "$PLAN_REF" ]; then
         PLAN_REF="$arg"
       fi
@@ -190,50 +191,105 @@ for arg in "$@"; do
   esac
 done
 
-# Validate plan reference provided
+# Validate input provided
 if [ -z "$PLAN_REF" ]; then
-  echo "❌ Error: Plan reference required"
-  echo "   Usage: /rptc:tdd \"@plan-name/\" [--tdg]"
+  echo "❌ Error: Plan reference or description required"
+  echo ""
+  echo "   Usage:"
+  echo "     /rptc:tdd \"@plan-name/\"        # Execute plan (recommended)"
+  echo "     /rptc:tdd \"simple task\"        # Simple mode with TodoWrite"
   echo ""
   echo "   Examples:"
   echo "     /rptc:tdd \"@user-authentication/\""
-  echo "     /rptc:tdd \"@user-authentication/\" --tdg"
+  echo "     /rptc:tdd \"add login button\"   # Simple mode"
   echo ""
   exit 1
 fi
 
+# Detect execution mode based on input format
+if [[ "$PLAN_REF" == @*/ ]]; then
+  EXECUTION_MODE="directory"
+  PLAN_NAME="${PLAN_REF#@}"    # Remove @ prefix
+  PLAN_NAME="${PLAN_NAME%/}"   # Remove / suffix
+elif [[ "$PLAN_REF" == @*.md ]]; then
+  EXECUTION_MODE="deprecated"  # Monolithic format
+elif [[ "$PLAN_REF" != @* ]]; then
+  EXECUTION_MODE="simple"      # No @ prefix = simple mode
+  SIMPLE_DESCRIPTION="$PLAN_REF"
+else
+  EXECUTION_MODE="invalid"
+fi
 ```
 
 **Variables set:**
-- `PLAN_REF`: Plan reference (e.g., `"@plan-name/"`)
+- `PLAN_REF`: Raw input (plan reference or simple description)
 - `TDG_FLAG`: Boolean indicating if `--tdg` flag was provided
+- `EXECUTION_MODE`: One of "directory", "simple", "deprecated", or "invalid"
+- `SIMPLE_DESCRIPTION`: Feature description (only set in simple mode)
+- `PLAN_NAME`: Parsed plan name (only set in directory mode)
 
-### Phase 0: Load Plan (REQUIRED)
+### Phase 0: Load Plan or Initialize Simple Mode
 
-**Step 1: Detect Plan Format**
+**Step 1: Route Based on Execution Mode**
 
-**Supported Format (v2.0.0+):**
-- **Directory format ONLY**: Argument must end with `/` (e.g., `@feature-name/`)
-  - Plan stored as directory with `overview.md` + `step-*.md` files
-  - Enables token-efficient sub-agent delegation
-  - All plans must use this format
-
-**Legacy Format Detection**:
+Execution mode was determined in Step 0a2. Route accordingly:
 
 ```text
-If plan argument ends with "/":
-  → Directory format (supported)
-  → Load overview + delegate steps to sub-agents
+If EXECUTION_MODE = "simple":
+  → Simple mode (TodoWrite-based)
+  → Skip plan loading, go to Step 1-Simple
+  → No plan files created
 
-Else if plan argument ends with ".md":
+Else if EXECUTION_MODE = "directory":
+  → Directory format plan
+  → Load overview + delegate steps to sub-agents
+  → Continue to Step 2a
+
+Else if EXECUTION_MODE = "deprecated":
   → Legacy monolithic format (DEPRECATED in v2.0.0)
   → Show migration guide
   → Reject with error
 
-Else:
+Else (EXECUTION_MODE = "invalid"):
   → Error: Invalid format
   → Show usage examples
 ```
+
+**Step 1-Simple: Simple Mode Initialization** (if EXECUTION_MODE = "simple")
+
+Simple mode uses TodoWrite directly without creating plan files. Best for small, focused tasks.
+
+```text
+📋 Simple Mode Activated
+
+Task: "${SIMPLE_DESCRIPTION}"
+
+This will execute a focused TDD cycle using TodoWrite:
+1. RED - Write failing test(s)
+2. GREEN - Implement to pass
+3. REFACTOR - Clean up
+
+No plan files will be created. Progress tracked via TodoWrite only.
+```
+
+**Initialize Simple Mode TodoWrite:**
+
+```json
+{
+  "tool": "TodoWrite",
+  "todos": [
+    {"content": "RED: Write failing test for ${SIMPLE_DESCRIPTION}", "status": "pending", "activeForm": "Writing failing test"},
+    {"content": "GREEN: Implement ${SIMPLE_DESCRIPTION}", "status": "pending", "activeForm": "Implementing to pass tests"},
+    {"content": "REFACTOR: Clean up implementation", "status": "pending", "activeForm": "Refactoring code"}
+  ]
+}
+```
+
+**Then proceed to Phase 1-Simple** (see below).
+
+---
+
+**Step 2a** continues for directory format only:
 
 **Step 2a: Load Directory Format Plan**
 
@@ -370,85 +426,43 @@ For help: See docs/RPTC_WORKFLOW_GUIDE.md - "Migration from Monolithic Plans"
 
 **HALT EXECUTION**: Do not proceed with TDD. User must migrate plan first.
 
-**Step 3: Handle Invalid Format**
+**Step 3: Handle Invalid Format** (EXECUTION_MODE = "invalid")
 
-If plan argument doesn't match expected patterns (not `/` or `.md`):
+If plan argument starts with `@` but doesn't end with `/` or `.md`:
 
 ```text
 ❌ Error: Invalid plan argument format
 
-Expected format (v2.0.0+):
-- Directory: /rptc:tdd "@plan-name/"
+Expected formats:
+- Directory plan: /rptc:tdd "@plan-name/"
+- Simple mode: /rptc:tdd "task description"
 
-Your input: "@[user's input]"
+Your input: "${PLAN_REF}"
 
-The plan reference must end with "/" for directory format.
-All plans must use directory structure in v2.0.0+.
+Plan references must start with @ and end with /
+Simple mode descriptions should NOT start with @
 
-To create a plan: /rptc:plan "[feature description]"
+Examples:
+  /rptc:tdd "@user-authentication/"   # Execute plan
+  /rptc:tdd "add login button"        # Simple mode
 ```
 
-**If no plan provided** (simple work item description):
+**CRITICAL - Plan Synchronization** (Directory Format Only):
 
-**On-the-Fly Plan Generation:**
-
-1. **Create minimal directory structure**:
-   - Ask user to clarify feature/work item scope (if ambiguous)
-   - Generate plan slug from description: `[work-item-slug]`
-   - Create directory: `.rptc/plans/[work-item-slug]/`
-
-2. **Generate quick scaffold**:
-   - Create `overview.md`:
-     - Feature description
-     - Basic test strategy (happy path + error handling)
-     - Acceptance criteria
-   - Create `step-01.md` (typically single-step for simple work):
-     - Purpose
-     - Tests to write first
-     - Files to create/modify
-     - Implementation guidance
-
-3. **Flow into explicit delegation**:
-   Once scaffold created, execution flows into **Phase 1a: Directory Format - Sub-Agent Delegation** (line 1325) with the generated plan structure.
-
-   The explicit Task tool invocation pattern from Phase 1a handles all TDD execution—no special on-the-fly handling needed.
-
-**On-the-Fly Characteristics:**
-- **When Used**: User provides simple description instead of plan reference (e.g., `/rptc:tdd "add user login"`)
-- **Plan Structure**: Minimal directory (overview.md + step-01.md typically)
-- **Delegation**: Same explicit Phase 1a pattern established in Step 2
-- **Difference**: Plan created just-in-time vs. pre-existing from `/rptc:plan`
-
-**No Special Delegation Required**: The on-the-fly path creates a minimal plan directory, sets the appropriate variables (`PLAN_FORMAT="directory"`, `PLAN_DIR=...`), then flows into Phase 1a's unified delegation logic. All three paths (normal, resume, on-the-fly) converge at Phase 1a.
-
-**CRITICAL - Plan Synchronization**:
-
-**For Directory Format**:
 - Update step status in individual `step-NN.md` files
 - Mark step complete after sub-agent finishes
 - Update overview with progress
 
-**For Monolithic Format**:
-- Mark tests complete `- [x]` as they pass
-- Mark implementation steps complete `- [x]` as they finish
-- Update plan status from "Planned" to "In Progress" when starting
-- This keeps the living document in sync with actual progress
+**Note**: Simple mode does not create plan files - progress tracked via TodoWrite only.
 
-**Step 4: Parse Plan Configuration** (Optional Quality Gates)
+**Step 4: Parse Plan Configuration** (Optional Quality Gates, Directory Format Only)
 
 After loading the plan, parse the Configuration section to determine which quality gates are enabled.
 
 1. **Extract quality gate preferences from plan**:
-   
-   For Directory Format:
    - Read overview.md
    - Look for "## Configuration" section
    - Parse "**Efficiency Review**: [value]" and "**Security Review**: [value]"
-   
-   For Monolithic Format:
-   - Read plan file  
-   - Look for "## Configuration" section (if exists)
-   - Parse quality gate values
 
 2. **Set configuration variables**:
    ```text
@@ -1353,7 +1367,94 @@ echo ""
 
 ---
 
-### Phase 1: TDD Cycle for Each Step (REQUIRED)
+### Phase 1-Simple: Simple Mode TDD Execution
+
+**If EXECUTION_MODE = "simple"**, execute this streamlined TDD cycle:
+
+**Characteristics**:
+- No plan files created or updated
+- Progress tracked via TodoWrite only
+- Executes in main context (no sub-agent delegation)
+- Best for small, focused tasks (1-2 files)
+
+**Step S1: RED Phase - Write Failing Test**
+
+**Update TodoWrite**: Mark "RED: Write failing test for ${SIMPLE_DESCRIPTION}" as in_progress
+
+1. **Analyze the task**: Based on `${SIMPLE_DESCRIPTION}`, determine:
+   - What file(s) need to be created/modified
+   - What test file to create
+   - What the expected behavior is
+
+2. **Write test first**:
+   - Create test file with descriptive test cases
+   - Test should fail initially (no implementation yet)
+   - Use appropriate test framework for the project
+
+3. **Verify test fails**:
+   ```bash
+   # Run the test - should FAIL
+   [project test command]
+   ```
+
+**Update TodoWrite**: Mark "RED" as completed
+
+**Step S2: GREEN Phase - Implement to Pass**
+
+**Update TodoWrite**: Mark "GREEN: Implement ${SIMPLE_DESCRIPTION}" as in_progress
+
+1. **Write minimal implementation**:
+   - Create/modify the implementation file(s)
+   - Write ONLY enough code to make tests pass
+   - Follow KISS principle - simplest solution first
+
+2. **Verify tests pass**:
+   ```bash
+   # Run the test - should PASS now
+   [project test command]
+   ```
+
+**Update TodoWrite**: Mark "GREEN" as completed
+
+**Step S3: REFACTOR Phase - Clean Up**
+
+**Update TodoWrite**: Mark "REFACTOR: Clean up implementation" as in_progress
+
+1. **Improve code quality**:
+   - Remove duplication
+   - Improve naming
+   - Simplify complex logic
+   - Add comments only where necessary
+
+2. **Verify tests still pass**:
+   ```bash
+   # Run tests after refactoring - must still PASS
+   [project test command]
+   ```
+
+**Update TodoWrite**: Mark "REFACTOR" as completed
+
+**Step S4: Simple Mode Complete**
+
+```text
+✅ Simple Mode TDD Complete
+
+Task: ${SIMPLE_DESCRIPTION}
+Status: All tests passing
+
+Files created/modified:
+- [list files]
+
+No plan files were created. Use /rptc:plan for complex features.
+```
+
+**END SIMPLE MODE** - Do not continue to Phase 1a/1b.
+
+---
+
+### Phase 1: TDD Cycle for Each Step (Plan-Based)
+
+**Skip this section if EXECUTION_MODE = "simple"** (use Phase 1-Simple above instead).
 
 ```bash
 # Notify TDD execution start
@@ -1363,7 +1464,6 @@ notify_discord "🚀 **TDD Execution Started**\nPlan: \`${PLAN_NAME}\`\nSteps: $
 **Execution Strategy Based on Plan Format**:
 
 - **Directory Format**: Delegate each step to TDD sub-agent
-- **Monolithic Format**: Execute directly (existing workflow)
 
 **For EACH implementation step, choose execution path**:
 
@@ -3570,108 +3670,86 @@ Ready to begin TDD implementation with sub-agent delegation.
 [Proceeds to quality gates...]
 ```
 
-**Example 2: Monolithic Format (Backward Compatibility)**
+**Example 2: Simple Mode (TodoWrite-based)**
+
+```text
+User: /rptc:tdd "add login button"
+
+Agent: 📋 Simple Mode Activated
+
+Task: "add login button"
+
+This will execute a focused TDD cycle using TodoWrite:
+1. RED - Write failing test(s)
+2. GREEN - Implement to pass
+3. REFACTOR - Clean up
+
+No plan files will be created. Progress tracked via TodoWrite only.
+
+---
+
+🔴 RED Phase - Write failing test
+
+Analyzing task: Add login button to the UI
+- Test file: tests/components/LoginButton.test.tsx
+- Implementation: src/components/LoginButton.tsx
+
+Writing test first...
+
+✅ Test written:
+- ❌ should render login button
+- ❌ should call onLogin when clicked
+- ❌ should show loading state when authenticating
+
+All tests failing as expected (component doesn't exist yet).
+
+---
+
+🟢 GREEN Phase - Implement to pass
+
+Creating LoginButton.tsx...
+Running tests...
+
+✅ All tests passing (3 tests)
+
+---
+
+🔧 REFACTOR Phase - Clean up
+
+Improvements made:
+- Added TypeScript types
+- Improved accessibility (aria-label)
+
+✅ All tests still passing
+
+---
+
+✅ Simple Mode TDD Complete
+
+Task: add login button
+Status: All tests passing
+
+Files created:
+- src/components/LoginButton.tsx
+- tests/components/LoginButton.test.tsx
+
+No plan files were created. Use /rptc:plan for complex features.
+```
+
+**Example 3: Deprecated Monolithic Format (Shows Migration)**
 
 ```text
 User: /rptc:tdd "@user-authentication.md"
 
-Agent: 📋 Plan Loaded (Monolithic Format): User Authentication System
+Agent: ❌ MONOLITHIC PLAN FORMAT NO LONGER SUPPORTED (v2.0.0)
 
-Steps to implement: 5
-1. OAuth Strategy Setup
-2. JWT Token Management
-3. Password Reset Flow
-4. Frontend Integration
-5. Security Hardening
+Your plan: @user-authentication.md
+Legacy format: Monolithic (single .md file)
+Required format: Directory (overview.md + step-*.md)
 
-Ready to begin TDD implementation.
+To migrate, run: /rptc:plan "@user-authentication.md" --migrate
 
----
-
-🔴 RED Phase - Step 1: OAuth Strategy Setup
-
-Writing tests first...
-✅ Tests written: 4 tests
-- ❌ should configure Google OAuth strategy
-- ❌ should configure GitHub OAuth strategy
-- ❌ should handle OAuth callback
-- ❌ should validate OAuth tokens
-
-All tests failing as expected (no implementation yet).
-
-Proceeding to GREEN phase...
-
----
-
-🟢 GREEN Phase - Step 1: OAuth Strategy Setup
-
-Implementing OAuth strategy setup...
-Running tests...
-
-Iteration 1: Configured Passport strategies → ❌ 2 tests still failing
-Iteration 2: Added token validation → ✅ All tests passing!
-
-✅ All tests passing (4 tests)
-
-Proceeding to REFACTOR phase...
-
----
-
-🔧 REFACTOR Phase - Step 1
-
-Improvements made:
-- Extracted OAuth config to separate file
-- Improved error handling
-- Added explanatory comments
-
-✅ All tests still passing
-
-Step 1 complete!
-
----
-
-[Steps 2-5 follow same pattern...]
-
----
-
-✅ Implementation Complete - All Tests Passing!
-
-All 5 steps implemented successfully.
-- Total tests: 23 passing
-- Overall coverage: 87%
-- Files changed: 12
-
-**Ready for Master Efficiency Agent review?**
-[Details...]
-
-User: yes
-
-Agent: [Creates Efficiency Agent...]
-
-🎯 Master Efficiency Agent Complete!
-[Results...]
-
-**Ready for Master Security Agent review?**
-[Details...]
-
-User: yes
-
-Agent: [Creates Security Agent...]
-
-🔒 Master Security Agent Complete!
-[Results...]
-
----
-
-✅ TDD Implementation Complete with Quality Gates!
-
-**TDD Phase Complete - Ready for commit?**
-
-User: approved
-
-Agent: ✅ TDD Phase Approved!
-
-Next step: `/rptc:commit pr`
+HALT EXECUTION - User must migrate plan first.
 ```
 
 ## Success Criteria

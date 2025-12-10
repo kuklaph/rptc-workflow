@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.5.0] - 2025-12-10
+
+### Changed
+
+- **TDD command simple mode replaces on-the-fly plan generation**
+  - New: `/rptc:tdd "task description"` uses TodoWrite directly for simple tasks
+  - Removed: Dead on-the-fly plan generation code (was documented but never implemented)
+  - Simple mode executes RED-GREEN-REFACTOR in main context without plan files
+  - Plan-based execution (`@plan/`) continues to use sub-agent delegation
+  - Updated examples and documentation throughout tdd.md
+  - Cleaned up deprecated monolithic format references in examples
+
+### Removed
+
+- On-the-fly plan generation documentation (lines 391-422) - was never implemented
+- Monolithic format example replaced with Simple Mode example
+
+---
+
 ## [2.4.3] - 2025-11-15
 
 ### Changed
