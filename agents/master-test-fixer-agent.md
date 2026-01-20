@@ -1,7 +1,7 @@
 ---
 name: master-test-fixer-agent
 description: Auto-repairs test files based on sync analysis findings. Orchestrates fix decisions and delegates test generation to master-tdd-executor-agent. Handles update, add, create, and assertion fix scenarios.
-tools: Read, Edit, Write, Grep, Bash, Glob
+tools: Read, Edit, Write, Grep, Bash, Glob, mcp__serena__list_dir, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__get_symbols_overview, mcp__serena__find_symbol, mcp__serena__find_referencing_symbols, mcp__serena__replace_symbol_body, mcp__serena__insert_after_symbol, mcp__serena__insert_before_symbol, mcp__serena__rename_symbol, mcp__serena__activate_project, mcp__serena__read_memory, mcp__serena__write_memory, mcp__serena__think_about_task_adherence, mcp__MCP_DOCKER__sequentialthinking, mcp__sequentialthinking__sequentialthinking
 color: orange
 model: inherit
 ---
