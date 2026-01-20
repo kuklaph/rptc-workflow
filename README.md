@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 2.5.0
+**Version**: 2.6.0
 **Status**: Beta
 **License**: MIT
 
@@ -71,6 +71,7 @@ RESEARCH → PLAN → TDD → COMMIT
 | `/rptc:helper-resume-plan "@plan/"`               | Resume previous work   | After break |
 | `/rptc:helper-cleanup`                            | Review completed plans | Periodic    |
 | `/rptc:helper-simplify`                           | Simplify existing code complexity | As needed   |
+| `/rptc:sync-tests "[directory]"`                  | Sync tests to production code with auto-fix | As needed   |
 
 ### Admin Commands
 
@@ -212,6 +213,7 @@ SOPs are resolved in this order (highest priority first):
 - `security-and-performance.md` - Security practices, performance optimization
 - `post-tdd-refactoring.md` - Comprehensive 5-phase refactoring checklist for efficiency agent. Includes Code Simplicity metrics, Rule of Three abstraction framework, AI over-engineering detection, and tool configurations by language
 - `todowrite-guide.md` - TodoWrite integration patterns, state management, and best practices for progress tracking
+- `test-sync-guide.md` - Test-production matching algorithms, sync verification criteria, and auto-fix strategies for keeping tests aligned with production code
 
 ---
 
@@ -235,6 +237,7 @@ rptc-workflow/
 │   ├── helper-update-plan.md    # /rptc:helper-update-plan
 │   ├── helper-resume-plan.md    # /rptc:helper-resume-plan
 │   ├── helper-cleanup.md        # /rptc:helper-cleanup
+│   ├── sync-tests.md            # /rptc:sync-tests
 │   ├── admin-init.md            # /rptc:admin-init
 │   ├── admin-config.md          # /rptc:admin-config
 │   ├── admin-sop-check.md       # /rptc:admin-sop-check
@@ -244,10 +247,13 @@ rptc-workflow/
 │   ├── master-feature-planner-agent.md
 │   ├── master-efficiency-agent.md
 │   ├── master-security-agent.md
-│   └── master-documentation-specialist-agent.md
+│   ├── master-documentation-specialist-agent.md
+│   ├── master-test-sync-agent.md
+│   └── master-test-fixer-agent.md
 ├── sop/                         # Default SOPs (read-only)
 │   ├── testing-guide.md
 │   ├── flexible-testing-guide.md
+│   ├── test-sync-guide.md
 │   ├── architecture-patterns.md
 │   ├── frontend-guidelines.md
 │   ├── git-and-deployment.md
@@ -378,6 +384,20 @@ When you approve delegation, specialized AI agents provide expert analysis:
 **Purpose**: Automatic intelligent documentation
 **When**: TDD phase completion (automatically invoked after optional quality gates)
 **Provides**: Auto-creates permanent docs in `docs/` based on significance
+
+### Master Test Sync Agent
+
+**Purpose**: Analyze test-production relationships and verify synchronization
+**When**: `/rptc:sync-tests` command (analysis phase)
+**Provides**: Multi-layer confidence matching, 4-level sync verification, structured mismatch reports
+**Architecture**: 5-layer scoring (naming, directory, imports, semantic, intent) with MCP integration
+
+### Master Test Fixer Agent
+
+**Purpose**: Auto-repair test files based on sync analysis findings
+**When**: `/rptc:sync-tests` command (fix phase)
+**Provides**: 4 fix scenarios (update, add, create, assertion fix) with retry logic
+**Architecture**: Orchestrates fixes, delegates test generation to TDD executor agent
 
 ---
 

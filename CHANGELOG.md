@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.6.0] - 2026-01-20
+
+### Added
+
+- **Test Synchronization Command** (`/rptc:sync-tests`): New command to recursively sync tests with production code
+  - **Multi-layer confidence matching**: 5-layer scoring algorithm (naming 40pts, directory 30pts, imports 25pts, semantic 20pts, intent 15pts) with 50-point minimum threshold
+  - **4-level sync verification**: Structural (exports covered), Behavioral (coverage %), Assertion (tests pass), Intent (descriptions match)
+  - **Iterative convergence loop**: Continues until all areas report `actionRequired=false` or max iterations (10) reached
+  - **Auto-fix modes**: 4 fix scenarios (update tests, add tests, fix assertions, create new tests)
+  - **Production takes precedence**: Tests are updated to match production code, never vice versa
+  - **MCP integration**: Supports both Docker (`mcp__MCP_DOCKER__sequentialthinking`, `mcp__serena__*`) and non-Docker MCP versions
+  - **Dynamic progress tracking**: TodoWrite integration for real-time task updates per directory
+  - **New agents**:
+    - `master-test-sync-agent`: Analysis specialist for test-production matching and sync verification
+    - `master-test-fixer-agent`: Orchestrates fixes, delegates test generation to TDD executor agent
+  - **New SOP**: `test-sync-guide.md` - Test-production matching algorithms, sync criteria, and fix strategies
+  - **Configuration**: `rptc.syncTests` namespace with `autoFix`, `createMissing`, `matchMethods`, `maxIterations`, `confidenceThreshold` options
+
+---
+
 ## [2.5.0] - 2025-12-10
 
 ### Changed
