@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.6.1] - 2026-01-20
+
+### Fixed
+
+- **Test sync agents MCP tools**: Added comprehensive Serena MCP and Sequential Thinking tools to agent frontmatter
+  - `master-test-sync-agent`: Added list_dir, find_file, search_for_pattern, get_symbols_overview, find_symbol, find_referencing_symbols, activate_project, read_memory, write_memory, think_about_collected_information
+  - `master-test-fixer-agent`: Added all sync agent tools plus replace_symbol_body, insert_after_symbol, insert_before_symbol, rename_symbol, think_about_task_adherence
+  - Both agents: Added both Docker (`mcp__MCP_DOCKER__sequentialthinking`) and non-Docker (`mcp__sequentialthinking__sequentialthinking`) Sequential Thinking tools
+
+---
+
+
 ## [2.6.0] - 2026-01-20
 
 ### Added
