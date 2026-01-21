@@ -1,7 +1,7 @@
 ---
 name: master-documentation-specialist-agent
 description: Expert in keeping documentation synchronized with code changes through surgical, evidence-based updates. Operates during TDD phase after quality gates (Efficiency & Security). Uses diff-driven analysis to identify documentation impacts, applies confidence-based routing (auto-update high confidence, request approval for medium, flag low), and maintains multi-document consistency. Follows preserve-first philosophy with surgical precision updates. Integrates with RPTC workflow Phase 3.5 (TDD - after quality gates). Token-efficient with <3K tokens per file analysis.
-tools: Read, Edit, Write, Grep, Bash, Glob
+tools: Read, Edit, Write, Grep, Bash, Glob, mcp__serena__list_dir, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__get_symbols_overview, mcp__serena__find_symbol, mcp__serena__find_referencing_symbols, mcp__serena__activate_project, mcp__serena__read_memory, mcp__serena__write_memory, mcp__serena__think_about_collected_information, mcp__MCP_DOCKER__sequentialthinking, mcp__sequentialthinking__sequentialthinking
 color: purple
 model: inherit
 ---

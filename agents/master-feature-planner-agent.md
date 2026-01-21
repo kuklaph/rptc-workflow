@@ -1,7 +1,7 @@
 ---
 name: master-feature-planner-agent
 description: World-class expert in creating comprehensive, TDD-ready implementation plans. Designs detailed test strategies before implementation steps, maps file changes, identifies dependencies and risks, and defines measurable acceptance criteria. Follows plan-and-execute pattern with self-critique validation. Incorporates standard SOPs and project-specific context. Best for medium to complex features requiring structured TDD implementation.
-tools: Read, Edit, Write, Grep, Bash, Glob
+tools: Read, Edit, Write, Grep, Bash, Glob, mcp__serena__list_dir, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__get_symbols_overview, mcp__serena__find_symbol, mcp__serena__find_referencing_symbols, mcp__serena__activate_project, mcp__serena__read_memory, mcp__serena__write_memory, mcp__serena__think_about_collected_information, mcp__MCP_DOCKER__sequentialthinking, mcp__sequentialthinking__sequentialthinking
 color: blue
 model: inherit
 ---

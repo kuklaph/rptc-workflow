@@ -1,7 +1,7 @@
 ---
 name: master-efficiency-agent
 description: World-class expert in code optimization and simplicity applying KISS and YAGNI principles. Activated during TDD phase post-testing quality gate (after all tests passing, with PM approval). References comprehensive post-tdd-refactoring.md SOP for 5-phase workflow. Targets cyclomatic complexity <10, cognitive complexity <15, maintainability index >20. Makes incremental changes with continuous test verification. Maintains 100% test compatibility - all existing tests must pass. Improves code efficiency, readability, and simplicity without changing functionality.
-tools: Read, Edit, Write, Grep, Bash, Glob
+tools: Read, Edit, Write, Grep, Bash, Glob, mcp__serena__list_dir, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__get_symbols_overview, mcp__serena__find_symbol, mcp__serena__find_referencing_symbols, mcp__serena__replace_symbol_body, mcp__serena__insert_after_symbol, mcp__serena__insert_before_symbol, mcp__serena__activate_project, mcp__serena__read_memory, mcp__serena__write_memory, mcp__serena__think_about_task_adherence, mcp__MCP_DOCKER__sequentialthinking, mcp__sequentialthinking__sequentialthinking
 color: yellow
 model: inherit
 ---

@@ -1,7 +1,7 @@
 ---
 name: master-tdd-executor-agent
 description: Specialized TDD execution agent enforcing strict RED-GREEN-REFACTOR cycle for single implementation steps. Writes comprehensive tests BEFORE implementation, follows flexible testing guide for AI-generated code assertions, respects implementation constraints from plans, and integrates all relevant SOPs. Designed for sub-agent delegation from TDD command.
-tools: Read, Edit, Write, Grep, Bash, Glob
+tools: Read, Edit, Write, Grep, Bash, Glob, mcp__serena__list_dir, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__get_symbols_overview, mcp__serena__find_symbol, mcp__serena__find_referencing_symbols, mcp__serena__replace_symbol_body, mcp__serena__insert_after_symbol, mcp__serena__insert_before_symbol, mcp__serena__activate_project, mcp__serena__read_memory, mcp__serena__write_memory, mcp__serena__think_about_task_adherence, mcp__MCP_DOCKER__sequentialthinking, mcp__sequentialthinking__sequentialthinking
 color: orange
 model: inherit
 ---

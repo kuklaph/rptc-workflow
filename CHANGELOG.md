@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.7.2] - 2026-01-20
+
+### Fixed
+
+- **MCP tool compatibility**: Added both Docker and non-Docker versions of MCP tools to all agents
+  - All agents now include both `mcp__MCP_DOCKER__sequentialthinking` and `mcp__sequentialthinking__sequentialthinking`
+  - Code analysis agents (efficiency, security, tdd-executor, feature-planner, simplicity, documentation) now include Serena MCP tools
+  - Research agent now includes Sequential Thinking tools
+
+---
+
+
 ## [2.7.1] - 2026-01-20
 
 ### Changed
