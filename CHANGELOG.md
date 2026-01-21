@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.6.2] - 2026-01-20
+
+### Added
+
+- **Context-aware testing**: Sync agents now detect code context (8 categories: frontend-ui, backend-api, database, utility, browser-dependent, external-api, cli, realtime) and select appropriate testing strategies
+- **Testing tools detection**: Capability detection for E2E (Playwright/Cypress), component testing (RTL/VTL), API testing (supertest), mocking (MSW/nock), and DOM simulation (jsdom)
+- **Testability warnings**: Files requiring tools not installed (e.g., browser-dependent code without Playwright) are flagged for manual review instead of failing
+- **Context-specific test patterns**: Strategy matrix in fixer agent maps code context to appropriate test approaches
+
+### Fixed
+
+- **Convergence loop data staleness** (P0): Added Step 4a.1 to update AREA_STATUS with fresh sync agent results, preventing infinite loops
+- **Invalid bash syntax** (P0): Replaced non-existent `tool_exists` function with instructional text for MCP detection
+- **Weak delegation enforcement** (P0): Upgraded language to "YOU MUST NOT" with explicit violation warnings
+- **codeContext not mandatory** (P0): Added validation in Step 2c to reject sync results missing required codeContext field
+
+---
+
+
 ## [2.6.1] - 2026-01-20
 
 ### Fixed
