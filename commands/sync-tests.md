@@ -34,6 +34,31 @@ Ensure all production code has synchronized tests by:
 
 ---
 
+## ⚠️ CRITICAL: Sub-Agent Delegation Required
+
+**This command REQUIRES delegation to specialist sub-agents via the Task tool.**
+
+**YOU ARE THE ORCHESTRATOR, NOT THE EXECUTOR.**
+
+Your role is to:
+- ✅ Discover files and directories (Phase 1)
+- ✅ Track progress with TodoWrite
+- ✅ **Delegate analysis to `rptc:master-test-sync-agent`** (Phase 2)
+- ✅ **Delegate fixes to `rptc:master-test-fixer-agent`** (Phase 3)
+- ✅ Check convergence based on agent results (Phase 4)
+- ✅ Generate final report (Phase 5)
+
+**DO NOT in main context:**
+- ❌ Read production or test file contents
+- ❌ Analyze code for test matching
+- ❌ Write or edit test files
+- ❌ Run test commands
+- ❌ Attempt sync verification logic
+
+**All analysis and fixing work MUST be delegated to sub-agents using the Task tool.**
+
+---
+
 ## Step 0: Configuration & Validation
 
 ### Step 0a: Load Configuration
@@ -163,39 +188,18 @@ echo "✅ Target directory validated: $TARGET_DIR"
 
 **Check for Sequential Thinking MCP (both Docker and non-Docker):**
 
-```bash
-# Check for available MCP tools
-SEQUENTIAL_THINKING_AVAILABLE=false
-SEQUENTIAL_THINKING_TOOL=""
+Examine the available tools in your context to determine MCP availability:
 
-# Check Docker version
-if tool_exists "mcp__MCP_DOCKER__sequentialthinking"; then
-  SEQUENTIAL_THINKING_AVAILABLE=true
-  SEQUENTIAL_THINKING_TOOL="mcp__MCP_DOCKER__sequentialthinking"
-  echo "✅ Sequential Thinking MCP detected (Docker)"
-fi
+1. **Sequential Thinking MCP:**
+   - Look for `mcp__MCP_DOCKER__sequentialthinking` (Docker version)
+   - Look for `mcp__sequentialthinking__sequentialthinking` (non-Docker version)
+   - Set `SEQUENTIAL_THINKING_AVAILABLE=true` if either tool is present
+   - Set `SEQUENTIAL_THINKING_TOOL` to the available tool name
 
-# Check non-Docker version patterns
-if tool_exists "mcp__sequentialthinking__*"; then
-  SEQUENTIAL_THINKING_AVAILABLE=true
-  SEQUENTIAL_THINKING_TOOL="mcp__sequentialthinking"
-  echo "✅ Sequential Thinking MCP detected"
-fi
-```
-
-**Check for Serena MCP (both Docker and non-Docker):**
-
-```bash
-SERENA_AVAILABLE=false
-SERENA_TOOL_PREFIX=""
-
-# Check for Serena tools
-if tool_exists "mcp__serena__activate_project"; then
-  SERENA_AVAILABLE=true
-  SERENA_TOOL_PREFIX="mcp__serena__"
-  echo "✅ Serena MCP detected"
-fi
-```
+2. **Serena MCP:**
+   - Look for `mcp__serena__activate_project` and related tools
+   - Set `SERENA_AVAILABLE=true` if Serena tools are present
+   - Set `SERENA_TOOL_PREFIX="mcp__serena__"`
 
 **Display MCP status:**
 
@@ -267,6 +271,63 @@ FRAMEWORK="unknown"
 [ -f "pom.xml" ] || [ -f "build.gradle" ] && FRAMEWORK="junit"
 
 echo "Detected test framework: $FRAMEWORK"
+```
+
+### Step 1a.1: Detect Available Testing Tools
+
+**CRITICAL: Detect ALL available testing tools to inform context-aware test generation.**
+
+Use Grep tool to check package.json, pyproject.toml, or equivalent:
+
+```bash
+# Initialize capabilities
+TESTING_TOOLS=()
+
+# JavaScript/TypeScript ecosystem
+if [ -f "package.json" ]; then
+  grep -q '"@playwright/test"' package.json && TESTING_TOOLS+=("playwright")
+  grep -q '"cypress"' package.json && TESTING_TOOLS+=("cypress")
+  grep -q '"@testing-library/react"' package.json && TESTING_TOOLS+=("rtl")
+  grep -q '"@testing-library/vue"' package.json && TESTING_TOOLS+=("vtl")
+  grep -q '"supertest"' package.json && TESTING_TOOLS+=("supertest")
+  grep -q '"msw"' package.json && TESTING_TOOLS+=("msw")
+  grep -q '"nock"' package.json && TESTING_TOOLS+=("nock")
+  grep -q '"jsdom"' package.json && TESTING_TOOLS+=("jsdom")
+  grep -q '"happy-dom"' package.json && TESTING_TOOLS+=("happy-dom")
+fi
+
+# Python ecosystem
+if [ -f "pyproject.toml" ] || [ -f "requirements.txt" ]; then
+  grep -q 'playwright' pyproject.toml requirements.txt 2>/dev/null && TESTING_TOOLS+=("playwright-py")
+  grep -q 'pytest-asyncio' pyproject.toml requirements.txt 2>/dev/null && TESTING_TOOLS+=("pytest-asyncio")
+  grep -q 'httpx' pyproject.toml requirements.txt 2>/dev/null && TESTING_TOOLS+=("httpx")
+  grep -q 'responses' pyproject.toml requirements.txt 2>/dev/null && TESTING_TOOLS+=("responses")
+fi
+
+# Determine testing capabilities
+HAS_E2E=$(echo "${TESTING_TOOLS[@]}" | grep -qE "playwright|cypress" && echo "true" || echo "false")
+HAS_COMPONENT=$(echo "${TESTING_TOOLS[@]}" | grep -qE "rtl|vtl" && echo "true" || echo "false")
+HAS_API_TESTING=$(echo "${TESTING_TOOLS[@]}" | grep -qE "supertest|httpx" && echo "true" || echo "false")
+HAS_MOCKING=$(echo "${TESTING_TOOLS[@]}" | grep -qE "msw|nock|responses" && echo "true" || echo "false")
+HAS_DOM_MOCK=$(echo "${TESTING_TOOLS[@]}" | grep -qE "jsdom|happy-dom" && echo "true" || echo "false")
+```
+
+**Display detected capabilities:**
+
+```text
+Testing Tools Detected:
+  Framework: ${FRAMEWORK}
+  Tools: ${TESTING_TOOLS[@]}
+
+Testing Capabilities:
+  E2E Testing (Playwright/Cypress): ${HAS_E2E}
+  Component Testing (RTL/VTL): ${HAS_COMPONENT}
+  API Testing (Supertest/httpx): ${HAS_API_TESTING}
+  HTTP Mocking (MSW/nock): ${HAS_MOCKING}
+  DOM Simulation (jsdom): ${HAS_DOM_MOCK}
+
+[If HAS_E2E=false and frontend code exists:]
+⚠️  WARNING: No E2E test runner detected. Browser-dependent code may require Playwright setup.
 ```
 
 ### Step 1b: Discover Production Files
@@ -397,13 +458,28 @@ declare -A AREA_STATUS  # Track status per subdirectory
 
 ### Step 2b: Delegate Analysis to Sync Agent
 
-For each subdirectory, delegate to the sync agent:
+**⚠️ CRITICAL: MANDATORY SUB-AGENT DELEGATION**
 
-```markdown
+**YOU MUST delegate analysis to `rptc:master-test-sync-agent` using the Task tool.**
+
+**YOU MUST NOT:**
+- ❌ Read production file contents in main context
+- ❌ Read test file contents in main context
+- ❌ Analyze code for test matching in main context
+- ❌ Calculate confidence scores in main context
+- ❌ Attempt any sync verification logic in main context
+
+**VIOLATION OF THESE RULES BREAKS THE WORKFLOW.**
+
+If you find yourself reading file contents or analyzing code, STOP IMMEDIATELY and use the Task tool delegation below instead.
+
+---
+
+**For EACH subdirectory in SUBDIRECTORIES, execute this delegation:**
+
 Use the Task tool with subagent_type="rptc:master-test-sync-agent":
 
-**Prompt:**
-
+Prompt:
 ## Analysis Context
 
 **Directory to analyze:** ${SUBDIR}
@@ -416,6 +492,29 @@ Use the Task tool with subagent_type="rptc:master-test-sync-agent":
 
 ## Test Files Candidates
 [List of test files that might match]
+
+## Available Testing Tools & Capabilities
+**Tools installed:** ${TESTING_TOOLS[@]}
+**Capabilities:**
+- E2E Testing (Playwright/Cypress): ${HAS_E2E}
+- Component Testing (RTL/VTL): ${HAS_COMPONENT}
+- API Testing (Supertest/httpx): ${HAS_API_TESTING}
+- HTTP Mocking (MSW/nock): ${HAS_MOCKING}
+- DOM Simulation (jsdom): ${HAS_DOM_MOCK}
+
+## CRITICAL: Code Context Detection Required
+
+For EACH production file, you MUST detect its code context:
+- **Frontend UI**: React/Vue/Angular components, JSX/TSX, DOM manipulation
+- **Backend API**: Express/Fastify routes, HTTP handlers, middleware
+- **Database/ORM**: Prisma/Sequelize/TypeORM, SQL queries
+- **Pure Utilities**: No I/O, no side effects, pure functions
+- **Browser-Dependent**: window/document access, localStorage, cookies
+- **External Services**: API calls, webhooks, third-party SDKs
+
+Include detected context in your output for each file so the fixer agent knows the appropriate testing strategy.
+
+**IMPORTANT:** If browser-dependent code is found and HAS_E2E=false, flag it as requiring Playwright setup.
 
 ## MCP Availability
 - Sequential Thinking: ${SEQUENTIAL_THINKING_AVAILABLE} (tool: ${SEQUENTIAL_THINKING_TOOL})
@@ -434,13 +533,27 @@ Use the Task tool with subagent_type="rptc:master-test-sync-agent":
 
 ## Output Format
 Return JSON with: synced, mismatches, missingTests, orphanedTests, actionRequired
-```
+
+---
+
+**VALIDATION CHECKPOINT:** Verify the Task tool was invoked and returned results before proceeding. If no Task tool result exists, STOP and re-execute the delegation above.
 
 ### Step 2c: Process Sync Agent Results
 
 ```bash
 # Parse agent output
 SYNC_RESULT=$(parse_json "$AGENT_OUTPUT")
+
+# VALIDATION: Check that codeContext is present for all files
+# This is REQUIRED - reject results that don't include it
+MISSING_CONTEXT_COUNT=$(jq '[.synced[], .mismatches[], .missingTests[] | select(.codeContext == null or .codeContext == "")] | length' <<< "$SYNC_RESULT")
+
+if [ "$MISSING_CONTEXT_COUNT" -gt 0 ]; then
+  echo "❌ ERROR: Sync agent output missing required 'codeContext' field for $MISSING_CONTEXT_COUNT files"
+  echo "Re-delegating with explicit codeContext requirement..."
+  # Re-run Step 2b delegation with emphasis on codeContext
+  continue
+fi
 
 # Extract key metrics
 SYNCED_COUNT=$(jq '.synced | length' <<< "$SYNC_RESULT")
@@ -541,13 +654,28 @@ AskUserQuestion(
 
 ### Step 3b: Delegate Fixes to Fixer Agent
 
-For each area with `actionRequired=true`:
+**⚠️ CRITICAL: MANDATORY SUB-AGENT DELEGATION**
 
-```markdown
+**YOU MUST delegate fixes to `rptc:master-test-fixer-agent` using the Task tool.**
+
+**YOU MUST NOT:**
+- ❌ Edit test files in main context (use Edit tool)
+- ❌ Write new test code in main context
+- ❌ Create test files in main context (use Write tool)
+- ❌ Run test commands in main context (use Bash tool)
+- ❌ Apply any fix scenario logic in main context
+
+**VIOLATION OF THESE RULES BREAKS THE WORKFLOW.**
+
+If you find yourself about to edit a test file or write test code, STOP IMMEDIATELY and use the Task tool delegation below instead.
+
+---
+
+**For EACH area where AREA_STATUS[area]=true, execute this delegation:**
+
 Use the Task tool with subagent_type="rptc:master-test-fixer-agent":
 
-**Prompt:**
-
+Prompt:
 ## Fix Context
 
 **Iteration:** ${ITERATION} of ${MAX_ITERATIONS}
@@ -555,11 +683,38 @@ Use the Task tool with subagent_type="rptc:master-test-fixer-agent":
 **Test framework:** ${FRAMEWORK}
 **Coverage target:** ${COVERAGE_TARGET}%
 
+## Available Testing Tools & Capabilities
+**Tools installed:** ${TESTING_TOOLS[@]}
+**Capabilities:**
+- E2E Testing (Playwright/Cypress): ${HAS_E2E}
+- Component Testing (RTL/VTL): ${HAS_COMPONENT}
+- API Testing (Supertest/httpx): ${HAS_API_TESTING}
+- HTTP Mocking (MSW/nock): ${HAS_MOCKING}
+- DOM Simulation (jsdom): ${HAS_DOM_MOCK}
+
 ## Sync Report for This Area
-[Insert sync agent output for this area]
+[Insert sync agent output for this area - MUST include code context per file]
 
 ## Mismatches to Fix
-[List from sync report]
+[List from sync report - include detected codeContext for each file]
+
+## CRITICAL: Context-Aware Testing Strategy
+
+You MUST select the appropriate testing approach based on each file's code context:
+
+| Code Context | Strategy (if tools available) | Fallback (if tools missing) |
+|--------------|------------------------------|----------------------------|
+| **Frontend UI** | Component tests (RTL/VTL) or Playwright E2E | Snapshot tests, flag limitation |
+| **Backend API** | Integration tests (supertest/httpx) | Mock req/res objects |
+| **Database/ORM** | Test DB integration | Repository mocks |
+| **Pure Utilities** | Direct unit tests | Direct unit tests |
+| **Browser-Dependent** | **Playwright REQUIRED** | Flag for manual review |
+| **External Services** | MSW/nock mocked tests | Mock responses inline |
+
+**IMPORTANT:**
+- If codeContext is "browser-dependent" AND HAS_E2E=false, DO NOT attempt to create tests. Instead, add to manualReview with reason "Requires Playwright setup".
+- If codeContext is "frontend" AND HAS_COMPONENT=false AND HAS_E2E=false, flag for manual review.
+- Always match test style to existing tests in the project for consistency.
 
 ## Missing Tests to Create
 [List from sync report]
@@ -584,7 +739,10 @@ Use the Task tool with subagent_type="rptc:master-test-fixer-agent":
 - Auto-fix: ${AUTO_FIX}
 - Create missing: ${CREATE_MISSING}
 - Max retry attempts per file: 3
-```
+
+---
+
+**VALIDATION CHECKPOINT:** Verify the Task tool was invoked and returned results before proceeding. If no Task tool result exists, STOP and re-execute the delegation above.
 
 ### Step 3c: Process Fixer Results
 
@@ -631,21 +789,49 @@ echo "  Fixes applied: Updated=$UPDATED_COUNT, Created=$CREATED_COUNT, Failed=$F
 
 ### Step 4a: Re-run Sync Analysis
 
-Repeat Phase 2 analysis on all areas:
+**CRITICAL: You MUST re-delegate to the sync agent for verification. DO NOT skip this step or check convergence without fresh analysis.**
 
-```markdown
-# For each subdirectory, re-delegate to sync agent
-# (Same prompt as Step 2b, but with iteration context)
+**Re-execute Step 2b delegation for EACH subdirectory** with the following additional context in the prompt:
 
-**Additional context:**
-Iteration: ${ITERATION} (verification pass)
-Previous issues: [summary from fixer results]
+Use the Task tool with subagent_type="rptc:master-test-sync-agent":
+
+Prompt:
+[Include all context from Step 2b prompt, PLUS:]
+
+## Verification Context
+**Iteration:** ${ITERATION} (verification pass)
+**Previous issues fixed:** [summary from fixer results]
+**Expected outcome:** All previously flagged issues should now be resolved
+
+---
+
+**VALIDATION CHECKPOINT:** Verify the Task tool was invoked for EACH subdirectory before proceeding to convergence check.
+
+### Step 4a.1: Update AREA_STATUS with Fresh Results (CRITICAL)
+
+**YOU MUST update AREA_STATUS with the NEW sync agent results. Failure to do this causes stale data and infinite loops.**
+
+For EACH subdirectory that was re-analyzed in Step 4a:
+
+```bash
+# Parse the FRESH sync agent output (not cached from Phase 2)
+FRESH_SYNC_RESULT=$(parse_json "$FRESH_AGENT_OUTPUT")
+
+# Extract actionRequired from the NEW results
+FRESH_ACTION_REQUIRED=$(jq -r '.actionRequired' <<< "$FRESH_SYNC_RESULT")
+
+# UPDATE AREA_STATUS with fresh data (overwrites old value)
+AREA_STATUS["$SUBDIR"]="$FRESH_ACTION_REQUIRED"
+
+echo "  $SUBDIR: actionRequired=$FRESH_ACTION_REQUIRED (updated from fresh analysis)"
 ```
+
+**VALIDATION:** Before proceeding to Step 4b, verify that AREA_STATUS contains results from Step 4a (this iteration), NOT cached results from Phase 2.
 
 ### Step 4b: Check Convergence
 
 ```bash
-# Check if ALL areas report actionRequired=false
+# Check if ALL areas report actionRequired=false (using FRESH data from Step 4a.1)
 ALL_SYNCED=true
 
 for SUBDIR in "${!AREA_STATUS[@]}"; do

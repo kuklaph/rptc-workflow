@@ -303,6 +303,234 @@ expect(calculateTax(100)).toBe(8);
 
 ---
 
+## Code Context Detection
+
+Understanding **what type of code** is being tested is critical for selecting the appropriate testing strategy.
+
+### Context Categories
+
+| Category | Indicators | Primary Testing Approach |
+|----------|------------|-------------------------|
+| **Frontend UI** | React/Vue/Angular components, JSX/TSX, DOM manipulation | Component tests, E2E (Playwright) |
+| **Backend API** | Express/Fastify routes, HTTP handlers, middleware | Integration tests, API tests |
+| **Database/ORM** | Prisma/Sequelize/TypeORM, SQL queries, migrations | Integration tests with test DB |
+| **Pure Utilities** | No I/O, no side effects, pure functions | Unit tests |
+| **CLI/Scripts** | Process.argv, commander/yargs, file system ops | Integration tests, snapshot tests |
+| **Browser-Dependent** | window/document access, localStorage, cookies | E2E (Playwright), JSDOM mocks |
+| **External Services** | API calls, webhooks, third-party SDKs | Mocked unit tests, contract tests |
+| **Real-time** | WebSockets, Server-Sent Events, subscriptions | Integration tests with test server |
+
+### Detection Logic
+
+```typescript
+// Context detection algorithm
+function detectCodeContext(file: string, ast: AST): CodeContext {
+  const indicators = {
+    frontend: ['React', 'Vue', 'jsx', 'tsx', 'component', 'useState', 'useEffect'],
+    backend: ['express', 'fastify', 'koa', 'req', 'res', 'middleware', 'router'],
+    database: ['prisma', 'sequelize', 'typeorm', 'mongoose', 'query', 'schema'],
+    utility: ['export function', 'export const', no imports from above categories],
+    cli: ['process.argv', 'commander', 'yargs', 'inquirer', 'chalk'],
+    browser: ['window.', 'document.', 'localStorage', 'sessionStorage', 'navigator'],
+    external: ['fetch', 'axios', 'http.request', 'sdk', 'client'],
+    realtime: ['WebSocket', 'socket.io', 'EventSource', 'subscribe']
+  };
+
+  // Score each category based on indicators found
+  // Return highest scoring category with confidence
+}
+```
+
+### Project Testing Tools Detection
+
+Before selecting a strategy, detect what testing tools are available:
+
+```bash
+# Check package.json / pyproject.toml / go.mod for testing dependencies
+
+# JavaScript/TypeScript
+JEST=$(grep -q '"jest"' package.json && echo "true")
+VITEST=$(grep -q '"vitest"' package.json && echo "true")
+PLAYWRIGHT=$(grep -q '"@playwright/test"' package.json && echo "true")
+CYPRESS=$(grep -q '"cypress"' package.json && echo "true")
+RTL=$(grep -q '"@testing-library/react"' package.json && echo "true")
+
+# Python
+PYTEST=$(grep -q 'pytest' pyproject.toml && echo "true")
+PLAYWRIGHT_PY=$(grep -q 'playwright' pyproject.toml && echo "true")
+
+# Go
+GO_TEST="true"  # Built-in
+```
+
+### Testing Strategy Selection Matrix
+
+| Code Context | If Playwright Available | If Only Unit Test Framework | Fallback Strategy |
+|--------------|------------------------|----------------------------|-------------------|
+| **Frontend UI** | E2E component tests via Playwright | Mock DOM with JSDOM, use RTL | Snapshot tests + shallow render |
+| **Backend API** | Full integration via Playwright API testing | Supertest/httptest integration | Mock request/response objects |
+| **Database** | Test DB with migrations | In-memory SQLite / mocked repository | Repository pattern mocks |
+| **Pure Utility** | Not needed | Direct unit tests | Direct unit tests |
+| **Browser-Dependent** | **REQUIRED** - must use Playwright | JSDOM mocks (limited) | Flag for manual review |
+| **External Services** | Contract tests with real endpoints | Mocked responses (MSW, nock) | Mocked responses |
+| **CLI** | Process spawn tests | Mock stdin/stdout | Snapshot output tests |
+
+### Context-Specific Test Patterns
+
+#### Frontend Components (React Example)
+
+```typescript
+// Production: LoginForm.tsx
+export function LoginForm({ onSubmit }) {
+  const [email, setEmail] = useState('');
+  return (
+    <form onSubmit={() => onSubmit(email)}>
+      <input value={email} onChange={e => setEmail(e.target.value)} />
+      <button type="submit">Login</button>
+    </form>
+  );
+}
+
+// Test: LoginForm.test.tsx (with RTL)
+import { render, screen, fireEvent } from '@testing-library/react';
+import { LoginForm } from './LoginForm';
+
+describe('LoginForm', () => {
+  it('calls onSubmit with email when form is submitted', () => {
+    const handleSubmit = vi.fn();
+    render(<LoginForm onSubmit={handleSubmit} />);
+
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'test@example.com' } });
+    fireEvent.click(screen.getByRole('button', { name: /login/i }));
+
+    expect(handleSubmit).toHaveBeenCalledWith('test@example.com');
+  });
+});
+
+// OR with Playwright (E2E)
+test('login form submits email', async ({ page }) => {
+  await page.goto('/login');
+  await page.fill('input[type="email"]', 'test@example.com');
+  await page.click('button[type="submit"]');
+  await expect(page).toHaveURL('/dashboard');
+});
+```
+
+#### Backend API (Express Example)
+
+```typescript
+// Production: routes/users.ts
+router.get('/users/:id', async (req, res) => {
+  const user = await db.users.findById(req.params.id);
+  if (!user) return res.status(404).json({ error: 'Not found' });
+  res.json(user);
+});
+
+// Test: users.test.ts (Integration)
+import request from 'supertest';
+import { app } from '../app';
+
+describe('GET /users/:id', () => {
+  it('returns user when found', async () => {
+    const res = await request(app).get('/users/123');
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('id', '123');
+  });
+
+  it('returns 404 when user not found', async () => {
+    const res = await request(app).get('/users/nonexistent');
+    expect(res.status).toBe(404);
+  });
+});
+```
+
+#### Browser-Dependent Code (Playwright Required)
+
+```typescript
+// Production: analytics.ts
+export function trackPageView() {
+  if (typeof window === 'undefined') return;
+  const path = window.location.pathname;
+  localStorage.setItem('lastVisit', Date.now().toString());
+  // Send to analytics...
+}
+
+// Test: analytics.spec.ts (Playwright - REQUIRED for real browser context)
+import { test, expect } from '@playwright/test';
+
+test('trackPageView stores timestamp in localStorage', async ({ page }) => {
+  await page.goto('/some-page');
+  await page.evaluate(() => window.trackPageView());
+
+  const lastVisit = await page.evaluate(() => localStorage.getItem('lastVisit'));
+  expect(Number(lastVisit)).toBeGreaterThan(Date.now() - 1000);
+});
+```
+
+#### External API (Mocked)
+
+```typescript
+// Production: github.ts
+export async function getUser(username: string) {
+  const res = await fetch(`https://api.github.com/users/${username}`);
+  if (!res.ok) throw new Error('User not found');
+  return res.json();
+}
+
+// Test: github.test.ts (MSW mocking)
+import { rest } from 'msw';
+import { setupServer } from 'msw/node';
+import { getUser } from './github';
+
+const server = setupServer(
+  rest.get('https://api.github.com/users/:username', (req, res, ctx) => {
+    return res(ctx.json({ login: req.params.username, id: 123 }));
+  })
+);
+
+beforeAll(() => server.listen());
+afterAll(() => server.close());
+
+describe('getUser', () => {
+  it('returns user data from GitHub API', async () => {
+    const user = await getUser('octocat');
+    expect(user.login).toBe('octocat');
+  });
+});
+```
+
+### When Context Cannot Be Tested
+
+Some scenarios require special handling:
+
+| Scenario | Detection | Action |
+|----------|-----------|--------|
+| No browser test runner available | Browser-dependent code + no Playwright/Cypress | Flag for manual review, suggest Playwright setup |
+| Database tests with no test DB config | DB code + no test connection string | Create mocked repository tests, flag limitation |
+| Secrets/credentials required | Environment variable checks, API keys | Use stub values, test error paths, flag for CI setup |
+| Hardware dependencies | USB, Bluetooth, serial port APIs | Mock interfaces, flag as untestable in CI |
+
+### Context Inheritance
+
+Child modules often inherit context from parent:
+
+```
+src/
+├── components/          # Frontend context
+│   ├── Button.tsx      # → Component tests
+│   └── Modal.tsx       # → Component tests
+├── api/                # Backend context
+│   ├── routes.ts       # → Integration tests
+│   └── middleware.ts   # → Integration tests
+└── utils/              # Utility context
+    ├── format.ts       # → Unit tests
+    └── validate.ts     # → Unit tests
+```
+
+**Rule:** If file context is ambiguous, inherit from nearest parent directory with clear context.
+
+---
+
 ## Coverage Calculation
 
 ### Formula

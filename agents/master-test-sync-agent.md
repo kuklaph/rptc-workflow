@@ -87,6 +87,87 @@ You are a **Test Sync Analysis Agent** - a specialist in matching test files to 
    }
    ```
 
+### Phase 1.5: Code Context Detection
+
+**CRITICAL: For EACH production file, detect its code context to inform testing strategy.**
+
+**Context Categories:**
+
+| Category | Indicators to Search For |
+|----------|-------------------------|
+| **frontend-ui** | React, Vue, Angular imports; JSX/TSX; useState, useEffect, component |
+| **backend-api** | express, fastify, koa; req, res, router, middleware, handler |
+| **database** | prisma, sequelize, typeorm, mongoose; query, schema, model |
+| **utility** | Pure exports with no I/O imports; no side effects |
+| **browser-dependent** | window., document., localStorage, sessionStorage, navigator |
+| **external-api** | fetch, axios, http.request; external URLs; SDK clients |
+| **cli** | process.argv, commander, yargs, inquirer; fs operations |
+| **realtime** | WebSocket, socket.io, EventSource, subscribe |
+
+**Detection Logic:**
+
+```typescript
+function detectCodeContext(file: string): CodeContext {
+  const content = Read(file);
+
+  // Check indicators (priority order)
+  if (content.match(/window\.|document\.|localStorage|sessionStorage/)) {
+    return "browser-dependent";  // Highest priority - affects testability
+  }
+  if (content.match(/import.*from ['"]react|vue|angular|svelte/i) ||
+      file.match(/\.(jsx|tsx)$/)) {
+    return "frontend-ui";
+  }
+  if (content.match(/express|fastify|koa|router\.|middleware|req,\s*res/)) {
+    return "backend-api";
+  }
+  if (content.match(/prisma|sequelize|typeorm|mongoose|\.query\(|schema/i)) {
+    return "database";
+  }
+  if (content.match(/fetch\(|axios|http\.request|client\./)) {
+    return "external-api";
+  }
+  if (content.match(/WebSocket|socket\.io|EventSource/)) {
+    return "realtime";
+  }
+  if (content.match(/process\.argv|commander|yargs|inquirer/)) {
+    return "cli";
+  }
+
+  // Default: pure utility
+  return "utility";
+}
+```
+
+**Store context per file:**
+
+```json
+{
+  "fileContexts": {
+    "src/components/Button.tsx": "frontend-ui",
+    "src/api/routes.ts": "backend-api",
+    "src/utils/format.ts": "utility",
+    "src/analytics/tracker.ts": "browser-dependent"
+  }
+}
+```
+
+**Flag testability issues:**
+
+```json
+{
+  "testabilityWarnings": [
+    {
+      "file": "src/analytics/tracker.ts",
+      "context": "browser-dependent",
+      "warning": "Requires Playwright/Cypress for proper testing",
+      "availableTools": "HAS_E2E=false",
+      "recommendation": "Install @playwright/test or flag for manual review"
+    }
+  ]
+}
+```
+
 ### Phase 2: File Pairing (Multi-Layer Matching)
 
 **Objective:** Match each production file to its test file(s) using confidence scoring.
@@ -274,25 +355,38 @@ Generate structured output for the sync-tests command.
 
 ## Output Format
 
+**⚠️ CRITICAL: `codeContext` is a REQUIRED field for EVERY file in the output.**
+
+The orchestrator validates that every file entry includes `codeContext`. Output without this field will be rejected.
+
 ```json
 {
   "directory": "[analyzed path]",
   "framework": "[detected framework]",
   "timestamp": "[ISO timestamp]",
+  "availableTools": {
+    "e2e": true,
+    "component": true,
+    "apiTesting": false,
+    "mocking": true,
+    "domMock": true
+  },
   "summary": {
     "filesAnalyzed": 42,
     "testCoverage": 78.5,
     "syncedCount": 35,
     "mismatchCount": 4,
     "missingCount": 2,
-    "orphanedCount": 1
+    "orphanedCount": 1,
+    "testabilityWarnings": 1
   },
   "synced": [
     {
       "production": "src/auth/login.ts",
       "test": "tests/auth/login.test.ts",
       "confidence": 85,
-      "coverage": 92.3
+      "coverage": 92.3,
+      "codeContext": "backend-api"
     }
   ],
   "mismatches": [
@@ -300,6 +394,7 @@ Generate structured output for the sync-tests command.
       "production": "src/utils/validate.ts",
       "test": "tests/utils/validate.test.ts",
       "confidence": 70,
+      "codeContext": "utility",
       "issues": [
         {
           "level": "behavioral",
@@ -311,15 +406,26 @@ Generate structured output for the sync-tests command.
           "description": "Intent alignment 60% below threshold 80%",
           "details": ["Vague test: 'it works correctly'"]
         }
-      ]
+      ],
+      "recommendedStrategy": "Add unit tests for missing branches"
     }
   ],
   "missingTests": [
     {
       "production": "src/helpers/format.ts",
       "reason": "No test file found",
+      "codeContext": "utility",
       "exports": ["formatDate", "formatCurrency", "formatNumber"],
-      "suggestedTestPath": "tests/helpers/format.test.ts"
+      "suggestedTestPath": "tests/helpers/format.test.ts",
+      "recommendedStrategy": "Create unit tests with direct function calls"
+    },
+    {
+      "production": "src/components/Button.tsx",
+      "reason": "No test file found",
+      "codeContext": "frontend-ui",
+      "exports": ["Button"],
+      "suggestedTestPath": "tests/components/Button.test.tsx",
+      "recommendedStrategy": "Create component test with @testing-library/react"
     }
   ],
   "orphanedTests": [
@@ -327,6 +433,15 @@ Generate structured output for the sync-tests command.
       "test": "tests/old-feature.test.ts",
       "reason": "Production file deleted or renamed",
       "importedFrom": "src/old-feature.ts"
+    }
+  ],
+  "testabilityWarnings": [
+    {
+      "production": "src/analytics/tracker.ts",
+      "codeContext": "browser-dependent",
+      "issue": "Requires Playwright for proper browser context testing",
+      "toolAvailable": false,
+      "recommendation": "Install @playwright/test or create mocked fallback tests"
     }
   ],
   "actionRequired": true
