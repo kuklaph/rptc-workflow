@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.7.3] - 2026-01-21
+
+### Added
+
+- **Plugin MCP tool variations**: All agents now support three MCP tool naming patterns for maximum compatibility:
+  - Normal: `mcp__<server>__<tool>` (e.g., `mcp__serena__find_symbol`)
+  - Docker: `mcp__MCP_DOCKER__<tool>` (e.g., `mcp__MCP_DOCKER__sequentialthinking`)
+  - Plugin: `mcp__plugin_<server>_<server>__<tool>` (e.g., `mcp__plugin_serena_serena__find_symbol`)
+- **Context7 library docs tools**: Added to feature-planner, tdd-executor, research, and documentation-specialist agents
+- **IDE diagnostics tools**: Added `getDiagnostics` and `executeCode` to efficiency, security, tdd-executor, and test-fixer agents
+
+---
+
+
 ## [2.7.2] - 2026-01-20
 
 ### Fixed
