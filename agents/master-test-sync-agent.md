@@ -349,7 +349,7 @@ INTENT_PASS=$([[ $INTENT_SCORE -ge 80 ]] && echo true || echo false)
 
 ### Phase 5: Report Generation
 
-Generate structured output for the sync-tests command.
+Generate structured output for the sync-prod-to-tests command.
 
 ---
 

@@ -560,7 +560,7 @@ describe('formatDate', () => {
 
 5. **Log to audit trail:**
    ```bash
-   echo '{"timestamp":"'$(date -Iseconds)'","type":"production_fix","issueId":"'$ISSUE_ID'","file":"'$PROD_FILE'","approvalSession":"'$SESSION_ID'","pmApproved":true}' >> "${ARTIFACT_LOC}/sync-tests/audit-trail.jsonl"
+   echo '{"timestamp":"'$(date -Iseconds)'","type":"production_fix","issueId":"'$ISSUE_ID'","file":"'$PROD_FILE'","approvalSession":"'$SESSION_ID'","pmApproved":true}' >> "${ARTIFACT_LOC}/sync-prod-to-tests/audit-trail.jsonl"
    ```
 
 **Example Production Fix:**

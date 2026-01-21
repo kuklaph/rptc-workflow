@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.7.4] - 2026-01-21
+
+### Changed
+
+- **Renamed command**: `/rptc:sync-tests` → `/rptc:sync-prod-to-tests` for clearer intent
+  - Command file renamed from `sync-tests.md` to `sync-prod-to-tests.md`
+  - Artifact directory changed from `sync-tests/` to `sync-prod-to-tests/`
+  - Updated all references in README, agents, and SOPs
+
+---
+
+
 ## [2.7.3] - 2026-01-21
 
 ### Added
@@ -37,7 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Simplified Phase 6** (`/rptc:sync-tests`): Removed unnecessary efficiency and security agent reviews
+- **Simplified Phase 6** (`/rptc:sync-prod-to-tests`): Removed unnecessary efficiency and security agent reviews
   - Phase 6 now focuses solely on test suite verification (all tests must pass)
   - Removed `master-efficiency-agent` and `master-security-agent` delegations
   - Removed remediation approval workflow (efficiency/security reviews remain available in `/rptc:tdd`)
@@ -50,13 +62,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **PM Approval Gateway** (`/rptc:sync-tests` Phase 3): New phase that intercepts production code changes before execution
+- **PM Approval Gateway** (`/rptc:sync-prod-to-tests` Phase 3): New phase that intercepts production code changes before execution
   - Issue classification system: `test_bug` (auto-fix), `production_bug` (requires PM approval), `ambiguous` (PM review)
   - Evidence block with structured data: testBehavior, productionBehavior, standardsReference, riskAssessment
   - Classification decision tree for determining whether tests or production code is wrong
   - Audit trail logging for all PM decisions (approve/reject/defer)
 
-- **Test Suite Verification** (`/rptc:sync-tests` Phase 6): Post-convergence verification ensures all tests pass
+- **Test Suite Verification** (`/rptc:sync-prod-to-tests` Phase 6): Post-convergence verification ensures all tests pass
   - Full test suite run after inner loop convergence
   - Returns to inner loop if any tests fail
   - Outer loop iteration until all tests pass or max iterations reached
@@ -128,7 +140,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Test Synchronization Command** (`/rptc:sync-tests`): New command to recursively sync tests with production code
+- **Test Synchronization Command** (`/rptc:sync-prod-to-tests`): New command to recursively sync tests with production code
   - **Multi-layer confidence matching**: 5-layer scoring algorithm (naming 40pts, directory 30pts, imports 25pts, semantic 20pts, intent 15pts) with 50-point minimum threshold
   - **4-level sync verification**: Structural (exports covered), Behavioral (coverage %), Assertion (tests pass), Intent (descriptions match)
   - **Iterative convergence loop**: Continues until all areas report `actionRequired=false` or max iterations (10) reached

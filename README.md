@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 2.7.3
+**Version**: 2.7.4
 **Status**: Beta
 **License**: MIT
 
@@ -71,7 +71,7 @@ RESEARCH → PLAN → TDD → COMMIT
 | `/rptc:helper-resume-plan "@plan/"`               | Resume previous work   | After break |
 | `/rptc:helper-cleanup`                            | Review completed plans | Periodic    |
 | `/rptc:helper-simplify`                           | Simplify existing code complexity | As needed   |
-| `/rptc:sync-tests "[directory]"`                  | Sync tests to production code with auto-fix | As needed   |
+| `/rptc:sync-prod-to-tests "[directory]"`          | Sync tests to production code with auto-fix | As needed   |
 
 ### Admin Commands
 
@@ -237,7 +237,7 @@ rptc-workflow/
 │   ├── helper-update-plan.md    # /rptc:helper-update-plan
 │   ├── helper-resume-plan.md    # /rptc:helper-resume-plan
 │   ├── helper-cleanup.md        # /rptc:helper-cleanup
-│   ├── sync-tests.md            # /rptc:sync-tests
+│   ├── sync-prod-to-tests.md    # /rptc:sync-prod-to-tests
 │   ├── admin-init.md            # /rptc:admin-init
 │   ├── admin-config.md          # /rptc:admin-config
 │   ├── admin-sop-check.md       # /rptc:admin-sop-check
@@ -388,14 +388,14 @@ When you approve delegation, specialized AI agents provide expert analysis:
 ### Master Test Sync Agent
 
 **Purpose**: Analyze test-production relationships and verify synchronization
-**When**: `/rptc:sync-tests` command (analysis phase)
+**When**: `/rptc:sync-prod-to-tests` command (analysis phase)
 **Provides**: Multi-layer confidence matching, 4-level sync verification, structured mismatch reports
 **Architecture**: 5-layer scoring (naming, directory, imports, semantic, intent) with MCP integration
 
 ### Master Test Fixer Agent
 
 **Purpose**: Auto-repair test files based on sync analysis findings
-**When**: `/rptc:sync-tests` command (fix phase)
+**When**: `/rptc:sync-prod-to-tests` command (fix phase)
 **Provides**: 4 fix scenarios (update, add, create, assertion fix) with retry logic
 **Architecture**: Orchestrates fixes, delegates test generation to TDD executor agent
 

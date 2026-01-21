@@ -2,7 +2,7 @@
 description: Recursively sync tests to production code with auto-fix and convergence verification
 ---
 
-# RPTC: Sync Tests
+# RPTC: Sync Prod to Tests
 
 **You are the test synchronization orchestrator, ensuring all tests match production code.**
 The user is the **project manager** - they approve major decisions and final completion.
@@ -14,9 +14,9 @@ The user is the **project manager** - they approve major decisions and final com
 
 **Examples:**
 ```bash
-/rptc:sync-tests "src/"
-/rptc:sync-tests "src/auth/" --dry-run
-/rptc:sync-tests --max-iterations 5
+/rptc:sync-prod-to-tests "src/"
+/rptc:sync-prod-to-tests "src/auth/" --dry-run
+/rptc:sync-prod-to-tests --max-iterations 5
 ```
 
 ---
@@ -777,7 +777,7 @@ done
 
 ```bash
 # Log all PM decisions
-echo '{"timestamp":"'$(date -Iseconds)'","type":"pm_approval_session","sessionId":"'${SESSION_ID}'","productionBugs":'${PRODUCTION_BUG_COUNT}',"approved":'$(jq '.decisions.approved | length' <<< "$APPROVAL_DECISIONS")',"rejected":'$(jq '.decisions.rejected | length' <<< "$APPROVAL_DECISIONS")',"deferred":'$(jq '.decisions.deferred | length' <<< "$APPROVAL_DECISIONS")'}' >> "${ARTIFACT_LOC}/sync-tests/audit-trail.jsonl"
+echo '{"timestamp":"'$(date -Iseconds)'","type":"pm_approval_session","sessionId":"'${SESSION_ID}'","productionBugs":'${PRODUCTION_BUG_COUNT}',"approved":'$(jq '.decisions.approved | length' <<< "$APPROVAL_DECISIONS")',"rejected":'$(jq '.decisions.rejected | length' <<< "$APPROVAL_DECISIONS")',"deferred":'$(jq '.decisions.deferred | length' <<< "$APPROVAL_DECISIONS")'}' >> "${ARTIFACT_LOC}/sync-prod-to-tests/audit-trail.jsonl"
 ```
 
 **Update TodoWrite:** Add task "PM approved {N} production changes" as `completed`
@@ -1136,7 +1136,7 @@ fi
 
 ```bash
 # Log test verification results to audit trail
-echo '{"timestamp":"'$(date -Iseconds)'","type":"test_verification","outerIteration":'$OUTER_ITERATION',"innerIterations":'$ITERATION',"testsPassed":'$([ $TEST_EXIT_CODE -eq 0 ] && echo "true" || echo "false")',"status":"'$FINAL_STATUS'"}' >> "${ARTIFACT_LOC}/sync-tests/audit-trail.jsonl"
+echo '{"timestamp":"'$(date -Iseconds)'","type":"test_verification","outerIteration":'$OUTER_ITERATION',"innerIterations":'$ITERATION',"testsPassed":'$([ $TEST_EXIT_CODE -eq 0 ] && echo "true" || echo "false")',"status":"'$FINAL_STATUS'"}' >> "${ARTIFACT_LOC}/sync-prod-to-tests/audit-trail.jsonl"
 ```
 
 **Update TodoWrite:** Mark "Phase 6: Test suite verification" as `completed`
@@ -1238,7 +1238,7 @@ Generate report content:
 
 ## Audit Trail Summary
 
-Full audit trail available at: `${ARTIFACT_LOC}/sync-tests/audit-trail.jsonl`
+Full audit trail available at: `${ARTIFACT_LOC}/sync-prod-to-tests/audit-trail.jsonl`
 
 ### Key Events
 | Timestamp | Event Type | Details |
@@ -1363,7 +1363,7 @@ if [ $? -ne 0 ]; then
   echo "Options:"
   echo "  1. Retry with same parameters"
   echo "  2. Skip this area and continue"
-  echo "  3. Abort sync-tests"
+  echo "  3. Abort sync-prod-to-tests"
   # Use AskUserQuestion to get user decision
 fi
 ```

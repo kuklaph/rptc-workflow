@@ -555,7 +555,7 @@ Overall Coverage = Σ(Directory Coverage * File Count) / Total Files
 
 ## Convergence Criteria
 
-The sync-tests command runs iteratively until convergence:
+The sync-prod-to-tests command runs iteratively until convergence:
 
 ```
 CONVERGED = TRUE when ALL of:
