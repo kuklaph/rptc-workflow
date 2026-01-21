@@ -30,7 +30,18 @@ Ensure all production code has synchronized tests by:
 4. **Auto-fixing** mismatches (update, add, create tests)
 5. **Iterating** until ALL areas report full synchronization
 
-**Key Principle:** Production code is truth. Tests adapt to production, never vice versa.
+**Key Principle:** Production code is the source of truth. Tests adapt to production. However, if analysis reveals production code bugs (tests correctly failing), **PM approval is required** before modifying production code.
+
+---
+
+## ⚠️ CRITICAL: Broken Tests MUST Be Fixed
+
+**This command does NOT skip broken tests.** Every failing test must either:
+1. Be fixed to match production behavior (test was wrong)
+2. Trigger a production fix request with PM approval (production was wrong)
+3. Be explicitly marked for manual review with documented reason
+
+**The sync loop continues until ALL tests pass, not just coverage targets.**
 
 ---
 
@@ -44,9 +55,11 @@ Your role is to:
 - ✅ Discover files and directories (Phase 1)
 - ✅ Track progress with TodoWrite
 - ✅ **Delegate analysis to `rptc:master-test-sync-agent`** (Phase 2)
-- ✅ **Delegate fixes to `rptc:master-test-fixer-agent`** (Phase 3)
-- ✅ Check convergence based on agent results (Phase 4)
-- ✅ Generate final report (Phase 5)
+- ✅ Obtain PM approval for production changes (Phase 3)
+- ✅ **Delegate fixes to `rptc:master-test-fixer-agent`** (Phase 4)
+- ✅ Check convergence based on agent results (Phase 5)
+- ✅ **Verify all tests pass** (Phase 6)
+- ✅ Generate final report with audit trail (Phase 7)
 
 **DO NOT in main context:**
 - ❌ Read production or test file contents
@@ -234,17 +247,27 @@ Note: Proceeding with standard analysis (MCPs enhance but aren't required)
       "activeForm": "Analyzing sync status"
     },
     {
-      "content": "Phase 3: Apply fixes",
+      "content": "Phase 3: PM approval gateway",
+      "status": "pending",
+      "activeForm": "Processing PM approval"
+    },
+    {
+      "content": "Phase 4: Apply fixes",
       "status": "pending",
       "activeForm": "Applying fixes"
     },
     {
-      "content": "Phase 4: Verify convergence",
+      "content": "Phase 5: Verify convergence",
       "status": "pending",
       "activeForm": "Verifying convergence"
     },
     {
-      "content": "Phase 5: Generate report",
+      "content": "Phase 6: Test suite verification",
+      "status": "pending",
+      "activeForm": "Verifying all tests pass"
+    },
+    {
+      "content": "Phase 7: Generate report",
       "status": "pending",
       "activeForm": "Generating report"
     }
@@ -603,7 +626,165 @@ For each area with issues, add specific fix tasks:
 
 ---
 
-## Phase 3: Auto-Fix Execution
+## Phase 3: PM Approval Gateway (Production Changes)
+
+**Purpose**: Request explicit PM approval for any production code modifications before execution.
+
+### Step 3a: Check if PM Approval Required
+
+```bash
+# Check if any issues require production changes
+REQUIRES_PM_APPROVAL=$(jq -r '.summary.requiresPmApproval // false' <<< "$SYNC_RESULT")
+PRODUCTION_BUG_COUNT=$(jq -r '.summary.productionBugs // 0' <<< "$SYNC_RESULT")
+AMBIGUOUS_COUNT=$(jq -r '.summary.ambiguous // 0' <<< "$SYNC_RESULT")
+
+if [ "$REQUIRES_PM_APPROVAL" = "false" ] && [ "$PRODUCTION_BUG_COUNT" -eq 0 ]; then
+  echo "✓ No production changes detected, proceeding to fix phase"
+  # Skip to Phase 4
+else
+  echo "⚠️  ${PRODUCTION_BUG_COUNT} production bug(s) detected requiring PM approval"
+  # Continue to Step 3b
+fi
+```
+
+### Step 3b: Extract Production Change Requests
+
+```bash
+# Extract issues classified as production_bug or ambiguous
+PRODUCTION_ISSUES=$(jq '[.mismatches[] | select(.classification == "production_bug" or .classification == "ambiguous")]' <<< "$SYNC_RESULT")
+```
+
+### Step 3c: Present Evidence to PM
+
+**Generate human-readable approval request and present to user:**
+
+```markdown
+═══════════════════════════════════════════════════════
+  ⚠️  PRODUCTION CODE CHANGE APPROVAL REQUIRED
+═══════════════════════════════════════════════════════
+
+The test sync analysis has identified **{N} issue(s)** that may require changes to production code.
+
+## Philosophy Check
+⚠️ **Default stance**: "Production is truth, tests adapt"
+
+However, the analysis suggests these tests may have correctly identified bugs in production code.
+
+---
+
+{For each production_bug issue:}
+
+### Issue {issueId}: {classification}
+
+**Affected Files**:
+- Production: `{production}` (line {location})
+- Test: `{test}`
+
+**What the Test Expects**:
+{evidence.testBehavior}
+
+**What Production Actually Does**:
+{evidence.productionBehavior}
+
+**Root Cause**:
+{rootCause}
+
+**Standards/Specification Reference**:
+{evidence.standardsReference}
+
+**Proposed Production Change**:
+{recommendedFix.productionChanges}
+
+**Risk Assessment**: {evidence.riskAssessment}
+
+**Rationale for Production Change**:
+{recommendedFix.rationale}
+
+---
+
+## Decision Required
+
+For each issue above, you may:
+1. **Approve**: Apply the proposed production code change
+2. **Reject**: Keep production as-is, adapt the test instead
+3. **Defer**: Mark for manual investigation (logged in final report)
+```
+
+### Step 3d: Capture PM Decisions
+
+Use AskUserQuestion tool for EACH production bug:
+
+```markdown
+AskUserQuestion(
+  questions: [{
+    question: "Issue {issueId}: {rootCause}\n\nProposed fix: {recommendedFix.productionChanges}\n\nRisk: {evidence.riskAssessment}\n\nApprove this production change?",
+    header: "{issueId}",
+    multiSelect: false,
+    options: [
+      {
+        label: "Approve",
+        description: "Apply production fix (PM takes responsibility)"
+      },
+      {
+        label: "Reject",
+        description: "Keep production as-is, adapt test instead"
+      },
+      {
+        label: "Defer",
+        description: "Mark for manual review later"
+      }
+    ]
+  }]
+)
+```
+
+**Store decisions:**
+
+```bash
+# Create approval decisions structure
+APPROVAL_DECISIONS='{
+  "sessionId": "sync-'$(date +%Y%m%d-%H%M%S)'",
+  "timestamp": "'$(date -Iseconds)'",
+  "decisions": {
+    "approved": [],
+    "rejected": [],
+    "deferred": []
+  },
+  "pmNotes": ""
+}'
+
+# Add each decision based on PM response
+# If Approve: add issueId to decisions.approved
+# If Reject: add issueId to decisions.rejected
+# If Defer: add issueId to decisions.deferred
+```
+
+### Step 3e: Handle Rejected Production Bugs
+
+**For rejected production changes, the test must be adapted instead:**
+
+```bash
+# For each rejected issue, modify the sync result to target test instead
+for ISSUE_ID in $(jq -r '.decisions.rejected[]' <<< "$APPROVAL_DECISIONS"); do
+  echo "Converting ${ISSUE_ID} from production fix to test adaptation..."
+  # The fixer agent will adapt the test to match production behavior
+done
+```
+
+### Step 3f: Audit Trail
+
+**Append to audit trail for accountability:**
+
+```bash
+# Log all PM decisions
+echo '{"timestamp":"'$(date -Iseconds)'","type":"pm_approval_session","sessionId":"'${SESSION_ID}'","productionBugs":'${PRODUCTION_BUG_COUNT}',"approved":'$(jq '.decisions.approved | length' <<< "$APPROVAL_DECISIONS")',"rejected":'$(jq '.decisions.rejected | length' <<< "$APPROVAL_DECISIONS")',"deferred":'$(jq '.decisions.deferred | length' <<< "$APPROVAL_DECISIONS")'}' >> "${ARTIFACT_LOC}/sync-tests/audit-trail.jsonl"
+```
+
+**Update TodoWrite:** Add task "PM approved {N} production changes" as `completed`
+
+---
+
+## Phase 4: Auto-Fix Execution
 
 **Skip if `--dry-run` flag is set:**
 
@@ -613,7 +794,7 @@ if [ "$DRY_RUN" = true ]; then
   echo ""
   echo "Issues found that would be fixed:"
   # Display summary of what would be fixed
-  goto Phase 5
+  goto Phase 7  # Skip directly to report in dry-run mode
 fi
 ```
 
@@ -783,11 +964,11 @@ echo "  Fixes applied: Updated=$UPDATED_COUNT, Created=$CREATED_COUNT, Failed=$F
 
 ---
 
-## Phase 4: Verification Loop
+## Phase 5: Verification Loop (Inner Loop Convergence Check)
 
-**Update TodoWrite:** Mark "Phase 4: Verify convergence" as `in_progress`
+**Update TodoWrite:** Mark "Phase 5: Verify convergence" as `in_progress`
 
-### Step 4a: Re-run Sync Analysis
+### Step 5a: Re-run Sync Analysis
 
 **CRITICAL: You MUST re-delegate to the sync agent for verification. DO NOT skip this step or check convergence without fresh analysis.**
 
@@ -807,11 +988,11 @@ Prompt:
 
 **VALIDATION CHECKPOINT:** Verify the Task tool was invoked for EACH subdirectory before proceeding to convergence check.
 
-### Step 4a.1: Update AREA_STATUS with Fresh Results (CRITICAL)
+### Step 5a.1: Update AREA_STATUS with Fresh Results (CRITICAL)
 
 **YOU MUST update AREA_STATUS with the NEW sync agent results. Failure to do this causes stale data and infinite loops.**
 
-For EACH subdirectory that was re-analyzed in Step 4a:
+For EACH subdirectory that was re-analyzed in Step 5a:
 
 ```bash
 # Parse the FRESH sync agent output (not cached from Phase 2)
@@ -826,12 +1007,12 @@ AREA_STATUS["$SUBDIR"]="$FRESH_ACTION_REQUIRED"
 echo "  $SUBDIR: actionRequired=$FRESH_ACTION_REQUIRED (updated from fresh analysis)"
 ```
 
-**VALIDATION:** Before proceeding to Step 4b, verify that AREA_STATUS contains results from Step 4a (this iteration), NOT cached results from Phase 2.
+**VALIDATION:** Before proceeding to Step 5b, verify that AREA_STATUS contains results from Step 5a (this iteration), NOT cached results from Phase 2.
 
-### Step 4b: Check Convergence
+### Step 5b: Check Convergence
 
 ```bash
-# Check if ALL areas report actionRequired=false (using FRESH data from Step 4a.1)
+# Check if ALL areas report actionRequired=false (using FRESH data from Step 5a.1)
 ALL_SYNCED=true
 
 for SUBDIR in "${!AREA_STATUS[@]}"; do
@@ -850,12 +1031,12 @@ if [ "$ALL_SYNCED" = true ]; then
 fi
 ```
 
-### Step 4c: Loop or Complete
+### Step 5c: Loop or Complete
 
 ```bash
 if [ "$CONVERGED" = true ]; then
-  echo "Proceeding to report generation..."
-  goto Phase 5
+  echo "Proceeding to quality gate analysis..."
+  goto Phase 6  # Quality gates before final report
 fi
 
 ITERATION=$((ITERATION + 1))
@@ -864,7 +1045,7 @@ if [ $ITERATION -ge $MAX_ITERATIONS ]; then
   echo ""
   echo "⚠️  Max iterations ($MAX_ITERATIONS) reached"
   echo "Some issues require manual review."
-  goto Phase 5
+  goto Phase 7  # Skip to report with failures documented
 fi
 
 echo ""
@@ -872,15 +1053,101 @@ echo "Starting iteration $ITERATION..."
 goto Phase 2  # Re-analyze and fix
 ```
 
-**Update TodoWrite:** Mark "Phase 4: Verify convergence" as `completed`
+**Update TodoWrite:** Mark "Phase 5: Verify convergence" as `completed`
 
 ---
 
-## Phase 5: Completion Report
+## Phase 6: Test Suite Verification (Post-Convergence)
 
-**Update TodoWrite:** Mark "Phase 5: Generate report" as `in_progress`
+**Purpose**: After inner loop convergence (all tests sync), verify all tests actually pass. If any fail, return to inner loop to fix them.
 
-### Step 5a: Generate Report File
+**Update TodoWrite:** Mark "Phase 6: Test suite verification" as `in_progress`
+
+### Step 6a: Run Full Test Suite
+
+**Run the complete test suite to ensure all synced tests pass:**
+
+```bash
+echo "Running full test suite verification..."
+
+# Run test suite based on framework
+case $FRAMEWORK in
+  jest)
+    TEST_OUTPUT=$(npm test 2>&1)
+    TEST_EXIT_CODE=$?
+    ;;
+  vitest)
+    TEST_OUTPUT=$(npx vitest run 2>&1)
+    TEST_EXIT_CODE=$?
+    ;;
+  pytest)
+    TEST_OUTPUT=$(pytest 2>&1)
+    TEST_EXIT_CODE=$?
+    ;;
+  go)
+    TEST_OUTPUT=$(go test ./... 2>&1)
+    TEST_EXIT_CODE=$?
+    ;;
+  junit)
+    TEST_OUTPUT=$(mvn test 2>&1 || gradle test 2>&1)
+    TEST_EXIT_CODE=$?
+    ;;
+esac
+```
+
+### Step 6b: Handle Test Results
+
+```bash
+if [ $TEST_EXIT_CODE -ne 0 ]; then
+  echo "❌ Test suite failed after sync"
+  echo ""
+  echo "Failing tests:"
+  echo "$TEST_OUTPUT" | grep -E "(FAIL|ERROR|✗)" | head -20
+  echo ""
+
+  OUTER_ITERATION=$((OUTER_ITERATION + 1))
+
+  if [ $OUTER_ITERATION -ge $MAX_OUTER_ITERATIONS ]; then
+    echo "⚠️  Max outer iterations ($MAX_OUTER_ITERATIONS) reached with failing tests"
+    echo "Proceeding to report with failures documented"
+    FINAL_STATUS="FAILED"
+    goto Phase 7
+  else
+    echo "Returning to analysis phase to fix failing tests..."
+    goto Phase 2  # Re-analyze failing tests
+  fi
+else
+  echo ""
+  echo "════════════════════════════════════════════════════════"
+  echo "  ✅ ALL TESTS PASSING"
+  echo "════════════════════════════════════════════════════════"
+  echo ""
+  echo "  Test suite: PASSED"
+  echo "  Outer iterations: $OUTER_ITERATION"
+  echo "  Inner iterations: $ITERATION"
+  echo ""
+  echo "════════════════════════════════════════════════════════"
+
+  FINAL_STATUS="CONVERGED"
+fi
+```
+
+### Step 6c: Audit Trail
+
+```bash
+# Log test verification results to audit trail
+echo '{"timestamp":"'$(date -Iseconds)'","type":"test_verification","outerIteration":'$OUTER_ITERATION',"innerIterations":'$ITERATION',"testsPassed":'$([ $TEST_EXIT_CODE -eq 0 ] && echo "true" || echo "false")',"status":"'$FINAL_STATUS'"}' >> "${ARTIFACT_LOC}/sync-tests/audit-trail.jsonl"
+```
+
+**Update TodoWrite:** Mark "Phase 6: Test suite verification" as `completed`
+
+---
+
+## Phase 7: Completion Report
+
+**Update TodoWrite:** Mark "Phase 7: Generate report" as `in_progress`
+
+### Step 7a: Generate Report File
 
 ```bash
 REPORT_FILE="${ARTIFACT_LOC}/reports/test-sync-$(date +%Y%m%d-%H%M%S).md"
@@ -895,19 +1162,30 @@ Generate report content:
 **Generated:** [timestamp]
 **Directory:** ${TARGET_DIR}
 **Framework:** ${FRAMEWORK}
-**Iterations:** ${ITERATION}
+**Session ID:** ${SESSION_ID}
 **Status:** [CONVERGED/PARTIAL/FAILED]
+
+---
+
+## Convergence Metrics
+
+| Metric | Value |
+|--------|-------|
+| Inner Loop Iterations | ${ITERATION} |
+| Outer Loop Iterations | ${OUTER_ITERATION} |
+| Total Analysis Passes | [calculated] |
+| Total Fix Passes | [calculated] |
 
 ---
 
 ## Summary
 
-| Metric | Before | After |
-|--------|--------|-------|
-| Files Analyzed | [N] | [N] |
-| Test Coverage | [X]% | [Y]% |
-| Synced Files | [A] | [B] |
-| Issues Remaining | [C] | [D] |
+| Metric | Before | After | Delta |
+|--------|--------|-------|-------|
+| Files Analyzed | [N] | [N] | - |
+| Test Coverage | [X]% | [Y]% | +[Z]% |
+| Synced Files | [A] | [B] | +[C] |
+| Issues Remaining | [D] | [E] | -[F] |
 
 ---
 
@@ -919,8 +1197,29 @@ Generate report content:
 ### Tests Created ([count])
 [List of new test files with coverage metrics]
 
+### Production Changes Applied ([count])
+[List of production files modified with PM approval IDs]
+
 ### Manual Review Required ([count])
 [List of files that couldn't be auto-fixed with reasons]
+
+---
+
+## PM Approval Log
+
+| Issue ID | Classification | Decision | Rationale |
+|----------|---------------|----------|-----------|
+| [id] | production_bug | Approved/Rejected/Deferred | [PM notes] |
+
+**Total Production Changes:** [N] approved, [M] rejected, [K] deferred
+
+---
+
+## Test Suite Verification
+
+- Status: ✅ PASSED / ❌ FAILED
+- Failing tests: [count if failed]
+- Coverage achieved: [X]%
 
 ---
 
@@ -934,6 +1233,20 @@ Generate report content:
 [If NOT CONVERGED:]
 ⚠️ Some issues require manual attention:
 [List remaining issues]
+
+---
+
+## Audit Trail Summary
+
+Full audit trail available at: `${ARTIFACT_LOC}/sync-tests/audit-trail.jsonl`
+
+### Key Events
+| Timestamp | Event Type | Details |
+|-----------|-----------|---------|
+| [time] | sync_started | Directory: ${TARGET_DIR} |
+| [time] | pm_approval_session | Approved: N, Rejected: M, Deferred: K |
+| [time] | test_verification | Tests: ✅ PASSED / ❌ FAILED |
+| [time] | sync_completed | Status: ${FINAL_STATUS} |
 
 ---
 
@@ -952,14 +1265,14 @@ Generate report content:
 - Confidence threshold: ${CONFIDENCE_THRESHOLD}
 ```
 
-### Step 5b: Write Report
+### Step 7b: Write Report
 
 ```bash
 Write(file_path="$REPORT_FILE", content="$REPORT_CONTENT")
 echo "📄 Report saved: $REPORT_FILE"
 ```
 
-### Step 5c: Display Summary
+### Step 7c: Display Summary
 
 ```text
 ═══════════════════════════════════════════════════════
@@ -986,7 +1299,7 @@ Report saved: ${REPORT_FILE}
 ═══════════════════════════════════════════════════════
 ```
 
-### Step 5d: Final TodoWrite Update
+### Step 7d: Final TodoWrite Update
 
 ```json
 {
@@ -1008,17 +1321,27 @@ Report saved: ${REPORT_FILE}
       "activeForm": "Analyzing sync status"
     },
     {
-      "content": "Phase 3: Apply fixes",
+      "content": "Phase 3: PM approval gateway",
+      "status": "completed",
+      "activeForm": "Processing PM approval"
+    },
+    {
+      "content": "Phase 4: Apply fixes",
       "status": "completed",
       "activeForm": "Applying fixes"
     },
     {
-      "content": "Phase 4: Verify convergence",
+      "content": "Phase 5: Verify convergence",
       "status": "completed",
       "activeForm": "Verifying convergence"
     },
     {
-      "content": "Phase 5: Generate report",
+      "content": "Phase 6: Test suite verification",
+      "status": "completed",
+      "activeForm": "Verifying all tests pass"
+    },
+    {
+      "content": "Phase 7: Generate report",
       "status": "completed",
       "activeForm": "Generating report"
     }

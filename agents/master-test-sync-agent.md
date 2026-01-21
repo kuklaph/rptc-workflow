@@ -355,9 +355,12 @@ Generate structured output for the sync-tests command.
 
 ## Output Format
 
-**⚠️ CRITICAL: `codeContext` is a REQUIRED field for EVERY file in the output.**
+**⚠️ CRITICAL REQUIRED FIELDS for EVERY issue:**
+- `codeContext` - Required for testing strategy selection
+- `classification` - Required for PM approval routing
+- `recommended_fix.target` - Required to determine test vs production change
 
-The orchestrator validates that every file entry includes `codeContext`. Output without this field will be rejected.
+The orchestrator validates these fields. Output without them will be rejected.
 
 ```json
 {
@@ -378,7 +381,11 @@ The orchestrator validates that every file entry includes `codeContext`. Output 
     "mismatchCount": 4,
     "missingCount": 2,
     "orphanedCount": 1,
-    "testabilityWarnings": 1
+    "testabilityWarnings": 1,
+    "testBugs": 3,
+    "productionBugs": 1,
+    "ambiguous": 0,
+    "requiresPmApproval": true
   },
   "synced": [
     {
@@ -391,41 +398,71 @@ The orchestrator validates that every file entry includes `codeContext`. Output 
   ],
   "mismatches": [
     {
+      "issueId": "AUTH-001",
       "production": "src/utils/validate.ts",
       "test": "tests/utils/validate.test.ts",
       "confidence": 70,
       "codeContext": "utility",
+      "classification": "test_bug",
       "issues": [
         {
           "level": "behavioral",
           "description": "Coverage 62% below target 85%",
           "details": ["Missing edge case: empty input", "Missing error path: invalid format"]
-        },
-        {
-          "level": "intent",
-          "description": "Intent alignment 60% below threshold 80%",
-          "details": ["Vague test: 'it works correctly'"]
         }
       ],
-      "recommendedStrategy": "Add unit tests for missing branches"
+      "rootCause": "Test expects old return format, production now returns object",
+      "recommendedFix": {
+        "target": "test",
+        "rationale": "Production change was intentional (API v2), test needs update",
+        "testChanges": "Update assertion: expect(result.value) instead of expect(result)",
+        "productionChanges": null
+      }
+    },
+    {
+      "issueId": "AUTH-002",
+      "production": "src/auth/login.ts",
+      "test": "tests/auth/login.test.ts",
+      "confidence": 85,
+      "codeContext": "backend-api",
+      "classification": "production_bug",
+      "issues": [
+        {
+          "level": "assertion",
+          "description": "Test expects ValidationError for invalid email",
+          "details": ["Production accepts any string without validation"]
+        }
+      ],
+      "rootCause": "Production missing input validation - security vulnerability",
+      "recommendedFix": {
+        "target": "production",
+        "rationale": "Test correctly identifies missing input validation (OWASP)",
+        "testChanges": null,
+        "productionChanges": "Add email validation: if (!isValidEmail(email)) throw new ValidationError(...)"
+      },
+      "evidence": {
+        "testBehavior": "Expects ValidationError for invalid email format",
+        "productionBehavior": "Accepts any string as email, proceeds to database query",
+        "standardsReference": "OWASP Input Validation - email format must be validated",
+        "riskAssessment": "High"
+      }
     }
   ],
   "missingTests": [
     {
+      "issueId": "FMT-001",
       "production": "src/helpers/format.ts",
       "reason": "No test file found",
       "codeContext": "utility",
+      "classification": "test_bug",
       "exports": ["formatDate", "formatCurrency", "formatNumber"],
       "suggestedTestPath": "tests/helpers/format.test.ts",
-      "recommendedStrategy": "Create unit tests with direct function calls"
-    },
-    {
-      "production": "src/components/Button.tsx",
-      "reason": "No test file found",
-      "codeContext": "frontend-ui",
-      "exports": ["Button"],
-      "suggestedTestPath": "tests/components/Button.test.tsx",
-      "recommendedStrategy": "Create component test with @testing-library/react"
+      "recommendedFix": {
+        "target": "test",
+        "rationale": "Production is correct, tests need to be created",
+        "testChanges": "Create new test file with coverage for all exports",
+        "productionChanges": null
+      }
     }
   ],
   "orphanedTests": [
@@ -447,6 +484,62 @@ The orchestrator validates that every file entry includes `codeContext`. Output 
   "actionRequired": true
 }
 ```
+
+---
+
+## Classification Decision Tree
+
+For EACH broken test or mismatch, you MUST determine classification:
+
+### Step 1: Identify What Changed
+
+```bash
+# Check recent production changes
+git log --oneline -10 -- {production_file}
+# Check if change was intentional (look for commit message)
+```
+
+### Step 2: Evaluate Test Validity
+
+**Classification: `test_bug`** if:
+- Test expects outdated API signature or behavior
+- Test validates deprecated functionality
+- Test has incorrect assertion logic
+- Production change was intentional/documented and test didn't adapt
+- Missing test coverage (test needs to be created)
+
+**Classification: `production_bug`** if:
+- Test validates a specification/standard (RFC, API contract, OWASP)
+- Production behavior violates documented contract
+- Production change introduced regression (unintentional break)
+- Test correctly identifies missing error handling or validation
+- Security issue in production (e.g., missing input sanitization)
+
+**Classification: `ambiguous`** if:
+- Specification is unclear or contradictory
+- Both test and production logic seem reasonable
+- Requires product/design decision (not technical issue)
+
+### Step 3: Gather Evidence (for production_bug ONLY)
+
+When `classification: "production_bug"`, you MUST provide evidence:
+
+```json
+{
+  "evidence": {
+    "testBehavior": "What the test expects",
+    "productionBehavior": "What production actually does",
+    "standardsReference": "RFC/OWASP/API contract reference",
+    "riskAssessment": "Low|Medium|High|Critical"
+  }
+}
+```
+
+**Risk Assessment Guide:**
+- **Low**: Cosmetic issue, no functional impact
+- **Medium**: Could cause bugs in edge cases
+- **High**: Security vulnerability, data integrity risk
+- **Critical**: Active exploit possible, data loss risk
 
 ---
 

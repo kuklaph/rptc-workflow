@@ -7,6 +7,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.7.1] - 2026-01-20
+
+### Changed
+
+- **Simplified Phase 6** (`/rptc:sync-tests`): Removed unnecessary efficiency and security agent reviews
+  - Phase 6 now focuses solely on test suite verification (all tests must pass)
+  - Removed `master-efficiency-agent` and `master-security-agent` delegations
+  - Removed remediation approval workflow (efficiency/security reviews remain available in `/rptc:tdd`)
+  - Reduced Phase 6 from ~250 lines to ~80 lines for faster execution
+
+---
+
+
+## [2.7.0] - 2026-01-20
+
+### Added
+
+- **PM Approval Gateway** (`/rptc:sync-tests` Phase 3): New phase that intercepts production code changes before execution
+  - Issue classification system: `test_bug` (auto-fix), `production_bug` (requires PM approval), `ambiguous` (PM review)
+  - Evidence block with structured data: testBehavior, productionBehavior, standardsReference, riskAssessment
+  - Classification decision tree for determining whether tests or production code is wrong
+  - Audit trail logging for all PM decisions (approve/reject/defer)
+
+- **Test Suite Verification** (`/rptc:sync-tests` Phase 6): Post-convergence verification ensures all tests pass
+  - Full test suite run after inner loop convergence
+  - Returns to inner loop if any tests fail
+  - Outer loop iteration until all tests pass or max iterations reached
+
+- **Nested Loop Architecture**: Inner loop (test sync convergence) + Outer loop (test verification)
+  - Inner loop continues until all tests sync (Phases 2-5)
+  - Outer loop verifies all tests pass (Phase 6), returns to inner loop if any fail
+  - Configurable max outer iterations (default: 3)
+
+- **Enhanced Audit Trail**: JSONL logging for full accountability
+  - Tracks PM approval sessions with decisions
+  - Logs test verification results
+  - Records all sync events with timestamps
+
+- **Enhanced Report Template**: New sections for comprehensive reporting
+  - Convergence metrics (inner/outer iterations)
+  - PM approval log with decision rationale
+  - Test suite verification results
+  - Audit trail summary with key events
+
+### Changed
+
+- **Phase numbering restructured** to 7 phases:
+  - Phase 1: Discovery, Phase 2: Analysis, Phase 3: PM Approval Gateway (NEW)
+  - Phase 4: Auto-Fix, Phase 5: Verification, Phase 6: Test Suite Verification (NEW), Phase 7: Report
+- **Sync agent output format** enhanced with `classification`, `evidence`, and `requiresPmApproval` fields
+- **Fixer agent** now supports Scenario E (Apply Production Fix) with PM approval verification
+- **TodoWrite initialization** includes all 7 phases for complete progress tracking
+
+### Fixed
+
+- **Duplicate Phase 4 numbering**: Verification Loop now correctly labeled as Phase 5
+
+---
+
+
 ## [2.6.2] - 2026-01-20
 
 ### Added
