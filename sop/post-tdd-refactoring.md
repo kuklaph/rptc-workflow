@@ -629,7 +629,7 @@ For every optimization, ask:
 
 **Research Foundation:**
 - `.rptc/research/code-simplicity-research.md` (Phase 1)
-- `.rptc/research/master-efficiency-agent-research.md` (30+ sources)
+- `.rptc/research/optimizer-agent-research.md` (30+ sources)
 
 **SOPs:**
 - `architecture-patterns.md` → AI Over-Engineering Prevention (5 anti-patterns)

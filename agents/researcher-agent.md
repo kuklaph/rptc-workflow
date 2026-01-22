@@ -1,5 +1,5 @@
 ---
-name: master-research-agent
+name: researcher-agent
 description: Unified research specialist for codebase exploration and web research. Mode A uses 4-phase code-explorer methodology. Mode B consults 20+ sources with cross-verification. Mode C combines both with gap analysis.
 tools: Read, Write, Glob, Grep, WebSearch, WebFetch, mcp__MCP_DOCKER__fetch, mcp__plugin_MCP_DOCKER_MCP_DOCKER__fetch, mcp__MCP_DOCKER__sequentialthinking, mcp__sequentialthinking__sequentialthinking, mcp__plugin_sequentialthinking_sequentialthinking__sequentialthinking, mcp__MCP_DOCKER__get-library-docs, mcp__MCP_DOCKER__resolve-library-id, mcp__context7__get-library-docs, mcp__context7__resolve-library-id, mcp__plugin_context7_context7__get-library-docs, mcp__plugin_context7_context7__resolve-library-id
 color: green

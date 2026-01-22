@@ -53,10 +53,10 @@ Agent 3 prompt: "Map integration points and dependencies for [topic]. Return: ex
 ### For Web Research
 
 **Actions**:
-1. **Delegate to master-research-agent** with context:
+1. **Delegate to researcher-agent** with context:
 
 ```
-Use Task tool with subagent_type="rptc:master-research-agent":
+Use Task tool with subagent_type="rptc:researcher-agent":
 
 prompt: "Research [topic] for [project tech stack].
 Questions to answer: [specific questions].
@@ -151,7 +151,7 @@ Launch 3 Task tools simultaneously with subagent_type="Explore":
 
 ### Research Agent (Web)
 ```
-Use Task tool with subagent_type="rptc:master-research-agent":
+Use Task tool with subagent_type="rptc:researcher-agent":
 prompt: "Research [topic] for [context]. Return: findings with confidence, recommendations, sources."
 ```
 

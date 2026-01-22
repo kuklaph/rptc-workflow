@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 2.9.0
+**Version**: 2.10.0
 **Status**: Beta
 **License**: MIT
 
@@ -244,13 +244,15 @@ rptc-workflow/
 │   ├── admin-sop-check.md       # /rptc:admin-sop-check
 │   └── admin-upgrade.md         # /rptc:admin-upgrade
 ├── agents/
-│   ├── master-research-agent.md
-│   ├── master-feature-planner-agent.md
-│   ├── master-efficiency-agent.md
-│   ├── master-security-agent.md
-│   ├── master-documentation-specialist-agent.md
-│   ├── master-test-sync-agent.md
-│   └── master-test-fixer-agent.md
+│   ├── researcher-agent.md
+│   ├── planner-agent.md
+│   ├── optimizer-agent.md
+│   ├── security-agent.md
+│   ├── docs-agent.md
+│   ├── kiss-agent.md
+│   ├── tdd-agent.md
+│   ├── test-sync-agent.md
+│   └── test-fixer-agent.md
 ├── sop/                         # Default SOPs (read-only)
 │   ├── testing-guide.md
 │   ├── flexible-testing-guide.md

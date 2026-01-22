@@ -40,7 +40,7 @@ Use code-explorer methodology Phase 2 (Code Flow Tracing): call chains, data tra
 Return: external dependencies, internal dependencies, API boundaries."
 ```
 
-3. **If web research needed**, delegate to master-research-agent (Mode B)
+3. **If web research needed**, delegate to researcher-agent (Mode B)
 4. **If hybrid research needed** (codebase + best practices), launch both in parallel (Mode C)
 5. **If unclear about requirements**, ask user for clarification
 6. **Summarize findings**: Key patterns, files to modify, dependencies, gap analysis (if hybrid)
@@ -97,7 +97,7 @@ This eliminates ~80% of manual TDD overhead while maintaining test-first discipl
 3. **For each step**, delegate to TDD executor sub-agent:
 
 ```
-Use Task tool with subagent_type="rptc:master-tdd-executor-agent":
+Use Task tool with subagent_type="rptc:tdd-agent":
 
 ## Context
 - Feature: [description]
@@ -183,7 +183,7 @@ Agent 3 (Code Flow Tracing): "Map integration points for [topic]. Call chains, d
 ### Research Agent (Phase 1 - Web/Hybrid)
 
 ```
-Use Task tool with subagent_type="rptc:master-research-agent":
+Use Task tool with subagent_type="rptc:researcher-agent":
 prompt: "Research [topic]. Mode: [A=codebase|B=web|C=hybrid]. Return: findings with confidence."
 ```
 
@@ -197,21 +197,21 @@ prompt: "Design implementation for [feature]. Perspective: [Minimal|Clean|Pragma
 ### TDD Executor Agent (Phase 3)
 
 ```
-Use Task tool with subagent_type="rptc:master-tdd-executor-agent":
+Use Task tool with subagent_type="rptc:tdd-agent":
 prompt: "[Context + Step details + TDG instruction (generate ~50 tests) + TDD cycle]"
 ```
 
 ### Efficiency Agent (Phase 4)
 
 ```
-Use Task tool with subagent_type="rptc:master-efficiency-agent":
+Use Task tool with subagent_type="rptc:optimizer-agent":
 prompt: "Review code quality for [files]. Apply tiered authority. Output: confidence-scored findings."
 ```
 
 ### Security Agent (Phase 4)
 
 ```
-Use Task tool with subagent_type="rptc:master-security-agent":
+Use Task tool with subagent_type="rptc:security-agent":
 prompt: "Security review for [files]. Apply tiered authority. Output: confidence-scored findings."
 ```
 

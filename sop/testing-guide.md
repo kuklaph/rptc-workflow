@@ -6,7 +6,7 @@
 **Created**: 2024-01-15
 **Last Updated**: 2025-01-21
 
-**Applies To**: All RPTC workflow commands (research, plan, tdd, commit), master-feature-planner-agent, master-efficiency-agent
+**Applies To**: All RPTC workflow commands (research, plan, tdd, commit), planner-agent, optimizer-agent
 
 ---
 

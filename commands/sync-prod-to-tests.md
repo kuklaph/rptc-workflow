@@ -63,10 +63,10 @@ Your role is to:
 - ✅ Discover files and directories (Phase 1)
 - ✅ Track progress with TodoWrite (per-iteration todos)
 - ✅ **SYNC LOOP** (Phase 2):
-  - Step 2.1: **Delegate analysis to `rptc:master-test-sync-agent`** (EXPLORE)
+  - Step 2.1: **Delegate analysis to `rptc:test-sync-agent`** (EXPLORE)
   - Step 2.2: **Check exit condition** (EXIT_CHECK) ← immediately after explore
   - Step 2.3: Obtain PM approval for production changes (PM_APPROVAL)
-  - Step 2.4: **Delegate fixes to `rptc:master-test-fixer-agent`** (FIX)
+  - Step 2.4: **Delegate fixes to `rptc:test-fixer-agent`** (FIX)
   - Step 2.5: Run test suite verification (VERIFY)
   - Step 2.6: Increment iteration and loop back
 - ✅ **Verify all tests pass** (Phase 3: Final Test Verification)
@@ -510,7 +510,7 @@ echo "════════════════════════�
 
 **⚠️ CRITICAL: MANDATORY SUB-AGENT DELEGATION**
 
-**YOU MUST delegate analysis to `rptc:master-test-sync-agent` using the Task tool.**
+**YOU MUST delegate analysis to `rptc:test-sync-agent` using the Task tool.**
 
 **YOU MUST NOT:**
 - ❌ Read production file contents in main context
@@ -536,7 +536,7 @@ ITERATION_GAPS_TOTAL=0
 
 **For EACH subdirectory in SUBDIRECTORIES, execute this delegation:**
 
-Use the Task tool with subagent_type="rptc:master-test-sync-agent":
+Use the Task tool with subagent_type="rptc:test-sync-agent":
 
 Prompt:
 ## Analysis Context
@@ -627,7 +627,7 @@ echo "  $SUBDIR: Synced=$SYNCED_COUNT, Mismatches=$MISMATCH_COUNT, Missing=$MISS
 ```
 
 **VALIDATION CHECKPOINT (EXPLORE):**
-- [ ] Task tool invoked with rptc:master-test-sync-agent for EACH subdirectory
+- [ ] Task tool invoked with rptc:test-sync-agent for EACH subdirectory
 - [ ] GAPS_FOUND populated from THIS iteration's results (not cached)
 - [ ] ITERATION_GAPS_TOTAL calculated from fresh data
 - [ ] codeContext present for all analyzed files
@@ -846,7 +846,7 @@ fi
 
 **⚠️ CRITICAL: MANDATORY SUB-AGENT DELEGATION**
 
-**YOU MUST delegate fixes to `rptc:master-test-fixer-agent` using the Task tool.**
+**YOU MUST delegate fixes to `rptc:test-fixer-agent` using the Task tool.**
 
 **YOU MUST NOT:**
 - ❌ Edit test files in main context
@@ -859,7 +859,7 @@ fi
 
 **For EACH area where GAPS_FOUND[area] > 0, execute this delegation:**
 
-Use the Task tool with subagent_type="rptc:master-test-fixer-agent":
+Use the Task tool with subagent_type="rptc:test-fixer-agent":
 
 Prompt:
 ## Fix Context
@@ -912,7 +912,7 @@ You MUST select the appropriate testing approach based on each file's code conte
 
 ## Your Task
 1. Apply appropriate fix scenario for each issue (A: Update, B: Add, C: Fix assertions, D: Create)
-2. Delegate test generation to master-tdd-executor-agent where appropriate
+2. Delegate test generation to tdd-agent where appropriate
 3. Verify all fixes by running tests
 4. Return structured result with success/failure per file
 
@@ -944,7 +944,7 @@ echo "  Iteration ${ITERATION} fixes: Updated=$UPDATED_COUNT, Created=$CREATED_C
 ```
 
 **VALIDATION CHECKPOINT (FIX):**
-- [ ] Task tool invoked with rptc:master-test-fixer-agent for each area with gaps
+- [ ] Task tool invoked with rptc:test-fixer-agent for each area with gaps
 - [ ] FIX_RESULT parsed and metrics extracted
 - [ ] Cumulative totals updated
 

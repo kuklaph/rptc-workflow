@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.10.0] - 2026-01-22
+
+### Changed
+
+- **Agent naming simplification**: Renamed all 9 agents from verbose `master-*-agent` to concise `{role}-agent`
+  - `master-efficiency-agent` → `optimizer-agent`
+  - `master-security-agent` → `security-agent`
+  - `master-research-agent` → `researcher-agent`
+  - `master-feature-planner-agent` → `planner-agent`
+  - `master-tdd-executor-agent` → `tdd-agent`
+  - `master-documentation-specialist-agent` → `docs-agent`
+  - `master-simplicity-agent` → `kiss-agent`
+  - `master-test-sync-agent` → `test-sync-agent`
+  - `master-test-fixer-agent` → `test-fixer-agent`
+- Updated all references in commands, SOPs, documentation, and cross-agent references
+
+---
+
 ## [2.9.0] - 2026-01-22
 
 ### Changed

@@ -1012,11 +1012,11 @@ Agent definitions are provided by the plugin at `${CLAUDE_PLUGIN_ROOT}/agents/`
 
 These agents have specialized prompts and capabilities for specific tasks.
 
-### Master Research Agent
+### Researcher Agent
 
 **Purpose**: Research best practices through web search and codebase exploration
 
-**Definition:** `${CLAUDE_PLUGIN_ROOT}/agents/master-research-agent.md`
+**Definition:** `${CLAUDE_PLUGIN_ROOT}/agents/researcher-agent.md`
 
 **What it does**:
 
