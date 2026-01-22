@@ -58,6 +58,7 @@ RESEARCH → PLAN → TDD → COMMIT
 | `/rptc:research "topic"`    | Interactive discovery  | Complex/unfamiliar work |
 | `/rptc:plan "feature"`      | Collaborative planning | Medium to complex work  |
 | `/rptc:tdd "@plan/"`        | TDD implementation     | Always (TDD required)   |
+| `/rptc:tdd "@native:name"`  | TDD with Claude's native plan | Use existing Claude plan |
 | `/rptc:commit [pr]`         | Verify and ship        | Ready to commit         |
 
 ### Helper Commands

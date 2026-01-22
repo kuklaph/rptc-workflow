@@ -72,39 +72,15 @@ Your role is to:
 
 ---
 
-## Step 0: Configuration & Validation
+## Step 0: Validation
 
-### Step 0a: Load Configuration
+### Step 0a: Defaults
 
-**Load RPTC configuration from `.claude/settings.json`:**
-
-1. **Check if settings file exists:**
-   - Use Read tool to read `.claude/settings.json`
-   - If file doesn't exist or can't be read, use defaults (skip to step 3)
-
-2. **Parse configuration** (extract these fields):
-   - `rptc.defaultThinkingMode` → THINKING_MODE (default: "think")
-   - `rptc.artifactLocation` → ARTIFACT_LOC (default: ".rptc")
-   - `rptc.testCoverageTarget` → COVERAGE_TARGET (default: 85)
-   - `rptc.syncTests.autoFix` → AUTO_FIX (default: true)
-   - `rptc.syncTests.createMissing` → CREATE_MISSING (default: true)
-   - `rptc.syncTests.maxIterations` → MAX_ITERATIONS (default: 10)
-   - `rptc.syncTests.confidenceThreshold` → CONFIDENCE_THRESHOLD (default: 50)
-   - `rptc.discord.notificationsEnabled` → DISCORD_ENABLED (default: false)
-   - `rptc.discord.webhookUrl` → DISCORD_WEBHOOK (default: "")
-
-3. **Display loaded configuration:**
-   ```text
-   Configuration loaded:
-     Thinking mode: [THINKING_MODE]
-     Coverage target: [COVERAGE_TARGET]%
-     Auto-fix: [AUTO_FIX]
-     Create missing: [CREATE_MISSING]
-     Max iterations: [MAX_ITERATIONS]
-     Confidence threshold: [CONFIDENCE_THRESHOLD]
-   ```
-
-**Use these values throughout command execution.**
+- Coverage target: 80%
+- Auto-fix: enabled
+- Create missing: enabled
+- Max iterations: 10
+- Confidence threshold: 50
 
 ### Step 0b: Parse Arguments
 
@@ -543,10 +519,8 @@ Include detected context in your output for each file so the fixer agent knows t
 - Sequential Thinking: ${SEQUENTIAL_THINKING_AVAILABLE} (tool: ${SEQUENTIAL_THINKING_TOOL})
 - Serena: ${SERENA_AVAILABLE} (prefix: ${SERENA_TOOL_PREFIX})
 
-## SOPs to Reference (fallback chain)
-1. .rptc/sop/test-sync-guide.md
-2. ~/.claude/global/sop/test-sync-guide.md
-3. ${CLAUDE_PLUGIN_ROOT}/sop/test-sync-guide.md
+## SOPs to Reference
+- ${CLAUDE_PLUGIN_ROOT}/sop/test-sync-guide.md
 
 ## Your Task
 1. Match test files to production files using 5-layer confidence scoring
@@ -905,10 +879,7 @@ You MUST select the appropriate testing approach based on each file's code conte
 - Serena: ${SERENA_AVAILABLE} (prefix: ${SERENA_TOOL_PREFIX})
 
 ## SOPs to Reference
-1. .rptc/sop/testing-guide.md
-2. .rptc/sop/test-sync-guide.md
-3. ~/.claude/global/sop/testing-guide.md
-4. ${CLAUDE_PLUGIN_ROOT}/sop/testing-guide.md
+- ${CLAUDE_PLUGIN_ROOT}/sop/testing-guide.md
 
 ## Your Task
 1. Apply appropriate fix scenario for each issue (A: Update, B: Add, C: Fix assertions, D: Create)

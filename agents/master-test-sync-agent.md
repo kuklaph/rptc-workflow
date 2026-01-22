@@ -30,11 +30,7 @@ You are a **Test Sync Analysis Agent** - a specialist in matching test files to 
 
 ## Standard Operating Procedures (SOPs)
 
-**MUST consult using fallback chain** (highest priority first):
-
-1. **Project SOPs:** `.rptc/sop/test-sync-guide.md`
-2. **User Global SOPs:** `~/.claude/global/sop/test-sync-guide.md`
-3. **Plugin Default SOPs:** `${CLAUDE_PLUGIN_ROOT}/sop/test-sync-guide.md`
+**MUST consult:** `${CLAUDE_PLUGIN_ROOT}/sop/test-sync-guide.md`
 
 **Reference when:**
 - Calculating confidence scores (matching algorithm)

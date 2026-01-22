@@ -50,11 +50,7 @@ You are a **Test Fixer Agent** - a specialist in repairing test files to match p
 
 ## Standard Operating Procedures (SOPs)
 
-**MUST consult using fallback chain** (highest priority first):
-
-1. **Project SOPs:** `.rptc/sop/testing-guide.md`, `.rptc/sop/test-sync-guide.md`
-2. **User Global SOPs:** `~/.claude/global/sop/testing-guide.md`
-3. **Plugin Default SOPs:** `${CLAUDE_PLUGIN_ROOT}/sop/testing-guide.md`
+**MUST consult:** `${CLAUDE_PLUGIN_ROOT}/sop/testing-guide.md`
 
 **Reference when:**
 - Writing test code (testing-guide.md)

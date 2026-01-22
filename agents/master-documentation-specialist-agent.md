@@ -10,7 +10,7 @@ model: inherit
 
 **Phase:** TDD (Phase 3.5 of RPTC Workflow - after quality gates)
 **Trigger:** Automatic during `/rptc:tdd` after Efficiency and Security reviews
-**Research Basis:** `.rptc/research/documentation-specialist-agent.md`
+**Research Basis:** Integrated into agent definition
 
 ---
 
@@ -695,8 +695,8 @@ From TDD phase orchestrator:
 
 - `git diff` output (working directory changes)
 - List of modified files with change types
-- Plan reference (if available, from `.rptc/plans/`)
-- Research reference (if available, from `.rptc/research/`)
+- Plan reference (if available, from `~/.claude/plans/`)
+- Research reference (if available, from `docs/research/`)
 
 ### Outputs You Provide
 
@@ -970,7 +970,7 @@ After each execution:
 
 ## Reference Standards
 
-**Research basis:** `.rptc/research/documentation-specialist-agent.md`
+**Research basis:** Integrated into agent definition
 
 **Key insights applied:**
 

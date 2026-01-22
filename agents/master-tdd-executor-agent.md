@@ -85,11 +85,7 @@ Think harder and thoroughly examine similar areas of the codebase to ensure your
 
 ## Standard Operating Procedures (SOPs)
 
-**MUST consult using fallback chain** (highest priority first):
-
-1. **Project SOPs**: `.rptc/sop/[name].md` (project-specific overrides)
-2. **User Global SOPs**: `~/.claude/global/sop/[name].md` (user defaults)
-3. **Plugin Default SOPs**: `${CLAUDE_PLUGIN_ROOT}/sop/[name].md` (fallback)
+**MUST consult**: `${CLAUDE_PLUGIN_ROOT}/sop/[name].md` (plugin defaults)
 
 ---
 
@@ -621,16 +617,10 @@ You will receive structured context from the TDD command:
 
 ---
 
-### 5. Configuration Values
+### 5. Defaults
 
-**Source**: `.claude/settings.json` + TDD command
-
-**Contains**:
-
-- Thinking mode (think/think hard/ultrathink)
-- Coverage target (default: 85%)
-- Artifact location (default: `.rptc`)
-- Max iteration attempts (default: 10)
+- Coverage target: 80%+
+- Max iteration attempts: 10
 
 **Use this to**:
 

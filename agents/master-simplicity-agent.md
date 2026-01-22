@@ -138,13 +138,7 @@ Validate the PM-approved scaffold against 4-gate simplicity criteria. Autonomous
 
 ### Standard Operating Procedures (SOP Fallback Chain)
 
-SOPs are resolved via fallback chain (highest priority first):
-
-1. `.rptc/sop/[name].md` - Project-specific overrides
-2. `~/.claude/global/sop/[name].md` - User global defaults
-3. `${CLAUDE_PLUGIN_ROOT}/sop/[name].md` - Plugin defaults
-
-Use `/rptc:admin-sop-check [filename]` to verify which SOP will be loaded.
+SOPs are loaded from plugin defaults: `${CLAUDE_PLUGIN_ROOT}/sop/[name].md`
 
 **PRIMARY REFERENCE - AI Over-Engineering Prevention:**
 

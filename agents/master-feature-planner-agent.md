@@ -125,8 +125,8 @@ Think harder and thoroughly examine similar areas of the codebase to ensure your
 
 **Output**: Directory structure with multiple files
 
-- `.rptc/plans/[feature-slug]/overview.md` - High-level strategy and context
-- `.rptc/plans/[feature-slug]/step-01.md` through `step-NN.md` - Individual step details
+- `~/.claude/plans/[feature-slug].md` - Native plan file (Claude's plan mode)
+- Steps tracked via TodoWrite during TDD execution
 - Files saved immediately as generated (not at end)
 
 **Advantages**:
@@ -239,13 +239,7 @@ You will receive:
 
 **1.1 Standard Operating Procedures (Reference as needed)**
 
-SOPs are resolved via fallback chain (highest priority first):
-
-1. `.rptc/sop/[name].md` - Project-specific overrides
-2. `~/.claude/global/sop/[name].md` - User global defaults
-3. `${CLAUDE_PLUGIN_ROOT}/sop/[name].md` - Plugin defaults
-
-Use `/rptc:admin-sop-check [filename]` to verify which SOP will be loaded.
+SOPs are loaded from plugin defaults: `${CLAUDE_PLUGIN_ROOT}/sop/[name].md`
 
 Consult these SOPs for cross-project best practices:
 
@@ -840,7 +834,7 @@ If issues found during self-critique:
 
 ## Research References (If Applicable)
 
-**Research Document:** `.rptc/research/[topic].md`
+**Research Document:** `docs/research/[topic].md` (if saved) or inline findings
 
 **Key Findings:**
 

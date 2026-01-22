@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.7.4] - 2026-01-21
 
+### Added
+
+- **Native plan support for TDD** (`/rptc:tdd`): Can now reference Claude's built-in plans
+  - `@native:plan-name` syntax to reference plans from `~/.claude/plans/`
+  - Direct path support: `~/.claude/plans/plan-name.md`
+  - Loads native plan as context, uses TodoWrite for step tracking
+  - Extracts actionable steps from freeform markdown plans
+
 ### Changed
 
 - **Renamed command**: `/rptc:sync-tests` → `/rptc:sync-prod-to-tests` for clearer intent
