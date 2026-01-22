@@ -7,6 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.8.0] - 2026-01-21
+
+### Added
+
+- **Unified `/rptc:feat` command**: Complete Research → Plan → TDD → Review flow in one command
+  - Phase 1: Discovery with 2-3 parallel Explore agents
+  - Phase 2: Architecture with three-architect pattern (Minimal/Clean/Pragmatic)
+  - Phase 3: TDD Implementation with Test-Driven Generation (~50 tests per step)
+  - Phase 4: Parallel quality review (efficiency + security agents)
+  - Phase 5: Completion summary
+- **Tiered authority model** (A/B/C) in efficiency and security agents
+  - Tier A: Autonomous safe fixes (no approval)
+  - Tier B: Report with confidence ≥80 (user decides)
+  - Tier C: Approval required (risky changes)
+- **Confidence scoring** (0-100) with ≥80 filter to eliminate nitpicks
+- **Mode A/B/C in research agent**: Codebase exploration, Web research, Hybrid
+
+### Changed
+
+- **Zero-config architecture**: Removed all 10+ configuration fields
+- **Native plan mode**: Uses Claude's built-in `~/.claude/plans/` exclusively
+- **Single approval point**: ExitPlanMode after architecture phase (was 4+ gates)
+- **Plugin SOP defaults only**: Removed .rptc/sop fallback chain
+- **Goal+Actions format**: All commands use concise phase descriptions
+
+### Removed
+
+- **12 command files deleted**:
+  - `plan.md`, `tdd.md` (merged into `/rptc:feat`)
+  - `admin-config.md`, `admin-upgrade.md`, `admin-sop-check.md` (obsolete)
+  - All 7 `helper-*.md` commands (merged into feat workflow)
+- **Configuration system**: No `.claude/settings.json` RPTC fields
+- **`.rptc/` directory**: No workspace initialization required
+
+### Metrics
+
+- Command lines: 4000+ → 742 (82% reduction)
+- Agent lines (core 3): 1200 → 629 (48% reduction)
+- Config fields: 10+ → 0 (100% removal)
+- Execution modes: 5 → 1 (80% reduction)
+
+---
+
 ## [2.7.4] - 2026-01-21
 
 ### Added
