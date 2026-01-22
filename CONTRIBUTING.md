@@ -338,7 +338,7 @@ Updated resolution logic to follow documented priority order.
 ### File Naming
 
 - Commands: `kebab-case.md` (e.g., `catch-up-med.md`)
-- Agents: `kebab-case-agent.md` (e.g., `planner-agent.md`)
+- Agents: `kebab-case-agent.md` (e.g., `plan-agent.md`)
 - SOPs: `kebab-case.md` (e.g., `testing-guide.md`)
 - Docs: `SCREAMING_SNAKE_CASE.md` (e.g., `RPTC_WORKFLOW_GUIDE.md`)
 

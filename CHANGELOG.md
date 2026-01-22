@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.10.1] - 2026-01-22
+
+### Changed
+
+- **Agent rename**: `planner-agent` → `plan-agent` for consistency with command naming (`/rptc:plan`)
+- **Fixed external dependency**: Replaced `feature-dev:code-architect` with `rptc:plan-agent` in `/feat` command
+
+---
+
 ## [2.10.0] - 2026-01-22
 
 ### Changed
@@ -15,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `master-efficiency-agent` → `optimizer-agent`
   - `master-security-agent` → `security-agent`
   - `master-research-agent` → `researcher-agent`
-  - `master-feature-planner-agent` → `planner-agent`
+  - `master-feature-planner-agent` → `plan-agent`
   - `master-tdd-executor-agent` → `tdd-agent`
   - `master-documentation-specialist-agent` → `docs-agent`
   - `master-simplicity-agent` → `kiss-agent`

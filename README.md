@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 2.10.0
+**Version**: 2.10.1
 **Status**: Beta
 **License**: MIT
 
@@ -245,7 +245,7 @@ rptc-workflow/
 │   └── admin-upgrade.md         # /rptc:admin-upgrade
 ├── agents/
 │   ├── researcher-agent.md
-│   ├── planner-agent.md
+│   ├── plan-agent.md
 │   ├── optimizer-agent.md
 │   ├── security-agent.md
 │   ├── docs-agent.md

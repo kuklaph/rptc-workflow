@@ -54,7 +54,7 @@ Return: external dependencies, internal dependencies, API boundaries."
 **Actions**:
 
 1. **Enter plan mode** using EnterPlanMode tool
-2. **Launch 3 code-architect agents in parallel** with different perspectives:
+2. **Launch 3 plan agents in parallel** with different perspectives:
    - **Minimal**: Smallest change, maximum reuse of existing code
    - **Clean**: Maintainability-focused, elegant abstractions
    - **Pragmatic**: Balance of speed and quality
@@ -187,11 +187,11 @@ Use Task tool with subagent_type="rptc:researcher-agent":
 prompt: "Research [topic]. Mode: [A=codebase|B=web|C=hybrid]. Return: findings with confidence."
 ```
 
-### Architect Agent (Phase 2)
+### Planner Agent (Phase 2)
 
 ```
-Use Task tool with subagent_type="feature-dev:code-architect":
-prompt: "Design implementation for [feature]. Perspective: [Minimal|Clean|Pragmatic]. Provide: files to modify, component design, data flow, build sequence."
+Use Task tool with subagent_type="rptc:plan-agent":
+prompt: "Design implementation for [feature]. Perspective: [Minimal|Clean|Pragmatic]. Provide: files to modify, component design, data flow, build sequence, test strategy."
 ```
 
 ### TDD Executor Agent (Phase 3)
