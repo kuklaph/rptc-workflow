@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.9.0] - 2026-01-22
+
+### Changed
+
+- **Restructured `/rptc:sync-prod-to-tests` command**: Major overhaul for better loop enforcement
+  - Merged Phases 2-5 into single "Phase 2: SYNC LOOP" with steps 2.0-2.6
+  - Moved exit condition to immediately after EXPLORE (Step 2.2) - prevents unnecessary fix cycles
+  - Added per-iteration TodoWrite tracking (`Iter N: EXPLORE`, `EXIT_CHECK`, `FIX`, `VERIFY`)
+  - Removed `goto` pseudocode, replaced with explicit flow control and validation checkpoints
+  - Renumbered phases: Discovery (1), SYNC LOOP (2), Final Test Verification (3), Report (4)
+- **Smart repository structure detection**: Command now auto-detects production and test locations
+  - Uses Glob, Grep, Read, Serena, and Sequential Thinking MCPs for intelligent exploration
+  - Reads `package.json`, `tsconfig.json`, `pyproject.toml` for configuration hints
+  - Detects test patterns: separate (`tests/`), co-located (`*.test.ts`), `__tests__/`
+  - Only prompts user if detection is ambiguous
+- **Simplified bash pseudocode**: Replaced verbose bash scripts with natural language instructions
+  - Claude uses its available tools intelligently rather than following scripted commands
+  - Cleaner, more maintainable command structure
+
+---
+
 ## [2.8.0] - 2026-01-21
 
 ### Added

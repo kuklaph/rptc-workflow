@@ -8,15 +8,23 @@ description: Recursively sync tests to production code with auto-fix and converg
 The user is the **project manager** - they approve major decisions and final completion.
 
 **Arguments:**
-- `[directory]` - Target directory to sync (optional, prompts if not provided)
+- `[directory]` - Target directory to sync (optional, auto-detected from repo structure)
 - `--dry-run` - Analyze only, don't make changes
 - `--max-iterations N` - Override max convergence iterations (default: 10)
 
+**Auto-Detection:**
+The command automatically discovers:
+- Production code locations (src/, lib/, app/, packages/)
+- Test locations (tests/, __tests__/, co-located *.test.* files)
+- Test framework (jest, vitest, pytest, go, junit)
+- Testing tools (Playwright, RTL, supertest, msw, etc.)
+
 **Examples:**
 ```bash
-/rptc:sync-prod-to-tests "src/"
-/rptc:sync-prod-to-tests "src/auth/" --dry-run
-/rptc:sync-prod-to-tests --max-iterations 5
+/rptc:sync-prod-to-tests                    # Auto-detect everything
+/rptc:sync-prod-to-tests "src/auth/"        # Target specific subdirectory
+/rptc:sync-prod-to-tests --dry-run          # Analyze without changes
+/rptc:sync-prod-to-tests --max-iterations 5 # Limit iterations
 ```
 
 ---
@@ -53,13 +61,16 @@ Ensure all production code has synchronized tests by:
 
 Your role is to:
 - ✅ Discover files and directories (Phase 1)
-- ✅ Track progress with TodoWrite
-- ✅ **Delegate analysis to `rptc:master-test-sync-agent`** (Phase 2)
-- ✅ Obtain PM approval for production changes (Phase 3)
-- ✅ **Delegate fixes to `rptc:master-test-fixer-agent`** (Phase 4)
-- ✅ Check convergence based on agent results (Phase 5)
-- ✅ **Verify all tests pass** (Phase 6)
-- ✅ Generate final report with audit trail (Phase 7)
+- ✅ Track progress with TodoWrite (per-iteration todos)
+- ✅ **SYNC LOOP** (Phase 2):
+  - Step 2.1: **Delegate analysis to `rptc:master-test-sync-agent`** (EXPLORE)
+  - Step 2.2: **Check exit condition** (EXIT_CHECK) ← immediately after explore
+  - Step 2.3: Obtain PM approval for production changes (PM_APPROVAL)
+  - Step 2.4: **Delegate fixes to `rptc:master-test-fixer-agent`** (FIX)
+  - Step 2.5: Run test suite verification (VERIFY)
+  - Step 2.6: Increment iteration and loop back
+- ✅ **Verify all tests pass** (Phase 3: Final Test Verification)
+- ✅ Generate final report with audit trail (Phase 4)
 
 **DO NOT in main context:**
 - ❌ Read production or test file contents
@@ -117,61 +128,63 @@ if [ -n "$MAX_ITER_OVERRIDE" ]; then
 fi
 ```
 
-### Step 0c: Get Directory (if not provided)
+### Step 0c: Auto-Detect Repository Structure
 
-If `TARGET_DIR` is empty, prompt user:
+**If `TARGET_DIR` is not provided, intelligently explore the repository.**
 
-Use the AskUserQuestion tool:
+Use Sequential Thinking MCP (if available) to reason through detection, and Serena MCP (if available) for semantic code understanding.
 
-```markdown
-AskUserQuestion(
-  questions: [{
-    question: "Which directory should be analyzed for test synchronization?",
-    header: "Directory",
-    multiSelect: false,
-    options: [
-      {
-        label: "src/",
-        description: "Standard source directory"
-      },
-      {
-        label: "lib/",
-        description: "Library source directory"
-      },
-      {
-        label: "Current directory",
-        description: "Analyze entire project root"
-      }
-    ]
-  }]
-)
+**Exploration Strategy:**
+
+1. **Read configuration files** for explicit hints:
+   - `package.json` → check `main`, `module`, `jest.roots`, `scripts.test`
+   - `tsconfig.json` → check `compilerOptions.rootDir`, `include`
+   - `pyproject.toml` → check `testpaths`, source directories
+   - `go.mod` → module structure
+
+2. **Search with Grep** for import patterns and test configurations:
+   - Search for `describe(`, `it(`, `test(` to find test files
+   - Search for `@Test`, `def test_` for other frameworks
+
+3. **Use Glob** to discover directory patterns:
+   - Production: `src/`, `lib/`, `app/`, `packages/`, `core/`
+   - Tests: `tests/`, `test/`, `__tests__/`, `spec/`, `e2e/`
+   - Co-located: `**/*.test.{ts,js}` alongside production files
+
+4. **Use Serena** (if available) for semantic understanding:
+   - `get_symbols_overview` on candidate directories
+   - `find_symbol` to locate test utilities and fixtures
+   - Understand module boundaries and dependencies
+
+5. **Determine test pattern type:**
+   - `separate` - tests in dedicated directory (tests/, test/)
+   - `co-located` - test files next to production (*.test.ts)
+   - `__tests__` - Jest-style folders within source
+
+**Store results:**
+- `TARGET_DIR` - Primary production code directory
+- `TEST_LOCATIONS` - Where tests live
+- `TEST_PATTERN_TYPE` - How tests are organized
+
+**Display detection results:**
+
+```text
+════════════════════════════════════════════════════════
+  REPOSITORY STRUCTURE DETECTED
+════════════════════════════════════════════════════════
+
+  Production: src/
+  Tests: tests/, src/**/__tests__/
+  Pattern: separate + __tests__
+
+════════════════════════════════════════════════════════
 ```
 
-**Process response:**
-- If "src/" selected → `TARGET_DIR="src/"`
-- If "lib/" selected → `TARGET_DIR="lib/"`
-- If "Current directory" selected → `TARGET_DIR="."`
-- If "Other" selected → Use provided custom path
+**Only prompt user if detection is ambiguous** (multiple equally-valid production directories found).
 
 ### Step 0d: Validate Directory
 
-```bash
-# Check directory exists
-if [ ! -d "$TARGET_DIR" ]; then
-  echo "❌ Error: Directory not found: $TARGET_DIR"
-  echo ""
-  echo "Please check the path and try again."
-  exit 1
-fi
-
-# Check directory is readable
-if [ ! -r "$TARGET_DIR" ]; then
-  echo "❌ Error: Directory not readable: $TARGET_DIR"
-  exit 1
-fi
-
-echo "✅ Target directory validated: $TARGET_DIR"
-```
+Verify `TARGET_DIR` exists and is accessible. If not found, display error and exit.
 
 ### Step 0e: Detect MCP Availability
 
@@ -203,6 +216,8 @@ Note: Proceeding with standard analysis (MCPs enhance but aren't required)
 
 ### Step 0f: Initialize TodoWrite
 
+**Initial structure uses phases. Iteration-specific todos are added dynamically in Phase 2.**
+
 ```json
 {
   "tool": "TodoWrite",
@@ -218,32 +233,17 @@ Note: Proceeding with standard analysis (MCPs enhance but aren't required)
       "activeForm": "Discovering files"
     },
     {
-      "content": "Phase 2: Analyze sync status",
+      "content": "Phase 2: SYNC LOOP",
       "status": "pending",
-      "activeForm": "Analyzing sync status"
+      "activeForm": "Running sync loop"
     },
     {
-      "content": "Phase 3: PM approval gateway",
-      "status": "pending",
-      "activeForm": "Processing PM approval"
-    },
-    {
-      "content": "Phase 4: Apply fixes",
-      "status": "pending",
-      "activeForm": "Applying fixes"
-    },
-    {
-      "content": "Phase 5: Verify convergence",
-      "status": "pending",
-      "activeForm": "Verifying convergence"
-    },
-    {
-      "content": "Phase 6: Test suite verification",
+      "content": "Phase 3: Final test verification",
       "status": "pending",
       "activeForm": "Verifying all tests pass"
     },
     {
-      "content": "Phase 7: Generate report",
+      "content": "Phase 4: Generate report",
       "status": "pending",
       "activeForm": "Generating report"
     }
@@ -331,66 +331,44 @@ Testing Capabilities:
 
 ### Step 1b: Discover Production Files
 
-Use Glob tool to find production code:
+Use Glob to find production code in `TARGET_DIR`:
 
-```bash
-# Language-specific patterns
-Glob(pattern="${TARGET_DIR}/**/*.{ts,tsx,js,jsx}")  # TypeScript/JavaScript
-Glob(pattern="${TARGET_DIR}/**/*.py")                # Python
-Glob(pattern="${TARGET_DIR}/**/*.go")                # Go
-Glob(pattern="${TARGET_DIR}/**/*.java")              # Java
+| Language | Pattern |
+|----------|---------|
+| TypeScript/JavaScript | `**/*.{ts,tsx,js,jsx}` |
+| Python | `**/*.py` |
+| Go | `**/*.go` |
+| Java | `**/*.java` |
 
-# Exclude patterns (filter results):
-# - **/node_modules/**
-# - **/vendor/**
-# - **/.git/**
-# - **/dist/**
-# - **/build/**
-# - **/generated/**
-# - **/*.test.* , **/*.spec.* , **/test_* , **/*_test.*
-```
+**Exclude:** `node_modules/`, `vendor/`, `dist/`, `build/`, `generated/`, and test files.
 
 Store results in `PRODUCTION_FILES` list.
 
 ### Step 1c: Discover Test Files
 
-Use Glob tool to find test files:
+**Use the detected `TEST_LOCATIONS` and `TEST_PATTERN_TYPE` from Step 0c.**
 
-```bash
-# Test file patterns by framework
-case $FRAMEWORK in
-  jest|vitest)
-    Glob(pattern="**/*.test.{ts,tsx,js,jsx}")
-    Glob(pattern="**/*.spec.{ts,tsx,js,jsx}")
-    Glob(pattern="**/__tests__/**/*.{ts,tsx,js,jsx}")
-    ;;
-  pytest)
-    Glob(pattern="**/test_*.py")
-    Glob(pattern="**/*_test.py")
-    ;;
-  go)
-    Glob(pattern="**/*_test.go")
-    ;;
-  junit)
-    Glob(pattern="**/src/test/**/*Test.java")
-    ;;
-esac
-```
+Use Glob to find test files based on detected framework:
+
+| Framework | Patterns |
+|-----------|----------|
+| jest/vitest | `*.test.{ts,tsx,js,jsx}`, `*.spec.*`, `__tests__/**/*` |
+| pytest | `test_*.py`, `*_test.py` |
+| go | `*_test.go` |
+| junit | `*Test.java`, `*Tests.java` |
+
+Search in:
+1. Detected `TEST_LOCATIONS` (e.g., `tests/`, `spec/`)
+2. Co-located patterns if `TEST_PATTERN_TYPE` includes "co-located"
+3. `__tests__/` directories within `TARGET_DIR` if applicable
 
 Store results in `TEST_FILES` list.
 
 ### Step 1d: Identify Subdirectories
 
-```bash
-# Group files by subdirectory for staged analysis
-SUBDIRECTORIES=$(echo "$PRODUCTION_FILES" | xargs -n1 dirname | sort -u)
+Group discovered files by subdirectory for staged analysis. For each subdirectory, count production files and matching test files.
 
-# Count files per subdirectory
-for SUBDIR in $SUBDIRECTORIES; do
-  FILE_COUNT=$(echo "$PRODUCTION_FILES" | grep "^${SUBDIR}/" | wc -l)
-  echo "  $SUBDIR: $FILE_COUNT production files"
-done
-```
+This creates `SUBDIRECTORIES` - the list of areas to analyze in Phase 2.
 
 ### Step 1e: Update TodoWrite with Discovered Areas
 
@@ -423,18 +401,26 @@ Dynamically add tasks for each subdirectory:
   DISCOVERY COMPLETE
 ═══════════════════════════════════════════════════════
 
-Directory: ${TARGET_DIR}
-Framework: ${FRAMEWORK}
+Repository Structure:
+  Production code: ${TARGET_DIR}
+  Test locations: ${TEST_LOCATIONS}
+  Test pattern: ${TEST_PATTERN_TYPE:-separate}
 
-Production files found: [N]
-Test files found: [M]
-Subdirectories to analyze: [K]
+Framework: ${FRAMEWORK}
+Testing tools: ${TESTING_TOOLS[@]}
+
+Files Found:
+  Production files: [N]
+  Test files: [M]
+  Subdirectories to analyze: [K]
 
 Subdirectory breakdown:
-  src/auth/: 5 files
-  src/utils/: 8 files
-  src/api/: 12 files
+  ${TARGET_DIR}/auth/: 5 prod files, 3 test files
+  ${TARGET_DIR}/utils/: 8 prod files, 6 test files
+  ${TARGET_DIR}/api/: 12 prod files, 10 test files
   ...
+
+Test Coverage Estimate: [X]% (based on file matching)
 
 ═══════════════════════════════════════════════════════
 ```
@@ -443,19 +429,84 @@ Subdirectory breakdown:
 
 ---
 
-## Phase 2: Analysis Loop
+## Phase 2: SYNC LOOP
 
-**Update TodoWrite:** Mark "Phase 2: Analyze sync status" as `in_progress`
+**This phase consolidates analysis, approval, fixing, and verification into a single iterative loop with clear exit conditions.**
 
-### Step 2a: Initialize Convergence Tracking
+**Update TodoWrite:** Mark "Phase 2: SYNC LOOP" as `in_progress`
+
+---
+
+### Step 2.0: Initialize Iteration State
 
 ```bash
-ITERATION=0
+# Initialize tracking variables
+ITERATION=1
+MAX_ITERATIONS=${MAX_ITER_OVERRIDE:-10}
 CONVERGED=false
-declare -A AREA_STATUS  # Track status per subdirectory
+declare -A AREA_STATUS      # Track sync status per subdirectory
+declare -A GAPS_FOUND       # Track gaps found THIS iteration (reset each loop)
+
+# Cumulative metrics (persist across iterations)
+TOTAL_UPDATED=0
+TOTAL_CREATED=0
+TOTAL_FAILED=0
+TOTAL_MANUAL_REVIEW=0
+
+# Session ID for audit trail
+SESSION_ID="sync-$(date +%Y%m%d-%H%M%S)"
+
+echo ""
+echo "════════════════════════════════════════════════════════"
+echo "  SYNC LOOP INITIALIZED"
+echo "════════════════════════════════════════════════════════"
+echo "  Max iterations: ${MAX_ITERATIONS}"
+echo "  Session ID: ${SESSION_ID}"
+echo "  Subdirectories: ${#SUBDIRECTORIES[@]}"
+echo "════════════════════════════════════════════════════════"
 ```
 
-### Step 2b: Delegate Analysis to Sync Agent
+**Add initial iteration todos:**
+
+```json
+{
+  "tool": "TodoWrite",
+  "todos": [
+    // ... preserve existing phase todos ...
+    {
+      "content": "Iter 1: EXPLORE",
+      "status": "pending",
+      "activeForm": "Iter 1: Exploring sync status"
+    },
+    {
+      "content": "Iter 1: EXIT_CHECK",
+      "status": "pending",
+      "activeForm": "Iter 1: Checking exit condition"
+    },
+    {
+      "content": "Iter 1: PM_APPROVAL",
+      "status": "pending",
+      "activeForm": "Iter 1: Processing PM approval"
+    },
+    {
+      "content": "Iter 1: FIX",
+      "status": "pending",
+      "activeForm": "Iter 1: Applying fixes"
+    },
+    {
+      "content": "Iter 1: VERIFY",
+      "status": "pending",
+      "activeForm": "Iter 1: Verifying fixes"
+    }
+  ]
+}
+```
+
+---
+
+### Step 2.1: EXPLORE (Sync Agent Delegation)
+
+**Update TodoWrite:** Mark "Iter ${ITERATION}: EXPLORE" as `in_progress`
 
 **⚠️ CRITICAL: MANDATORY SUB-AGENT DELEGATION**
 
@@ -470,9 +521,18 @@ declare -A AREA_STATUS  # Track status per subdirectory
 
 **VIOLATION OF THESE RULES BREAKS THE WORKFLOW.**
 
-If you find yourself reading file contents or analyzing code, STOP IMMEDIATELY and use the Task tool delegation below instead.
-
 ---
+
+**Reset per-iteration tracking:**
+
+```bash
+# CRITICAL: Reset GAPS_FOUND for this iteration
+# This ensures we're checking fresh results, not stale data
+unset GAPS_FOUND
+declare -A GAPS_FOUND
+
+ITERATION_GAPS_TOTAL=0
+```
 
 **For EACH subdirectory in SUBDIRECTORIES, execute this delegation:**
 
@@ -481,6 +541,7 @@ Use the Task tool with subagent_type="rptc:master-test-sync-agent":
 Prompt:
 ## Analysis Context
 
+**Iteration:** ${ITERATION} of ${MAX_ITERATIONS}
 **Directory to analyze:** ${SUBDIR}
 **Test framework:** ${FRAMEWORK}
 **Coverage target:** ${COVERAGE_TARGET}%
@@ -533,22 +594,19 @@ Return JSON with: synced, mismatches, missingTests, orphanedTests, actionRequire
 
 ---
 
-**VALIDATION CHECKPOINT:** Verify the Task tool was invoked and returned results before proceeding. If no Task tool result exists, STOP and re-execute the delegation above.
-
-### Step 2c: Process Sync Agent Results
+**Process sync agent results for EACH subdirectory:**
 
 ```bash
 # Parse agent output
 SYNC_RESULT=$(parse_json "$AGENT_OUTPUT")
 
 # VALIDATION: Check that codeContext is present for all files
-# This is REQUIRED - reject results that don't include it
 MISSING_CONTEXT_COUNT=$(jq '[.synced[], .mismatches[], .missingTests[] | select(.codeContext == null or .codeContext == "")] | length' <<< "$SYNC_RESULT")
 
 if [ "$MISSING_CONTEXT_COUNT" -gt 0 ]; then
-  echo "❌ ERROR: Sync agent output missing required 'codeContext' field for $MISSING_CONTEXT_COUNT files"
+  echo "❌ ERROR: Sync agent output missing 'codeContext' for $MISSING_CONTEXT_COUNT files"
   echo "Re-delegating with explicit codeContext requirement..."
-  # Re-run Step 2b delegation with emphasis on codeContext
+  # Re-run delegation for this subdirectory
   continue
 fi
 
@@ -559,78 +617,113 @@ MISSING_COUNT=$(jq '.missingTests | length' <<< "$SYNC_RESULT")
 ORPHANED_COUNT=$(jq '.orphanedTests | length' <<< "$SYNC_RESULT")
 ACTION_REQUIRED=$(jq -r '.actionRequired' <<< "$SYNC_RESULT")
 
-# Update area status
+# CRITICAL: Store gaps for THIS iteration
+SUBDIR_GAPS=$((MISMATCH_COUNT + MISSING_COUNT))
+GAPS_FOUND["$SUBDIR"]=$SUBDIR_GAPS
 AREA_STATUS["$SUBDIR"]="$ACTION_REQUIRED"
+ITERATION_GAPS_TOTAL=$((ITERATION_GAPS_TOTAL + SUBDIR_GAPS))
 
-# Display progress
 echo "  $SUBDIR: Synced=$SYNCED_COUNT, Mismatches=$MISMATCH_COUNT, Missing=$MISSING_COUNT"
 ```
 
-### Step 2d: Update TodoWrite with Findings
+**VALIDATION CHECKPOINT (EXPLORE):**
+- [ ] Task tool invoked with rptc:master-test-sync-agent for EACH subdirectory
+- [ ] GAPS_FOUND populated from THIS iteration's results (not cached)
+- [ ] ITERATION_GAPS_TOTAL calculated from fresh data
+- [ ] codeContext present for all analyzed files
 
-For each area with issues, add specific fix tasks:
+**IF ANY UNCHECKED:** STOP. Re-execute Step 2.1.
 
-```json
-{
-  "tool": "TodoWrite",
-  "todos": [
-    // Update area analysis task
-    {
-      "content": "Analyze ${SUBDIR}",
-      "status": "completed",
-      "activeForm": "Analyzing ${SUBDIR}"
-    },
-    // Add fix tasks for mismatches
-    {
-      "content": "Fix ${MISMATCH_FILE} tests",
-      "status": "pending",
-      "activeForm": "Fixing ${MISMATCH_FILE} tests"
-    },
-    // Add create tasks for missing
-    {
-      "content": "Create tests for ${MISSING_FILE}",
-      "status": "pending",
-      "activeForm": "Creating tests for ${MISSING_FILE}"
-    }
-  ]
-}
-```
-
-**Update TodoWrite:** Mark "Phase 2: Analyze sync status" as `completed`
+**Update TodoWrite:** Mark "Iter ${ITERATION}: EXPLORE" as `completed`
 
 ---
 
-## Phase 3: PM Approval Gateway (Production Changes)
+### Step 2.2: EXIT CHECK (Immediately After EXPLORE)
 
-**Purpose**: Request explicit PM approval for any production code modifications before execution.
+**Update TodoWrite:** Mark "Iter ${ITERATION}: EXIT_CHECK" as `in_progress`
 
-### Step 3a: Check if PM Approval Required
+**⚠️ CRITICAL: This check happens IMMEDIATELY after EXPLORE, before any fixes.**
+
+```bash
+echo ""
+echo "────────────────────────────────────────────────────────"
+echo "  EXIT CHECK (Iteration ${ITERATION})"
+echo "────────────────────────────────────────────────────────"
+echo "  Total gaps found this iteration: ${ITERATION_GAPS_TOTAL}"
+echo "────────────────────────────────────────────────────────"
+
+# Check if ALL gaps are zero
+if [ "$ITERATION_GAPS_TOTAL" -eq 0 ]; then
+  echo ""
+  echo "════════════════════════════════════════════════════════"
+  echo "  ✅ CONVERGENCE ACHIEVED"
+  echo "════════════════════════════════════════════════════════"
+  echo "  All subdirectories report 0 gaps"
+  echo "  Proceeding to Phase 3: Final Test Verification"
+  echo "════════════════════════════════════════════════════════"
+
+  CONVERGED=true
+
+  # Mark remaining iteration todos as skipped (not needed)
+  # Update TodoWrite to mark EXIT_CHECK completed, skip PM_APPROVAL/FIX/VERIFY
+
+  # ─────────────────────────────────────────────────────────
+  # EXIT TO PHASE 3: Final Test Suite Verification
+  # ─────────────────────────────────────────────────────────
+fi
+```
+
+**If gaps remain, continue to Step 2.3:**
+
+```bash
+if [ "$ITERATION_GAPS_TOTAL" -gt 0 ]; then
+  echo ""
+  echo "  Gaps remaining: ${ITERATION_GAPS_TOTAL}"
+  echo "  Continuing to PM_APPROVAL and FIX steps..."
+  echo ""
+
+  # Display per-subdirectory breakdown
+  for SUBDIR in "${!GAPS_FOUND[@]}"; do
+    if [ "${GAPS_FOUND[$SUBDIR]}" -gt 0 ]; then
+      echo "    ⚠️  $SUBDIR: ${GAPS_FOUND[$SUBDIR]} gaps"
+    else
+      echo "    ✅ $SUBDIR: 0 gaps"
+    fi
+  done
+fi
+```
+
+**VALIDATION CHECKPOINT (EXIT_CHECK):**
+- [ ] ITERATION_GAPS_TOTAL evaluated from EXPLORE results (not stale)
+- [ ] If gaps=0: Exit to Phase 3 (do NOT proceed to FIX)
+- [ ] If gaps>0: Continue to Step 2.3
+
+**IF ANY UNCHECKED:** STOP. Re-evaluate exit condition.
+
+**Update TodoWrite:** Mark "Iter ${ITERATION}: EXIT_CHECK" as `completed`
+
+---
+
+### Step 2.3: PM APPROVAL (Conditional - Production Changes Only)
+
+**Update TodoWrite:** Mark "Iter ${ITERATION}: PM_APPROVAL" as `in_progress`
+
+**This step only executes if production bugs were detected in EXPLORE.**
 
 ```bash
 # Check if any issues require production changes
 REQUIRES_PM_APPROVAL=$(jq -r '.summary.requiresPmApproval // false' <<< "$SYNC_RESULT")
 PRODUCTION_BUG_COUNT=$(jq -r '.summary.productionBugs // 0' <<< "$SYNC_RESULT")
-AMBIGUOUS_COUNT=$(jq -r '.summary.ambiguous // 0' <<< "$SYNC_RESULT")
 
 if [ "$REQUIRES_PM_APPROVAL" = "false" ] && [ "$PRODUCTION_BUG_COUNT" -eq 0 ]; then
-  echo "✓ No production changes detected, proceeding to fix phase"
-  # Skip to Phase 4
+  echo "✓ No production changes detected, skipping PM approval"
+  # Continue directly to Step 2.4 FIX
 else
   echo "⚠️  ${PRODUCTION_BUG_COUNT} production bug(s) detected requiring PM approval"
-  # Continue to Step 3b
 fi
 ```
 
-### Step 3b: Extract Production Change Requests
-
-```bash
-# Extract issues classified as production_bug or ambiguous
-PRODUCTION_ISSUES=$(jq '[.mismatches[] | select(.classification == "production_bug" or .classification == "ambiguous")]' <<< "$SYNC_RESULT")
-```
-
-### Step 3c: Present Evidence to PM
-
-**Generate human-readable approval request and present to user:**
+**If PM approval required, present evidence:**
 
 ```markdown
 ═══════════════════════════════════════════════════════
@@ -663,16 +756,10 @@ However, the analysis suggests these tests may have correctly identified bugs in
 **Root Cause**:
 {rootCause}
 
-**Standards/Specification Reference**:
-{evidence.standardsReference}
-
 **Proposed Production Change**:
 {recommendedFix.productionChanges}
 
 **Risk Assessment**: {evidence.riskAssessment}
-
-**Rationale for Production Change**:
-{recommendedFix.rationale}
 
 ---
 
@@ -684,9 +771,7 @@ For each issue above, you may:
 3. **Defer**: Mark for manual investigation (logged in final report)
 ```
 
-### Step 3d: Capture PM Decisions
-
-Use AskUserQuestion tool for EACH production bug:
+**Capture PM decisions using AskUserQuestion for EACH production bug:**
 
 ```markdown
 AskUserQuestion(
@@ -715,50 +800,31 @@ AskUserQuestion(
 **Store decisions:**
 
 ```bash
-# Create approval decisions structure
 APPROVAL_DECISIONS='{
-  "sessionId": "sync-'$(date +%Y%m%d-%H%M%S)'",
+  "sessionId": "'$SESSION_ID'",
+  "iteration": '$ITERATION',
   "timestamp": "'$(date -Iseconds)'",
   "decisions": {
     "approved": [],
     "rejected": [],
     "deferred": []
-  },
-  "pmNotes": ""
+  }
 }'
-
-# Add each decision based on PM response
-# If Approve: add issueId to decisions.approved
-# If Reject: add issueId to decisions.rejected
-# If Defer: add issueId to decisions.deferred
 ```
 
-### Step 3e: Handle Rejected Production Bugs
+**VALIDATION CHECKPOINT (PM_APPROVAL):**
+- [ ] If no production bugs: Step was skipped correctly
+- [ ] If production bugs: Each issue presented to PM with evidence
+- [ ] PM decisions captured in APPROVAL_DECISIONS structure
+- [ ] Rejected issues converted to test adaptation
 
-**For rejected production changes, the test must be adapted instead:**
-
-```bash
-# For each rejected issue, modify the sync result to target test instead
-for ISSUE_ID in $(jq -r '.decisions.rejected[]' <<< "$APPROVAL_DECISIONS"); do
-  echo "Converting ${ISSUE_ID} from production fix to test adaptation..."
-  # The fixer agent will adapt the test to match production behavior
-done
-```
-
-### Step 3f: Audit Trail
-
-**Append to audit trail for accountability:**
-
-```bash
-# Log all PM decisions
-echo '{"timestamp":"'$(date -Iseconds)'","type":"pm_approval_session","sessionId":"'${SESSION_ID}'","productionBugs":'${PRODUCTION_BUG_COUNT}',"approved":'$(jq '.decisions.approved | length' <<< "$APPROVAL_DECISIONS")',"rejected":'$(jq '.decisions.rejected | length' <<< "$APPROVAL_DECISIONS")',"deferred":'$(jq '.decisions.deferred | length' <<< "$APPROVAL_DECISIONS")'}' >> "${ARTIFACT_LOC}/sync-prod-to-tests/audit-trail.jsonl"
-```
-
-**Update TodoWrite:** Add task "PM approved {N} production changes" as `completed`
+**Update TodoWrite:** Mark "Iter ${ITERATION}: PM_APPROVAL" as `completed`
 
 ---
 
-## Phase 4: Auto-Fix Execution
+### Step 2.4: FIX (Fixer Agent Delegation)
+
+**Update TodoWrite:** Mark "Iter ${ITERATION}: FIX" as `in_progress`
 
 **Skip if `--dry-run` flag is set:**
 
@@ -766,67 +832,32 @@ echo '{"timestamp":"'$(date -Iseconds)'","type":"pm_approval_session","sessionId
 if [ "$DRY_RUN" = true ]; then
   echo "🔍 Dry run mode - skipping fixes"
   echo ""
-  echo "Issues found that would be fixed:"
-  # Display summary of what would be fixed
-  goto Phase 7  # Skip directly to report in dry-run mode
+  echo "Issues that would be fixed in iteration ${ITERATION}:"
+  for SUBDIR in "${!GAPS_FOUND[@]}"; do
+    echo "  $SUBDIR: ${GAPS_FOUND[$SUBDIR]} issues"
+  done
+
+  # Mark iteration todos and proceed to report
+  # ─────────────────────────────────────────────────────────
+  # EXIT TO PHASE 4: Completion Report (dry-run)
+  # ─────────────────────────────────────────────────────────
 fi
 ```
-
-**Update TodoWrite:** Mark "Phase 3: Apply fixes" as `in_progress`
-
-### Step 3a: Confirm Fix Execution
-
-Use AskUserQuestion tool:
-
-```markdown
-AskUserQuestion(
-  questions: [{
-    question: "Found [N] issues to fix. Proceed with auto-fix?",
-    header: "Fix",
-    multiSelect: false,
-    options: [
-      {
-        label: "Yes, fix all",
-        description: "Auto-fix all [N] issues (recommended)"
-      },
-      {
-        label: "Review first",
-        description: "Show detailed breakdown before fixing"
-      },
-      {
-        label: "Skip",
-        description: "Generate report only, don't fix"
-      }
-    ]
-  }]
-)
-```
-
-**Process response:**
-- "Yes, fix all" → Proceed to Step 3b
-- "Review first" → Display detailed breakdown, then re-ask
-- "Skip" → Skip to Phase 5
-
-### Step 3b: Delegate Fixes to Fixer Agent
 
 **⚠️ CRITICAL: MANDATORY SUB-AGENT DELEGATION**
 
 **YOU MUST delegate fixes to `rptc:master-test-fixer-agent` using the Task tool.**
 
 **YOU MUST NOT:**
-- ❌ Edit test files in main context (use Edit tool)
+- ❌ Edit test files in main context
 - ❌ Write new test code in main context
-- ❌ Create test files in main context (use Write tool)
-- ❌ Run test commands in main context (use Bash tool)
+- ❌ Create test files in main context
+- ❌ Run test commands in main context
 - ❌ Apply any fix scenario logic in main context
-
-**VIOLATION OF THESE RULES BREAKS THE WORKFLOW.**
-
-If you find yourself about to edit a test file or write test code, STOP IMMEDIATELY and use the Task tool delegation below instead.
 
 ---
 
-**For EACH area where AREA_STATUS[area]=true, execute this delegation:**
+**For EACH area where GAPS_FOUND[area] > 0, execute this delegation:**
 
 Use the Task tool with subagent_type="rptc:master-test-fixer-agent":
 
@@ -853,6 +884,9 @@ Prompt:
 ## Mismatches to Fix
 [List from sync report - include detected codeContext for each file]
 
+## PM Approval Decisions (if applicable)
+[Include APPROVAL_DECISIONS if any production changes were approved]
+
 ## CRITICAL: Context-Aware Testing Strategy
 
 You MUST select the appropriate testing approach based on each file's code context:
@@ -865,11 +899,6 @@ You MUST select the appropriate testing approach based on each file's code conte
 | **Pure Utilities** | Direct unit tests | Direct unit tests |
 | **Browser-Dependent** | **Playwright REQUIRED** | Flag for manual review |
 | **External Services** | MSW/nock mocked tests | Mock responses inline |
-
-**IMPORTANT:**
-- If codeContext is "browser-dependent" AND HAS_E2E=false, DO NOT attempt to create tests. Instead, add to manualReview with reason "Requires Playwright setup".
-- If codeContext is "frontend" AND HAS_COMPONENT=false AND HAS_E2E=false, flag for manual review.
-- Always match test style to existing tests in the project for consistency.
 
 ## Missing Tests to Create
 [List from sync report]
@@ -894,154 +923,182 @@ You MUST select the appropriate testing approach based on each file's code conte
 
 ---
 
-**VALIDATION CHECKPOINT:** Verify the Task tool was invoked and returned results before proceeding. If no Task tool result exists, STOP and re-execute the delegation above.
-
-### Step 3c: Process Fixer Results
+**Process fixer results:**
 
 ```bash
-# Parse fixer output
 FIX_RESULT=$(parse_json "$FIXER_OUTPUT")
 
-# Extract metrics
 UPDATED_COUNT=$(jq '.updated | length' <<< "$FIX_RESULT")
 CREATED_COUNT=$(jq '.created | length' <<< "$FIX_RESULT")
 FAILED_COUNT=$(jq '.failed | length' <<< "$FIX_RESULT")
+MANUAL_REVIEW_COUNT=$(jq '.manualReview | length' <<< "$FIX_RESULT")
 
 # Update cumulative tracking
 TOTAL_UPDATED=$((TOTAL_UPDATED + UPDATED_COUNT))
 TOTAL_CREATED=$((TOTAL_CREATED + CREATED_COUNT))
 TOTAL_FAILED=$((TOTAL_FAILED + FAILED_COUNT))
+TOTAL_MANUAL_REVIEW=$((TOTAL_MANUAL_REVIEW + MANUAL_REVIEW_COUNT))
 
-echo "  Fixes applied: Updated=$UPDATED_COUNT, Created=$CREATED_COUNT, Failed=$FAILED_COUNT"
+echo ""
+echo "  Iteration ${ITERATION} fixes: Updated=$UPDATED_COUNT, Created=$CREATED_COUNT, Failed=$FAILED_COUNT"
 ```
 
-### Step 3d: Update TodoWrite with Fix Progress
+**VALIDATION CHECKPOINT (FIX):**
+- [ ] Task tool invoked with rptc:master-test-fixer-agent for each area with gaps
+- [ ] FIX_RESULT parsed and metrics extracted
+- [ ] Cumulative totals updated
+
+**Update TodoWrite:** Mark "Iter ${ITERATION}: FIX" as `completed`
+
+---
+
+### Step 2.5: VERIFY (Run Tests)
+
+**Update TodoWrite:** Mark "Iter ${ITERATION}: VERIFY" as `in_progress`
+
+**Run test suite to verify fixes:**
+
+```bash
+echo ""
+echo "Running test suite verification for iteration ${ITERATION}..."
+
+case $FRAMEWORK in
+  jest)
+    TEST_OUTPUT=$(npm test 2>&1)
+    TEST_EXIT_CODE=$?
+    ;;
+  vitest)
+    TEST_OUTPUT=$(npx vitest run 2>&1)
+    TEST_EXIT_CODE=$?
+    ;;
+  pytest)
+    TEST_OUTPUT=$(pytest 2>&1)
+    TEST_EXIT_CODE=$?
+    ;;
+  go)
+    TEST_OUTPUT=$(go test ./... 2>&1)
+    TEST_EXIT_CODE=$?
+    ;;
+  junit)
+    TEST_OUTPUT=$(mvn test 2>&1 || gradle test 2>&1)
+    TEST_EXIT_CODE=$?
+    ;;
+esac
+
+if [ $TEST_EXIT_CODE -ne 0 ]; then
+  echo "⚠️  Some tests still failing after fixes"
+  echo ""
+  echo "Failing tests:"
+  echo "$TEST_OUTPUT" | grep -E "(FAIL|ERROR|✗)" | head -10
+else
+  echo "✅ All tests passing for this iteration"
+fi
+```
+
+**VALIDATION CHECKPOINT (VERIFY):**
+- [ ] Test suite executed for appropriate framework
+- [ ] TEST_EXIT_CODE captured
+- [ ] Failing tests logged (if any)
+
+**Update TodoWrite:** Mark "Iter ${ITERATION}: VERIFY" as `completed`
+
+---
+
+### Step 2.6: INCREMENT & CONTINUE
+
+```bash
+echo ""
+echo "────────────────────────────────────────────────────────"
+echo "  ITERATION ${ITERATION} COMPLETE"
+echo "────────────────────────────────────────────────────────"
+echo "  Tests status: $([ $TEST_EXIT_CODE -eq 0 ] && echo '✅ PASSING' || echo '⚠️ SOME FAILING')"
+echo "  Fixes applied: Updated=$UPDATED_COUNT, Created=$CREATED_COUNT"
+echo "────────────────────────────────────────────────────────"
+
+# Increment iteration counter
+ITERATION=$((ITERATION + 1))
+
+# Check safety valve
+if [ $ITERATION -gt $MAX_ITERATIONS ]; then
+  echo ""
+  echo "════════════════════════════════════════════════════════"
+  echo "  ⚠️  MAX ITERATIONS REACHED (${MAX_ITERATIONS})"
+  echo "════════════════════════════════════════════════════════"
+  echo "  Some issues require manual review."
+  echo "  Proceeding to Phase 4: Completion Report"
+  echo "════════════════════════════════════════════════════════"
+
+  FINAL_STATUS="PARTIAL"
+
+  # ─────────────────────────────────────────────────────────
+  # EXIT TO PHASE 4: Completion Report (max iterations)
+  # ─────────────────────────────────────────────────────────
+fi
+
+# Add todos for next iteration
+echo ""
+echo "Starting iteration ${ITERATION}..."
+```
+
+**Add next iteration todos:**
 
 ```json
 {
   "tool": "TodoWrite",
   "todos": [
-    // Mark individual fix tasks as completed
+    // ... preserve existing todos ...
     {
-      "content": "Fix ${MISMATCH_FILE} tests",
-      "status": "completed",
-      "activeForm": "Fixing ${MISMATCH_FILE} tests"
+      "content": "Iter ${ITERATION}: EXPLORE",
+      "status": "pending",
+      "activeForm": "Iter ${ITERATION}: Exploring sync status"
+    },
+    {
+      "content": "Iter ${ITERATION}: EXIT_CHECK",
+      "status": "pending",
+      "activeForm": "Iter ${ITERATION}: Checking exit condition"
+    },
+    {
+      "content": "Iter ${ITERATION}: PM_APPROVAL",
+      "status": "pending",
+      "activeForm": "Iter ${ITERATION}: Processing PM approval"
+    },
+    {
+      "content": "Iter ${ITERATION}: FIX",
+      "status": "pending",
+      "activeForm": "Iter ${ITERATION}: Applying fixes"
+    },
+    {
+      "content": "Iter ${ITERATION}: VERIFY",
+      "status": "pending",
+      "activeForm": "Iter ${ITERATION}: Verifying fixes"
     }
   ]
 }
 ```
 
-**Update TodoWrite:** Mark "Phase 3: Apply fixes" as `completed`
+**─────────────────────────────────────────────────────────**
+**LOOP BACK TO STEP 2.1: EXPLORE**
+**─────────────────────────────────────────────────────────**
 
 ---
 
-## Phase 5: Verification Loop (Inner Loop Convergence Check)
+## Phase 3: Final Test Suite Verification
 
-**Update TodoWrite:** Mark "Phase 5: Verify convergence" as `in_progress`
+**This phase runs ONLY after convergence is achieved (gaps=0) in Phase 2.**
 
-### Step 5a: Re-run Sync Analysis
+**Update TodoWrite:** Mark "Phase 3: Final test verification" as `in_progress`
 
-**CRITICAL: You MUST re-delegate to the sync agent for verification. DO NOT skip this step or check convergence without fresh analysis.**
-
-**Re-execute Step 2b delegation for EACH subdirectory** with the following additional context in the prompt:
-
-Use the Task tool with subagent_type="rptc:master-test-sync-agent":
-
-Prompt:
-[Include all context from Step 2b prompt, PLUS:]
-
-## Verification Context
-**Iteration:** ${ITERATION} (verification pass)
-**Previous issues fixed:** [summary from fixer results]
-**Expected outcome:** All previously flagged issues should now be resolved
-
----
-
-**VALIDATION CHECKPOINT:** Verify the Task tool was invoked for EACH subdirectory before proceeding to convergence check.
-
-### Step 5a.1: Update AREA_STATUS with Fresh Results (CRITICAL)
-
-**YOU MUST update AREA_STATUS with the NEW sync agent results. Failure to do this causes stale data and infinite loops.**
-
-For EACH subdirectory that was re-analyzed in Step 5a:
+### Step 3a: Run Complete Test Suite
 
 ```bash
-# Parse the FRESH sync agent output (not cached from Phase 2)
-FRESH_SYNC_RESULT=$(parse_json "$FRESH_AGENT_OUTPUT")
-
-# Extract actionRequired from the NEW results
-FRESH_ACTION_REQUIRED=$(jq -r '.actionRequired' <<< "$FRESH_SYNC_RESULT")
-
-# UPDATE AREA_STATUS with fresh data (overwrites old value)
-AREA_STATUS["$SUBDIR"]="$FRESH_ACTION_REQUIRED"
-
-echo "  $SUBDIR: actionRequired=$FRESH_ACTION_REQUIRED (updated from fresh analysis)"
-```
-
-**VALIDATION:** Before proceeding to Step 5b, verify that AREA_STATUS contains results from Step 5a (this iteration), NOT cached results from Phase 2.
-
-### Step 5b: Check Convergence
-
-```bash
-# Check if ALL areas report actionRequired=false (using FRESH data from Step 5a.1)
-ALL_SYNCED=true
-
-for SUBDIR in "${!AREA_STATUS[@]}"; do
-  if [ "${AREA_STATUS[$SUBDIR]}" = "true" ]; then
-    ALL_SYNCED=false
-    echo "  ⚠️  $SUBDIR still needs fixes"
-  else
-    echo "  ✅ $SUBDIR fully synced"
-  fi
-done
-
-if [ "$ALL_SYNCED" = true ]; then
-  CONVERGED=true
-  echo ""
-  echo "✅ CONVERGENCE ACHIEVED - All areas synced!"
-fi
-```
-
-### Step 5c: Loop or Complete
-
-```bash
-if [ "$CONVERGED" = true ]; then
-  echo "Proceeding to quality gate analysis..."
-  goto Phase 6  # Quality gates before final report
-fi
-
-ITERATION=$((ITERATION + 1))
-
-if [ $ITERATION -ge $MAX_ITERATIONS ]; then
-  echo ""
-  echo "⚠️  Max iterations ($MAX_ITERATIONS) reached"
-  echo "Some issues require manual review."
-  goto Phase 7  # Skip to report with failures documented
-fi
-
 echo ""
-echo "Starting iteration $ITERATION..."
-goto Phase 2  # Re-analyze and fix
-```
+echo "════════════════════════════════════════════════════════"
+echo "  FINAL TEST SUITE VERIFICATION"
+echo "════════════════════════════════════════════════════════"
+echo "  All sync gaps resolved after ${ITERATION} iteration(s)"
+echo "  Running full test suite to confirm all tests pass..."
+echo "════════════════════════════════════════════════════════"
 
-**Update TodoWrite:** Mark "Phase 5: Verify convergence" as `completed`
-
----
-
-## Phase 6: Test Suite Verification (Post-Convergence)
-
-**Purpose**: After inner loop convergence (all tests sync), verify all tests actually pass. If any fail, return to inner loop to fix them.
-
-**Update TodoWrite:** Mark "Phase 6: Test suite verification" as `in_progress`
-
-### Step 6a: Run Full Test Suite
-
-**Run the complete test suite to ensure all synced tests pass:**
-
-```bash
-echo "Running full test suite verification..."
-
-# Run test suite based on framework
 case $FRAMEWORK in
   jest)
     TEST_OUTPUT=$(npm test 2>&1)
@@ -1066,66 +1123,54 @@ case $FRAMEWORK in
 esac
 ```
 
-### Step 6b: Handle Test Results
+### Step 3b: Determine Final Status
 
 ```bash
-if [ $TEST_EXIT_CODE -ne 0 ]; then
-  echo "❌ Test suite failed after sync"
-  echo ""
-  echo "Failing tests:"
-  echo "$TEST_OUTPUT" | grep -E "(FAIL|ERROR|✗)" | head -20
-  echo ""
-
-  OUTER_ITERATION=$((OUTER_ITERATION + 1))
-
-  if [ $OUTER_ITERATION -ge $MAX_OUTER_ITERATIONS ]; then
-    echo "⚠️  Max outer iterations ($MAX_OUTER_ITERATIONS) reached with failing tests"
-    echo "Proceeding to report with failures documented"
-    FINAL_STATUS="FAILED"
-    goto Phase 7
-  else
-    echo "Returning to analysis phase to fix failing tests..."
-    goto Phase 2  # Re-analyze failing tests
-  fi
-else
+if [ $TEST_EXIT_CODE -eq 0 ]; then
   echo ""
   echo "════════════════════════════════════════════════════════"
   echo "  ✅ ALL TESTS PASSING"
   echo "════════════════════════════════════════════════════════"
   echo ""
   echo "  Test suite: PASSED"
-  echo "  Outer iterations: $OUTER_ITERATION"
-  echo "  Inner iterations: $ITERATION"
+  echo "  Total iterations: $((ITERATION - 1))"
+  echo "  Total fixes: Updated=$TOTAL_UPDATED, Created=$TOTAL_CREATED"
   echo ""
   echo "════════════════════════════════════════════════════════"
 
   FINAL_STATUS="CONVERGED"
+else
+  echo ""
+  echo "════════════════════════════════════════════════════════"
+  echo "  ⚠️  TESTS FAILING AFTER SYNC"
+  echo "════════════════════════════════════════════════════════"
+  echo ""
+  echo "Unexpected: Sync reported 0 gaps but tests are failing."
+  echo "This may indicate:"
+  echo "  - Test infrastructure issues"
+  echo "  - Tests affected by execution order"
+  echo "  - Environment-specific failures"
+  echo ""
+  echo "Failing tests:"
+  echo "$TEST_OUTPUT" | grep -E "(FAIL|ERROR|✗)" | head -20
+  echo ""
+  echo "════════════════════════════════════════════════════════"
+
+  FINAL_STATUS="FAILED"
 fi
 ```
 
-### Step 6c: Audit Trail
-
-```bash
-# Log test verification results to audit trail
-echo '{"timestamp":"'$(date -Iseconds)'","type":"test_verification","outerIteration":'$OUTER_ITERATION',"innerIterations":'$ITERATION',"testsPassed":'$([ $TEST_EXIT_CODE -eq 0 ] && echo "true" || echo "false")',"status":"'$FINAL_STATUS'"}' >> "${ARTIFACT_LOC}/sync-prod-to-tests/audit-trail.jsonl"
-```
-
-**Update TodoWrite:** Mark "Phase 6: Test suite verification" as `completed`
+**Update TodoWrite:** Mark "Phase 3: Final test verification" as `completed`
 
 ---
 
-## Phase 7: Completion Report
+## Phase 4: Completion Report
 
-**Update TodoWrite:** Mark "Phase 7: Generate report" as `in_progress`
+**Update TodoWrite:** Mark "Phase 4: Generate report" as `in_progress`
 
-### Step 7a: Generate Report File
+### Step 4a: Generate Inline Report
 
-```bash
-REPORT_FILE="${ARTIFACT_LOC}/reports/test-sync-$(date +%Y%m%d-%H%M%S).md"
-mkdir -p "${ARTIFACT_LOC}/reports"
-```
-
-Generate report content:
+**Display the report inline to the user (no file saved):**
 
 ```markdown
 # Test Sync Report
@@ -1142,10 +1187,10 @@ Generate report content:
 
 | Metric | Value |
 |--------|-------|
-| Inner Loop Iterations | ${ITERATION} |
-| Outer Loop Iterations | ${OUTER_ITERATION} |
-| Total Analysis Passes | [calculated] |
-| Total Fix Passes | [calculated] |
+| Sync Loop Iterations | ${ITERATION} |
+| Total Analysis Passes | ${ITERATION} |
+| Total Fix Passes | ${ITERATION} |
+| Max Iterations Allowed | ${MAX_ITERATIONS} |
 
 ---
 
@@ -1207,20 +1252,6 @@ Generate report content:
 
 ---
 
-## Audit Trail Summary
-
-Full audit trail available at: `${ARTIFACT_LOC}/sync-prod-to-tests/audit-trail.jsonl`
-
-### Key Events
-| Timestamp | Event Type | Details |
-|-----------|-----------|---------|
-| [time] | sync_started | Directory: ${TARGET_DIR} |
-| [time] | pm_approval_session | Approved: N, Rejected: M, Deferred: K |
-| [time] | test_verification | Tests: ✅ PASSED / ❌ FAILED |
-| [time] | sync_completed | Status: ${FINAL_STATUS} |
-
----
-
 ## Next Steps
 
 [Contextual recommendations based on results]
@@ -1236,14 +1267,7 @@ Full audit trail available at: `${ARTIFACT_LOC}/sync-prod-to-tests/audit-trail.j
 - Confidence threshold: ${CONFIDENCE_THRESHOLD}
 ```
 
-### Step 7b: Write Report
-
-```bash
-Write(file_path="$REPORT_FILE", content="$REPORT_CONTENT")
-echo "📄 Report saved: $REPORT_FILE"
-```
-
-### Step 7c: Display Summary
+### Step 4b: Display Summary
 
 ```text
 ═══════════════════════════════════════════════════════
@@ -1262,15 +1286,13 @@ Results:
 
 Coverage: [before]% → [after]%
 
-Report saved: ${REPORT_FILE}
-
 [If issues remain:]
 ⚠️  Some issues require manual review. See report for details.
 
 ═══════════════════════════════════════════════════════
 ```
 
-### Step 7d: Final TodoWrite Update
+### Step 4c: Final TodoWrite Update
 
 ```json
 {
@@ -1287,32 +1309,17 @@ Report saved: ${REPORT_FILE}
       "activeForm": "Discovering files"
     },
     {
-      "content": "Phase 2: Analyze sync status",
+      "content": "Phase 2: SYNC LOOP",
       "status": "completed",
-      "activeForm": "Analyzing sync status"
+      "activeForm": "Running sync loop"
     },
     {
-      "content": "Phase 3: PM approval gateway",
-      "status": "completed",
-      "activeForm": "Processing PM approval"
-    },
-    {
-      "content": "Phase 4: Apply fixes",
-      "status": "completed",
-      "activeForm": "Applying fixes"
-    },
-    {
-      "content": "Phase 5: Verify convergence",
-      "status": "completed",
-      "activeForm": "Verifying convergence"
-    },
-    {
-      "content": "Phase 6: Test suite verification",
+      "content": "Phase 3: Final test verification",
       "status": "completed",
       "activeForm": "Verifying all tests pass"
     },
     {
-      "content": "Phase 7: Generate report",
+      "content": "Phase 4: Generate report",
       "status": "completed",
       "activeForm": "Generating report"
     }
@@ -1379,9 +1386,11 @@ fi
 
 ## Important Notes
 
-- **Production code is never modified** - only test files are changed
-- **Convergence loop prevents incomplete sync** - continues until all areas report success
+- **Production code requires PM approval** - test files are changed automatically; production changes need explicit approval
+- **Exit condition checked immediately after EXPLORE** - prevents unnecessary fix cycles when no gaps exist
+- **Per-iteration TodoWrite tracking** - each loop iteration has distinct progress entries (Iter N: EXPLORE, EXIT_CHECK, FIX, VERIFY)
+- **Fresh sync analysis each iteration** - no stale data; GAPS_FOUND reset before each EXPLORE
+- **Max iteration safety valve** - prevents infinite loops (default: 10 iterations)
 - **MCP integration is optional** - command works without, MCPs enhance analysis
-- **TodoWrite provides visibility** - user can track progress in real-time
 - **Dry-run mode available** - analyze without making changes
-- **Report preserves history** - timestamped reports for audit trail
+- **Inline reporting** - results displayed directly without file persistence
