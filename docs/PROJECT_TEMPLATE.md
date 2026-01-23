@@ -139,6 +139,10 @@ Every feature follows this workflow:
 3. **Auto-iteration on failures** - Claude fixes until passing (max 10)
 4. **Never commit broken tests** - Enforced by hooks
 
+**When handling code changes directly** (not via `/rptc:tdd` or TDD agent delegation):
+- **Load skill**: `tdd-methodology` - Provides surgical coding approach, context discovery, and detailed TDD phase guidance
+- This ensures the same quality standards apply whether work is done by sub-agent or main context
+
 ### PM Approval Gates
 
 1. **Research findings** - Explicit approval before saving

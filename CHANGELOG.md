@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.12.0] - 2026-01-23
+
+### Added
+
+- **TDD Methodology Skill** (`skills/tdd-methodology/SKILL.md`): New skill providing functional parity with tdd-agent for main context execution
+  - SOP references section (4 SOPs with usage guidance by TDD phase)
+  - Implementation constraints awareness (sources, types, defaults, conflict handling)
+  - Expanded human collaboration boundaries with escalation pattern template
+  - Progress reporting format for phase completion
+  - Ensures equivalent quality standards when smart routing handles TDD in main context vs sub-agent
+
+### Changed
+
+- **docs/PROJECT_TEMPLATE.md**: Added guidance to load `tdd-methodology` skill when handling code changes directly in main context
+
+---
+
 ## [2.11.0] - 2026-01-22
 
 ### Added
