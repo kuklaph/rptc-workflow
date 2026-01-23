@@ -7,15 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.13.0] - 2026-01-23
+## [2.13.1] - 2026-01-23
+
+### Fixed
+
+- **`/feat` Phase 2 Architecture**: Corrected plan selection flow
+  - Keeps all 3 parallel plan agents (was incorrectly changed to single agent in 2.13.0)
+  - After agents complete, presents all 3 options via AskUserQuestion
+  - Claude recommends best fit (marked "(Recommended)") but user has final choice
+  - Each option shows brief pros/cons to help user decide
+
+---
+
+## [2.13.0] - 2026-01-23 [YANKED]
 
 ### Changed
 
-- **`/feat` Phase 2 Architecture**: User now selects planning approach upfront via AskUserQuestion
-  - Options: Minimal (recommended), Clean, Pragmatic - each with brief pros/cons
-  - Launches single selected agent instead of 3 parallel agents (~66% token reduction)
-  - Removes "alternative approaches" from plan output (user chose upfront)
-  - Updated error handling to offer different approach if plan doesn't fit requirements
+- Incorrectly implemented single-agent selection (reverted in 2.13.1)
 
 ---
 

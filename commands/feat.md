@@ -55,7 +55,21 @@ Return: external dependencies, internal dependencies, API boundaries."
 
 1. **Enter plan mode** using EnterPlanMode tool
 
-2. **Ask user which planning approach** using AskUserQuestion:
+2. **Launch 3 plan agents in parallel** with different perspectives:
+
+```
+Use Task tool with subagent_type="rptc:plan-agent" (launch all 3 in parallel):
+
+Agent 1: "Design implementation for [feature]. Perspective: Minimal. Provide: files to modify, component design, data flow, build sequence, test strategy."
+
+Agent 2: "Design implementation for [feature]. Perspective: Clean. Provide: files to modify, component design, data flow, build sequence, test strategy."
+
+Agent 3: "Design implementation for [feature]. Perspective: Pragmatic. Provide: files to modify, component design, data flow, build sequence, test strategy."
+```
+
+3. **Review all 3 approaches**, form an opinion on which fits best for this specific feature
+
+4. **Present to user** via AskUserQuestion (put recommended option first with "(Recommended)" suffix):
 
 ```
 Use AskUserQuestion tool:
@@ -63,28 +77,26 @@ Use AskUserQuestion tool:
 question: "Which planning approach would you like to use?"
 header: "Plan Type"
 options:
-  - label: "Minimal (Recommended)"
-    description: "Smallest change possible. Reuses existing code. Fast to implement but may accumulate tech debt."
-  - label: "Clean"
-    description: "Maintainability-focused with elegant abstractions. Takes longer but easier to extend later."
-  - label: "Pragmatic"
-    description: "Balanced approach. Good enough architecture without over-engineering. Middle ground on speed vs quality."
+  - label: "[Best fit] (Recommended)"
+    description: "[Why this fits best for this feature]"
+  - label: "[Second option]"
+    description: "[Brief description and trade-offs]"
+  - label: "[Third option]"
+    description: "[Brief description and trade-offs]"
+
+Approach descriptions:
+- Minimal: Smallest change possible. Reuses existing code. Fast but may accumulate tech debt.
+- Clean: Maintainability-focused with elegant abstractions. Takes longer but easier to extend.
+- Pragmatic: Balanced approach. Good enough architecture without over-engineering.
 ```
 
-3. **Launch selected plan agent**:
-
-```
-Use Task tool with subagent_type="rptc:plan-agent":
-prompt: "Design implementation for [feature]. Perspective: [selected approach]. Provide: files to modify, component design, data flow, build sequence, test strategy."
-```
-
-4. **Write plan to plan file** with:
+5. **Write selected plan to plan file** with:
    - Approach used (with rationale)
    - Implementation steps (testable, ordered)
    - Files to create/modify
    - Test strategy per step
 
-5. **Exit plan mode** using ExitPlanMode to get user approval
+6. **Exit plan mode** using ExitPlanMode to get user approval
 
 **Plan file format** (flexible):
 
@@ -259,10 +271,13 @@ prompt: "Research [topic]. Mode: [A=codebase|B=web|C=hybrid]. Return: findings w
 ### Planner Agent (Phase 2)
 
 ```
-Use Task tool with subagent_type="rptc:plan-agent":
-prompt: "Design implementation for [feature]. Perspective: [user-selected: Minimal|Clean|Pragmatic]. Provide: files to modify, component design, data flow, build sequence, test strategy."
+Use Task tool with subagent_type="rptc:plan-agent" (launch all 3 in parallel):
 
-Note: User selects approach via AskUserQuestion before agent launch.
+Agent 1: "Design implementation for [feature]. Perspective: Minimal. ..."
+Agent 2: "Design implementation for [feature]. Perspective: Clean. ..."
+Agent 3: "Design implementation for [feature]. Perspective: Pragmatic. ..."
+
+After all complete: Present options to user via AskUserQuestion, write selected plan.
 ```
 
 ### TDD Executor Agent (Phase 3 - Batch Mode)
@@ -328,6 +343,6 @@ prompt: "Security review for [files]. Apply tiered authority. Output: confidence
 ## Error Handling
 
 - **Discovery fails**: Ask user for more context
-- **Plan doesn't fit requirements**: Ask user if they want to try a different approach (Minimal/Clean/Pragmatic)
+- **All plans miss requirements**: Re-run planning with additional constraints from user
 - **TDD step fails 3x**: Pause, ask user for guidance
 - **Quality review finds critical issues**: Block completion, show findings
