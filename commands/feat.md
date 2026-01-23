@@ -74,55 +74,105 @@ Return: external dependencies, internal dependencies, API boundaries."
 
 ---
 
-## Phase 3: TDD Implementation (with Test-Driven Generation)
+## Phase 3: TDD Implementation (with Smart Batching)
 
-**Goal**: Build with tests first, using AI-accelerated test generation.
+**Goal**: Build with tests first, using intelligent step batching for efficiency.
 
-**TDG (Test-Driven Generation)**: Each step generates ~50 comprehensive tests covering:
-
-- Happy paths and success scenarios
-- Edge cases and boundary conditions
-- Error conditions and failure modes
-- Integration scenarios
-
-This eliminates ~80% of manual TDD overhead while maintaining test-first discipline.
+**Smart Batching**: Combines related steps into fewer tdd-agent calls, reducing overhead while maintaining TDD discipline.
 
 **Actions**:
 
-1. **Extract steps from plan** into TodoWrite
-2. **Detect parallelizable steps**:
-   - Different target files → likely independent → parallelize
-   - Shared state/data → sequential
-   - Explicit "after step N" → sequential
-3. **For each step**, delegate to TDD executor sub-agent:
+1. **Extract steps from plan** and analyze each step for:
+   - Target files (create/modify)
+   - Dependencies (detect using these rules):
+     - **Explicit**: Step description contains "after step N" or "requires step N"
+     - **Implicit write-read**: Step B reads/imports file that Step A creates or modifies
+     - **Implicit shared write**: Both steps modify the same file → must be sequential
+     - **Independent**: No shared files, no explicit ordering mentioned
+   - Complexity and estimated lines:
+     - Simple (1 file): ~30 lines, ~15 tests
+     - Medium (1-2 files): ~60 lines, ~30 tests
+     - Complex (3+ files): ~100 lines, ~50 tests
+
+2. **Group steps into batches** using these criteria:
+   - **File cohesion**: Steps targeting same/related files → batch together
+   - **Sequential chain**: Step N+1 depends only on N → batch together
+   - **Size threshold**: Combined estimated lines < 150 → batch together
+   - **No blockers**: No user approval needed between steps
+
+3. **Calculate test allocation per batch**:
+   - Use complexity-based counts: simple (~15), medium (~30), complex (~50)
+   - **Batch cap**: 100 tests maximum
+   - If sum exceeds 100, distribute proportionally: `adjusted = (step_count / total) × 100`
+   - Example: [50, 50, 15] over cap → [43, 43, 14] after proportional reduction
+
+4. **Identify parallel batches**: Batches with no inter-dependencies can run simultaneously
+   - Build dependency graph from step analysis (step 1)
+   - Batches are independent if: no batch contains steps that depend on steps in other batch
+
+5. **Create TodoWrite** with batches (not individual steps):
+   ```
+   Batch 1 [Steps 1-3]: User model + validation + tests
+   Batch 2 [Steps 4-5]: UserService + tests (parallel with Batch 1 if independent)
+   Batch 3 [Step 6]: API endpoint (waits for Batch 2)
+   ```
+
+6. **For each batch**, delegate to TDD executor sub-agent:
 
 ```
 Use Task tool with subagent_type="rptc:tdd-agent":
 
 ## Context
 - Feature: [description]
-- Step: [N] - [step name]
-- Previous steps completed: [list]
+- Batch: Steps [N, N+1, ...] - [batch summary]
+- Previous batches completed: [list]
+
+## Steps in This Batch
+
+### Step N: [name]
+- Files: [list]
+- Tests to generate: [calculated count]
+- Complexity: [simple|medium|complex]
+
+### Step N+1: [name]
+- Files: [list]
+- Tests to generate: [calculated count]
+- Complexity: [simple|medium|complex]
 
 ## Test-Driven Generation
-Generate comprehensive test suite (~50 tests) covering:
-- Happy paths for this step's functionality
-- Edge cases (empty, null, boundaries)
-- Error conditions (invalid input, failures)
-- Integration with previous steps
+Generate tests for ALL steps in batch (~[total] tests):
+- Allocate per step based on complexity scores above
+- Cover: happy paths, edge cases, errors, integration
 
-## Implementation
-- Files to modify: [from plan]
-- Constraints: [any limits]
-
-## TDD Cycle
-RED: Write all tests first (they fail)
-GREEN: Implement minimal code to pass
-REFACTOR: Improve while keeping green
+## TDD Cycle (per step in batch)
+For each step in order:
+1. RED: Write tests for this step
+2. GREEN: Implement minimal code
+3. REFACTOR: Improve while green
+Then move to next step in batch.
 ```
 
-4. **Update TodoWrite** as each step completes
-5. **Handle failures**: If step fails after 3 attempts, ask user for guidance
+7. **Launch parallel batches** simultaneously when independent:
+   - Identify batches with no inter-dependencies (from step 4)
+   - Invoke ALL independent Task tools in the same message (parallel execution)
+   - Wait for all to complete before processing dependent batches
+   - Example: Batch A and B independent → invoke both `Task(rptc:tdd-agent)` calls together
+
+8. **Update TodoWrite** as each batch completes
+9. **Handle failures**: If batch fails after 3 attempts, ask user for guidance
+
+**Example Batching**:
+```
+Plan steps:                          Batched execution:
+1. Create User model      ─┐
+2. Add validation         ├─► Batch A [1,2,3] → 1 agent ─┐
+3. Write User tests       ─┘                             ├─ parallel
+4. Create UserService     ─┬─► Batch B [4,5] → 1 agent ──┘
+5. Write Service tests    ─┘
+6. Add API endpoint       ───► Batch C [6] → 1 agent (waits for B)
+
+Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
+```
 
 ---
 
@@ -194,11 +244,24 @@ Use Task tool with subagent_type="rptc:plan-agent":
 prompt: "Design implementation for [feature]. Perspective: [Minimal|Clean|Pragmatic]. Provide: files to modify, component design, data flow, build sequence, test strategy."
 ```
 
-### TDD Executor Agent (Phase 3)
+### TDD Executor Agent (Phase 3 - Batch Mode)
 
 ```
 Use Task tool with subagent_type="rptc:tdd-agent":
-prompt: "[Context + Step details + TDG instruction (generate ~50 tests) + TDD cycle]"
+
+## Context
+- Feature: [description]
+- Batch: Steps [N, N+1, ...] - [summary]
+
+## Steps in This Batch
+### Step N: [name]
+- Files: [list], Tests: [count], Complexity: [simple|medium|complex]
+
+### Step N+1: [name]
+- Files: [list], Tests: [count], Complexity: [simple|medium|complex]
+
+## TDD Cycle
+For each step in order: RED → GREEN → REFACTOR, then next step.
 ```
 
 ### Efficiency Agent (Phase 4)

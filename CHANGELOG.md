@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.11.0] - 2026-01-22
+
+### Added
+
+- **Smart Step Batching** for `/feat` Phase 3 (TDD Implementation):
+  - Automatic grouping of related steps by file cohesion, dependencies, and size
+  - Parallel execution of independent batches
+  - Smart test scaling: simple (~15), medium (~30), complex (~50) tests per step
+  - Batch cap of 100 tests with proportional distribution
+  - ~40% token reduction vs single-step approach
+
+### Changed
+
+- **tdd-agent**: Now supports batch mode (one or more steps per invocation)
+  - Per-step TDD cycle within batch (RED-GREEN-REFACTOR for each step in order)
+  - Shared context between batch steps (no redundant exploration)
+  - Single unified completion report per batch
+
+---
+
 ## [2.10.1] - 2026-01-22
 
 ### Changed
