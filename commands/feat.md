@@ -54,17 +54,36 @@ Return: external dependencies, internal dependencies, API boundaries."
 **Actions**:
 
 1. **Enter plan mode** using EnterPlanMode tool
-2. **Launch 3 plan agents in parallel** with different perspectives:
-   - **Minimal**: Smallest change, maximum reuse of existing code
-   - **Clean**: Maintainability-focused, elegant abstractions
-   - **Pragmatic**: Balance of speed and quality
-3. **Review all approaches**, form an opinion
+
+2. **Ask user which planning approach** using AskUserQuestion:
+
+```
+Use AskUserQuestion tool:
+
+question: "Which planning approach would you like to use?"
+header: "Plan Type"
+options:
+  - label: "Minimal (Recommended)"
+    description: "Smallest change possible. Reuses existing code. Fast to implement but may accumulate tech debt."
+  - label: "Clean"
+    description: "Maintainability-focused with elegant abstractions. Takes longer but easier to extend later."
+  - label: "Pragmatic"
+    description: "Balanced approach. Good enough architecture without over-engineering. Middle ground on speed vs quality."
+```
+
+3. **Launch selected plan agent**:
+
+```
+Use Task tool with subagent_type="rptc:plan-agent":
+prompt: "Design implementation for [feature]. Perspective: [selected approach]. Provide: files to modify, component design, data flow, build sequence, test strategy."
+```
+
 4. **Write plan to plan file** with:
-   - Recommended approach (with rationale)
-   - Alternative approaches (brief summary)
+   - Approach used (with rationale)
    - Implementation steps (testable, ordered)
    - Files to create/modify
    - Test strategy per step
+
 5. **Exit plan mode** using ExitPlanMode to get user approval
 
 **Plan file format** (flexible):
@@ -241,7 +260,9 @@ prompt: "Research [topic]. Mode: [A=codebase|B=web|C=hybrid]. Return: findings w
 
 ```
 Use Task tool with subagent_type="rptc:plan-agent":
-prompt: "Design implementation for [feature]. Perspective: [Minimal|Clean|Pragmatic]. Provide: files to modify, component design, data flow, build sequence, test strategy."
+prompt: "Design implementation for [feature]. Perspective: [user-selected: Minimal|Clean|Pragmatic]. Provide: files to modify, component design, data flow, build sequence, test strategy."
+
+Note: User selects approach via AskUserQuestion before agent launch.
 ```
 
 ### TDD Executor Agent (Phase 3 - Batch Mode)
@@ -307,6 +328,6 @@ prompt: "Security review for [files]. Apply tiered authority. Output: confidence
 ## Error Handling
 
 - **Discovery fails**: Ask user for more context
-- **Architecture disagreement**: Present all 3 perspectives, user chooses
+- **Plan doesn't fit requirements**: Ask user if they want to try a different approach (Minimal/Clean/Pragmatic)
 - **TDD step fails 3x**: Pause, ask user for guidance
 - **Quality review finds critical issues**: Block completion, show findings

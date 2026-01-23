@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.13.0] - 2026-01-23
+
+### Changed
+
+- **`/feat` Phase 2 Architecture**: User now selects planning approach upfront via AskUserQuestion
+  - Options: Minimal (recommended), Clean, Pragmatic - each with brief pros/cons
+  - Launches single selected agent instead of 3 parallel agents (~66% token reduction)
+  - Removes "alternative approaches" from plan output (user chose upfront)
+  - Updated error handling to offer different approach if plan doesn't fit requirements
+
+---
+
 ## [2.12.0] - 2026-01-23
 
 ### Added
