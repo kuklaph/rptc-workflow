@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.14.0] - 2026-01-23
+
+### Fixed
+
+- **`/feat` Phase 1 Discovery**: Now uses `rptc:researcher-agent` instead of generic Explore agents for codebase exploration
+- **`/feat` Phase 4 Quality Review**: Improved consistency of review agent invocation
+  - Added explicit Task tool invocation code blocks for both optimizer-agent and security-agent
+  - Emphasized "MUST invoke both in same message" for parallel execution
+  - Updated Agent Delegation Reference with combined review agents section
+  - Ensures both code quality and security reviews are consistently triggered
+
+---
+
 ## [2.13.1] - 2026-01-23
 
 ### Fixed

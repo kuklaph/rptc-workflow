@@ -25,7 +25,7 @@ Complete feature development: Discovery → Architecture → TDD Implementation 
 2. **If codebase exploration needed**, launch 2-3 Explore agents in parallel using code-explorer methodology:
 
 ```
-Use Task tool with subagent_type="Explore" (launch all 3 in parallel):
+Use Task tool with subagent_type="rptc:researcher-agent" (launch all 3 in parallel):
 
 Agent 1 prompt: "Find similar features and existing patterns for [feature].
 Use code-explorer methodology Phase 1 (Feature Discovery): entry points, core files, boundaries.
@@ -213,17 +213,23 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
 
 **Actions**:
 
-1. **Auto-simplify** (autonomous, no approval):
-   - Apply CLAUDE.md standards to new code
-   - Enhance clarity, reduce obvious complexity
-   - Fix formatting, naming violations
+1. **Collect files modified** during TDD phase for review
 
-2. **Launch parallel review agents**:
-   - **Efficiency agent**: Code quality, complexity, KISS/YAGNI
-   - **Security agent**: Vulnerabilities, input validation, auth
-   - Both use confidence ≥80 filtering
+2. **Launch BOTH review agents in parallel** (MUST invoke both in same message):
 
-3. **Consolidate findings**:
+```
+Use Task tool with subagent_type="rptc:optimizer-agent":
+prompt: "Review code quality for these files: [list all files modified in Phase 3].
+Focus: complexity, KISS/YAGNI violations, dead code, readability.
+Apply tiered authority. Output: confidence-scored findings (≥80 only)."
+
+Use Task tool with subagent_type="rptc:security-agent":
+prompt: "Security review for these files: [list all files modified in Phase 3].
+Focus: input validation, auth checks, injection vulnerabilities, data exposure.
+Apply tiered authority. Output: confidence-scored findings (≥80 only)."
+```
+
+3. **Consolidate findings** from both agents:
    - Categorize: bugs, security, style, structural
    - Show only high-confidence issues (≥80)
    - Present to user
@@ -254,7 +260,7 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
 ### Explore Agents with Code-Explorer Methodology (Phase 1)
 
 ```
-Launch 3 Task tools in parallel with subagent_type="Explore":
+Launch 3 Task tools in parallel with subagent_type="rptc:researcher-agent":
 
 Agent 1 (Feature Discovery): "Find similar features for [topic]. Entry points, core files, boundaries."
 Agent 2 (Architecture Analysis): "Analyze architecture for [topic]. Layers, patterns, cross-cutting concerns."
@@ -300,18 +306,16 @@ Use Task tool with subagent_type="rptc:tdd-agent":
 For each step in order: RED → GREEN → REFACTOR, then next step.
 ```
 
-### Efficiency Agent (Phase 4)
+### Review Agents (Phase 4) - MUST launch both in parallel
 
 ```
+Launch BOTH in the same message for parallel execution:
+
 Use Task tool with subagent_type="rptc:optimizer-agent":
-prompt: "Review code quality for [files]. Apply tiered authority. Output: confidence-scored findings."
-```
+prompt: "Review code quality for [files]. Focus: complexity, KISS/YAGNI, dead code, readability. Apply tiered authority. Output: confidence-scored findings (≥80 only)."
 
-### Security Agent (Phase 4)
-
-```
 Use Task tool with subagent_type="rptc:security-agent":
-prompt: "Security review for [files]. Apply tiered authority. Output: confidence-scored findings."
+prompt: "Security review for [files]. Focus: input validation, auth, injection, data exposure. Apply tiered authority. Output: confidence-scored findings (≥80 only)."
 ```
 
 ---
