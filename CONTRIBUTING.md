@@ -44,9 +44,9 @@ cd rptc-workflow
 # Install as local plugin for testing
 claude plugin install .
 
-# Initialize a test workspace
+# Test in a separate project
 mkdir test-project && cd test-project
-/rptc:admin-init
+/rptc:feat "test feature"
 ```
 
 ---
@@ -92,13 +92,15 @@ Before suggesting a feature:
 ```text
 rptc-workflow/
 ├── .claude-plugin/        # Plugin metadata
-├── commands/              # Slash command definitions
-│   ├── admin/            # Admin commands
-│   └── helper/           # Helper commands
-├── agents/                # Master specialist agent definitions
-├── sop/                   # Standard Operating Procedures (defaults)
-├── templates/             # User artifact templates
-├── hooks/                 # Quality enforcement hooks
+├── commands/              # Slash command definitions (flat structure)
+│   ├── commit.md         # /rptc:commit
+│   ├── feat.md           # /rptc:feat (PRIMARY)
+│   ├── research.md       # /rptc:research
+│   └── sync-prod-to-tests.md  # /rptc:sync-prod-to-tests
+├── agents/                # Specialist agent definitions (9 agents)
+├── sop/                   # Standard Operating Procedures (10 SOPs)
+├── templates/             # Templates for artifacts
+├── skills/                # Skills (3 skills)
 └── docs/                  # Documentation
 ```
 
@@ -118,31 +120,20 @@ rptc-workflow/
 
 Before submitting a PR, test the following:
 
-**Admin Commands:**
+**Core Commands:**
 
-- [ ] `/rptc:admin-init` creates correct directory structure
-- [ ] `/rptc:admin-init --copy-sops` copies SOPs correctly
-- [ ] `/rptc:admin-sop-check` resolves SOPs via fallback chain
-- [ ] `/rptc:admin-config` displays configuration
-
-**Core Workflow:**
-
-- [ ] `/rptc:research` performs interactive discovery
-- [ ] `/rptc:plan` creates comprehensive plans
-- [ ] `/rptc:tdd` implements with tests-first approach
+- [ ] `/rptc:feat "test feature"` completes all 5 phases (Discovery → Architecture → TDD → Quality → Complete)
+- [ ] `/rptc:research "test topic"` performs discovery with exploration agents
 - [ ] `/rptc:commit` verifies and creates commits
+- [ ] `/rptc:sync-prod-to-tests "src/"` analyzes and syncs tests
 
-**Helper Commands:**
+**Workflow Verification:**
 
-- [ ] `/rptc:helper:catch-up-*` provides appropriate context
-- [ ] `/rptc:helper-update-plan` modifies plans correctly
-- [ ] `/rptc:helper-cleanup` archives completed plans
-
-**SOP Fallback Chain:**
-
-- [ ] Project SOPs (`.rptc/sop/`) override user SOPs
-- [ ] User SOPs (`~/.claude/global/sop/`) override plugin SOPs
-- [ ] Plugin SOPs work as fallback
+- [ ] Phase 1 (Discovery) launches parallel exploration agents
+- [ ] Phase 2 (Architecture) presents 3 planning perspectives
+- [ ] Phase 3 (TDD) uses smart batching for implementation
+- [ ] Phase 4 (Quality Review) runs optimizer and security agents in parallel
+- [ ] Plans are stored in Claude's native plan mode (`~/.claude/plans/`)
 
 ### Test on Multiple Platforms
 
@@ -266,7 +257,7 @@ How was this tested? Include:
 - [ ] Documentation updated
 - [ ] No breaking changes (or documented if unavoidable)
 - [ ] Follows style guidelines
-- [ ] SOP fallback chain still works
+- [ ] Plugin SOPs load correctly (from `sop/` directory)
 ```
 
 ### Commit Message Format
@@ -293,19 +284,19 @@ Follow Conventional Commits:
 **Examples:**
 
 ```text
-feat(commands): add /rptc:helper-resume-plan command
+feat(commands): add smart batching to /rptc:feat TDD phase
 
-Allows users to resume previous work by loading plan context
-and recent progress. Useful after breaks or context switches.
+Implements intelligent step grouping for ~40% token reduction.
+Related steps are batched together for parallel execution.
 
 Closes #42
 ```
 
 ```text
-fix(sop): correct fallback chain resolution
+fix(agents): correct parallel agent invocation in quality review
 
-Project SOPs were not being prioritized over user SOPs.
-Updated resolution logic to follow documented priority order.
+Optimizer and security agents now launch in same message
+for true parallel execution instead of sequential.
 ```
 
 ### Review Process

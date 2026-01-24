@@ -1,235 +1,412 @@
-# RPTC Plugin: What's Included?
+# RPTC Plugin Architecture
 
-## Plugin Distribution (What Users Get)
+> Technical documentation for plugin structure, installation, and internals
 
-When users install the plugin with:
+---
+
+## Plugin Distribution
+
+When users install the plugin:
 
 ```bash
-claude plugin install github.com/your-org/rptc-workflow
+/plugin marketplace add https://github.com/kuklaph/rptc-workflow
+/plugin install rptc
 ```
 
-They get the **entire repository** cloned to their Claude plugin directory, which includes:
+They receive the entire repository cloned to their Claude plugin directory.
 
-### ✅ Core Plugin Files (Distributed)
+### Plugin Structure
 
 ```text
-rptc-workflow/                      # Plugin root (${CLAUDE_PLUGIN_ROOT})
+rptc-workflow/                      # ${CLAUDE_PLUGIN_ROOT}
 ├── .claude-plugin/
-│   ├── plugin.json                 # Plugin metadata & config ✅
-│   └── marketplace.json            # Marketplace listing ✅
+│   ├── plugin.json                 # Plugin metadata & version
+│   └── marketplace.json            # Marketplace listing
 │
-├── commands/                       # All workflow commands ✅
-│   ├── admin/*.md                  # Admin commands ✅
-│   ├── helper/*.md                 # Helper commands ✅
-│   └── *.md                        # Core workflow commands ✅
+├── commands/                       # Flat structure (4 commands)
+│   ├── commit.md                   # /rptc:commit
+│   ├── feat.md                     # /rptc:feat (PRIMARY)
+│   ├── research.md                 # /rptc:research
+│   └── sync-prod-to-tests.md       # /rptc:sync-prod-to-tests
 │
-├── sop/                            # Standard Operating Procedures ✅
-│   └── *.md                        # All SOP files ✅
+├── agents/                         # Specialist agents (9 agents)
+│   ├── docs-agent.md               # Documentation sync
+│   ├── kiss-agent.md               # Plan simplification
+│   ├── optimizer-agent.md          # Code optimization
+│   ├── plan-agent.md               # Implementation planning
+│   ├── researcher-agent.md         # Research and exploration
+│   ├── security-agent.md           # Security review
+│   ├── tdd-agent.md                # TDD execution
+│   ├── test-fixer-agent.md         # Test repair
+│   └── test-sync-agent.md          # Test-production sync
 │
-├── agents/                         # Master Specialist Agents ✅
-│   └── *.md                        # All agent definitions ✅
+├── sop/                            # Standard Operating Procedures (10 SOPs)
+│   ├── architecture-patterns.md
+│   ├── flexible-testing-guide.md
+│   ├── frontend-guidelines.md
+│   ├── git-and-deployment.md
+│   ├── languages-and-style.md
+│   ├── post-tdd-refactoring.md
+│   ├── security-and-performance.md
+│   ├── test-sync-guide.md
+│   ├── testing-guide.md
+│   └── todowrite-guide.md
 │
-├── templates/                      # Document templates ✅
-│   ├── research.md                 # Research template ✅
-│   └── plan.md                     # Plan template ✅
+├── skills/                         # Skills (3 skills)
+│   ├── discord-notify/
+│   ├── html-report-generator/
+│   └── tdd-methodology/
 │
-├── docs/                           # Plugin documentation ✅
-│   ├── RPTC_WORKFLOW_GUIDE.md      # Complete guide ✅
-│   ├── PROJECT_TEMPLATE.md         # User project template ✅
-│   └── MIGRATION_GUIDE.md          # Migration instructions ✅
+├── templates/                      # Document templates
+│   ├── plan.md
+│   └── research.md
 │
-├── scripts/                        # Utility scripts (if any) ✅
-├── hooks/                          # Plugin hooks (if any) ✅
-├── README.md                       # Main documentation ✅
-├── LICENSE                         # License file ✅
-└── CHANGELOG.md                    # Version history ✅
+├── docs/                           # Documentation
+│   ├── PLUGIN_ARCHITECTURE.md      # This file
+│   ├── PROJECT_TEMPLATE.md         # User project template
+│   └── RPTC_WORKFLOW_GUIDE.md      # Complete workflow guide
+│
+├── README.md                       # Main documentation
+├── CONTRIBUTING.md                 # Contribution guidelines
+├── CHANGELOG.md                    # Version history
+└── LICENSE                         # MIT License
 ```
-
-**Total distributed**: All commands, SOPs, agents, templates, and documentation
 
 ---
 
-## ❌ NOT Included in Plugin Distribution
+## NOT Distributed
 
-These files/folders are **development artifacts** or **user-specific**:
+These files are development artifacts:
 
 ```text
-rptc-workflow/                      # Your development repo
-├── .rptc/                          # ❌ USER workspace (not distributed)
-│   ├── plans/                      # ❌ User's personal plans
-│   └── research/                   # ❌ User's personal research
-│
-├── legacy/                         # ❌ Development history (not distributed)
-│   ├── commands/.rptc/             # ❌ Old bash commands
-│   ├── agents/.rptc/               # ❌ Old agents
-│   ├── setup/                      # ❌ Old bash scripts
-│   └── notes/                      # ❌ Conversion notes
-│
-├── .git/                           # ❌ Version control (excluded)
-├── .gitignore                      # ✅ But this IS included
-├── .claude/                        # ❌ Your local dev settings (not distributed)
-├── PLUGIN_CONVERSION_STATUS.md     # ❌ Development tracking (not distributed)
-└── node_modules/                   # ❌ If you had dependencies (excluded)
+rptc-workflow/
+├── legacy/                         # Development history
+├── scripts/                        # Maintainer tools
+├── .git/                           # Version control
+├── .claude/                        # Local dev settings
+└── CLAUDE.md                       # Maintainer documentation
 ```
 
 ---
 
-## How It Works: Installation Flow
+## Installation Flow
 
-### 1. User Installs Plugin
+### Step 1: User Installs Plugin
 
 ```bash
-claude plugin install github.com/your-org/rptc-workflow
+/plugin marketplace add https://github.com/kuklaph/rptc-workflow
+/plugin install rptc
 ```
 
-**What happens**:
+**What happens:**
 
-- Claude clones repo to: `~/.claude/plugins/rptc-workflow/`
+- Claude clones repo to plugin directory
 - This becomes `${CLAUDE_PLUGIN_ROOT}`
-- Claude registers all commands from `commands/`
-- SOPs are available at `${CLAUDE_PLUGIN_ROOT}/sop/`
-- Agents are available at `${CLAUDE_PLUGIN_ROOT}/agents/`
+- All 5 commands registered and available
+- Agents available for delegation
+- SOPs available for agent reference
 
-### 2. User Initializes Workspace
-
-```bash
-cd ~/my-project
-/rptc:admin-init
-```
-
-**What happens**:
-
-- Creates `.rptc/` in user's project (empty workspace)
-- Creates `.rptc/plans/`, `.rptc/research/`, `.rptc/complete/`
-- Optionally copies SOPs to `.rptc/sop/` (if `--copy-sops` flag used)
-- User's project now has its own workspace
-
-### 3. User Uses Workflow
+### Step 2: User Starts Building
 
 ```bash
-/rptc:research "user authentication"
+/rptc:feat "add user authentication"
 ```
 
-**What happens**:
+**What happens:**
 
-- Command loaded from plugin: `${CLAUDE_PLUGIN_ROOT}/commands/research.md`
-- SOPs loaded via fallback chain:
-  1. `.rptc/sop/` (user's project overrides) ← checked first
-  2. `~/.claude/global/sop/` (user's global settings) ← checked second
-  3. `${CLAUDE_PLUGIN_ROOT}/sop/` (plugin defaults) ← checked last
-- Research saved to user's project: `.rptc/research/user-authentication.md`
+- `/rptc:feat` handles entire workflow
+- Phase 1: Discovery (codebase exploration)
+- Phase 2: Architecture (plan creation in `~/.claude/plans/`)
+- Phase 3: TDD Implementation
+- Phase 4: Quality Review
+- Phase 5: Complete
 
----
-
-## File Separation: Plugin vs User
-
-| Category          | Plugin Includes                   | User Creates                   | Purpose                 |
-| ----------------- | --------------------------------- | ------------------------------ | ----------------------- |
-| **Commands**      | ✅ All `.md` files in `commands/` | ❌ None                        | Workflow automation     |
-| **SOPs**          | ✅ Defaults in `sop/`             | ✅ Overrides in `.rptc/sop/` | Customizable standards  |
-| **Agents**        | ✅ All `.md` files in `agents/`   | ❌ None                        | Specialist delegation   |
-| **Templates**     | ✅ In `templates/`                | ❌ None                        | Document scaffolding    |
-| **Workspace**     | ❌ Not included                   | ✅ `.rptc/` in project         | User's working files    |
-| **Documentation** | ✅ In `docs/`                     | ✅ In project's `docs/`        | Guidance + project docs |
+**No workspace initialization required.** RPTC uses Claude's native plan mode.
 
 ---
 
-## Key Concept: Three Locations
+## User Projects (Minimal Footprint)
 
-### 1. Plugin Installation (Read-Only for Users)
+RPTC requires almost nothing in user projects:
 
 ```text
-~/.claude/plugins/rptc-workflow/
-├── commands/           # Plugin commands (not modified)
-├── sop/                # Plugin SOP defaults (not modified)
-├── agents/             # Plugin agents (not modified)
-└── templates/          # Plugin templates (not modified)
+user-project/
+├── docs/research/               # Optional: saved research documents
+├── CLAUDE.md                    # Optional: project context (recommended)
+└── [your project files]
 ```
 
-**Purpose**: Shared, version-controlled workflow definition
+**Plans are stored in:** `~/.claude/plans/` (Claude's native location)
 
-### 2. User Global Settings (Optional)
-
-```text
-~/.claude/global/
-└── sop/                # User's global SOP overrides
-    ├── testing-guide.md         # Customized for all projects
-    └── architecture-patterns.md # User's preferred patterns
-```
-
-**Purpose**: User's personal preferences across all projects
-
-### 3. Project Workspace (User's Work)
-
-```text
-my-project/
-├── .rptc/              # Working artifacts
-│   ├── research/       # Research documents
-│   ├── plans/          # Implementation plans
-│   ├── complete/       # Completed work
-│   └── sop/            # Project SOP overrides (optional)
-├── .claude/            # Project-specific settings
-│   └── settings.json   # Configuration
-└── docs/               # Permanent documentation (auto-created)
-```
-
-**Purpose**: Project-specific work and settings
+**No `.rptc/` directory needed.** No `.claude/settings.json` configuration needed.
 
 ---
 
-## What Should Be .gitignored?
+## Command Architecture
 
-### In Your Development Repo (This Repo)
+### The Unified `/rptc:feat` Command
 
-```gitignore
-# Don't distribute to users
-legacy/                          # Development history
-.rptc/plans/*                    # Your personal plans
-.rptc/research/*                 # Your personal research
-PLUGIN_CONVERSION_STATUS.md      # Development tracking
-.claude/settings.local.json      # Your local settings
+The primary command handles the complete workflow:
 
-# Keep these
-.rptc/.gitkeep                   # Preserve directory structure
+```text
+/rptc:feat "description"
+    ↓
+Phase 1: Discovery
+    → Launches 2-3 parallel exploration agents
+    → Uses rptc:researcher-agent with code-explorer methodology
+    ↓
+Phase 2: Architecture
+    → Enters Claude's native plan mode
+    → Launches 3 parallel plan agents (Minimal, Clean, Pragmatic)
+    → User selects approach
+    → Plan written to ~/.claude/plans/
+    ↓
+Phase 3: TDD Implementation
+    → Smart batching groups related steps
+    → Delegates batches to rptc:tdd-agent
+    → Strict RED → GREEN → REFACTOR cycle
+    ↓
+Phase 4: Quality Review
+    → Parallel execution of optimizer-agent and security-agent
+    → Tiered authority (auto-fix safe issues)
+    ↓
+Phase 5: Complete
+    → Summary of changes
+    → Ready for /rptc:commit
 ```
 
-### In User Projects (What Users Should Ignore)
+### Supporting Commands
 
-```gitignore
-# Working artifacts (should be gitignored by users)
-.rptc/research/*
-.rptc/plans/*
-.rptc/complete/*
+| Command | Purpose | Typical Usage |
+|---------|---------|---------------|
+| `/rptc:research "topic"` | Standalone research | Before `/rptc:feat` for unfamiliar topics |
+| `/rptc:commit [pr]` | Verify and ship | After completing implementation |
+| `/rptc:sync-prod-to-tests "[dir]"` | Test maintenance | When tests drift from production |
 
-# Keep important plans/research with explicit add
-# Users can: git add -f .rptc/plans/important-feature.md
+---
+
+## Agent Delegation Pattern
+
+Commands delegate to specialist agents using the Task tool:
+
+```markdown
+Use Task tool with subagent_type="rptc:[agent-name]":
+
+## Context
+[Feature description, relevant findings]
+
+## Your Task
+[Specific work for this agent]
+
+## SOPs to Reference
+- ${CLAUDE_PLUGIN_ROOT}/sop/[relevant-sop].md
+
+## Output Required
+[Expected deliverable format]
+```
+
+### Agent Responsibilities
+
+| Agent | Phase | Purpose |
+|-------|-------|---------|
+| `rptc:researcher-agent` | Phase 1 | Codebase exploration, pattern discovery |
+| `rptc:plan-agent` | Phase 2 | Implementation planning (3 perspectives) |
+| `rptc:tdd-agent` | Phase 3 | RED-GREEN-REFACTOR execution |
+| `rptc:optimizer-agent` | Phase 4 | Code simplification, KISS/YAGNI |
+| `rptc:security-agent` | Phase 4 | Vulnerability detection, OWASP compliance |
+| `rptc:kiss-agent` | Internal | Plan validation against simplicity principles |
+| `rptc:docs-agent` | Optional | Documentation synchronization |
+| `rptc:test-sync-agent` | `/sync-prod-to-tests` | Analyze test-production relationships |
+| `rptc:test-fixer-agent` | `/sync-prod-to-tests` | Auto-repair test files |
+
+---
+
+## Parallel Execution Architecture
+
+RPTC maximizes efficiency through parallelization:
+
+### Phase 1: Discovery
+
+```text
+┌─────────────────────┐
+│  Feature Request    │
+└─────────┬───────────┘
+          │
+    ┌─────┴─────┐
+    ▼           ▼
+┌───────┐   ┌───────┐
+│Agent 1│   │Agent 2│   (2-3 parallel exploration agents)
+│Feature│   │Arch   │
+│Disco- │   │Analy- │
+│very   │   │sis    │
+└───┬───┘   └───┬───┘
+    │           │
+    └─────┬─────┘
+          ▼
+   Consolidated Findings
+```
+
+### Phase 2: Architecture
+
+```text
+┌─────────────────────┐
+│  Discovery Results  │
+└─────────┬───────────┘
+          │
+    ┌─────┼─────┐
+    ▼     ▼     ▼
+┌─────┐ ┌─────┐ ┌─────┐
+│Mini-│ │Clean│ │Prag-│  (3 parallel plan agents)
+│mal  │ │     │ │matic│
+└──┬──┘ └──┬──┘ └──┬──┘
+   │       │       │
+   └───────┼───────┘
+           ▼
+    User Selects One
+```
+
+### Phase 4: Quality Review
+
+```text
+┌─────────────────────┐
+│  TDD Complete       │
+└─────────┬───────────┘
+          │
+    ┌─────┴─────┐
+    ▼           ▼
+┌───────┐   ┌───────┐
+│Optim- │   │Secur- │   (Both run in parallel)
+│izer   │   │ity    │
+└───┬───┘   └───┬───┘
+    │           │
+    └─────┬─────┘
+          ▼
+   Consolidated Findings
 ```
 
 ---
 
-## Summary: The Big Picture
+## Tiered Authority System
 
-**Plugin = Workflow Definition** (distributed, version-controlled)
+Quality agents use confidence-based authority:
 
-- Commands, SOPs, agents, templates
-- Installed to `~/.claude/plugins/rptc-workflow/`
-- Updated with `claude plugin update rptc-workflow`
+| Tier | Confidence | Action |
+|------|------------|--------|
+| **A** (Auto-fix) | Very high | Applied automatically |
+| **B** (High confidence) | ≥80% | Applied with summary |
+| **C** (Approval required) | <80% | Requires explicit user approval |
 
-**User Workspace = Actual Work** (local, not in plugin)
+**Principles:**
 
-- Research documents, implementation plans
-- Lives in user's project: `my-project/.rptc/`
-- Managed by user with git (or not)
+- All fixes must maintain test compatibility (100% pass rate required)
+- Tier A fixes are reversible safe patterns
+- Tier C includes structural changes or architecture decisions
 
-**SOP Fallback Chain = Customization** (3 levels)
+---
 
-1. Project: `.rptc/sop/` (overrides everything)
-2. User: `~/.claude/global/sop/` (overrides plugin)
-3. Plugin: `${CLAUDE_PLUGIN_ROOT}/sop/` (defaults)
+## Smart Batching (TDD Phase)
 
-This separation allows:
+Related implementation steps are grouped for efficiency:
 
-- ✅ Plugin maintainer updates workflow without touching user's work
-- ✅ Users customize SOPs without modifying plugin
-- ✅ Clean separation of "tool" vs "work product"
-- ✅ Version control for both plugin and user work (independently)
+### Batching Criteria
+
+1. **File cohesion**: Steps targeting same files
+2. **Sequential chains**: Step N+1 depends only on N
+3. **Size threshold**: Combined lines < 150
+
+### Benefits
+
+- ~40% token reduction vs. sequential execution
+- Parallel execution of independent batches
+- Maintains strict TDD discipline per step
+
+### Example
+
+```text
+Plan with 7 steps:
+  Step 1: Add User model
+  Step 2: Add User repository
+  Step 3: Add User service
+  Step 4: Add Auth middleware
+  Step 5: Add Login endpoint
+  Step 6: Add Register endpoint
+  Step 7: Add Tests
+
+Batching result:
+  Batch A: [1, 2, 3] - Core user module (parallel)
+  Batch B: [4]       - Middleware (sequential after A)
+  Batch C: [5, 6]    - Endpoints (parallel after B)
+  Batch D: [7]       - Tests (sequential after C)
+```
+
+---
+
+## Version Management
+
+### Plugin Version Locations
+
+All must stay synchronized:
+
+1. `.claude-plugin/plugin.json` → `"version"`
+2. `.claude-plugin/marketplace.json` → `metadata.version`
+3. `.claude-plugin/marketplace.json` → `plugins[0].version`
+4. `README.md` → `**Version**: X.Y.Z`
+5. `CHANGELOG.md` → `## [X.Y.Z]`
+
+### Update Process
+
+```bash
+# One command updates all locations
+./scripts/sync-version.sh X.Y.Z
+```
+
+Pre-commit hook automatically blocks commits with version mismatch.
+
+---
+
+## Migration from v1.x/v2.x
+
+### What Changed in v2.8.0+
+
+| Before | After |
+|--------|-------|
+| Separate `/rptc:plan` + `/rptc:tdd` | Unified `/rptc:feat` |
+| 16 commands | 5 commands |
+| `.rptc/` workspace required | Not needed |
+| `.claude/settings.json` config | Not needed |
+| SOP fallback chain (3 levels) | Plugin SOPs only |
+| Helper commands (6+) | Merged into `/rptc:feat` |
+
+### Migration Steps
+
+1. No action required for new features
+2. Existing `.rptc/` directories can be deleted
+3. Old plans can be referenced by path if needed
+4. Plans now stored in `~/.claude/plans/`
+
+---
+
+## Summary
+
+**RPTC Architecture Principles:**
+
+1. **One command for features**: `/rptc:feat` handles everything
+2. **Parallel execution**: Maximize efficiency through concurrent agents
+3. **Native plan mode**: Use Claude's built-in planning (`~/.claude/plans/`)
+4. **Minimal footprint**: No workspace directories or configuration required
+5. **User as PM**: You select approach, approve plans, review findings
+6. **Quality gates**: Parallel efficiency and security reviews
+
+**Plugin provides:**
+
+- 5 commands (1 primary, 4 supporting)
+- 9 specialist agents
+- 10 SOPs
+- 3 skills
+
+**User provides:**
+
+- Feature descriptions
+- Planning approach selection
+- Plan approval
+- Quality gate decisions

@@ -169,11 +169,11 @@
 **After Plan Approval:**
 
 1. **For PM:** Review and approve plan
-2. **For Developer:** Execute with `/rptc:tdd "@[plan-directory-name]"`
-3. **Quality Gates:** Efficiency Agent → Security Agent (after all steps complete)
+2. **For Developer:** Continue with TDD implementation phase
+3. **Quality Gates:** Efficiency Agent → Security Agent (parallel execution after TDD)
 4. **Completion:** Verify all acceptance criteria met
 
-**First Step:** Run `/rptc:tdd "@[plan-directory-name]"` to begin TDD implementation
+**Next:** TDD implementation begins automatically after plan approval
 
 ---
 

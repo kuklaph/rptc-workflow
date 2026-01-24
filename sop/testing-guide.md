@@ -842,7 +842,7 @@ Traditional TDD assumes deterministic outputs: `same_input → same_output`. Thi
 - Complete decision tree for choosing flexible vs exact assertions
 - Implementation details for all four patterns with language-specific examples
 - Safety mechanisms preventing abuse and quality erosion
-- Integration with RPTC TDD workflow (`/rptc:plan`, `/rptc:tdd`)
+- Integration with RPTC TDD workflow (`/rptc:feat`)
 
 **Key Principle**: Flexible assertions are a **precision tool** for inherent non-determinism, not a quality compromise. Security, compliance, and contracts ALWAYS require exact assertions.
 

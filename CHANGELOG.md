@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.15.0] - 2026-01-23
+
+### Removed
+
+- **`/rptc:admin-init` command**: Removed as it was purely informational and no commands depended on it. Users can start directly with `/rptc:feat` or `/rptc:research`.
+
+### Changed
+
+- **Documentation overhaul**: Complete update of all documentation to match v2.8.0+ unified `/rptc:feat` workflow
+  - README.md: Rewrote commands table (4 commands instead of 16 documented)
+  - RPTC_WORKFLOW_GUIDE.md: Complete rewrite for 5-phase `/rptc:feat` workflow
+  - PLUGIN_ARCHITECTURE.md: Updated plugin structure and version locations (5 instead of 7)
+  - PROJECT_TEMPLATE.md: Updated essential commands and workflow sections
+  - CONTRIBUTING.md: Updated directory structure and testing checklist
+- **Version tracking**: Reduced from 7 locations to 5 (removed admin-init.md and admin-upgrade.md)
+
+### Fixed
+
+- **Stale command references**: Fixed 23 references to deleted commands (`/rptc:plan`, `/rptc:tdd`, `/rptc:helper-*`, `/rptc:admin-init`) across 10 files:
+  - `sop/flexible-testing-guide.md` - 8 references updated to `/rptc:feat` phases
+  - `sop/testing-guide.md` - 1 reference updated
+  - `sop/todowrite-guide.md` - 2 references updated
+  - `agents/plan-agent.md` - 2 references updated
+  - `agents/kiss-agent.md` - 1 reference updated
+  - `agents/docs-agent.md` - 5 references updated + example output modernized
+  - `templates/plan-overview.md` - 1 reference updated
+  - `templates/research.md` - 1 reference updated
+  - `templates/handoff.md` - 1 reference updated (resume instructions now use `/rptc:feat`)
+  - `skills/tdd-methodology/SKILL.md` - 1 reference updated
+
+---
+
+
 ## [2.14.0] - 2026-01-23
 
 ### Fixed

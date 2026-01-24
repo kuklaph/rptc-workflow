@@ -1,6 +1,6 @@
 ---
 name: tdd-methodology
-description: TDD execution methodology for main context. Load when handling code changes directly (not via /rptc:feat or /rptc:tdd). Provides surgical coding approach, context discovery, and strict RED-GREEN-REFACTOR enforcement.
+description: TDD execution methodology for main context. Load when handling code changes directly (not via /rptc:feat). Provides surgical coding approach, context discovery, and strict RED-GREEN-REFACTOR enforcement.
 ---
 
 # TDD Methodology Skill

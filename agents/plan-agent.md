@@ -1138,7 +1138,7 @@ describe('[component]', () => {
 ### How to Handle Changes During Implementation
 
 1. **Small Adjustments:** Update plan inline, note in "Deviations" section
-2. **Major Changes:** Use `/rptc:helper-update-plan` command
+2. **Major Changes:** Request plan modification before continuing
 3. **Blockers:** Document in "Implementation Notes" section
 
 ### Deviations Log
@@ -1191,11 +1191,11 @@ Request full replan if:
 
 **After Plan Complete:**
 
-1. **For Developer:** Execute with `/rptc:tdd "@[plan-name]/"`
-2. **Quality Gates:** Efficiency Agent → Security Agent (if enabled)
+1. **For Developer:** Continue with TDD implementation phase
+2. **Quality Gates:** Efficiency Agent → Security Agent (parallel execution)
 3. **Completion:** Verify all acceptance criteria met
 
-**First Step:** Run `/rptc:tdd "@[plan-filename]/"` to begin TDD implementation
+**Next:** TDD implementation begins automatically in `/rptc:feat` workflow
 
 ---
 

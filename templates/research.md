@@ -128,7 +128,7 @@
 
 - [ ] Review this research document
 - [ ] Make decisions on open questions (see "Decision Points" above)
-- [ ] Create implementation plan: `/rptc:plan "@[topic-slug].md"`
+- [ ] Start feature development: `/rptc:feat "[feature description]"`
 
 ---
 

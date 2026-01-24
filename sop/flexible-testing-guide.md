@@ -6,7 +6,7 @@
 **Created**: 2025-01-25
 **Status**: ✅ COMPLETE - Ready for Production Use
 
-**Applies To**: `/rptc:tdd`, `/rptc:plan`, Master Feature Planner Agent, AI code review workflows
+**Applies To**: `/rptc:feat` workflow (TDD phase), plan-agent, AI code review workflows
 
 **Dependencies**:
 - `testing-guide.md` (foundational TDD principles)
@@ -733,7 +733,7 @@ for section in ["Introduction", "Methods", "Results"]:
 
 #### Integration with RPTC Workflow
 
-When planning in `/rptc:plan`:
+When planning in `/rptc:feat` (Phase 2: Architecture):
 ```markdown
 ## Test Strategy for AI Comment Generation
 
@@ -743,7 +743,7 @@ When planning in `/rptc:plan`:
 **Baseline**: Exact test validates function signature presence in comment
 ```
 
-When implementing in `/rptc:tdd`:
+When implementing in `/rptc:feat` (Phase 3: TDD):
 ```python
 def test_ai_comment_exact_baseline():
     """Baseline: Comment must reference function name."""
@@ -1356,7 +1356,7 @@ def test_password_hashing_algorithm():
 
 #### Integration with RPTC Workflow
 
-When planning in `/rptc:plan`:
+When planning in `/rptc:feat` (Phase 2: Architecture):
 ```markdown
 ## Test Strategy for AI-Generated Data Processor
 
@@ -1373,7 +1373,7 @@ When planning in `/rptc:plan`:
 **Baseline**: Exact test for core transformation logic with known input/output
 ```
 
-When implementing in `/rptc:tdd`:
+When implementing in `/rptc:feat` (Phase 3: TDD):
 ```python
 def test_data_processor_exact_baseline():
     """Baseline: Known input produces known output."""
@@ -1880,7 +1880,7 @@ def test_security_decision_exact():
 
 #### Integration with RPTC Workflow
 
-When planning in `/rptc:plan`:
+When planning in `/rptc:feat` (Phase 2: Architecture):
 ```markdown
 ## Test Strategy for AI Code Documentation
 
@@ -1891,7 +1891,7 @@ When planning in `/rptc:plan`:
 **Baseline**: Exact test validates factual claims (metrics, numbers) separately
 ```
 
-When implementing in `/rptc:tdd`:
+When implementing in `/rptc:feat` (Phase 3: TDD):
 ```python
 def test_documentation_facts_exact():
     """Baseline: Factual claims must be exact."""
@@ -2404,7 +2404,7 @@ def test_output():
 
 #### Integration with RPTC Workflow
 
-When planning in `/rptc:plan`:
+When planning in `/rptc:feat` (Phase 2: Architecture):
 ```markdown
 ## Test Strategy for AI Tag Generation
 
@@ -2415,7 +2415,7 @@ When planning in `/rptc:plan`:
 **Baseline**: Exact test validates tag count and no duplicates
 ```
 
-When implementing in `/rptc:tdd`:
+When implementing in `/rptc:feat` (Phase 3: TDD):
 ```python
 def test_tag_generation_exact_baseline():
     """Baseline: Tag count and uniqueness exact."""
@@ -3298,7 +3298,7 @@ proptest! {
 
 This section documents how flexible assertions integrate seamlessly with RPTC's Research → Plan → TDD → Commit workflow.
 
-### 5.1 Planning Phase Integration (`/rptc:plan`)
+### 5.1 Planning Phase Integration (`/rptc:feat` Phase 2)
 
 When creating implementation plans that involve AI-generated outputs or non-deterministic code, specify the testing strategy upfront.
 
@@ -3389,7 +3389,7 @@ Add to your `.rptc/plans/feature-name.md` file:
 
 ---
 
-### 5.2 TDD Phase Integration (`/rptc:tdd`)
+### 5.2 TDD Phase Integration (`/rptc:feat` Phase 3)
 
 Flexible assertions follow the standard RED-GREEN-REFACTOR cycle with additional documentation requirements.
 
@@ -3599,12 +3599,12 @@ Plan reference: .rptc/plans/[feature-name].md#test-strategy
 │ RPTC WORKFLOW WITH FLEXIBLE ASSERTIONS                          │
 └─────────────────────────────────────────────────────────────────┘
 
-/rptc:research (if needed)
+/rptc:feat (Phase 1: Discovery)
   ↓
   Identify AI/non-deterministic components
   Document variation characteristics
   ↓
-/rptc:plan
+/rptc:feat (Phase 2: Architecture)
   ↓
   Specify flexible assertion needs in plan
   ├─ Variation type identified
@@ -3613,7 +3613,7 @@ Plan reference: .rptc/plans/[feature-name].md#test-strategy
   ├─ Safety checks completed
   └─ Baseline exact tests planned
   ↓
-/rptc:tdd
+/rptc:feat (Phase 3: TDD)
   ↓
   RED: Write flexible test with rationale
   │    └─ Includes: why, pattern, threshold, baseline ref, failure action
@@ -3653,8 +3653,7 @@ Plan reference: .rptc/plans/[feature-name].md#test-strategy
 ### 5.6 RPTC Command References
 
 **See Also**:
-- **`/rptc:plan`** (`commands/plan.md`) - Planning phase integration, test strategy specification
-- **`/rptc:tdd`** (`commands/tdd.md`) - TDD cycle execution, Phase 1d verification guidance
+- **`/rptc:feat`** (`commands/feat.md`) - Unified workflow: Discovery → Plan → TDD → Review
 - **`/rptc:commit`** (`commands/commit.md`) - Documentation verification before commit
 - **Optimizer Agent** (`agents/optimizer-agent.md`) - Quality review of flexible assertions
 - **Security Agent** (`agents/security-agent.md`) - Security validation of test strategies
@@ -4268,7 +4267,7 @@ Quick reference table for choosing the right flexible assertion pattern:
 
 Use this checklist when adding flexible assertions to your RPTC workflow:
 
-#### Planning Phase (`/rptc:plan`)
+#### Planning Phase (`/rptc:feat` Phase 2)
 
 - [ ] **Identify** non-deterministic outputs in feature requirements
 - [ ] **Document** variation type (semantic, behavioral, reasoning, multiple paths)
@@ -4278,7 +4277,7 @@ Use this checklist when adding flexible assertions to your RPTC workflow:
 - [ ] **Plan** at least one baseline exact test for critical path
 - [ ] **Add** flexible assertion section to `.rptc/plans/[feature].md`
 
-#### TDD Phase (`/rptc:tdd`)
+#### TDD Phase (`/rptc:feat` Phase 3)
 
 - [ ] **RED**: Write flexible test with complete rationale docstring
   - [ ] Include "why" (reason for flexibility)

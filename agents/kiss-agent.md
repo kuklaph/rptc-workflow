@@ -106,7 +106,7 @@ Think harder and thoroughly examine similar areas of the codebase to ensure your
 
 ## Activation Context
 
-This agent is invoked during the plan command workflow (via `/rptc:plan` command which loads `${CLAUDE_PLUGIN_ROOT}/commands/plan.md`) at Phase 4.5 with the following context:
+This agent is invoked during the `/rptc:feat` workflow (Phase 2: Architecture) at Phase 4.5 with the following context:
 
 **Preconditions (Already Met):**
 

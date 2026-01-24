@@ -613,15 +613,11 @@ Original: "Write tests for Step 1"
    - Verify state updates correctly
    - Confirm all tasks "completed" at end
 
-2. Run `/rptc:plan "@test-topic.md"`
-   - Verify correct list (simple vs complex)
-   - Test both PM approval gates
-   - Confirm plan saves only after approval
-
-3. Run `/rptc:tdd "@test-plan.md"`
-   - Verify dynamic TODO generation (N×4 + 6)
-   - Test all 3 PM approval gates (Efficiency, Security, Final)
-   - Verify quality gates never skipped
+2. Run `/rptc:feat "test feature"`
+   - Verify correct todo list generation during planning
+   - Test PM approval gates
+   - Verify dynamic TODO generation during TDD phase
+   - Verify quality gates (Efficiency, Security) run in parallel
 
 4. Run `/rptc:commit pr`
    - Verify 7-phase tracking

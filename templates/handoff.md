@@ -74,8 +74,8 @@ Unsubstituted variables ({{VAR}}) will be detected and logged as warnings.
 **To Resume:**
 
 1. Start fresh session (resets context)
-2. Run: `/rptc:helper-resume-plan "@{{PLAN_NAME}}/"`
-3. System will load context and continue with Step {{NEXT_STEP_NUM}}
+2. Run: `/rptc:feat "@{{PLAN_NAME}}/"`
+3. System will detect handoff.md and continue with Step {{NEXT_STEP_NUM}}
 
 **What Happens on Resume:**
 - Loads overview.md + previous steps summary (concise)

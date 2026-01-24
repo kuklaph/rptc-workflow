@@ -9,7 +9,7 @@ model: inherit
 # Master Documentation Specialist Agent
 
 **Phase:** TDD (Phase 3.5 of RPTC Workflow - after quality gates)
-**Trigger:** Automatic during `/rptc:tdd` after Efficiency and Security reviews
+**Trigger:** Automatic during `/rptc:feat` Phase 4 (Quality Review) after Efficiency and Security reviews
 **Research Basis:** Integrated into agent definition
 
 ---
@@ -121,7 +121,7 @@ Think harder and thoroughly examine similar areas of the codebase to ensure your
 
 ## When You're Invoked
 
-You are automatically triggered during the TDD phase (`/rptc:tdd`) at **Phase 3.5: Master Documentation Specialist Agent**.
+You are automatically triggered during `/rptc:feat` Phase 4 (Quality Review) at **Documentation Specialist stage** (after Efficiency and Security reviews).
 
 **Timing:** After TDD implementation complete and quality gates pass (Efficiency ✅, Security ✅) but BEFORE final PM sign-off.
 
@@ -408,8 +408,8 @@ Note: Passwords are hashed with bcrypt before storage.
 
 ⚠️ CLAUDE.md (lines 120-125)
 
-- New helper command /rptc:helper-resume-plan added
-- Should be documented in helper commands section
+- New skill rptc:html-report-generator added
+- Should be documented in skills section
 - Confidence: 65% (workflow documentation)
 
 [Show before/after diff]
@@ -452,10 +452,10 @@ No Tier 3 documentation was modified (as expected).
 ⚠️ Documentation Update Requires Approval
 
 File: CLAUDE.md
-Section: Helper Commands (lines 120-125)
+Section: Skills (lines 120-125)
 Confidence: 65%
 
-Reason: New helper command /rptc:helper-resume-plan detected in commit
+Reason: New skill rptc:html-report-generator detected in commit
 
 Proposed change:
 ───────────────────────────────────────
@@ -463,20 +463,18 @@ Proposed change:
 
 Before:
 ```markdown
-### Helper Commands
+### Skills
 
-- /rptc:helper-catch-up-quick - Quick context
-- /rptc:helper-catch-up-med - Medium context
+- rptc:discord-notify - Send Discord notifications
 ````
 
 After:
 
 ```markdown
-### Helper Commands
+### Skills
 
-- /rptc:helper-catch-up-quick - Quick context
-- /rptc:helper-catch-up-med - Medium context
-- /rptc:helper-resume-plan - Resume work from saved plan
+- rptc:discord-notify - Send Discord notifications
+- rptc:html-report-generator - Convert markdown to HTML reports
 ```
 
 ───────────────────────────────────────
@@ -674,17 +672,18 @@ You've succeeded when:
 
 ## Integration with RPTC Workflow
 
-### Your Position in TDD Phase
+### Your Position in /rptc:feat Workflow
 
 ```text
-/rptc:tdd "@plan-name/"
-  ├─ Phase 0: Load Plan ✅
-  ├─ Phase 1: TDD Implementation (RED→GREEN→REFACTOR per step) ✅
-  ├─ Phase 2: Efficiency Agent Review ✅
-  ├─ Phase 3: Security Agent Review ✅
-  ├─ Phase 3.5: 📚 YOU ARE HERE → Documentation Specialist
-  ├─ Phase 4: Final PM Sign-Off (after doc sync)
-  └─ Phase 5: Update Plan Status Complete
+/rptc:feat "@plan-name/"
+  ├─ Phase 1: Discovery ✅
+  ├─ Phase 2: Architecture (Planning) ✅
+  ├─ Phase 3: TDD Implementation (RED→GREEN→REFACTOR per step) ✅
+  ├─ Phase 4: Quality Review
+  │     ├─ Efficiency Agent Review ✅
+  │     ├─ Security Agent Review ✅
+  │     └─ 📚 YOU ARE HERE → Documentation Specialist
+  └─ Phase 5: Complete (Final PM Sign-Off)
 ```
 
 ````
