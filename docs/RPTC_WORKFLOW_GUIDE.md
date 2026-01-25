@@ -49,9 +49,11 @@ Phase 1: Discovery (codebase exploration)
     ↓
 Phase 2: Architecture (you select approach)
     ↓
-Phase 3: TDD Implementation (smart batching)
+Phase 3: Implementation
+    → Route A (non-code): Direct execution
+    → Route B (code): TDD with smart batching
     ↓
-Phase 4: Quality Review (parallel agents)
+Phase 4: Quality Review (report-only, parallel agents)
     ↓
 Phase 5: Complete (summary)
 ```
@@ -88,9 +90,22 @@ Phase 5: Complete (summary)
 
 **Agents used:** `rptc:plan-agent` (3 parallel instances)
 
-### Phase 3: TDD Implementation (Smart Batching)
+### Phase 3: Implementation
 
-**Goal**: Build with tests first, efficiently.
+**Goal**: Execute the plan using the appropriate method for the task type.
+
+**Task Classification** determines the route:
+- **Code tasks** (`.ts`, `.js`, `.py`, source files): Route B (TDD)
+- **Non-Code tasks** (`.md`, `.json`, config, docs): Route A (Direct)
+
+#### Route A: Non-Code Tasks (Direct Execution)
+
+For documentation, config, and non-code changes:
+1. Main context executes steps directly
+2. No TDD overhead for non-code work
+3. Proceeds to Phase 4
+
+#### Route B: Code Tasks (TDD with Smart Batching)
 
 **Smart Batching** combines related steps for efficiency:
 - Groups steps by file cohesion and dependencies
@@ -112,28 +127,27 @@ Phase 5: Complete (summary)
 5. Parallel batches execute simultaneously
 6. Updates progress tracking as batches complete
 
-**Agents used:** `rptc:tdd-agent` (one per batch)
+**Agents used:** `rptc:tdd-agent` (one per batch, code tasks only)
 
 ### Phase 4: Quality Review
 
-**Goal**: Ensure code quality through parallel review.
+**Goal**: Review changes and create fix list for main context.
+
+**Mode**: Report-only. Agents DO NOT make changes—they report findings.
 
 **What happens:**
-1. Collects all files modified during TDD phase
-2. Launches BOTH review agents in parallel:
-   - **Optimizer Agent**: Complexity, KISS/YAGNI violations, dead code, readability
+1. Collects all files modified during Implementation phase
+2. Launches ALL THREE review agents in parallel:
+   - **Code Review Agent**: Complexity, KISS/YAGNI violations, dead code, readability
    - **Security Agent**: Input validation, auth checks, injection vulnerabilities, data exposure
+   - **Documentation Agent**: README updates, API doc changes, inline comment accuracy
 3. Consolidates findings with confidence scoring (only shows ≥80 confidence)
-4. **You review** and select what to fix:
-   - Simple fixes: Applied autonomously
-   - Structural changes: Shown for approval
+4. Creates TodoWrite with findings for main context to address
+5. **Main context handles fixes**:
+   - Simple fixes: Applied directly
+   - Structural changes: Shown to you for approval
 
-**Agents used:** `rptc:optimizer-agent` + `rptc:security-agent` (parallel)
-
-**Tiered authority:**
-- **Tier A (Auto-fix)**: Safe patterns with well-understood fixes
-- **Tier B (High confidence)**: 80%+ confidence, applied with brief summary
-- **Tier C (Approval required)**: Complex or risky changes require explicit approval
+**Agents used:** `rptc:code-review-agent` + `rptc:security-agent` + `rptc:docs-agent` (parallel, report-only)
 
 ### Phase 5: Complete
 
@@ -238,15 +252,17 @@ RPTC maximizes efficiency through parallelization:
 - **TDD**: Independent batches execute in parallel
 - **Quality Review**: Optimizer and Security agents run together
 
-### Tiered Authority System
+### Report-Only Review System
 
-Quality agents use confidence-based authority:
+Quality review agents analyze code and report findings—they do NOT make changes.
 
-| Tier | Confidence | Action |
-|------|------------|--------|
-| **A** (Auto-fix) | Very high | Applied automatically |
-| **B** (High confidence) | ≥80% | Applied with summary |
-| **C** (Approval required) | <80% | Requires explicit approval |
+| Confidence | Action |
+|------------|--------|
+| ≥90% | High priority finding, reported first |
+| 80-89% | Medium priority finding, reported |
+| <80% | Skipped (below confidence threshold) |
+
+Main context receives findings via TodoWrite and handles all fixes with user approval as needed.
 
 ---
 
@@ -281,25 +297,29 @@ Quality agents use confidence-based authority:
 - Flexible testing guide for AI-generated code
 - SOP integration
 
-### Optimizer Agent (`rptc:optimizer-agent`)
+### Code Review Agent (`rptc:code-review-agent`)
 
-**Purpose**: Code optimization with tiered authority
+**Purpose**: Code review for efficiency issues (report-only)
 
 **Focus areas:**
-- Cyclomatic complexity (<10 per function)
-- Cognitive complexity (<15)
-- KISS/YAGNI principle enforcement
-- Dead code removal
+- Cyclomatic complexity (>10 per function)
+- Cognitive complexity (>15)
+- KISS/YAGNI violations
+- Dead code detection
+
+**Mode**: Reports findings only—main context handles fixes
 
 ### Security Agent (`rptc:security-agent`)
 
-**Purpose**: Security review with tiered authority
+**Purpose**: Security review for vulnerabilities (report-only)
 
 **Coverage:**
 - OWASP Top 10 vulnerabilities
-- Input validation
-- Authentication/authorization
+- Input validation gaps
+- Authentication/authorization issues
 - Data exposure risks
+
+**Mode**: Reports findings only—main context handles fixes
 
 ### Test Sync Agent (`rptc:test-sync-agent`)
 
@@ -356,18 +376,20 @@ Quality agents use confidence-based authority:
 - **Complex domain**: Research payment processing before building checkout
 - **Multiple approaches**: Research to compare options before committing
 
-### TDD Discipline
+### TDD Discipline (Code Tasks)
+
+**Note**: TDD applies to code tasks only. Non-code tasks (docs, config) execute directly.
 
 1. **Tests define behavior** - Write what you want, not what exists
 2. **Minimal implementation** - Just enough to pass tests
 3. **Refactor with confidence** - Tests catch regressions
 4. **All tests must pass** - Never commit broken tests
 
-### Quality Gates
+### Quality Review
 
-- **Accept auto-fixes** - Tier A changes are safe
-- **Review Tier B carefully** - High confidence, but verify impact
-- **Deliberate on Tier C** - These need your judgment
+- **Review high-confidence findings** (≥90%) - These are clear issues
+- **Consider medium-confidence findings** (80-89%) - Verify impact before fixing
+- **Main context handles all fixes** - Agents report, you decide what to address
 
 ---
 
@@ -388,9 +410,9 @@ RPTC uses auto-handoff with dynamic prediction:
 
 ### Q: Quality review found many issues?
 
-1. Focus on high-confidence findings (≥80)
-2. Apply auto-fixes for Tier A/B
-3. Discuss Tier C changes before accepting
+1. Focus on high-confidence findings (≥90) first
+2. Review medium-confidence findings (80-89) for context
+3. Address findings via TodoWrite—main context handles all changes
 
 ### Q: Plan approach doesn't fit?
 
@@ -448,7 +470,8 @@ RPTC provides a systematic development workflow that puts you in control:
 
 1. **One command for features**: `/rptc:feat "description"`
 2. **You select the approach**: Minimal, Clean, or Pragmatic
-3. **Smart execution**: Parallel agents, batched TDD, tiered quality gates
-4. **Ship with confidence**: `/rptc:commit [pr]`
+3. **Task-appropriate execution**: TDD for code, direct execution for non-code
+4. **Report-only quality gates**: Agents report, main context fixes
+5. **Ship with confidence**: `/rptc:commit [pr]`
 
 The workflow handles complexity while keeping you as the decision maker.

@@ -5,7 +5,7 @@ allowed-tools: Bash(git *), Bash(npm *), Bash(npx *), Bash(bunx *), Bash(pnpm *)
 
 # /rptc:feat
 
-Complete feature development: Discovery → Architecture → TDD Implementation → Quality Review.
+Complete feature development: Discovery → Architecture → Implementation → Quality Review.
 
 ## Arguments
 
@@ -15,14 +15,34 @@ Complete feature development: Discovery → Architecture → TDD Implementation 
 
 ---
 
+## Task Classification
+
+**Before starting**, classify the task to determine the appropriate workflow:
+
+| Task Type | Examples | TDD Phase | Implementation |
+|-----------|----------|-----------|----------------|
+| **Code** | New features, bug fixes, refactoring, API changes | ✅ Required | Delegate to tdd-agent |
+| **Non-Code** | Documentation, config, markdown, plugin updates | ⏭️ Skip | Main context executes directly |
+
+**Classification rules**:
+- **Code tasks**: Create/modify `.ts`, `.js`, `.py`, `.go`, `.rs`, `.java`, or other source files
+- **Non-Code tasks**: Create/modify `.md`, `.json`, `.yaml`, `.toml`, config files, or purely documentation
+
+**Result**: Set `task_type` to `code` or `non-code` for Phase 3 routing.
+
+---
+
 ## Phase 1: Discovery
 
 **Goal**: Understand what to build and existing patterns.
 
 **Actions**:
 
-1. **Create initial todo list** with phases: Discovery, Architecture, TDD, Quality Review, Complete
-2. **If codebase exploration needed**, launch 2-3 Explore agents in parallel using code-explorer methodology:
+1. **Classify task type** (see Task Classification above)
+2. **Create initial todo list** with phases based on task type:
+   - Code tasks: Discovery, Architecture, TDD Implementation, Quality Review, Complete
+   - Non-Code tasks: Discovery, Architecture, Implementation, Review, Complete
+3. **If codebase exploration needed**, launch 2-3 Explore agents in parallel using code-explorer methodology:
 
 ```
 Use Task tool with subagent_type="rptc:researcher-agent" (launch all 3 in parallel):
@@ -40,10 +60,10 @@ Use code-explorer methodology Phase 2 (Code Flow Tracing): call chains, data tra
 Return: external dependencies, internal dependencies, API boundaries."
 ```
 
-3. **If web research needed**, delegate to researcher-agent (Mode B)
-4. **If hybrid research needed** (codebase + best practices), launch both in parallel (Mode C)
-5. **If unclear about requirements**, ask user for clarification
-6. **Summarize findings**: Key patterns, files to modify, dependencies, gap analysis (if hybrid)
+4. **If web research needed**, delegate to researcher-agent (Mode B)
+5. **If hybrid research needed** (codebase + best practices), launch both in parallel (Mode C)
+6. **If unclear about requirements**, ask user for clarification
+7. **Summarize findings**: Key patterns, files to modify, dependencies, gap analysis (if hybrid)
 
 ---
 
@@ -60,11 +80,11 @@ Return: external dependencies, internal dependencies, API boundaries."
 ```
 Use Task tool with subagent_type="rptc:plan-agent" (launch all 3 in parallel):
 
-Agent 1: "Design implementation for [feature]. Perspective: Minimal. Provide: files to modify, component design, data flow, build sequence, test strategy."
+Agent 1: "Design implementation for [feature]. Perspective: Minimal. Provide: files to modify, component design, data flow, build sequence. [If code task: include test strategy]"
 
-Agent 2: "Design implementation for [feature]. Perspective: Clean. Provide: files to modify, component design, data flow, build sequence, test strategy."
+Agent 2: "Design implementation for [feature]. Perspective: Clean. Provide: files to modify, component design, data flow, build sequence. [If code task: include test strategy]"
 
-Agent 3: "Design implementation for [feature]. Perspective: Pragmatic. Provide: files to modify, component design, data flow, build sequence, test strategy."
+Agent 3: "Design implementation for [feature]. Perspective: Pragmatic. Provide: files to modify, component design, data flow, build sequence. [If code task: include test strategy]"
 ```
 
 3. **Review all 3 approaches**, form an opinion on which fits best for this specific feature
@@ -92,9 +112,9 @@ Approach descriptions:
 
 5. **Write selected plan to plan file** with:
    - Approach used (with rationale)
-   - Implementation steps (testable, ordered)
+   - Implementation steps (ordered)
    - Files to create/modify
-   - Test strategy per step
+   - Test strategy per step (code tasks only)
 
 6. **Exit plan mode** using ExitPlanMode to get user approval
 
@@ -105,7 +125,29 @@ Approach descriptions:
 
 ---
 
-## Phase 3: TDD Implementation (with Smart Batching)
+## Phase 3: Implementation
+
+**Goal**: Execute the plan using the appropriate method for the task type.
+
+### Route A: Non-Code Tasks (Direct Execution)
+
+**When**: `task_type = non-code` (documentation, config, markdown, plugin updates)
+
+**Actions**:
+
+1. **Execute steps directly** in main context (no sub-agent delegation)
+2. **For each step**:
+   - Read target files
+   - Make changes using Edit/Write tools
+   - Verify changes are correct
+3. **Update TodoWrite** as each step completes
+4. **Proceed to Phase 4** (Quality Review)
+
+---
+
+### Route B: Code Tasks (TDD with Smart Batching)
+
+**When**: `task_type = code` (source files, tests, application logic)
 
 **Goal**: Build with tests first, using intelligent step batching for efficiency.
 
@@ -209,34 +251,51 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
 
 ## Phase 4: Quality Review
 
-**Goal**: Ensure code quality through parallel review.
+**Goal**: Review changes and report findings for main context to address.
+
+**Mode**: Report-only. Review agents DO NOT make changes—they report findings. Main context handles all fixes.
 
 **Actions**:
 
-1. **Collect files modified** during TDD phase for review
+1. **Collect files modified** during Phase 3 for review
 
-2. **Launch BOTH review agents in parallel** (MUST invoke both in same message):
+2. **Launch ALL THREE review agents in parallel** (MUST invoke all in same message):
 
 ```
-Use Task tool with subagent_type="rptc:optimizer-agent":
+Use Task tool with subagent_type="rptc:code-review-agent":
 prompt: "Review code quality for these files: [list all files modified in Phase 3].
 Focus: complexity, KISS/YAGNI violations, dead code, readability.
-Apply tiered authority. Output: confidence-scored findings (≥80 only)."
+REPORT ONLY - do not make changes. Output: confidence-scored findings (≥80 only)."
 
 Use Task tool with subagent_type="rptc:security-agent":
 prompt: "Security review for these files: [list all files modified in Phase 3].
 Focus: input validation, auth checks, injection vulnerabilities, data exposure.
-Apply tiered authority. Output: confidence-scored findings (≥80 only)."
+REPORT ONLY - do not make changes. Output: confidence-scored findings (≥80 only)."
+
+Use Task tool with subagent_type="rptc:docs-agent":
+prompt: "Review documentation impact for these files: [list all files modified in Phase 3].
+Focus: README updates, API doc changes, inline comment accuracy, breaking changes.
+REPORT ONLY - do not make changes. Output: documentation updates needed (≥80 only)."
 ```
 
-3. **Consolidate findings** from both agents:
-   - Categorize: bugs, security, style, structural
+3. **Consolidate findings** from all agents:
+   - Categorize: bugs, security, style, structural, documentation
    - Show only high-confidence issues (≥80)
-   - Present to user
+   - Present summary to user
 
-4. **User selects what to fix**:
-   - Simple fixes: Apply autonomously
-   - Structural changes: Show proposed change, get approval
+4. **Create TodoWrite for fixes** (if any findings):
+   ```
+   TodoWrite with status="pending":
+   - [Category] Finding 1: description (file:line)
+   - [Category] Finding 2: description (file:line)
+   ...
+   ```
+
+5. **Main context addresses findings**:
+   - Work through TodoWrite items
+   - Simple fixes: Apply directly
+   - Structural changes: Show proposed change, get user approval
+   - Mark todos complete as addressed
 
 ---
 
@@ -306,16 +365,21 @@ Use Task tool with subagent_type="rptc:tdd-agent":
 For each step in order: RED → GREEN → REFACTOR, then next step.
 ```
 
-### Review Agents (Phase 4) - MUST launch both in parallel
+### Review Agents (Phase 4) - MUST launch all three in parallel
+
+**Mode**: Report-only. Agents report findings; main context handles fixes via TodoWrite.
 
 ```
-Launch BOTH in the same message for parallel execution:
+Launch ALL THREE in the same message for parallel execution:
 
-Use Task tool with subagent_type="rptc:optimizer-agent":
-prompt: "Review code quality for [files]. Focus: complexity, KISS/YAGNI, dead code, readability. Apply tiered authority. Output: confidence-scored findings (≥80 only)."
+Use Task tool with subagent_type="rptc:code-review-agent":
+prompt: "Review code quality for [files]. Focus: complexity, KISS/YAGNI, dead code, readability. REPORT ONLY - do not make changes. Output: confidence-scored findings (≥80 only)."
 
 Use Task tool with subagent_type="rptc:security-agent":
-prompt: "Security review for [files]. Focus: input validation, auth, injection, data exposure. Apply tiered authority. Output: confidence-scored findings (≥80 only)."
+prompt: "Security review for [files]. Focus: input validation, auth, injection, data exposure. REPORT ONLY - do not make changes. Output: confidence-scored findings (≥80 only)."
+
+Use Task tool with subagent_type="rptc:docs-agent":
+prompt: "Review documentation impact for [files]. Focus: README, API docs, inline comments, breaking changes. REPORT ONLY - do not make changes. Output: documentation updates needed (≥80 only)."
 ```
 
 ---
@@ -325,9 +389,10 @@ prompt: "Security review for [files]. Focus: input validation, auth, injection, 
 1. **Single approval point**: ExitPlanMode after Architecture phase
 2. **Ask when uncertain**: Use AskUserQuestion only when genuinely unclear
 3. **Smart parallelism**: Parallelize independent steps, sequence dependent ones
-4. **Tiered authority**: Auto-fix safe issues, report risky ones
-5. **Confidence filtering**: Only surface issues ≥80 confidence
-6. **Goal+Actions format**: Trust agents to handle details
+4. **Task-appropriate workflow**: TDD for code, direct execution for non-code
+5. **Report-only reviews**: Agents report findings, main context fixes via TodoWrite
+6. **Confidence filtering**: Only surface issues ≥80 confidence
+7. **Goal+Actions format**: Trust agents to handle details
 
 ---
 

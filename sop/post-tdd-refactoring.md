@@ -629,7 +629,7 @@ For every optimization, ask:
 
 **Research Foundation:**
 - `.rptc/research/code-simplicity-research.md` (Phase 1)
-- `.rptc/research/optimizer-agent-research.md` (30+ sources)
+- `.rptc/research/code-review-agent-research.md` (30+ sources)
 
 **SOPs:**
 - `architecture-patterns.md` → AI Over-Engineering Prevention (5 anti-patterns)
@@ -649,5 +649,5 @@ For every optimization, ask:
 
 ---
 
-_This SOP is referenced by Master Efficiency Agent via fallback chain_
+_This SOP is referenced by Code Review Agent via fallback chain_
 _Project-specific overrides: `.rptc/sop/post-tdd-refactoring.md`_

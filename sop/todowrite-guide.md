@@ -6,7 +6,7 @@
 **Created**: 2025-10-16
 **Last Updated**: 2025-10-16
 
-**Applies To**: All RPTC commands (research, plan, tdd, commit)
+**Applies To**: `/rptc:feat` (unified workflow), `/rptc:research`, `/rptc:commit`, `/rptc:sync-prod-to-tests`
 
 ---
 
@@ -176,7 +176,7 @@
       "activeForm": "Getting final PM approval"
     },
     {
-      "content": "Save plan document to .rptc/plans/",
+      "content": "Save plan document to ~/.claude/plans/",
       "status": "pending",
       "activeForm": "Saving plan document"
     }
@@ -184,38 +184,25 @@
 }
 ```
 
-**TDD Command** (dynamic: N×4 + 6 phases, example for 3-step plan):
+**TDD Phase** (smart batching with parallel quality review, example for 3-step plan):
 
 ```json
 {
   "tool": "TodoWrite",
   "todos": [
-    {"content": "Step 1: RED - Write failing tests", "status": "pending", "activeForm": "Writing tests for Step 1"},
-    {"content": "Step 1: GREEN - Implement to pass", "status": "pending", "activeForm": "Implementing Step 1"},
-    {"content": "Step 1: REFACTOR - Improve quality", "status": "pending", "activeForm": "Refactoring Step 1"},
-    {"content": "Step 1: SYNC - Update plan", "status": "pending", "activeForm": "Syncing plan for Step 1"},
-
-    {"content": "Step 2: RED - Write failing tests", "status": "pending", "activeForm": "Writing tests for Step 2"},
-    {"content": "Step 2: GREEN - Implement to pass", "status": "pending", "activeForm": "Implementing Step 2"},
-    {"content": "Step 2: REFACTOR - Improve quality", "status": "pending", "activeForm": "Refactoring Step 2"},
-    {"content": "Step 2: SYNC - Update plan", "status": "pending", "activeForm": "Syncing plan for Step 2"},
-
-    {"content": "Step 3: RED - Write failing tests", "status": "pending", "activeForm": "Writing tests for Step 3"},
-    {"content": "Step 3: GREEN - Implement to pass", "status": "pending", "activeForm": "Implementing Step 3"},
-    {"content": "Step 3: REFACTOR - Improve quality", "status": "pending", "activeForm": "Refactoring Step 3"},
-    {"content": "Step 3: SYNC - Update plan", "status": "pending", "activeForm": "Syncing plan for Step 3"},
-
-    {"content": "REQUEST PM: Efficiency Agent approval", "status": "pending", "activeForm": "Requesting Efficiency Agent approval"},
-    {"content": "EXECUTE: Efficiency Agent review", "status": "pending", "activeForm": "Running Efficiency Agent"},
-    {"content": "REQUEST PM: Security Agent approval", "status": "pending", "activeForm": "Requesting Security Agent approval"},
-    {"content": "EXECUTE: Security Agent review", "status": "pending", "activeForm": "Running Security Agent"},
-    {"content": "REQUEST PM: Final TDD sign-off", "status": "pending", "activeForm": "Requesting final sign-off"},
-    {"content": "UPDATE: Mark plan status Complete", "status": "pending", "activeForm": "Updating plan status"}
+    {"content": "Batch 1: Steps 1-2 TDD cycle", "status": "pending", "activeForm": "Executing Batch 1 TDD"},
+    {"content": "Batch 2: Step 3 TDD cycle", "status": "pending", "activeForm": "Executing Batch 2 TDD"},
+    {"content": "Quality Review: All agents (parallel)", "status": "pending", "activeForm": "Running quality review agents"},
+    {"content": "Process review findings", "status": "pending", "activeForm": "Processing review findings"},
+    {"content": "Complete implementation", "status": "pending", "activeForm": "Completing implementation"}
   ]
 }
 ```
 
-**Total TODOs**: (N × 4) + 6, where N = number of implementation steps in plan
+**Notes**:
+- Smart batching groups related steps for ~40% token reduction
+- Quality review runs 3 agents in parallel (optimizer, security, docs) - report-only mode
+- Main context handles fixes from review findings via additional TODOs if needed
 
 **Commit Command** (7 phases):
 
@@ -357,22 +344,24 @@ Repeat for all 6 phases sequentially.
 **Update TodoWrite**: Mark "[phase name]" as completed
 ```
 
-### TDD Command Pattern
+### TDD Phase Pattern (within /rptc:feat)
 
-**Initialize** dynamically from plan:
-1. Parse plan document to count steps: N
-2. Create (N × 4) + 6 TODOs
-3. 4 TODOs per step: RED, GREEN, REFACTOR, SYNC
-4. 6 quality gate TODOs at end
+**Initialize** based on plan steps:
+1. Group related steps into batches for efficiency
+2. Create batch-level TODOs (not per-step)
+3. Quality review TODO (runs 3 agents in parallel)
+4. Findings processing TODO
 
 **Update pattern**:
 ```markdown
-**Update TodoWrite**: Mark "Step X: RED - Write failing tests" as in_progress
-[Write tests...]
-**Update TodoWrite**: Mark "Step X: RED - Write failing tests" as completed
+**Update TodoWrite**: Mark "Batch 1: Steps 1-2 TDD cycle" as in_progress
+[Execute RED-GREEN-REFACTOR for each step in batch...]
+**Update TodoWrite**: Mark "Batch 1: Steps 1-2 TDD cycle" as completed
 ```
 
-**Auto-iteration**: GREEN phase may iterate up to 10 times without creating separate TODOs.
+**Smart batching**: Groups related steps for ~40% token reduction vs sequential execution.
+
+**Quality review**: Runs optimizer, security, and docs agents in parallel (report-only mode).
 
 ### Commit Command Pattern
 
@@ -420,16 +409,16 @@ Before [NEXT PHASE]:
 ---
 ```
 
-### All 8 Blocking Locations
+### All 6 Blocking Locations
 
 1. **Research** (commands/research.md): Block save without PM approval
-2. **Plan** (commands/plan.md): Block Master Planner delegation without PM approval
-3. **Plan** (commands/plan.md): Block plan save without PM approval
-4. **TDD** (commands/tdd.md): Block Efficiency Agent without PM approval
-5. **TDD** (commands/tdd.md): Block Security Agent without PM approval
-6. **TDD** (commands/tdd.md): Block TDD completion without PM approval
-7. **Commit** (commands/commit.md): Block commit if tests failing
-8. **Commit** (commands/commit.md): Block commit if code quality issues
+2. **Plan** (Phase 2): Block plan save without PM approval
+3. **TDD** (Phase 3): Block implementation until plan approved
+4. **Quality Review** (Phase 4): Review agents report findings (no PM pre-approval needed)
+5. **Commit** (commands/commit.md): Block commit if tests failing
+6. **Commit** (commands/commit.md): Block commit if code quality issues
+
+**Note**: Quality review agents (optimizer, security, docs) run automatically in parallel and report findings. Main context processes findings - no individual agent approval gates needed.
 
 ### Imperative Language Keywords
 
@@ -462,21 +451,19 @@ Before [NEXT PHASE]:
 | Command | Phase | Approval Required |
 |---------|-------|-------------------|
 | Research | Save document | YES |
-| Plan | Master Planner delegation | YES |
-| Plan | Save plan | YES |
-| TDD | Efficiency Agent | YES |
-| TDD | Security Agent | YES |
-| TDD | Mark complete | YES |
+| /rptc:feat | Plan approval (Phase 2) | YES |
+| /rptc:feat | Quality review findings (Phase 4) | PM decides which fixes to apply |
+| /rptc:feat | Mark complete | YES |
 | Commit | Final commit | YES |
-| Commit | Documentation Specialist | NO (automatic) |
 
 ### Automatic Phases (No Approval)
 
-**Documentation Specialist** (Commit phase):
-- Runs automatically after pre-commit checks
-- PM reviews output in final summary
-- Doesn't require pre-approval
-- Rationale: Operational task, not decision gate
+**Quality Review Agents** (Phase 4):
+- All 3 agents (optimizer, security, docs) run automatically in parallel
+- Agents operate in **report-only mode** - they don't make changes
+- PM reviews findings and decides which to address
+- Main context handles fixes via TodoWrite if needed
+- Rationale: Agents provide analysis, PM retains decision authority
 
 **Pre-Commit Verification** (Commit phase):
 - Tests, linting, coverage checks run automatically
@@ -614,10 +601,11 @@ Original: "Write tests for Step 1"
    - Confirm all tasks "completed" at end
 
 2. Run `/rptc:feat "test feature"`
-   - Verify correct todo list generation during planning
-   - Test PM approval gates
-   - Verify dynamic TODO generation during TDD phase
-   - Verify quality gates (Efficiency, Security) run in parallel
+   - Verify 5-phase workflow (Discovery → Architecture → Implementation → Quality → Complete)
+   - Test PM approval at plan phase
+   - Verify smart batching during TDD phase
+   - Verify quality review (optimizer, security, docs) run in parallel
+   - Confirm agents are report-only (no auto-fixes)
 
 4. Run `/rptc:commit pr`
    - Verify 7-phase tracking

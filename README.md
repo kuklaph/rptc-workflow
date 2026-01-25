@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 2.15.0
+**Version**: 2.16.0
 **Status**: Beta
 **License**: MIT
 
@@ -42,9 +42,9 @@ All phases unified in one command: `/rptc:feat`
 ### Core Principles
 
 - **You are the PM**: Final decision authority
-- **TDD is non-negotiable**: Tests always written first
+- **Task-appropriate workflow**: TDD for code, direct execution for non-code tasks
 - **Ask permission, not forgiveness**: Explicit approvals required
-- **Quality gates matter**: Efficiency & Security reviews
+- **Quality gates matter**: Efficiency, Security & Documentation reviews
 
 ---
 
@@ -54,7 +54,7 @@ All phases unified in one command: `/rptc:feat`
 
 | Command | Purpose | When to Use |
 |---------|---------|-------------|
-| `/rptc:feat "description"` | **Complete feature development**: Discovery → Architecture → TDD → Quality Review | **Default for all features** |
+| `/rptc:feat "description"` | **Complete feature development**: Discovery → Architecture → Implementation → Quality Review | **Default for all tasks** (code and non-code) |
 
 ### Supporting Commands
 
@@ -87,10 +87,15 @@ All phases unified in one command: `/rptc:feat`
   - **Pragmatic**: Balanced approach, good enough without over-engineering
 - **User selects approach** and approves plan
 
-### Phase 3: TDD Implementation (Smart Batching)
+### Phase 3: Implementation
 
-**Goal**: Build with tests first, using intelligent step batching.
+**Goal**: Execute the plan using the appropriate method.
 
+**Route A - Non-Code Tasks** (docs, config, markdown):
+- Main context executes steps directly
+- No TDD overhead for non-code changes
+
+**Route B - Code Tasks** (TDD with Smart Batching):
 - Groups related steps into batches for efficiency
 - Runs batches in parallel when independent
 - Strict RED → GREEN → REFACTOR cycle per step
@@ -98,11 +103,15 @@ All phases unified in one command: `/rptc:feat`
 
 ### Phase 4: Quality Review
 
-**Goal**: Ensure code quality through parallel review.
+**Goal**: Review changes and create fix list for main context.
+
+**Mode**: Report-only (agents don't make changes)
 
 - **Efficiency Agent**: Complexity, KISS/YAGNI violations, dead code
 - **Security Agent**: Input validation, auth checks, injection vulnerabilities
-- Both run in parallel with tiered authority (auto-fix safe issues)
+- **Documentation Agent**: README updates, API doc changes, inline comment accuracy
+- All three run in parallel, report findings
+- Main context addresses findings via TodoWrite
 
 ### Phase 5: Complete
 
@@ -121,7 +130,7 @@ All phases unified in one command: `/rptc:feat`
 ```bash
 # One command does everything
 /rptc:feat "add user profile avatar upload"
-# → Discovery → Architecture → TDD → Quality Review → Complete
+# → Discovery → Architecture → TDD Implementation → Quality Review → Complete
 
 # Then ship
 /rptc:commit pr
@@ -173,23 +182,30 @@ When you approve delegation, specialized AI agents provide expert analysis:
 ### TDD Agent
 
 **Purpose**: Execute strict RED-GREEN-REFACTOR cycle
-**When**: TDD Implementation phase (Phase 3)
+**When**: Implementation phase (Phase 3, code tasks only)
 **Provides**: Tests first, minimal implementations, batched execution
 **Architecture**: Smart batching for related steps
 
-### Optimizer Agent
+### Code Review Agent
 
-**Purpose**: Optimize code for simplicity (KISS/YAGNI)
-**When**: Quality Review phase (Phase 4)
-**Provides**: Dead code removal, logic simplification, readability improvements
-**Architecture**: Tiered authority with confidence scoring
+**Purpose**: Review code for simplicity issues (KISS/YAGNI)
+**When**: Quality Review phase (Phase 4, parallel with Security and Docs)
+**Provides**: Findings for dead code, complexity, readability improvements
+**Architecture**: Report-only with confidence scoring
 
 ### Security Agent
 
-**Purpose**: Identify and fix vulnerabilities
-**When**: Quality Review phase (Phase 4, parallel with Optimizer)
-**Provides**: OWASP audit, input validation, auth/authz review
-**Architecture**: Tiered authority with confidence scoring
+**Purpose**: Identify vulnerabilities and security issues
+**When**: Quality Review phase (Phase 4, parallel with Code Review and Docs)
+**Provides**: OWASP audit findings, input validation issues, auth/authz concerns
+**Architecture**: Report-only with confidence scoring
+
+### Documentation Agent
+
+**Purpose**: Review documentation impact of changes
+**When**: Quality Review phase (Phase 4, parallel with Code Review and Security)
+**Provides**: Findings for README updates, API doc changes, inline comment accuracy
+**Architecture**: Report-only with confidence scoring
 
 ### Test Sync Agent
 
@@ -270,7 +286,7 @@ rptc-workflow/
 ├── agents/                      # 9 specialist agents
 │   ├── researcher-agent.md
 │   ├── plan-agent.md
-│   ├── optimizer-agent.md
+│   ├── code-review-agent.md
 │   ├── security-agent.md
 │   ├── docs-agent.md
 │   ├── kiss-agent.md

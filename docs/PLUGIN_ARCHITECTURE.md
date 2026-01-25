@@ -32,7 +32,7 @@ rptc-workflow/                      # ${CLAUDE_PLUGIN_ROOT}
 ├── agents/                         # Specialist agents (9 agents)
 │   ├── docs-agent.md               # Documentation sync
 │   ├── kiss-agent.md               # Plan simplification
-│   ├── optimizer-agent.md          # Code optimization
+│   ├── code-review-agent.md        # Code review
 │   ├── plan-agent.md               # Implementation planning
 │   ├── researcher-agent.md         # Research and exploration
 │   ├── security-agent.md           # Security review
@@ -161,14 +161,14 @@ Phase 2: Architecture
     → User selects approach
     → Plan written to ~/.claude/plans/
     ↓
-Phase 3: TDD Implementation
-    → Smart batching groups related steps
-    → Delegates batches to rptc:tdd-agent
-    → Strict RED → GREEN → REFACTOR cycle
+Phase 3: Implementation
+    → Route A (non-code): Main context executes directly
+    → Route B (code): TDD with smart batching via rptc:tdd-agent
     ↓
-Phase 4: Quality Review
-    → Parallel execution of optimizer-agent and security-agent
-    → Tiered authority (auto-fix safe issues)
+Phase 4: Quality Review (Report-Only)
+    → Parallel: code-review-agent + security-agent + docs-agent
+    → Agents report findings only (no auto-fix)
+    → Main context handles fixes via TodoWrite
     ↓
 Phase 5: Complete
     → Summary of changes
@@ -207,17 +207,17 @@ Use Task tool with subagent_type="rptc:[agent-name]":
 
 ### Agent Responsibilities
 
-| Agent | Phase | Purpose |
-|-------|-------|---------|
-| `rptc:researcher-agent` | Phase 1 | Codebase exploration, pattern discovery |
-| `rptc:plan-agent` | Phase 2 | Implementation planning (3 perspectives) |
-| `rptc:tdd-agent` | Phase 3 | RED-GREEN-REFACTOR execution |
-| `rptc:optimizer-agent` | Phase 4 | Code simplification, KISS/YAGNI |
-| `rptc:security-agent` | Phase 4 | Vulnerability detection, OWASP compliance |
-| `rptc:kiss-agent` | Internal | Plan validation against simplicity principles |
-| `rptc:docs-agent` | Optional | Documentation synchronization |
-| `rptc:test-sync-agent` | `/sync-prod-to-tests` | Analyze test-production relationships |
-| `rptc:test-fixer-agent` | `/sync-prod-to-tests` | Auto-repair test files |
+| Agent | Phase | Purpose | Mode |
+|-------|-------|---------|------|
+| `rptc:researcher-agent` | Phase 1 | Codebase exploration, pattern discovery | Active |
+| `rptc:plan-agent` | Phase 2 | Implementation planning (3 perspectives) | Active |
+| `rptc:tdd-agent` | Phase 3 (code) | RED-GREEN-REFACTOR execution | Active |
+| `rptc:code-review-agent` | Phase 4 | Code review, KISS/YAGNI | **Report-only** |
+| `rptc:security-agent` | Phase 4 | Security review, OWASP compliance | **Report-only** |
+| `rptc:docs-agent` | Phase 4 | Documentation impact review | **Report-only** |
+| `rptc:kiss-agent` | Internal | Plan validation against simplicity | Active |
+| `rptc:test-sync-agent` | `/sync-prod-to-tests` | Analyze test-production relationships | Analysis |
+| `rptc:test-fixer-agent` | `/sync-prod-to-tests` | Auto-repair test files | Active |
 
 ---
 
@@ -265,42 +265,45 @@ RPTC maximizes efficiency through parallelization:
     User Selects One
 ```
 
-### Phase 4: Quality Review
+### Phase 4: Quality Review (Report-Only)
 
 ```text
 ┌─────────────────────┐
-│  TDD Complete       │
+│ Implementation Done │
 └─────────┬───────────┘
           │
-    ┌─────┴─────┐
-    ▼           ▼
-┌───────┐   ┌───────┐
-│Optim- │   │Secur- │   (Both run in parallel)
-│izer   │   │ity    │
-└───┬───┘   └───┬───┘
-    │           │
-    └─────┬─────┘
-          ▼
-   Consolidated Findings
+    ┌─────┼─────┐
+    ▼     ▼     ▼
+┌─────┐ ┌─────┐ ┌─────┐
+│Opti-│ │Secu-│ │Docs │  (All 3 run in parallel)
+│mizer│ │rity │ │Agent│  (REPORT-ONLY)
+└──┬──┘ └──┬──┘ └──┬──┘
+   │       │       │
+   └───────┼───────┘
+           ▼
+    Findings → TodoWrite
+           ▼
+    Main Context Fixes
 ```
 
 ---
 
-## Tiered Authority System
+## Report-Only Review System
 
-Quality agents use confidence-based authority:
+Quality review agents (optimizer, security, docs) operate in **report-only mode**:
 
-| Tier | Confidence | Action |
-|------|------------|--------|
-| **A** (Auto-fix) | Very high | Applied automatically |
-| **B** (High confidence) | ≥80% | Applied with summary |
-| **C** (Approval required) | <80% | Requires explicit user approval |
+| Confidence | Priority | Action |
+|------------|----------|--------|
+| ≥90% | High | Reported first, clear issues |
+| 80-89% | Medium | Reported, verify context |
+| <80% | Skip | Below threshold, not reported |
 
 **Principles:**
 
-- All fixes must maintain test compatibility (100% pass rate required)
-- Tier A fixes are reversible safe patterns
-- Tier C includes structural changes or architecture decisions
+- Agents DO NOT edit, write, or auto-fix anything
+- All findings returned to main context via TodoWrite
+- Main context handles fixes with user approval as needed
+- User decides which findings to address
 
 ---
 
@@ -391,11 +394,12 @@ Pre-commit hook automatically blocks commits with version mismatch.
 **RPTC Architecture Principles:**
 
 1. **One command for features**: `/rptc:feat` handles everything
-2. **Parallel execution**: Maximize efficiency through concurrent agents
-3. **Native plan mode**: Use Claude's built-in planning (`~/.claude/plans/`)
-4. **Minimal footprint**: No workspace directories or configuration required
-5. **User as PM**: You select approach, approve plans, review findings
-6. **Quality gates**: Parallel efficiency and security reviews
+2. **Task-appropriate workflow**: TDD for code, direct execution for non-code
+3. **Parallel execution**: Maximize efficiency through concurrent agents
+4. **Native plan mode**: Use Claude's built-in planning (`~/.claude/plans/`)
+5. **Minimal footprint**: No workspace directories or configuration required
+6. **User as PM**: You select approach, approve plans, review findings
+7. **Report-only quality gates**: Agents report, main context fixes
 
 **Plugin provides:**
 

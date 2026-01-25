@@ -132,7 +132,7 @@ Before submitting a PR, test the following:
 - [ ] Phase 1 (Discovery) launches parallel exploration agents
 - [ ] Phase 2 (Architecture) presents 3 planning perspectives
 - [ ] Phase 3 (TDD) uses smart batching for implementation
-- [ ] Phase 4 (Quality Review) runs optimizer and security agents in parallel
+- [ ] Phase 4 (Quality Review) runs optimizer, security, and docs agents in parallel (report-only)
 - [ ] Plans are stored in Claude's native plan mode (`~/.claude/plans/`)
 
 ### Test on Multiple Platforms

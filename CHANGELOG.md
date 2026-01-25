@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.16.0] - 2026-01-25
+
+### Changed
+
+- **Renamed `optimizer-agent` to `code-review-agent`**: Clearer name reflecting agent's purpose as code quality reviewer
+- **Review agents now report-only**: All three review agents (code-review, security, docs) no longer auto-fix issues. They report findings; main context handles fixes via TodoWrite
+- **TDD optional based on task type**: Code tasks use TDD, non-code tasks (docs, config, markdown) execute directly without TDD overhead
+- **Parallel quality review**: All 3 review agents run simultaneously in Phase 4 for faster feedback
+- **Updated 15 files** with new agent name and workflow changes:
+  - `agents/code-review-agent.md` (renamed from optimizer-agent.md)
+  - `agents/kiss-agent.md`, `agents/docs-agent.md`, `agents/security-agent.md`
+  - `commands/feat.md`
+  - `docs/RPTC_WORKFLOW_GUIDE.md`, `docs/PLUGIN_ARCHITECTURE.md`, `docs/PROJECT_TEMPLATE.md`
+  - `sop/flexible-testing-guide.md`, `sop/post-tdd-refactoring.md`, `sop/security-and-performance.md`, `sop/testing-guide.md`, `sop/todowrite-guide.md`
+  - `README.md`, `CONTRIBUTING.md`
+
+---
+
+
 ## [2.15.0] - 2026-01-23
 
 ### Removed

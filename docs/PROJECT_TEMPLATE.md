@@ -77,10 +77,15 @@ The unified `/rptc:feat` command handles the complete workflow:
 - **You select which approach** fits your needs
 - Plan saved to `~/.claude/plans/`
 
-### Phase 3: TDD Implementation
+### Phase 3: Implementation
 
-**Purpose**: Build with tests first using smart batching.
+**Purpose**: Execute the plan using the appropriate method.
 
+**Route A - Non-Code Tasks** (docs, config, markdown):
+- Main context executes steps directly
+- No TDD overhead for non-code work
+
+**Route B - Code Tasks** (TDD with Smart Batching):
 - Groups related steps into batches for efficiency
 - For each step: RED → GREEN → REFACTOR
 - Parallel execution of independent batches
@@ -88,12 +93,13 @@ The unified `/rptc:feat` command handles the complete workflow:
 
 ### Phase 4: Quality Review
 
-**Purpose**: Ensure code quality through parallel review.
+**Purpose**: Review changes and create fix list (report-only).
 
-- **Optimizer Agent**: Complexity, KISS/YAGNI violations, dead code
+- **Code Review Agent**: Complexity, KISS/YAGNI violations, dead code
 - **Security Agent**: Input validation, auth checks, injection vulnerabilities
-- Both run in parallel with tiered authority (auto-fix safe issues)
-- You review and approve significant changes
+- **Documentation Agent**: README updates, API doc changes
+- All three run in parallel, **report findings only**
+- Main context handles fixes via TodoWrite
 
 ### Phase 5: Complete
 
@@ -106,9 +112,11 @@ The unified `/rptc:feat` command handles the complete workflow:
 
 ## Core Principles
 
-### TDD (Non-Negotiable)
+### TDD (For Code Tasks)
 
-1. **Write tests FIRST** - Always, no exceptions
+**Note**: TDD applies to code tasks (source files). Non-code tasks (docs, config) execute directly without TDD.
+
+1. **Write tests FIRST** - For all code changes
 2. **RED → GREEN → REFACTOR** - The sacred cycle
 3. **Auto-iteration on failures** - Agent fixes until passing
 4. **Never commit broken tests** - Quality gate enforced
@@ -131,8 +139,9 @@ When `/rptc:feat` presents 3 planning approaches, consider:
 
 - **Efficiency Gate**: Catches over-engineering, enforces KISS/YAGNI
 - **Security Gate**: Prevents vulnerabilities before they ship
-- Both run in parallel for speed
-- Tiered authority: auto-fix safe issues, report risky ones
+- **Documentation Gate**: Ensures docs stay in sync with code
+- All three run in parallel for speed
+- **Report-only mode**: Agents report findings, main context handles fixes
 
 ## AI Coding Assistant Guidelines
 
@@ -334,7 +343,7 @@ docs/research/
 
 - **Minimum coverage**: 80% overall, 100% critical paths
 - **Test types**: Unit, Integration, E2E
-- **Test-first**: ALWAYS write tests before implementation
+- **Test-first for code**: Write tests before implementation (code tasks only)
 
 ### Code Quality
 
@@ -354,8 +363,9 @@ docs/research/
 
 - **You are the decision maker** - Select planning approach, approve plans
 - **One command for features** - `/rptc:feat` handles the workflow
-- **Tests first, always** - Non-negotiable TDD principle
-- **Quality gates matter** - Efficiency and Security reviews catch issues
+- **TDD for code tasks** - Tests first for source file changes
+- **Direct execution for non-code** - Docs and config skip TDD
+- **Report-only quality gates** - Agents report, you decide what to fix
 - **Native plan mode** - Plans in `~/.claude/plans/`, no `.rptc/` needed
 
 ## Example Complete Workflow

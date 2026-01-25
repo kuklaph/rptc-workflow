@@ -3324,7 +3324,7 @@ During planning, flag features requiring flexible assertions if they involve:
 
 #### Plan Documentation Template
 
-Add to your `.rptc/plans/feature-name.md` file:
+Add to your `~/.claude/plans/feature-name.md` file:
 
 ```markdown
 ## Test Strategy
@@ -3408,7 +3408,7 @@ def test_feature_with_flexible_assertion():
     - Failure Action: [What to do if test becomes flaky]
       Example: "Review prompt stability, check if similarity drops below 0.80"
 
-    Plan Reference: .rptc/plans/[feature-name].md#test-strategy
+    Plan Reference: ~/.claude/plans/[feature-name].md#test-strategy
     """
     # Arrange
     input_data = create_test_input()
@@ -3482,7 +3482,7 @@ RPTC's efficiency and security review agents provide specialized guidance on fle
 
 #### Efficiency Review Checklist
 
-When reviewing code with flexible assertions, the Master Efficiency Agent checks:
+When reviewing code with flexible assertions, the Code Review Agent checks:
 
 - [ ] **Is flexibility justified?**
   - Could prompt engineering eliminate variation? (If yes, improve prompt first)
@@ -3514,7 +3514,7 @@ When reviewing code with flexible assertions, the Master Efficiency Agent checks
 
 #### Security Review Checklist
 
-When reviewing code with flexible assertions, the Master Security Agent verifies:
+When reviewing code with flexible assertions, the Security Agent verifies:
 
 - [ ] **No security-critical flexible assertions**
   - Authentication logic: Exact assertions only
@@ -3550,7 +3550,7 @@ Before committing code with flexible assertions, ensure documentation completene
 #### Pre-Commit Checklist
 
 - [ ] **Plan documentation updated**
-  - `.rptc/plans/[feature].md` describes flexible assertion strategy
+  - `~/.claude/plans/[feature].md` describes flexible assertion strategy
   - Rationale for flexibility documented in plan
   - Threshold selection explained
 
@@ -3587,7 +3587,7 @@ Rationale for flexibility:
 - Security review: ✅ Not security-critical
 - Efficiency review: ✅ Flexibility justified, threshold appropriate
 
-Plan reference: .rptc/plans/[feature-name].md#test-strategy
+Plan reference: ~/.claude/plans/[feature-name].md#test-strategy
 ```
 
 ---
@@ -3655,7 +3655,7 @@ Plan reference: .rptc/plans/[feature-name].md#test-strategy
 **See Also**:
 - **`/rptc:feat`** (`commands/feat.md`) - Unified workflow: Discovery → Plan → TDD → Review
 - **`/rptc:commit`** (`commands/commit.md`) - Documentation verification before commit
-- **Optimizer Agent** (`agents/optimizer-agent.md`) - Quality review of flexible assertions
+- **Code Review Agent** (`agents/code-review-agent.md`) - Quality review of flexible assertions
 - **Security Agent** (`agents/security-agent.md`) - Security validation of test strategies
 
 **SOPs**:
@@ -4275,7 +4275,7 @@ Use this checklist when adding flexible assertions to your RPTC workflow:
 - [ ] **Define** explicit threshold/acceptance criteria
 - [ ] **Complete** safety check (not security/compliance/contract-critical)
 - [ ] **Plan** at least one baseline exact test for critical path
-- [ ] **Add** flexible assertion section to `.rptc/plans/[feature].md`
+- [ ] **Add** flexible assertion section to `~/.claude/plans/[feature].md`
 
 #### TDD Phase (`/rptc:feat` Phase 3)
 

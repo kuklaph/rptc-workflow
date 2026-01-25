@@ -6,7 +6,7 @@
 **Created**: 2024-01-15
 **Last Updated**: 2025-01-21
 
-**Applies To**: All RPTC workflow commands (research, plan, tdd, commit), plan-agent, optimizer-agent
+**Applies To**: `/rptc:feat` (code tasks only), tdd-agent, plan-agent
 
 ---
 
@@ -62,10 +62,12 @@
 - Code review shows missing edge case tests
 - Coverage reports show <80% on critical paths
 
-**NEVER skip**:
-- Even "trivial" features (AI underestimates edge cases)
+**NEVER skip** (for code tasks):
+- Even "trivial" code changes (AI underestimates edge cases)
 - Bug fixes (must include regression tests)
 - Refactoring work (tests validate behavior preservation)
+
+**Note**: TDD applies to code tasks only. Non-code tasks (documentation, config, markdown) skip TDD and execute directly via main context.
 
 ---
 

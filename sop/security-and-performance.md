@@ -6,7 +6,7 @@
 **Created**: 2024-01-15
 **Last Updated**: 2025-01-21
 
-**Applies To**: All RPTC workflow commands (research, plan, tdd, commit), Master Security Agent, Master Efficiency Agent, all implementation sub-agents
+**Applies To**: `/rptc:feat` (unified workflow), `/rptc:research`, `/rptc:commit`, `/rptc:sync-prod-to-tests`, Code Review Agent, Security Agent, all implementation sub-agents
 
 ---
 
