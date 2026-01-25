@@ -340,16 +340,6 @@ Main context receives findings via TodoWrite and handles all fixes with user app
 - Create new test files
 - Fix failing assertions
 
-### KISS Agent (`rptc:kiss-agent`)
-
-**Purpose**: Plan validation against simplicity principles
-
-**4-Gate Validation:**
-1. Pattern Search
-2. Abstraction Justification
-3. Complexity Check
-4. Simplicity Principles
-
 ### Documentation Agent (`rptc:docs-agent`)
 
 **Purpose**: Sync documentation with code changes

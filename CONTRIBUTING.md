@@ -97,7 +97,7 @@ rptc-workflow/
 │   ├── feat.md           # /rptc:feat (PRIMARY)
 │   ├── research.md       # /rptc:research
 │   └── sync-prod-to-tests.md  # /rptc:sync-prod-to-tests
-├── agents/                # Specialist agent definitions (9 agents)
+├── agents/                # Specialist agent definitions (8 agents)
 ├── sop/                   # Standard Operating Procedures (10 SOPs)
 ├── templates/             # Templates for artifacts
 ├── skills/                # Skills (3 skills)

@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 2.18.0
+**Version**: 2.19.0
 **Status**: Beta
 **License**: MIT
 
@@ -283,13 +283,12 @@ rptc-workflow/
 │   ├── feat.md                  # /rptc:feat (PRIMARY)
 │   ├── research.md              # /rptc:research
 │   └── sync-prod-to-tests.md    # /rptc:sync-prod-to-tests
-├── agents/                      # 9 specialist agents
+├── agents/                      # 8 specialist agents
 │   ├── research-agent.md
 │   ├── architect-agent.md
 │   ├── code-review-agent.md
 │   ├── security-agent.md
 │   ├── docs-agent.md
-│   ├── kiss-agent.md
 │   ├── tdd-agent.md
 │   ├── test-sync-agent.md
 │   └── test-fixer-agent.md

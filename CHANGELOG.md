@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.19.0] - 2026-01-25
+
+### Changed
+
+- **Merged `kiss-agent` into `architect-agent`**: 80% of concepts already existed; added Simplicity Validation section with thresholds (≤10 steps, ≤5 files, ≤3 layers, ≥3 use cases), YAGNI check, and simplification actions
+- **Removed `kiss-agent.md`**: Concepts consolidated into architect-agent Phase 5 (Self-Critique & Validation)
+- **Agent count reduced from 9 to 8**: Updated all documentation references
+
+---
+
 ## [2.18.0] - 2026-01-25
 
 ### Added

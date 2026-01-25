@@ -727,6 +727,37 @@ Use structured risk framework:
 - [ ] Timeline realistic for scope
 - [ ] All steps independently testable
 
+### Simplicity Validation (KISS/YAGNI Gate)
+
+**Thresholds** - Flag if exceeded:
+
+| Metric | Threshold | Action if Exceeded |
+|--------|-----------|-------------------|
+| Implementation steps | ≤10 | Merge related steps |
+| New files | ≤5 | Consolidate files |
+| Layers of indirection | ≤3 | Remove intermediate layers |
+| Abstractions | ≥3 use cases each | Inline single-use abstractions |
+
+**Checklist:**
+
+- [ ] Step count ≤10 (or justified with rationale)
+- [ ] New file count ≤5 (or justified with rationale)
+- [ ] No unnecessary abstractions (each has ≥3 use cases)
+- [ ] No speculative features (YAGNI - solving today's problem only)
+- [ ] Junior engineer could understand the plan on first reading
+
+**YAGNI Check:**
+- Question: "Are we building for CURRENT requirements only?"
+- Test: "Are there features with no current use case?"
+- Action: Remove speculative extensibility, "just in case" abstractions
+
+**Simplification Actions** (if thresholds exceeded):
+
+1. **Step count exceeded**: Merge related steps (e.g., "Create interface" + "Create implementation" → single step)
+2. **File count exceeded**: Consolidate related files (validator+mapper+service → single service file)
+3. **Layer count exceeded**: Remove intermediate layers, simplify architecture
+4. **Abstraction unjustified**: Inline implementation, remove interface/base class
+
 ### Context Efficiency
 
 - [ ] Total plan tokens < 15K

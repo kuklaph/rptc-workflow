@@ -29,9 +29,8 @@ rptc-workflow/                      # ${CLAUDE_PLUGIN_ROOT}
 │   ├── research.md                 # /rptc:research
 │   └── sync-prod-to-tests.md       # /rptc:sync-prod-to-tests
 │
-├── agents/                         # Specialist agents (9 agents)
+├── agents/                         # Specialist agents (8 agents)
 │   ├── docs-agent.md               # Documentation sync
-│   ├── kiss-agent.md               # Plan simplification
 │   ├── code-review-agent.md        # Code review
 │   ├── architect-agent.md               # Implementation planning
 │   ├── research-agent.md         # Research and exploration
@@ -215,7 +214,6 @@ Use Task tool with subagent_type="rptc:[agent-name]":
 | `rptc:code-review-agent` | Phase 4 | Code review, KISS/YAGNI | **Report-only** |
 | `rptc:security-agent` | Phase 4 | Security review, OWASP compliance | **Report-only** |
 | `rptc:docs-agent` | Phase 4 | Documentation impact review | **Report-only** |
-| `rptc:kiss-agent` | Internal | Plan validation against simplicity | Active |
 | `rptc:test-sync-agent` | `/sync-prod-to-tests` | Analyze test-production relationships | Analysis |
 | `rptc:test-fixer-agent` | `/sync-prod-to-tests` | Auto-repair test files | Active |
 
@@ -404,7 +402,7 @@ Pre-commit hook automatically blocks commits with version mismatch.
 **Plugin provides:**
 
 - 5 commands (1 primary, 4 supporting)
-- 9 specialist agents
+- 8 specialist agents
 - 10 SOPs
 - 3 skills
 
