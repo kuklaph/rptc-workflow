@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.18.0] - 2026-01-25
+
+### Added
+
+- **Flexible scope modes** for code-review-agent: PR Review, Directory Review, Codebase Sweep
+- **Dead code detection** in Tier 2: unused imports, variables, functions, unreachable code
+- **Over-engineering checklist**: junior-benchmark, Rule of Three, pattern table
+- **Expanded AI anti-patterns**: 5 specific patterns inline for quick reference
+
+---
+
 ## [2.17.0] - 2026-01-25
 
 ### Changed
