@@ -43,13 +43,26 @@ Reference before review for principles and thresholds:
 
 ## Scope
 
-**Flexible scope** - Use whichever is provided or appropriate:
+**Flexible scope** - select based on context:
 
-1. **Git diff** (when available): `git diff` for unstaged or `git diff --cached` for staged changes
-2. **Explicit files**: Files specifically provided for review
-3. **Feature scope**: Code modified in current feature
+| Mode | When to Use | Input |
+|------|-------------|-------|
+| **PR Review** | Feature branch vs base | `git diff main...HEAD` |
+| **Change Review** | Pre-commit check (default) | `git diff` or `git diff --cached` |
+| **Directory Review** | Targeted cleanup | Specified directory path |
+| **Codebase Sweep** | Full cleanup (explicit request only) | Entire project |
 
-**Always exclude**: Entire codebase scanning (review only what changed)
+**Selection Logic:**
+1. PR context provided → PR Review
+2. Directory specified → Directory Review
+3. "Sweep" or "cleanup" explicitly requested → Codebase Sweep
+4. Default → Change Review
+
+**For Codebase Sweeps:**
+- Requires explicit user request (never auto-select)
+- Apply stricter confidence threshold (90+) to reduce noise
+- Focus on STRUCTURE, COMPLEXITY, and dead code
+- Limit output to top 20 findings per category
 
 **Use git blame** when helpful to understand:
 - Why code was written this way originally
@@ -67,7 +80,13 @@ Analyze in this priority order:
 - System boundary violations (mixing layers inappropriately)
 - Modularity issues (tight coupling, circular dependencies)
 - Single Responsibility violations at module/class level
-- AI anti-patterns (reference `architecture-patterns.md` Section: AI Anti-Patterns)
+- AI over-engineering patterns:
+  - Abstract base class with only 1 implementation
+  - Factory/Builder for simple constructor
+  - Interface with only 1 implementation
+  - Middleware layer for <5 operations
+  - Event bus within same module
+  - Reference: `architecture-patterns.md` Section: AI Anti-Patterns
 
 **Functionality & Correctness**
 - Logic flaws and off-by-one errors
@@ -83,6 +102,12 @@ Analyze in this priority order:
 - Clever one-liners that sacrifice readability
 - Missing or misleading comments on complex logic
 - Inconsistent patterns within the codebase
+
+**Dead Code** (flag obvious cases)
+- Unused imports and dependencies
+- Unused private variables and functions
+- Unreachable code after return/throw/break
+- See `post-tdd-refactoring.md` Phase 2 for language-specific detection tools
 
 **Testing Strategy** (when tests are in scope)
 - Coverage gaps on critical paths
@@ -123,6 +148,24 @@ Analyze in this priority order:
 - Inefficient algorithms on large datasets
 - Missing caching opportunities
 - Resource exhaustion risks (unbounded queries, memory leaks)
+
+---
+
+## Over-Engineering Checklist
+
+**Benchmark**: Would a junior engineer's straightforward solution work here? If yes, the current abstraction is likely unnecessary.
+
+| Pattern | Red Flag | Keep If... |
+|---------|----------|------------|
+| Abstract base class | Only 1 implementation | 3+ implementations exist |
+| Factory/Builder | Simple constructor works | Complex initialization logic required |
+| Interface | Only 1 implementation | 2+ implementations exist |
+| Middleware layer | <5 operations | Dynamic composition needed |
+| Event bus | Same module only | Cross-module communication required |
+
+**Rule of Three**: Don't abstract until you have 3 actual use cases.
+
+See `${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md` for detailed examples.
 
 ---
 
