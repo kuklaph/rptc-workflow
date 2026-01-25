@@ -33,8 +33,8 @@ rptc-workflow/                      # ${CLAUDE_PLUGIN_ROOT}
 │   ├── docs-agent.md               # Documentation sync
 │   ├── kiss-agent.md               # Plan simplification
 │   ├── code-review-agent.md        # Code review
-│   ├── plan-agent.md               # Implementation planning
-│   ├── researcher-agent.md         # Research and exploration
+│   ├── architect-agent.md               # Implementation planning
+│   ├── research-agent.md         # Research and exploration
 │   ├── security-agent.md           # Security review
 │   ├── tdd-agent.md                # TDD execution
 │   ├── test-fixer-agent.md         # Test repair
@@ -153,7 +153,7 @@ The primary command handles the complete workflow:
     ↓
 Phase 1: Discovery
     → Launches 2-3 parallel exploration agents
-    → Uses rptc:researcher-agent with code-explorer methodology
+    → Uses rptc:research-agent with code-explorer methodology
     ↓
 Phase 2: Architecture
     → Enters Claude's native plan mode
@@ -209,8 +209,8 @@ Use Task tool with subagent_type="rptc:[agent-name]":
 
 | Agent | Phase | Purpose | Mode |
 |-------|-------|---------|------|
-| `rptc:researcher-agent` | Phase 1 | Codebase exploration, pattern discovery | Active |
-| `rptc:plan-agent` | Phase 2 | Implementation planning (3 perspectives) | Active |
+| `rptc:research-agent` | Phase 1 | Codebase exploration, pattern discovery | Active |
+| `rptc:architect-agent` | Phase 2 | Implementation planning (3 perspectives) | Active |
 | `rptc:tdd-agent` | Phase 3 (code) | RED-GREEN-REFACTOR execution | Active |
 | `rptc:code-review-agent` | Phase 4 | Code review, KISS/YAGNI | **Report-only** |
 | `rptc:security-agent` | Phase 4 | Security review, OWASP compliance | **Report-only** |
@@ -275,8 +275,8 @@ RPTC maximizes efficiency through parallelization:
     ┌─────┼─────┐
     ▼     ▼     ▼
 ┌─────┐ ┌─────┐ ┌─────┐
-│Opti-│ │Secu-│ │Docs │  (All 3 run in parallel)
-│mizer│ │rity │ │Agent│  (REPORT-ONLY)
+│Code │ │Secu-│ │Docs │  (All 3 run in parallel)
+│Revw │ │rity │ │Agent│  (REPORT-ONLY)
 └──┬──┘ └──┬──┘ └──┬──┘
    │       │       │
    └───────┼───────┘
@@ -290,7 +290,7 @@ RPTC maximizes efficiency through parallelization:
 
 ## Report-Only Review System
 
-Quality review agents (optimizer, security, docs) operate in **report-only mode**:
+Quality review agents (code-review, security, docs) operate in **report-only mode**:
 
 | Confidence | Priority | Action |
 |------------|----------|--------|

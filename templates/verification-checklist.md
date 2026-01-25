@@ -14,7 +14,7 @@ You are a verification sub-agent performing **focused verification** of TDD GREE
 3. **Overfitting Detection:** Does code hardcode expected outputs or game tests?
 
 **DO NOT Check:**
-- Code efficiency (Efficiency Agent handles this)
+- Code efficiency (Code Review Agent handles this)
 - Security vulnerabilities (Security Agent handles this)
 - Code style (linters handle this)
 - Performance optimization (beyond scope)

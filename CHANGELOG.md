@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.17.0] - 2026-01-25
+
+### Changed
+
+- **Renamed `plan-agent` to `architect-agent`**: Clearer name reflecting agent's role as Master Architect for implementation planning
+- **Renamed `researcher-agent` to `research-agent`**: Simplified, consistent naming
+- **Enhanced `code-review-agent`**: Added hierarchical review framework (Tier 1-3), false positive guidance, net positive philosophy, nit convention, SOP references, and new tools (LS, NotebookRead, git commands, tree)
+- **Enhanced `research-agent`**: Added LS, NotebookRead, TodoWrite tools; file:line output format requirement; Phase 2.5 clarifying questions checkpoint
+- **Updated all references across 16 files**: All "Master Feature Planner" → "Master Architect", all "Efficiency Agent/Review" → "Code Review Agent", all agent name references updated
+
+---
+
 ## [2.16.0] - 2026-01-25
 
 ### Changed

@@ -45,7 +45,7 @@ Complete feature development: Discovery → Architecture → Implementation → 
 3. **If codebase exploration needed**, launch 2-3 Explore agents in parallel using code-explorer methodology:
 
 ```
-Use Task tool with subagent_type="rptc:researcher-agent" (launch all 3 in parallel):
+Use Task tool with subagent_type="rptc:research-agent" (launch all 3 in parallel):
 
 Agent 1 prompt: "Find similar features and existing patterns for [feature].
 Use code-explorer methodology Phase 1 (Feature Discovery): entry points, core files, boundaries.
@@ -60,7 +60,7 @@ Use code-explorer methodology Phase 2 (Code Flow Tracing): call chains, data tra
 Return: external dependencies, internal dependencies, API boundaries."
 ```
 
-4. **If web research needed**, delegate to researcher-agent (Mode B)
+4. **If web research needed**, delegate to research-agent (Mode B)
 5. **If hybrid research needed** (codebase + best practices), launch both in parallel (Mode C)
 6. **If unclear about requirements**, ask user for clarification
 7. **Summarize findings**: Key patterns, files to modify, dependencies, gap analysis (if hybrid)
@@ -78,7 +78,7 @@ Return: external dependencies, internal dependencies, API boundaries."
 2. **Launch 3 plan agents in parallel** with different perspectives:
 
 ```
-Use Task tool with subagent_type="rptc:plan-agent" (launch all 3 in parallel):
+Use Task tool with subagent_type="rptc:architect-agent" (launch all 3 in parallel):
 
 Agent 1: "Design implementation for [feature]. Perspective: Minimal. Provide: files to modify, component design, data flow, build sequence. [If code task: include test strategy]"
 
@@ -319,7 +319,7 @@ REPORT ONLY - do not make changes. Output: documentation updates needed (≥80 o
 ### Explore Agents with Code-Explorer Methodology (Phase 1)
 
 ```
-Launch 3 Task tools in parallel with subagent_type="rptc:researcher-agent":
+Launch 3 Task tools in parallel with subagent_type="rptc:research-agent":
 
 Agent 1 (Feature Discovery): "Find similar features for [topic]. Entry points, core files, boundaries."
 Agent 2 (Architecture Analysis): "Analyze architecture for [topic]. Layers, patterns, cross-cutting concerns."
@@ -329,14 +329,14 @@ Agent 3 (Code Flow Tracing): "Map integration points for [topic]. Call chains, d
 ### Research Agent (Phase 1 - Web/Hybrid)
 
 ```
-Use Task tool with subagent_type="rptc:researcher-agent":
+Use Task tool with subagent_type="rptc:research-agent":
 prompt: "Research [topic]. Mode: [A=codebase|B=web|C=hybrid]. Return: findings with confidence."
 ```
 
 ### Planner Agent (Phase 2)
 
 ```
-Use Task tool with subagent_type="rptc:plan-agent" (launch all 3 in parallel):
+Use Task tool with subagent_type="rptc:architect-agent" (launch all 3 in parallel):
 
 Agent 1: "Design implementation for [feature]. Perspective: Minimal. ..."
 Agent 2: "Design implementation for [feature]. Perspective: Clean. ..."

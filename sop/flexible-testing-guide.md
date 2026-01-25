@@ -6,7 +6,7 @@
 **Created**: 2025-01-25
 **Status**: ✅ COMPLETE - Ready for Production Use
 
-**Applies To**: `/rptc:feat` workflow (TDD phase), plan-agent, AI code review workflows
+**Applies To**: `/rptc:feat` workflow (TDD phase), architect-agent, AI code review workflows
 
 **Dependencies**:
 - `testing-guide.md` (foundational TDD principles)
@@ -3478,9 +3478,9 @@ pytest -v --tb=short test_flexible_assertions.py
 
 ### 5.3 Quality Gate Integration
 
-RPTC's efficiency and security review agents provide specialized guidance on flexible assertions.
+RPTC's code review and security agents provide specialized guidance on flexible assertions.
 
-#### Efficiency Review Checklist
+#### Code Review Checklist
 
 When reviewing code with flexible assertions, the Code Review Agent checks:
 
@@ -3509,7 +3509,7 @@ When reviewing code with flexible assertions, the Code Review Agent checks:
   - Threshold continuously drifts downward → quality degradation
   - Multiple developers question why test is flexible → reconsider necessity
 
-**Efficiency Agent Guidance**:
+**Code Review Agent Guidance**:
 > "Flexible assertions are precision tools for inherent non-determinism, not permission to write permissive tests. Default to exact assertions unless variation is proven necessary and acceptable."
 
 #### Security Review Checklist
@@ -3625,7 +3625,7 @@ Plan reference: ~/.claude/plans/[feature-name].md#test-strategy
   │          └─ Monitor threshold margins, check baseline tests
   ↓
   Quality Gates:
-  ├─ Efficiency Review
+  ├─ Code Review
   │  ├─ Flexibility justified?
   │  ├─ Threshold appropriate?
   │  ├─ Baseline exact tests present?
@@ -4295,7 +4295,7 @@ Use this checklist when adding flexible assertions to your RPTC workflow:
 
 #### Quality Gate Phase
 
-- [ ] **Efficiency Review**: Complete efficiency checklist (Section 5.3)
+- [ ] **Code Review**: Complete code review checklist (Section 5.3)
   - [ ] Flexibility justified (not masking quality issue)
   - [ ] Threshold appropriate (0.85-0.92 recommended)
   - [ ] Baseline exact tests present

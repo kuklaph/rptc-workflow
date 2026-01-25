@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 2.16.0
+**Version**: 2.17.0
 **Status**: Beta
 **License**: MIT
 
@@ -107,7 +107,7 @@ All phases unified in one command: `/rptc:feat`
 
 **Mode**: Report-only (agents don't make changes)
 
-- **Efficiency Agent**: Complexity, KISS/YAGNI violations, dead code
+- **Code Review Agent**: Complexity, KISS/YAGNI violations, dead code
 - **Security Agent**: Input validation, auth checks, injection vulnerabilities
 - **Documentation Agent**: README updates, API doc changes, inline comment accuracy
 - All three run in parallel, report findings
@@ -244,7 +244,7 @@ Standard Operating Procedures provide guidance for agents:
 - `git-and-deployment.md` - Git workflow, CI/CD, deployment
 - `languages-and-style.md` - Language conventions, formatters, linters
 - `security-and-performance.md` - Security practices, performance optimization
-- `post-tdd-refactoring.md` - 5-phase refactoring checklist for efficiency agent
+- `post-tdd-refactoring.md` - 5-phase refactoring checklist for code review agent
 - `todowrite-guide.md` - TodoWrite integration patterns and best practices
 - `test-sync-guide.md` - Test-production matching algorithms and sync verification
 
@@ -284,8 +284,8 @@ rptc-workflow/
 │   ├── research.md              # /rptc:research
 │   └── sync-prod-to-tests.md    # /rptc:sync-prod-to-tests
 ├── agents/                      # 9 specialist agents
-│   ├── researcher-agent.md
-│   ├── plan-agent.md
+│   ├── research-agent.md
+│   ├── architect-agent.md
 │   ├── code-review-agent.md
 │   ├── security-agent.md
 │   ├── docs-agent.md

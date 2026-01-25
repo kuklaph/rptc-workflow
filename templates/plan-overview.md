@@ -4,7 +4,7 @@
 
 - [x] Planned
 - [ ] In Progress (TDD Phase)
-- [ ] Efficiency Review
+- [ ] Code Review
 - [ ] Security Review
 - [ ] Complete
 
@@ -18,7 +18,7 @@
 
 ### Quality Gates
 
-**Efficiency Review**: [enabled/disabled]
+**Code Review**: [enabled/disabled]
 **Security Review**: [enabled/disabled]
 
 **Note**: Quality gates are optional. Set to "enabled" to run automated reviews after TDD implementation, or "disabled" to skip. Default is "enabled" for both if not specified.
@@ -170,12 +170,12 @@
 
 1. **For PM:** Review and approve plan
 2. **For Developer:** Continue with TDD implementation phase
-3. **Quality Gates:** Efficiency Agent → Security Agent (parallel execution after TDD)
+3. **Quality Gates:** Code Review Agent → Security Agent (parallel execution after TDD)
 4. **Completion:** Verify all acceptance criteria met
 
 **Next:** TDD implementation begins automatically after plan approval
 
 ---
 
-_Plan overview created by Master Feature Planner_
+_Plan overview created by Master Architect_
 _Detailed steps in: step-01.md, step-02.md, ..., step-NN.md_

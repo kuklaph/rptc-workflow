@@ -71,7 +71,7 @@ Phase 5: Complete (summary)
 3. Optional web research for unfamiliar topics
 4. Summarizes findings: patterns found, files to modify, dependencies
 
-**Agents used:** `rptc:researcher-agent` with code-explorer methodology
+**Agents used:** `rptc:research-agent` with code-explorer methodology
 
 ### Phase 2: Architecture
 
@@ -88,7 +88,7 @@ Phase 5: Complete (summary)
 5. Writes selected plan to plan file
 6. **You approve** the plan via ExitPlanMode
 
-**Agents used:** `rptc:plan-agent` (3 parallel instances)
+**Agents used:** `rptc:architect-agent` (3 parallel instances)
 
 ### Phase 3: Implementation
 
@@ -268,7 +268,7 @@ Main context receives findings via TodoWrite and handles all fixes with user app
 
 ## Specialist Agents
 
-### Research Agent (`rptc:researcher-agent`)
+### Research Agent (`rptc:research-agent`)
 
 **Purpose**: Research through web search and codebase exploration
 
@@ -277,7 +277,7 @@ Main context receives findings via TodoWrite and handles all fixes with user app
 - **Mode B (Web)**: Consults 20+ sources with cross-verification
 - **Mode C (Hybrid)**: Combines both with gap analysis
 
-### Plan Agent (`rptc:plan-agent`)
+### Plan Agent (`rptc:architect-agent`)
 
 **Purpose**: Create comprehensive TDD-ready implementation plans
 

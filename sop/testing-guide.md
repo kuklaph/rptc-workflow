@@ -6,7 +6,7 @@
 **Created**: 2024-01-15
 **Last Updated**: 2025-01-21
 
-**Applies To**: `/rptc:feat` (code tasks only), tdd-agent, plan-agent
+**Applies To**: `/rptc:feat` (code tasks only), tdd-agent, architect-agent
 
 ---
 

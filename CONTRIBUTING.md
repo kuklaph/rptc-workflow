@@ -132,7 +132,7 @@ Before submitting a PR, test the following:
 - [ ] Phase 1 (Discovery) launches parallel exploration agents
 - [ ] Phase 2 (Architecture) presents 3 planning perspectives
 - [ ] Phase 3 (TDD) uses smart batching for implementation
-- [ ] Phase 4 (Quality Review) runs optimizer, security, and docs agents in parallel (report-only)
+- [ ] Phase 4 (Quality Review) runs code-review, security, and docs agents in parallel (report-only)
 - [ ] Plans are stored in Claude's native plan mode (`~/.claude/plans/`)
 
 ### Test on Multiple Platforms
@@ -329,7 +329,7 @@ for true parallel execution instead of sequential.
 ### File Naming
 
 - Commands: `kebab-case.md` (e.g., `catch-up-med.md`)
-- Agents: `kebab-case-agent.md` (e.g., `plan-agent.md`)
+- Agents: `kebab-case-agent.md` (e.g., `architect-agent.md`)
 - SOPs: `kebab-case.md` (e.g., `testing-guide.md`)
 - Docs: `SCREAMING_SNAKE_CASE.md` (e.g., `RPTC_WORKFLOW_GUIDE.md`)
 

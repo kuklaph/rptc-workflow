@@ -151,14 +151,14 @@
       "activeForm": "Asking clarifying questions"
     },
     {
-      "content": "Get PM approval for Master Feature Planner delegation",
+      "content": "Get PM approval for Master Architect delegation",
       "status": "pending",
-      "activeForm": "Requesting Master Feature Planner approval"
+      "activeForm": "Requesting Master Architect approval"
     },
     {
-      "content": "Delegate to Master Feature Planner Agent",
+      "content": "Delegate to Master Architect Agent",
       "status": "pending",
-      "activeForm": "Delegating to Master Feature Planner"
+      "activeForm": "Delegating to Master Architect"
     },
     {
       "content": "Present comprehensive plan to PM",
@@ -201,7 +201,7 @@
 
 **Notes**:
 - Smart batching groups related steps for ~40% token reduction
-- Quality review runs 3 agents in parallel (optimizer, security, docs) - report-only mode
+- Quality review runs 3 agents in parallel (code-review, security, docs) - report-only mode
 - Main context handles fixes from review findings via additional TODOs if needed
 
 **Commit Command** (7 phases):
@@ -361,7 +361,7 @@ Repeat for all 6 phases sequentially.
 
 **Smart batching**: Groups related steps for ~40% token reduction vs sequential execution.
 
-**Quality review**: Runs optimizer, security, and docs agents in parallel (report-only mode).
+**Quality review**: Runs code-review, security, and docs agents in parallel (report-only mode).
 
 ### Commit Command Pattern
 
@@ -418,7 +418,7 @@ Before [NEXT PHASE]:
 5. **Commit** (commands/commit.md): Block commit if tests failing
 6. **Commit** (commands/commit.md): Block commit if code quality issues
 
-**Note**: Quality review agents (optimizer, security, docs) run automatically in parallel and report findings. Main context processes findings - no individual agent approval gates needed.
+**Note**: Quality review agents (code-review, security, docs) run automatically in parallel and report findings. Main context processes findings - no individual agent approval gates needed.
 
 ### Imperative Language Keywords
 
@@ -459,7 +459,7 @@ Before [NEXT PHASE]:
 ### Automatic Phases (No Approval)
 
 **Quality Review Agents** (Phase 4):
-- All 3 agents (optimizer, security, docs) run automatically in parallel
+- All 3 agents (code-review, security, docs) run automatically in parallel
 - Agents operate in **report-only mode** - they don't make changes
 - PM reviews findings and decides which to address
 - Main context handles fixes via TodoWrite if needed
@@ -604,7 +604,7 @@ Original: "Write tests for Step 1"
    - Verify 5-phase workflow (Discovery → Architecture → Implementation → Quality → Complete)
    - Test PM approval at plan phase
    - Verify smart batching during TDD phase
-   - Verify quality review (optimizer, security, docs) run in parallel
+   - Verify quality review (code-review, security, docs) run in parallel
    - Confirm agents are report-only (no auto-fixes)
 
 4. Run `/rptc:commit pr`

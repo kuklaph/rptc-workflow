@@ -555,7 +555,7 @@ VERIFY Phase:
 
 ### Quality Gates: Automated Verification
 
-**Efficiency Agent** (executes after TDD phase):
+**Code Review Agent** (executes after TDD phase):
 - Runs **complexity analysis** (cyclomatic complexity, nesting depth)
 - Detects **over-abstraction** (abstract classes with single implementation)
 - Flags **unnecessary patterns** (factories with one variant)
