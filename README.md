@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 2.19.0
+**Version**: 2.20.0
 **Status**: Beta
 **License**: MIT
 
@@ -60,6 +60,7 @@ All phases unified in one command: `/rptc:feat`
 
 | Command | Purpose | When to Use |
 |---------|---------|-------------|
+| `/rptc:fix "bug description"` | **Systematic bug fixing**: Reproduction → Root Cause → Fix → Verify | Bug triaging and fixing |
 | `/rptc:research "topic"` | Standalone research and discovery | Exploring unfamiliar topics separately |
 | `/rptc:commit [pr]` | Verify and ship | After completing implementation |
 | `/rptc:sync-prod-to-tests "[dir]"` | Sync tests to production code with auto-fix | Test maintenance |
@@ -149,12 +150,12 @@ All phases unified in one command: `/rptc:feat`
 /rptc:commit pr
 ```
 
-### Pattern 3: Quick Bug Fix
+### Pattern 3: Bug Fix
 
 ```bash
-# Skip research/planning for simple fixes
-/rptc:feat "fix login error with special characters"
-# → Agent detects simplicity, minimal phases
+# Systematic bug triaging and fixing
+/rptc:fix "cart items disappear after page refresh"
+# → Reproduction → Root Cause Analysis → Fix → Verification
 
 /rptc:commit
 ```
@@ -219,18 +220,6 @@ When you approve delegation, specialized AI agents provide expert analysis:
 **When**: `/rptc:sync-prod-to-tests` command (fix phase)
 **Provides**: Update, add, create, and assertion fix scenarios
 
-### KISS Agent
-
-**Purpose**: Validate plan complexity against simplicity principles
-**When**: Internal plan validation
-**Provides**: 4-gate validation, autonomous simplification
-
-### Documentation Agent
-
-**Purpose**: Sync documentation with code changes
-**When**: After quality gates (future integration)
-**Provides**: Diff-driven analysis, surgical updates
-
 ---
 
 ## Available SOPs
@@ -281,6 +270,7 @@ rptc-workflow/
 ├── commands/                    # All commands (flat structure)
 │   ├── commit.md                # /rptc:commit
 │   ├── feat.md                  # /rptc:feat (PRIMARY)
+│   ├── fix.md                   # /rptc:fix
 │   ├── research.md              # /rptc:research
 │   └── sync-prod-to-tests.md    # /rptc:sync-prod-to-tests
 ├── agents/                      # 8 specialist agents
@@ -355,9 +345,9 @@ your-project/
 
 ### When to Use Each Approach
 
-| Complexity | Approach |
-|------------|----------|
-| Bug Fix | `/rptc:feat "fix X"` (agent detects simplicity) |
+| Scenario | Approach |
+|----------|----------|
+| Bug Fix | `/rptc:fix "bug description"` |
 | Small Feature | `/rptc:feat "add X"` |
 | Medium Feature | `/rptc:feat "implement X"` |
 | Large Feature | `/rptc:feat "build X"` (auto-batching handles size) |

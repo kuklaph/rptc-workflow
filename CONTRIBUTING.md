@@ -92,9 +92,10 @@ Before suggesting a feature:
 ```text
 rptc-workflow/
 ├── .claude-plugin/        # Plugin metadata
-├── commands/              # Slash command definitions (flat structure)
+├── commands/              # Slash command definitions (flat structure, 5 commands)
 │   ├── commit.md         # /rptc:commit
 │   ├── feat.md           # /rptc:feat (PRIMARY)
+│   ├── fix.md            # /rptc:fix
 │   ├── research.md       # /rptc:research
 │   └── sync-prod-to-tests.md  # /rptc:sync-prod-to-tests
 ├── agents/                # Specialist agent definitions (8 agents)
@@ -123,6 +124,7 @@ Before submitting a PR, test the following:
 **Core Commands:**
 
 - [ ] `/rptc:feat "test feature"` completes all 5 phases (Discovery → Architecture → TDD → Quality → Complete)
+- [ ] `/rptc:fix "test bug"` completes all 5 phases (Reproduction → RCA → Fix → Verification → Complete)
 - [ ] `/rptc:research "test topic"` performs discovery with exploration agents
 - [ ] `/rptc:commit` verifies and creates commits
 - [ ] `/rptc:sync-prod-to-tests "src/"` analyzes and syncs tests

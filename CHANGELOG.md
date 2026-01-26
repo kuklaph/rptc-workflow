@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.20.0] - 2026-01-26
+
+### Added
+
+- **New `/rptc:fix` command**: Systematic bug fixing workflow with 5 phases:
+  - Phase 1: Reproduction & Triage (2-3 parallel research agents)
+  - Phase 2: Root Cause Analysis (5 Whys methodology, optional plan mode for complex bugs)
+  - Phase 3: Fix Application (TDD with regression test first emphasis)
+  - Phase 4: Verification (parallel review agents with regression focus)
+  - Phase 5: Complete (summary with root cause documentation)
+- **Bug severity classification**: S1 Blocker through S4 Minor with response guidance
+- **Regression test first approach**: Write test that reproduces bug before fixing
+- **5 Whys methodology integration**: Systematic root cause analysis
+
+### Changed
+
+- **Command count increased from 4 to 5**: Updated all documentation references
+- **README.md**: Added `/rptc:fix` to commands table, updated workflow patterns
+- **CLAUDE.md**: Added `/rptc:fix` workflow diagram and testing command
+
+---
+
 ## [2.19.0] - 2026-01-25
 
 ### Changed

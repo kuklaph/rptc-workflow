@@ -23,9 +23,10 @@ rptc-workflow/                      # ${CLAUDE_PLUGIN_ROOT}
 │   ├── plugin.json                 # Plugin metadata & version
 │   └── marketplace.json            # Marketplace listing
 │
-├── commands/                       # Flat structure (4 commands)
+├── commands/                       # Flat structure (5 commands)
 │   ├── commit.md                   # /rptc:commit
 │   ├── feat.md                     # /rptc:feat (PRIMARY)
+│   ├── fix.md                      # /rptc:fix
 │   ├── research.md                 # /rptc:research
 │   └── sync-prod-to-tests.md       # /rptc:sync-prod-to-tests
 │
