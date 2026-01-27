@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.22.0] - 2026-01-27
+
+### Fixed
+
+- **Enforce test-first ordering in main context**: Added explicit "CRITICAL - Test-First Ordering" rules to `feat.md` Route B and `fix.md` Phase 3 to prevent main context from modifying production code before tests. Previously, test-first enforcement only existed inside `tdd-agent.md`, so when main context executed code changes directly, it could violate test-first ordering.
+- **tdd-agent test-first coverage expanded**: Clarified that test-first applies to updating existing tests (not just writing new ones) and added context discovery step to identify existing tests needing updates.
+
+---
+
 ## [2.21.0] - 2026-01-26
 
 ### Fixed

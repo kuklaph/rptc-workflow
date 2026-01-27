@@ -153,6 +153,8 @@ Approach descriptions:
 
 **Goal**: Build with tests first, using intelligent step batching for efficiency.
 
+**CRITICAL - Test-First Ordering**: Whether delegating to tdd-agent OR executing in main context, ALWAYS write/update tests BEFORE modifying production code. This applies to new tests, updated existing tests, and regression tests. Never change production code first.
+
 **Smart Batching**: Combines related steps into fewer tdd-agent calls, reducing overhead while maintaining TDD discipline.
 
 **Actions**:

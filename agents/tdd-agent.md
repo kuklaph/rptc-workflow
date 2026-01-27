@@ -314,7 +314,12 @@ const mockUserService = {
 
 ### Phase 1: RED - Write Failing Tests First
 
-**CRITICAL**: Write ALL tests BEFORE any implementation code.
+**CRITICAL**: Write ALL tests BEFORE any implementation code. This applies to BOTH new tests AND updates to existing tests. Never modify production code first.
+
+**Test-First Rule** (no exceptions):
+- **New feature**: Write new tests first → then implement production code
+- **Modifying existing code**: Update/add tests first to cover new behavior → then change production code
+- **Bug fix**: Write regression test that reproduces the bug first → then fix production code
 
 **Steps**:
 
@@ -325,6 +330,7 @@ const mockUserService = {
    - Review 2-3 similar test files for naming patterns and structure
    - Check test configuration files (jest.config.js, vitest.config.ts, pytest.ini)
    - Note coverage baseline if available (use for improvement targets)
+   - **Identify existing tests that need updating** for the planned changes
 
 1. **Review test scenarios from step file**:
 

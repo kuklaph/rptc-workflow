@@ -142,6 +142,8 @@ Constraints:
 
 **Goal**: Apply the fix using test-driven approach (regression test first).
 
+**CRITICAL - Test-First Ordering**: Whether delegating to tdd-agent OR executing in main context, ALWAYS write the regression test that reproduces the bug BEFORE modifying production code. Update any existing tests BEFORE changing production code. Never fix production code first.
+
 **Actions**:
 
 1. **Delegate to TDD agent** with regression emphasis:
