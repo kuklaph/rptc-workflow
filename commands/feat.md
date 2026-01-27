@@ -42,9 +42,11 @@ Complete feature development: Discovery → Architecture → Implementation → 
 2. **Create initial todo list** with phases based on task type:
    - Code tasks: Discovery, Architecture, TDD Implementation, Quality Review, Complete
    - Non-Code tasks: Discovery, Architecture, Implementation, Review, Complete
-3. **If codebase exploration needed**, launch 2-3 Explore agents in parallel using code-explorer methodology:
+3. **If codebase exploration needed**, launch 2-3 research agents in parallel (NOT the built-in Explore agent):
 
 ```
+IMPORTANT: Use subagent_type="rptc:research-agent", NOT "Explore"
+
 Use Task tool with subagent_type="rptc:research-agent" (launch all 3 in parallel):
 
 Agent 1 prompt: "Find similar features and existing patterns for [feature].
@@ -60,8 +62,8 @@ Use code-explorer methodology Phase 2 (Code Flow Tracing): call chains, data tra
 Return: external dependencies, internal dependencies, API boundaries."
 ```
 
-4. **If web research needed**, delegate to research-agent (Mode B)
-5. **If hybrid research needed** (codebase + best practices), launch both in parallel (Mode C)
+4. **If web research needed**, use `rptc:research-agent` with Mode B (20+ sources, cross-verification)
+5. **If hybrid research needed** (codebase + best practices), use `rptc:research-agent` with Mode C
 6. **If unclear about requirements**, ask user for clarification
 7. **Summarize findings**: Key patterns, files to modify, dependencies, gap analysis (if hybrid)
 
@@ -190,7 +192,7 @@ Approach descriptions:
    Batch 3 [Step 6]: API endpoint (waits for Batch 2)
    ```
 
-6. **For each batch**, delegate to TDD executor sub-agent:
+6. **For each batch, invoke tdd-agent** using the Task tool:
 
 ```
 Use Task tool with subagent_type="rptc:tdd-agent":
@@ -233,6 +235,7 @@ Then move to next step in batch.
 
 8. **Update TodoWrite** as each batch completes
 9. **Handle failures**: If batch fails after 3 attempts, ask user for guidance
+10. **Proceed to Phase 4** (Quality Review) after all batches complete
 
 **Example Batching**:
 ```
@@ -316,9 +319,11 @@ REPORT ONLY - do not make changes. Output: documentation updates needed (≥80 o
 
 ## Agent Delegation Reference
 
-### Explore Agents with Code-Explorer Methodology (Phase 1)
+### Research Agents with Code-Explorer Methodology (Phase 1)
 
 ```
+IMPORTANT: Use "rptc:research-agent", NOT "Explore"
+
 Launch 3 Task tools in parallel with subagent_type="rptc:research-agent":
 
 Agent 1 (Feature Discovery): "Find similar features for [topic]. Entry points, core files, boundaries."

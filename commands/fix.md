@@ -48,9 +48,11 @@ Systematic bug fixing: Reproduction → Root Cause Analysis → Fix → Verifica
 
 3. **If reproduction steps unclear**, ask user for clarification via AskUserQuestion
 
-4. **Launch 2-3 research agents in parallel** for bug investigation:
+4. **Launch 2-3 research agents in parallel** for bug investigation (NOT the built-in Explore agent):
 
 ```
+IMPORTANT: Use subagent_type="rptc:research-agent", NOT "Explore"
+
 Use Task tool with subagent_type="rptc:research-agent" (launch all in parallel):
 
 Agent 1 prompt: "Investigate bug: [description].

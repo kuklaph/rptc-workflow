@@ -32,16 +32,24 @@ Research partner for discovery and brainstorming. Use before `/rptc:feat` when y
 ### For Codebase Research
 
 **Actions**:
-1. **Launch 2-3 Explore agents in parallel** with different focuses:
+1. **Launch 2-3 research agents in parallel** with different focuses (NOT the built-in Explore agent):
 
 ```
-Use Task tool with subagent_type="Explore" (launch all 3 in parallel):
+IMPORTANT: Use subagent_type="rptc:research-agent", NOT "Explore"
 
-Agent 1 prompt: "Find similar features and existing patterns for [topic]. Return: files implementing similar functionality, patterns used."
+Use Task tool with subagent_type="rptc:research-agent" (launch all 3 in parallel):
 
-Agent 2 prompt: "Analyze architecture and abstractions related to [topic]. Return: layers involved, key abstractions, design patterns."
+Agent 1 prompt: "Find similar features and existing patterns for [topic].
+Use code-explorer methodology Phase 1 (Feature Discovery).
+Return: files implementing similar functionality, patterns used."
 
-Agent 3 prompt: "Map integration points and dependencies for [topic]. Return: external dependencies, internal dependencies, API boundaries."
+Agent 2 prompt: "Analyze architecture and abstractions related to [topic].
+Use code-explorer methodology Phase 3 (Architecture Analysis).
+Return: layers involved, key abstractions, design patterns."
+
+Agent 3 prompt: "Map integration points and dependencies for [topic].
+Use code-explorer methodology Phase 2 (Code Flow Tracing).
+Return: external dependencies, internal dependencies, API boundaries."
 ```
 
 2. **Consolidate findings**:
@@ -141,12 +149,14 @@ mkdir -p docs/research
 
 ## Agent Delegation Reference
 
-### Parallel Explore Agents (Codebase)
+### Parallel Research Agents (Codebase)
 ```
-Launch 3 Task tools simultaneously with subagent_type="Explore":
-- Agent 1: Similar features / existing patterns
-- Agent 2: Architecture and abstractions
-- Agent 3: Integration points / dependencies
+IMPORTANT: Use "rptc:research-agent", NOT "Explore"
+
+Launch 3 Task tools simultaneously with subagent_type="rptc:research-agent":
+- Agent 1: Similar features / existing patterns (Mode A, Phase 1)
+- Agent 2: Architecture and abstractions (Mode A, Phase 3)
+- Agent 3: Integration points / dependencies (Mode A, Phase 2)
 ```
 
 ### Research Agent (Web)

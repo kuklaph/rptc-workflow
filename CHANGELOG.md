@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.21.0] - 2026-01-26
+
+### Fixed
+
+- **Enforce `rptc:research-agent` over built-in Explore agent**: Added explicit warnings in all commands to use `rptc:research-agent` instead of the built-in Explore agent. Research-agent provides web research, structured methodology, MCP tools (context7), and confidence scoring that Explore lacks.
+- **Phase 4 transition missing in Route B**: Added explicit "Proceed to Phase 4" instruction after TDD batches complete in `/rptc:feat`
+- **TDD invocation language unclear**: Changed "delegate to TDD executor sub-agent" to "invoke tdd-agent using the Task tool" for clarity
+
+### Changed
+
+- **`/rptc:fix` promoted to Primary Workflow**: Now listed alongside `/rptc:feat` as a primary command (2 primary, 3 supporting)
+- **Research agent prompts enhanced**: Added code-explorer methodology phase references to all parallel agent prompts
+- **Documentation consistency**: Updated PLUGIN_ARCHITECTURE.md command classification
+
+---
+
 ## [2.20.0] - 2026-01-26
 
 ### Added

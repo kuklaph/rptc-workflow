@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 2.20.0
+**Version**: 2.21.0
 **Status**: Beta
 **License**: MIT
 
@@ -54,13 +54,13 @@ All phases unified in one command: `/rptc:feat`
 
 | Command | Purpose | When to Use |
 |---------|---------|-------------|
-| `/rptc:feat "description"` | **Complete feature development**: Discovery → Architecture → Implementation → Quality Review | **Default for all tasks** (code and non-code) |
+| `/rptc:feat "description"` | **Complete feature development**: Discovery → Architecture → Implementation → Quality Review | New features, enhancements, refactoring |
+| `/rptc:fix "bug description"` | **Systematic bug fixing**: Reproduction → Root Cause → Fix → Verify | Bug triaging and fixing |
 
 ### Supporting Commands
 
 | Command | Purpose | When to Use |
 |---------|---------|-------------|
-| `/rptc:fix "bug description"` | **Systematic bug fixing**: Reproduction → Root Cause → Fix → Verify | Bug triaging and fixing |
 | `/rptc:research "topic"` | Standalone research and discovery | Exploring unfamiliar topics separately |
 | `/rptc:commit [pr]` | Verify and ship | After completing implementation |
 | `/rptc:sync-prod-to-tests "[dir]"` | Sync tests to production code with auto-fix | Test maintenance |

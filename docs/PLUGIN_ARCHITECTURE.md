@@ -402,7 +402,7 @@ Pre-commit hook automatically blocks commits with version mismatch.
 
 **Plugin provides:**
 
-- 5 commands (1 primary, 4 supporting)
+- 5 commands (2 primary, 3 supporting)
 - 8 specialist agents
 - 10 SOPs
 - 3 skills
