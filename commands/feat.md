@@ -111,25 +111,50 @@ Agent 3: "Design implementation for [feature]. Perspective: Pragmatic. Provide: 
 
 3. **Review all 3 approaches**, form an opinion on which fits best for this specific feature
 
-4. **Present to user** via AskUserQuestion (put recommended option first with "(Recommended)" suffix):
+4. **MANDATORY: Ask user to choose** via AskUserQuestion (put recommended option first with "(Recommended)" suffix):
+
+   **Skip asking ONLY if ALL of these are true:**
+   - Single-file change with <20 lines
+   - No architectural decisions involved
+   - Only one approach is viable (others don't apply)
+
+   **Otherwise, ALWAYS ask the user** - even if one option seems obviously better.
+
+   **Before asking, present a brief summary of each approach:**
+
+```markdown
+## Architecture Options
+
+### Minimal Approach
+- **Files**: [list from agent 1]
+- **Key idea**: [1-sentence summary]
+- **Trade-off**: Fast, reuses existing code, may accumulate tech debt
+
+### Clean Approach
+- **Files**: [list from agent 2]
+- **Key idea**: [1-sentence summary]
+- **Trade-off**: Maintainable, elegant abstractions, takes longer
+
+### Pragmatic Approach
+- **Files**: [list from agent 3]
+- **Key idea**: [1-sentence summary]
+- **Trade-off**: Balanced, good enough without over-engineering
+```
+
+   **Then ask:**
 
 ```
 Use AskUserQuestion tool:
 
-question: "Which planning approach would you like to use?"
-header: "Plan Type"
+question: "Which architecture approach would you like to use for this feature?"
+header: "Architecture"
 options:
   - label: "[Best fit] (Recommended)"
-    description: "[Why this fits best for this feature]"
+    description: "[1-sentence why this fits best + file count]"
   - label: "[Second option]"
-    description: "[Brief description and trade-offs]"
+    description: "[1-sentence trade-off + file count]"
   - label: "[Third option]"
-    description: "[Brief description and trade-offs]"
-
-Approach descriptions:
-- Minimal: Smallest change possible. Reuses existing code. Fast but may accumulate tech debt.
-- Clean: Maintainability-focused with elegant abstractions. Takes longer but easier to extend.
-- Pragmatic: Balanced approach. Good enough architecture without over-engineering.
+    description: "[1-sentence trade-off + file count]"
 ```
 
 5. **Write selected plan to plan file** with:
@@ -430,7 +455,7 @@ Agent 1: "Design implementation for [feature]. Perspective: Minimal. ..."
 Agent 2: "Design implementation for [feature]. Perspective: Clean. ..."
 Agent 3: "Design implementation for [feature]. Perspective: Pragmatic. ..."
 
-After all complete: Present options to user via AskUserQuestion, write selected plan.
+After all complete: MUST ask user to choose via AskUserQuestion (skip only for trivial single-file changes).
 ```
 
 ### TDD Executor Agent (Phase 3 - Batch Mode)

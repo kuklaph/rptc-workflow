@@ -51,6 +51,13 @@ Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` â€
 
 Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp__MCP_DOCKER__sequentialthinking`, or `mcp__plugin_sequentialthinking_*`) for complex implementation decisions.
 
+**Serena Memory** (optional, when valuable):
+
+Use `write_memory` to persist important discoveries for future sessions:
+- Testing patterns specific to this project (mocking strategies, fixtures)
+- Non-obvious implementation details ("X must be called before Y because...")
+- Gotchas discovered during TDD that would help future development
+
 ---
 
 ## Batch Execution Mode

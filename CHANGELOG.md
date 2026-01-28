@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.25.1] - 2026-01-28
+
+### Added
+
+- **Serena `write_memory` globally available**: All 8 agents now have `write_memory` for persisting valuable discoveries (architectural decisions, gotchas, patterns)
+- **research-agent Serena integration**: Added full Serena toolset to research-agent (was completely missing)
+- **Serena Memory usage guidance**: Each agent has context-specific examples of when to use `write_memory`
+
+### Changed
+
+- **Architecture selection mandatory**: Phase 2 now requires asking user to choose between Minimal/Clean/Pragmatic approaches (unless trivial single-file change)
+- **Architecture summaries shown**: Before asking, presents each approach's files, key idea, and trade-offs
+
+---
+
 ## [2.25.0] - 2026-01-28
 
 ### Added

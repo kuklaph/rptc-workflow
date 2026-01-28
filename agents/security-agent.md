@@ -1,7 +1,7 @@
 ---
 name: security-agent
 description: Security specialist with confidence-based reporting. REPORT ONLY - does not make changes. Covers OWASP Top 10. Main context handles fixes.
-tools: Read, Grep, Glob, mcp__serena__list_dir, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__get_symbols_overview, mcp__serena__find_symbol, mcp__serena__find_referencing_symbols, mcp__serena__activate_project, mcp__serena__read_memory, mcp__serena__think_about_collected_information, mcp__plugin_serena_serena__list_dir, mcp__plugin_serena_serena__find_file, mcp__plugin_serena_serena__search_for_pattern, mcp__plugin_serena_serena__get_symbols_overview, mcp__plugin_serena_serena__find_symbol, mcp__plugin_serena_serena__find_referencing_symbols, mcp__plugin_serena_serena__activate_project, mcp__plugin_serena_serena__read_memory, mcp__plugin_serena_serena__think_about_collected_information, mcp__MCP_DOCKER__sequentialthinking, mcp__sequentialthinking__sequentialthinking, mcp__plugin_sequentialthinking_sequentialthinking__sequentialthinking
+tools: Read, Grep, Glob, mcp__serena__list_dir, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__get_symbols_overview, mcp__serena__find_symbol, mcp__serena__find_referencing_symbols, mcp__serena__activate_project, mcp__serena__read_memory, mcp__serena__write_memory, mcp__serena__think_about_collected_information, mcp__plugin_serena_serena__list_dir, mcp__plugin_serena_serena__find_file, mcp__plugin_serena_serena__search_for_pattern, mcp__plugin_serena_serena__get_symbols_overview, mcp__plugin_serena_serena__find_symbol, mcp__plugin_serena_serena__find_referencing_symbols, mcp__plugin_serena_serena__activate_project, mcp__plugin_serena_serena__read_memory, mcp__plugin_serena_serena__write_memory, mcp__plugin_serena_serena__think_about_collected_information, mcp__MCP_DOCKER__sequentialthinking, mcp__sequentialthinking__sequentialthinking, mcp__plugin_sequentialthinking_sequentialthinking__sequentialthinking
 color: red
 model: inherit
 ---
@@ -40,6 +40,13 @@ Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` â€
 **Sequential Thinking MCP** (when available):
 
 Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp__MCP_DOCKER__sequentialthinking`, or `mcp__plugin_sequentialthinking_*`) for complex security analysis requiring multi-step reasoning.
+
+**Serena Memory** (optional, when valuable):
+
+Use `write_memory` to persist important security discoveries for future sessions:
+- Security patterns/constraints specific to this project
+- Why certain security approaches were chosen (compliance, legacy, etc.)
+- Known vulnerabilities that were intentionally accepted with mitigations
 
 ---
 

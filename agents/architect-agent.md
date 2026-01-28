@@ -131,6 +131,13 @@ Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp_
 - Multi-step analysis
 - Architectural trade-off evaluation
 
+**Serena Memory** (optional, when valuable):
+
+Use `write_memory` to persist important discoveries for future sessions - things that would go in CLAUDE.md:
+- Architectural decisions and constraints discovered during planning
+- Why certain patterns are used ("uses X instead of Y because of Z")
+- Critical dependencies or integration points that affect future work
+
 ---
 
 ## Operating Mode

@@ -1,7 +1,7 @@
 ---
 name: research-agent
 description: Unified research specialist for codebase exploration and web research. Mode A uses 4-phase code-explorer methodology. Mode B consults 20+ sources with cross-verification. Mode C combines both with gap analysis.
-tools: Read, Write, Glob, Grep, LS, NotebookRead, TodoWrite, WebSearch, WebFetch, Bash(tree*), mcp__MCP_DOCKER__fetch, mcp__plugin_MCP_DOCKER_MCP_DOCKER__fetch, mcp__MCP_DOCKER__sequentialthinking, mcp__sequentialthinking__sequentialthinking, mcp__plugin_sequentialthinking_sequentialthinking__sequentialthinking, mcp__MCP_DOCKER__get-library-docs, mcp__MCP_DOCKER__resolve-library-id, mcp__context7__get-library-docs, mcp__context7__resolve-library-id, mcp__plugin_context7_context7__get-library-docs, mcp__plugin_context7_context7__resolve-library-id
+tools: Read, Write, Glob, Grep, LS, NotebookRead, TodoWrite, WebSearch, WebFetch, Bash(tree*), mcp__serena__list_dir, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__get_symbols_overview, mcp__serena__find_symbol, mcp__serena__find_referencing_symbols, mcp__serena__activate_project, mcp__serena__read_memory, mcp__serena__write_memory, mcp__serena__think_about_collected_information, mcp__plugin_serena_serena__list_dir, mcp__plugin_serena_serena__find_file, mcp__plugin_serena_serena__search_for_pattern, mcp__plugin_serena_serena__get_symbols_overview, mcp__plugin_serena_serena__find_symbol, mcp__plugin_serena_serena__find_referencing_symbols, mcp__plugin_serena_serena__activate_project, mcp__plugin_serena_serena__read_memory, mcp__plugin_serena_serena__write_memory, mcp__plugin_serena_serena__think_about_collected_information, mcp__MCP_DOCKER__fetch, mcp__plugin_MCP_DOCKER_MCP_DOCKER__fetch, mcp__MCP_DOCKER__sequentialthinking, mcp__sequentialthinking__sequentialthinking, mcp__plugin_sequentialthinking_sequentialthinking__sequentialthinking, mcp__MCP_DOCKER__get-library-docs, mcp__MCP_DOCKER__resolve-library-id, mcp__context7__get-library-docs, mcp__context7__resolve-library-id, mcp__plugin_context7_context7__get-library-docs, mcp__plugin_context7_context7__resolve-library-id
 color: green
 model: inherit
 ---
@@ -234,6 +234,13 @@ Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` â€
 **Sequential Thinking MCP** (when available):
 
 Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp__MCP_DOCKER__sequentialthinking`, or `mcp__plugin_sequentialthinking_*`) for complex research requiring multi-step reasoning.
+
+**Serena Memory** (optional, when valuable):
+
+Use `write_memory` to persist important discoveries for future sessions - things that would go in CLAUDE.md:
+- Architectural decisions and rationale discovered during exploration
+- Non-obvious patterns or gotchas ("X uses Y pattern because of Z constraint")
+- Key relationships between components that aren't obvious from code
 
 **Other MCP tools:**
 

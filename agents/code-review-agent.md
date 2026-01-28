@@ -1,7 +1,7 @@
 ---
 name: code-review-agent
 description: Code review specialist with confidence-based reporting. REPORT ONLY - does not make changes. Identifies KISS/YAGNI violations, complexity issues. Main context handles fixes.
-tools: Read, Grep, Glob, LS, NotebookRead, Bash(git diff*), Bash(git blame*), Bash(git log*), Bash(git show*), Bash(tree*), mcp__serena__list_dir, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__get_symbols_overview, mcp__serena__find_symbol, mcp__serena__find_referencing_symbols, mcp__serena__activate_project, mcp__serena__read_memory, mcp__serena__think_about_collected_information, mcp__plugin_serena_serena__list_dir, mcp__plugin_serena_serena__find_file, mcp__plugin_serena_serena__search_for_pattern, mcp__plugin_serena_serena__get_symbols_overview, mcp__plugin_serena_serena__find_symbol, mcp__plugin_serena_serena__find_referencing_symbols, mcp__plugin_serena_serena__activate_project, mcp__plugin_serena_serena__read_memory, mcp__plugin_serena_serena__think_about_collected_information, mcp__MCP_DOCKER__sequentialthinking, mcp__sequentialthinking__sequentialthinking, mcp__plugin_sequentialthinking_sequentialthinking__sequentialthinking
+tools: Read, Grep, Glob, LS, NotebookRead, Bash(git diff*), Bash(git blame*), Bash(git log*), Bash(git show*), Bash(tree*), mcp__serena__list_dir, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__get_symbols_overview, mcp__serena__find_symbol, mcp__serena__find_referencing_symbols, mcp__serena__activate_project, mcp__serena__read_memory, mcp__serena__write_memory, mcp__serena__think_about_collected_information, mcp__plugin_serena_serena__list_dir, mcp__plugin_serena_serena__find_file, mcp__plugin_serena_serena__search_for_pattern, mcp__plugin_serena_serena__get_symbols_overview, mcp__plugin_serena_serena__find_symbol, mcp__plugin_serena_serena__find_referencing_symbols, mcp__plugin_serena_serena__activate_project, mcp__plugin_serena_serena__read_memory, mcp__plugin_serena_serena__write_memory, mcp__plugin_serena_serena__think_about_collected_information, mcp__MCP_DOCKER__sequentialthinking, mcp__sequentialthinking__sequentialthinking, mcp__plugin_sequentialthinking_sequentialthinking__sequentialthinking
 color: yellow
 model: inherit
 ---
@@ -58,6 +58,13 @@ Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` â€
 **Sequential Thinking MCP** (when available):
 
 Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp__MCP_DOCKER__sequentialthinking`, or `mcp__plugin_sequentialthinking_*`) for complex analysis requiring multi-step reasoning.
+
+**Serena Memory** (optional, when valuable):
+
+Use `write_memory` to persist important discoveries for future sessions - things that would go in CLAUDE.md:
+- Why code is structured a certain way (architectural decisions, constraints)
+- Non-obvious patterns or gotchas ("don't refactor X to Y - causes Z")
+- Project conventions discovered during review
 
 ---
 

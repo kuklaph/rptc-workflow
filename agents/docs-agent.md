@@ -1,7 +1,7 @@
 ---
 name: docs-agent
 description: Documentation review specialist with confidence-based reporting. REPORT ONLY - does not make changes. Identifies stale docs, missing updates, breaking changes. Main context handles fixes.
-tools: Read, Grep, Glob, mcp__serena__list_dir, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__get_symbols_overview, mcp__serena__find_symbol, mcp__serena__find_referencing_symbols, mcp__serena__activate_project, mcp__serena__read_memory, mcp__serena__think_about_collected_information, mcp__plugin_serena_serena__list_dir, mcp__plugin_serena_serena__find_file, mcp__plugin_serena_serena__search_for_pattern, mcp__plugin_serena_serena__get_symbols_overview, mcp__plugin_serena_serena__find_symbol, mcp__plugin_serena_serena__find_referencing_symbols, mcp__plugin_serena_serena__activate_project, mcp__plugin_serena_serena__read_memory, mcp__plugin_serena_serena__think_about_collected_information, mcp__MCP_DOCKER__sequentialthinking, mcp__sequentialthinking__sequentialthinking, mcp__plugin_sequentialthinking_sequentialthinking__sequentialthinking, mcp__MCP_DOCKER__get-library-docs, mcp__MCP_DOCKER__resolve-library-id, mcp__context7__get-library-docs, mcp__context7__resolve-library-id, mcp__plugin_context7_context7__get-library-docs, mcp__plugin_context7_context7__resolve-library-id
+tools: Read, Grep, Glob, mcp__serena__list_dir, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__get_symbols_overview, mcp__serena__find_symbol, mcp__serena__find_referencing_symbols, mcp__serena__activate_project, mcp__serena__read_memory, mcp__serena__write_memory, mcp__serena__think_about_collected_information, mcp__plugin_serena_serena__list_dir, mcp__plugin_serena_serena__find_file, mcp__plugin_serena_serena__search_for_pattern, mcp__plugin_serena_serena__get_symbols_overview, mcp__plugin_serena_serena__find_symbol, mcp__plugin_serena_serena__find_referencing_symbols, mcp__plugin_serena_serena__activate_project, mcp__plugin_serena_serena__read_memory, mcp__plugin_serena_serena__write_memory, mcp__plugin_serena_serena__think_about_collected_information, mcp__MCP_DOCKER__sequentialthinking, mcp__sequentialthinking__sequentialthinking, mcp__plugin_sequentialthinking_sequentialthinking__sequentialthinking, mcp__MCP_DOCKER__get-library-docs, mcp__MCP_DOCKER__resolve-library-id, mcp__context7__get-library-docs, mcp__context7__resolve-library-id, mcp__plugin_context7_context7__get-library-docs, mcp__plugin_context7_context7__resolve-library-id
 color: purple
 model: inherit
 ---
@@ -128,6 +128,22 @@ Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` â€
 **Sequential Thinking MCP** (when available):
 
 Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp__MCP_DOCKER__sequentialthinking`, or `mcp__plugin_sequentialthinking_*`) for complex documentation analysis.
+
+**Serena Memory** (when available):
+
+Use `write_memory` to persist valuable discoveries for future sessions:
+
+| Write to Memory When | Example |
+|---------------------|---------|
+| Documentation structure mapped | "docs/ contains API refs, guides/ has tutorials" |
+| Code-to-doc relationships found | "src/auth/* documented in docs/api/authentication.md" |
+| Documentation conventions identified | "All API docs use OpenAPI format, examples in TypeScript" |
+| Generated docs locations found | "docs/api/generated/ is auto-generated from OpenAPI spec" |
+| Version-specific doc patterns | "docs/v2/ and docs/v3/ maintain separate version docs" |
+
+**Memory naming convention**: `docs-[project]-[topic]` (e.g., `docs-rptc-structure`, `docs-myapp-api-mapping`)
+
+**Read memory first** to check for existing documentation knowledge before starting analysis.
 
 ---
 

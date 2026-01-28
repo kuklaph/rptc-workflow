@@ -58,6 +58,13 @@ Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` â€
 
 Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp__MCP_DOCKER__sequentialthinking`, or `mcp__plugin_sequentialthinking_*`) for complex sync analysis.
 
+**Serena Memory** (optional, when valuable):
+
+Use `write_memory` to persist important discoveries for future sessions:
+- Test file naming conventions and locations for this project
+- Production-to-test mapping patterns discovered
+- Testing gaps or areas that need attention
+
 ---
 
 ## Analysis Process

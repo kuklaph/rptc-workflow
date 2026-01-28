@@ -63,6 +63,13 @@ Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` â€
 
 Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp__MCP_DOCKER__sequentialthinking`, or `mcp__plugin_sequentialthinking_*`) for complex fix decisions.
 
+**Serena Memory** (optional, when valuable):
+
+Use `write_memory` to persist important discoveries for future sessions:
+- Test patterns and conventions specific to this project
+- Common test failure causes and their fixes
+- Relationships between test files and production code
+
 ---
 | `production_bug` | **Approved** | Apply production fix |
 | `production_bug` | **Rejected** | Adapt test to match production instead |
