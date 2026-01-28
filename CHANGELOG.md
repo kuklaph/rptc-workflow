@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.25.2] - 2026-01-28
+
+### Fixed
+
+- **Stale `.rptc/` references removed**: Cleaned up all references to deprecated `.rptc/` workspace pattern
+- **Templates listing corrected**: Updated to show actual 7 templates (was showing non-existent `plan.md`)
+- **Docs listing corrected**: Added `AI_CODING_BEST_PRACTICES.md` to docs/ listings
+- **SOP fallback chain updated**: Removed `.rptc/sop/` tier from all SOPs and skills
+
+---
+
 ## [2.25.1] - 2026-01-28
 
 ### Added
