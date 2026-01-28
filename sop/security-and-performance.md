@@ -1313,11 +1313,10 @@ def test_security_breach_response():
 
 ## Related Standard Operating Procedures
 
-**For comprehensive development guidance, reference these SOPs via fallback chain:**
+**For comprehensive development guidance, reference these SOPs:**
 
-1. `.rptc/sop/[name].md` - Project-specific overrides
-2. `~/.claude/global/sop/[name].md` - User global defaults
-3. `${CLAUDE_PLUGIN_ROOT}/sop/[name].md` - Plugin defaults
+1. `~/.claude/global/sop/[name].md` - User global defaults
+2. `${CLAUDE_PLUGIN_ROOT}/sop/[name].md` - Plugin defaults
 
 **Cross-SOP Integration:**
 

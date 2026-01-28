@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # TDD Warning System
 # Warns when creating implementation files without corresponding tests
-# Reference: testing-guide.md (SOP fallback: .rptc/sop/ → ~/.claude/global/sop/ → ${CLAUDE_PLUGIN_ROOT}/sop/)
+# Reference: testing-guide.md (SOP: ~/.claude/global/sop/ or ${CLAUDE_PLUGIN_ROOT}/sop/)
 
 set -euo pipefail
 

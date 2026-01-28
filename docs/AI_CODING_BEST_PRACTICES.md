@@ -950,8 +950,7 @@ Track these metrics before/after applying principles:
 
 ### Further Reading
 
-**Research Findings:**
-- `.rptc/research/` directory - Phases 1-4 research documents
+**Research Background:**
 - Phase 1: AI over-engineering patterns and quantified impacts
 - Phase 2: Security blind spots and vulnerability statistics
 - Phase 3: Prompting strategy effectiveness studies

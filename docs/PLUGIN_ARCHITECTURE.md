@@ -58,13 +58,19 @@ rptc-workflow/                      # ${CLAUDE_PLUGIN_ROOT}
 │   └── tdd-methodology/
 │
 ├── templates/                      # Document templates
-│   ├── plan.md
-│   └── research.md
+│   ├── plan-overview.md
+│   ├── plan-step.md
+│   ├── research.md
+│   ├── handoff.md
+│   ├── tdg-prompt.md
+│   ├── verification-checklist.md
+│   └── ai-sop-enhancement-pattern.md
 │
 ├── docs/                           # Documentation
 │   ├── PLUGIN_ARCHITECTURE.md      # This file
 │   ├── PROJECT_TEMPLATE.md         # User project template
-│   └── RPTC_WORKFLOW_GUIDE.md      # Complete workflow guide
+│   ├── RPTC_WORKFLOW_GUIDE.md      # Complete workflow guide
+│   └── AI_CODING_BEST_PRACTICES.md # AI coding guidelines
 │
 ├── README.md                       # Main documentation
 ├── CONTRIBUTING.md                 # Contribution guidelines

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Auto-format code after edits
-# Reference: languages-and-style.md (SOP fallback: .rptc/sop/ → ~/.claude/global/sop/ → ${CLAUDE_PLUGIN_ROOT}/sop/)
+# Reference: languages-and-style.md (SOP: ~/.claude/global/sop/ or ${CLAUDE_PLUGIN_ROOT}/sop/)
 
 set -e
 

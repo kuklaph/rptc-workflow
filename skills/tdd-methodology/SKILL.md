@@ -70,11 +70,10 @@ description: TDD execution methodology for main context. Load when handling code
 
 ## Standard Operating Procedures (SOPs)
 
-**MUST consult** relevant SOPs from the SOP fallback chain:
+**MUST consult** relevant SOPs:
 
-1. Project: `.rptc/sop/[name].md` (highest priority)
-2. User: `~/.claude/global/sop/[name].md`
-3. Plugin: `${CLAUDE_PLUGIN_ROOT}/sop/[name].md` (defaults)
+1. User: `~/.claude/global/sop/[name].md` (user overrides)
+2. Plugin: `${CLAUDE_PLUGIN_ROOT}/sop/[name].md` (defaults)
 
 ### Required SOPs to Reference
 

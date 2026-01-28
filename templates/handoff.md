@@ -31,13 +31,9 @@ Work Summary:
 Metadata:
   {{TIMESTAMP}}              - Generation timestamp (UTC format)
 
-CUSTOMIZATION:
-Projects can override this template by creating their own at:
-  .rptc/templates/handoff.md
-
-The fallback chain is:
-  1. .rptc/templates/handoff.md (project-specific)
-  2. ${CLAUDE_PLUGIN_ROOT}/templates/handoff.md (this file)
+LOCATION:
+This template is provided by the RPTC plugin at:
+  ${CLAUDE_PLUGIN_ROOT}/templates/handoff.md
 
 NOTE: Do not remove required variables marked in acceptance criteria.
 Unsubstituted variables ({{VAR}}) will be detected and logged as warnings.

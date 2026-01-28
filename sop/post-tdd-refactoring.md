@@ -12,7 +12,6 @@ Comprehensive 5-phase refactoring workflow for efficiency optimization after all
 - 322% vulnerability reduction: Security SOP prevents AI-introduced gaps
 
 **References:**
-- `.rptc/research/code-simplicity-research.md` (Phase 1 foundation)
 - `architecture-patterns.md` → AI Over-Engineering Prevention
 - `security-and-performance.md` → AI Security Verification Checklist
 
@@ -59,13 +58,12 @@ Capture current state for comparison:
 
 ### 1.3 Review Context
 
-**SOPs to Load (Fallback Chain):**
-1. `.rptc/sop/languages-and-style.md` (or fallback to user/plugin)
-2. `.rptc/sop/architecture-patterns.md` (or fallback)
+**SOPs to Load:**
+1. `${CLAUDE_PLUGIN_ROOT}/sop/languages-and-style.md`
+2. `${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md`
 
-**Project Context:**
-- `.context/testing-strategy.md` (if exists)
-- `.context/architecture-decisions.md` (if exists)
+**Project Context (if exists):**
+- Project CLAUDE.md
 - Implementation plan (if referenced)
 
 **Surgical Coding Approach (Phase 1):**
@@ -627,10 +625,6 @@ For every optimization, ask:
 
 ## References
 
-**Research Foundation:**
-- `.rptc/research/code-simplicity-research.md` (Phase 1)
-- `.rptc/research/code-review-agent-research.md` (30+ sources)
-
 **SOPs:**
 - `architecture-patterns.md` → AI Over-Engineering Prevention (5 anti-patterns)
 - `security-and-performance.md` → AI Security Checklist
@@ -649,5 +643,4 @@ For every optimization, ask:
 
 ---
 
-_This SOP is referenced by Code Review Agent via fallback chain_
-_Project-specific overrides: `.rptc/sop/post-tdd-refactoring.md`_
+_This SOP is referenced by Code Review Agent_
