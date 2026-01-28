@@ -212,40 +212,95 @@ Apply MINIMAL fix to make the test pass:
 
 **Actions**:
 
-1. **Launch review agents in parallel** (all 3 in same message):
+1. **Determine review agent mode** (one-time project configuration):
 
-```
-Use Task tool with subagent_type="rptc:code-review-agent":
-prompt: "Review bug fix for: [bug description].
-Files modified: [list files].
-Focus:
-- Is this the ACTUAL root cause fix (not band-aid)?
-- Is the fix minimal and surgical?
-- Are there similar patterns elsewhere that need the same fix?
-- Regression risk assessment
-REPORT ONLY - do not make changes. Output: confidence-scored findings (≥80 only)."
+   a. **Check if project CLAUDE.md exists** (in project root)
 
-Use Task tool with subagent_type="rptc:security-agent":
-prompt: "Security review for bug fix: [bug description].
-Files modified: [list files].
-Focus: Did the fix maintain security invariants? Any new vulnerabilities introduced?
-REPORT ONLY - do not make changes. Output: confidence-scored findings (≥80 only)."
+   b. **If CLAUDE.md exists**, look for `review-agent-mode:` setting:
+      - If found: Use that mode (`automatic`, `all`, or `minimal`)
+      - If not found: Ask user via AskUserQuestion (one-time setup):
+        ```
+        Use AskUserQuestion:
+        question: "How should review agents be selected for this project? (saved to CLAUDE.md)"
+        header: "Review Mode"
+        options:
+          - label: "Automatic (Recommended)"
+            description: "Smart selection based on file types and change patterns"
+          - label: "All Agents"
+            description: "Always launch all 3 review agents"
+          - label: "Minimal"
+            description: "Only launch agents when strongly indicated"
+        ```
+        Then append to CLAUDE.md:
+        ```markdown
+        ## RPTC Review Configuration
+        review-agent-mode: [selected mode]
+        ```
 
-Use Task tool with subagent_type="rptc:docs-agent":
-prompt: "Documentation review for bug fix: [bug description].
-Files modified: [list files].
-Focus: Does the bug affect documented behavior? Any docs need updating?
-REPORT ONLY - do not make changes. Output: documentation updates needed (≥80 only)."
-```
+   c. **If no CLAUDE.md exists**: Use `automatic` mode (don't ask, don't create file)
 
-2. **Consolidate findings**:
+2. **Select agents based on mode**:
+
+   **Mode: `all`** — Launch all 3 agents (skip to step 3)
+
+   **Mode: `automatic`** — Select based on changes:
+
+   | Change Type | code-review | security | docs |
+   |-------------|:-----------:|:--------:|:----:|
+   | Source code in `auth/`, `api/`, `security/`, `middleware/` paths | ✅ | ✅ | Check keywords |
+   | Source code (other paths) | ✅ | Check keywords | Check keywords |
+   | Test files only | ✅ | ❌ | ❌ |
+   | Dependencies changed | ❌ | ✅ | ❌ |
+   | Docs/markdown only | ❌ | ❌ | ✅ |
+
+   **Keyword detection** (scan git diff):
+   - Security keywords: `password`, `token`, `secret`, `auth`, `session`, `crypto`, `hash`, `sql`, `exec`, `eval` → include security-agent
+   - API keywords: `export`, `interface`, `endpoint`, `route`, `version` → include docs-agent
+
+   **Default**: If uncertain, include the agent
+
+   **Mode: `minimal`** — Only launch when strongly indicated:
+   - code-review: Only if >50 lines changed
+   - security: Only if auth/api paths OR security keywords found
+   - docs: Only if doc files changed OR export keyword found
+
+3. **Launch selected review agents**:
+
+   **Code Review Agent** (if selected):
+   ```
+   Use Task tool with subagent_type="rptc:code-review-agent":
+   prompt: "Review bug fix for: [bug description].
+   Files modified: [list files].
+   Focus: Is this the ACTUAL root cause fix (not band-aid)? Is the fix minimal and surgical? Similar patterns elsewhere? Regression risk?
+   REPORT ONLY - do not make changes. Output: confidence-scored findings (≥80 only)."
+   ```
+
+   **Security Agent** (if selected):
+   ```
+   Use Task tool with subagent_type="rptc:security-agent":
+   prompt: "Security review for bug fix: [bug description].
+   Files modified: [list files].
+   Focus: Did the fix maintain security invariants? Any new vulnerabilities introduced?
+   REPORT ONLY - do not make changes. Output: confidence-scored findings (≥80 only)."
+   ```
+
+   **Documentation Agent** (if selected):
+   ```
+   Use Task tool with subagent_type="rptc:docs-agent":
+   prompt: "Documentation review for bug fix: [bug description].
+   Files modified: [list files].
+   Focus: Does the bug affect documented behavior? Any docs need updating?
+   REPORT ONLY - do not make changes. Output: documentation updates needed (≥80 only)."
+   ```
+
+4. **Consolidate findings** from launched agents:
    - Fix quality: Root cause addressed? Minimal scope?
    - Regression risk: Side effects identified?
    - Documentation: Updates needed?
 
-3. **Create TodoWrite for any issues** found by reviewers
+5. **Create TodoWrite for any issues** found by reviewers
 
-4. **Main context addresses findings**:
+6. **Main context addresses findings**:
    - Simple fixes: Apply directly
    - Scope expansion needed: Ask user first
    - Mark todos complete as addressed
@@ -334,15 +389,23 @@ GREEN: Apply minimal fix (surgical, no scope creep)
 VERIFY: Run full test suite, check for regressions
 ```
 
-### Review Agents (Phase 4)
+### Review Agents (Phase 4) - Semantic Selection
 
-```
-Launch ALL THREE in same message for parallel execution:
+**Selection based on `review-agent-mode` in project CLAUDE.md:**
+- `all`: Launch all 3 agents
+- `automatic`: Select based on file types/keywords (default if no CLAUDE.md)
+- `minimal`: Only when strongly indicated
 
-code-review-agent: "Review bug fix. Is root cause fixed? Is fix minimal?"
-security-agent: "Security review. Invariants maintained? New vulnerabilities?"
-docs-agent: "Documentation review. Behavior changes need doc updates?"
-```
+**Agents:**
+1. `rptc:code-review-agent`: Root cause fix? Minimal? Regression risk?
+2. `rptc:security-agent`: Security invariants maintained? New vulnerabilities?
+3. `rptc:docs-agent`: Behavior changes need doc updates?
+
+**Quick reference for `automatic` mode:**
+- Source code changed → code-review
+- Auth/api paths OR security keywords → security
+- Doc files OR behavior changes → docs
+- Test files only → code-review only
 
 ---
 

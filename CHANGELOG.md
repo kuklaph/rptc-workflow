@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.24.0] - 2026-01-28
+
+### Added
+
+- **Semantic review agent selection**: Review agents are now selected based on file types, paths, and keyword detection rather than always launching all 3
+- **One-time project configuration**: If project has CLAUDE.md but no `review-agent-mode` setting, asks user once and saves preference
+- **Three selection modes**: `automatic` (smart detection), `all` (always all 3), `minimal` (only when strongly indicated)
+
+### Changed
+
+- **Test files now reviewed**: Test-only changes trigger code-review-agent (previously would have triggered all 3)
+- **Selection logic**: Path patterns (`auth/`, `api/`, `security/`) and keywords (`password`, `token`, `export`, etc.) determine which agents launch
+- **Default behavior**: If no CLAUDE.md exists, uses `automatic` mode without prompting user
+
+---
+
 ## [2.23.0] - 2026-01-27
 
 ### Fixed

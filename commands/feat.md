@@ -258,39 +258,98 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
 
 **Goal**: Review changes and report findings for main context to address.
 
-**This phase is REQUIRED for ALL task types (code and non-code). Always launch all three review agents.**
-
 **Mode**: Report-only. Review agents DO NOT make changes—they report findings. Main context handles all fixes.
 
 **Actions**:
 
 1. **Collect files modified** during Phase 3 for review
 
-2. **Launch ALL THREE review agents in parallel** (MUST invoke all in same message):
+2. **Determine review agent mode** (one-time project configuration):
 
-```
-Use Task tool with subagent_type="rptc:code-review-agent":
-prompt: "Review code quality for these files: [list all files modified in Phase 3].
-Focus: complexity, KISS/YAGNI violations, dead code, readability.
-REPORT ONLY - do not make changes. Output: confidence-scored findings (≥80 only)."
+   a. **Check if project CLAUDE.md exists** (in project root)
 
-Use Task tool with subagent_type="rptc:security-agent":
-prompt: "Security review for these files: [list all files modified in Phase 3].
-Focus: input validation, auth checks, injection vulnerabilities, data exposure.
-REPORT ONLY - do not make changes. Output: confidence-scored findings (≥80 only)."
+   b. **If CLAUDE.md exists**, look for `review-agent-mode:` setting:
+      - If found: Use that mode (`automatic`, `all`, or `minimal`)
+      - If not found: Ask user via AskUserQuestion (one-time setup):
+        ```
+        Use AskUserQuestion:
+        question: "How should review agents be selected for this project? (saved to CLAUDE.md)"
+        header: "Review Mode"
+        options:
+          - label: "Automatic (Recommended)"
+            description: "Smart selection based on file types and change patterns"
+          - label: "All Agents"
+            description: "Always launch all 3 review agents"
+          - label: "Minimal"
+            description: "Only launch agents when strongly indicated"
+        ```
+        Then append to CLAUDE.md:
+        ```markdown
+        ## RPTC Review Configuration
+        review-agent-mode: [selected mode]
+        ```
 
-Use Task tool with subagent_type="rptc:docs-agent":
-prompt: "Review documentation impact for these files: [list all files modified in Phase 3].
-Focus: README updates, API doc changes, inline comment accuracy, breaking changes.
-REPORT ONLY - do not make changes. Output: documentation updates needed (≥80 only)."
-```
+   c. **If no CLAUDE.md exists**: Use `automatic` mode (don't ask, don't create file)
 
-3. **Consolidate findings** from all agents:
+3. **Select agents based on mode**:
+
+   **Mode: `all`** — Launch all 3 agents (skip to step 4)
+
+   **Mode: `automatic`** — Select based on changes:
+
+   | Change Type | code-review | security | docs |
+   |-------------|:-----------:|:--------:|:----:|
+   | Source code in `auth/`, `api/`, `security/`, `middleware/` paths | ✅ | ✅ | Check keywords |
+   | Source code (other paths) | ✅ | Check keywords | Check keywords |
+   | Source code with `export` statements | ✅ | Check keywords | ✅ |
+   | Test files only | ✅ | ❌ | ❌ |
+   | Dependencies changed (`package.json`, `requirements.txt`, etc.) | ❌ | ✅ | ❌ |
+   | Docs/markdown only | ❌ | ❌ | ✅ |
+   | Config files (non-sensitive) | ❌ | ❌ | ✅ |
+
+   **Keyword detection** (scan git diff):
+   - Security keywords: `password`, `token`, `secret`, `auth`, `session`, `crypto`, `hash`, `sql`, `exec`, `eval` → include security-agent
+   - API keywords: `export`, `interface`, `endpoint`, `route`, `version`, `deprecated` → include docs-agent
+
+   **Default**: If uncertain, include the agent
+
+   **Mode: `minimal`** — Only launch when strongly indicated:
+   - code-review: Only if >50 lines of source code changed
+   - security: Only if auth/api paths OR security keywords found
+   - docs: Only if doc files changed OR `export` keyword found
+
+4. **Launch selected review agents** — Make Task tool calls for each selected agent:
+
+   **Code Review Agent** (if selected):
+   ```
+   Use Task tool with subagent_type="rptc:code-review-agent":
+   prompt: "Review code quality for these files: [list files].
+   Focus: complexity, KISS/YAGNI violations, dead code, readability.
+   REPORT ONLY - do not make changes. Output: confidence-scored findings (≥80 only)."
+   ```
+
+   **Security Agent** (if selected):
+   ```
+   Use Task tool with subagent_type="rptc:security-agent":
+   prompt: "Security review for these files: [list files].
+   Focus: input validation, auth checks, injection vulnerabilities, data exposure.
+   REPORT ONLY - do not make changes. Output: confidence-scored findings (≥80 only)."
+   ```
+
+   **Documentation Agent** (if selected):
+   ```
+   Use Task tool with subagent_type="rptc:docs-agent":
+   prompt: "Review documentation impact for these files: [list files].
+   Focus: README updates, API doc changes, inline comment accuracy, breaking changes.
+   REPORT ONLY - do not make changes. Output: documentation updates needed (≥80 only)."
+   ```
+
+5. **Consolidate findings** from launched agents:
    - Categorize: bugs, security, style, structural, documentation
    - Show only high-confidence issues (≥80)
    - Present summary to user
 
-4. **Create TodoWrite for fixes** (if any findings):
+6. **Create TodoWrite for fixes** (if any findings):
    ```
    TodoWrite with status="pending":
    - [Category] Finding 1: description (file:line)
@@ -298,7 +357,7 @@ REPORT ONLY - do not make changes. Output: documentation updates needed (≥80 o
    ...
    ```
 
-5. **Main context addresses findings**:
+7. **Main context addresses findings**:
    - Work through TodoWrite items
    - Simple fixes: Apply directly
    - Structural changes: Show proposed change, get user approval
@@ -374,22 +433,25 @@ Use Task tool with subagent_type="rptc:tdd-agent":
 For each step in order: RED → GREEN → REFACTOR, then next step.
 ```
 
-### Review Agents (Phase 4) - MUST launch all three in parallel
+### Review Agents (Phase 4) - Semantic Selection
 
 **Mode**: Report-only. Agents report findings; main context handles fixes via TodoWrite.
 
-```
-Launch ALL THREE in the same message for parallel execution:
+**Selection based on `review-agent-mode` in project CLAUDE.md:**
+- `all`: Launch all 3 agents
+- `automatic`: Select based on file types/keywords (default if no CLAUDE.md)
+- `minimal`: Only when strongly indicated
 
-Use Task tool with subagent_type="rptc:code-review-agent":
-prompt: "Review code quality for [files]. Focus: complexity, KISS/YAGNI, dead code, readability. REPORT ONLY - do not make changes. Output: confidence-scored findings (≥80 only)."
+**Agents:**
+1. `rptc:code-review-agent`: Code quality, complexity, KISS/YAGNI
+2. `rptc:security-agent`: Input validation, auth, injection, data exposure
+3. `rptc:docs-agent`: README, API docs, inline comments, breaking changes
 
-Use Task tool with subagent_type="rptc:security-agent":
-prompt: "Security review for [files]. Focus: input validation, auth, injection, data exposure. REPORT ONLY - do not make changes. Output: confidence-scored findings (≥80 only)."
-
-Use Task tool with subagent_type="rptc:docs-agent":
-prompt: "Review documentation impact for [files]. Focus: README, API docs, inline comments, breaking changes. REPORT ONLY - do not make changes. Output: documentation updates needed (≥80 only)."
-```
+**Quick reference for `automatic` mode:**
+- Source code changed → code-review
+- Auth/api/security paths OR security keywords → security
+- Doc files OR export keywords → docs
+- Test files only → code-review only
 
 ---
 
