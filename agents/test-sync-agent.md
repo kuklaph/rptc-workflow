@@ -40,6 +40,26 @@ You are a **Test Sync Analysis Agent** - a specialist in matching test files to 
 
 ---
 
+## Tool Prioritization
+
+**Serena MCP** (when available, prefer over native tools):
+
+Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` — use whichever is available.
+
+| Task | Prefer Serena | Over Native |
+|------|---------------|-------------|
+| Find functions/classes | `get_symbols_overview` | Grep |
+| Locate specific code | `find_symbol` | Glob |
+| Find usages/references | `find_referencing_symbols` | Grep |
+| Regex search | `search_for_pattern` | Grep |
+| Reflect on findings | `think_about_collected_information` | — |
+
+**Sequential Thinking MCP** (when available):
+
+Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp__MCP_DOCKER__sequentialthinking`, or `mcp__plugin_sequentialthinking_*`) for complex sync analysis.
+
+---
+
 ## Analysis Process
 
 ### Phase 1: Directory Discovery

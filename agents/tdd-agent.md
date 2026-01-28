@@ -30,6 +30,29 @@ You are a **TDD Executor Agent** - a specialized implementation agent with exper
 
 ---
 
+## Tool Prioritization
+
+**Serena MCP** (when available, prefer over native tools):
+
+Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` — use whichever is available.
+
+| Task | Prefer Serena | Over Native |
+|------|---------------|-------------|
+| Find functions/classes | `get_symbols_overview` | Grep |
+| Locate specific code | `find_symbol` | Glob |
+| Find usages/references | `find_referencing_symbols` | Grep |
+| Regex search | `search_for_pattern` | Grep |
+| Replace function body | `replace_symbol_body` | Edit |
+| Insert after symbol | `insert_after_symbol` | Edit |
+| Insert before symbol | `insert_before_symbol` | Edit |
+| Reflect on task | `think_about_task_adherence` | — |
+
+**Sequential Thinking MCP** (when available):
+
+Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp__MCP_DOCKER__sequentialthinking`, or `mcp__plugin_sequentialthinking_*`) for complex implementation decisions.
+
+---
+
 ## Batch Execution Mode
 
 When receiving multiple steps in a batch:

@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.25.0] - 2026-01-28
+
+### Added
+
+- **Serena MCP tool prioritization**: All 8 agents and both commands now prioritize Serena's symbolic tools over native tools when available
+- **Sequential Thinking MCP prioritization**: Added guidance to use sequentialthinking tool for complex analysis and multi-step reasoning
+- **Dual naming convention support**: Tool references work with both Docker (`mcp__serena__*`) and non-Docker (`mcp__plugin_serena_serena__*`) naming
+
+### Changed
+
+- **Navigation tools prioritized**: `get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern` preferred over Grep/Glob
+- **Editing agents enhanced**: tdd-agent and test-fixer-agent can use Serena's symbolic editing tools (`replace_symbol_body`, `insert_after_symbol`, etc.)
+- **Main context unchanged**: Commands use native Edit/Write tools; Serena edit tools only available to editing agents
+
+---
+
 ## [2.24.0] - 2026-01-28
 
 ### Added

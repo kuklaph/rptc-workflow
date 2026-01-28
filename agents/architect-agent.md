@@ -109,6 +109,30 @@ Think harder and thoroughly examine similar areas of the codebase to ensure your
 
 ---
 
+## Tool Prioritization
+
+**Serena MCP** (when available, prefer over native tools):
+
+Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` — use whichever is available.
+
+| Task | Prefer Serena | Over Native |
+|------|---------------|-------------|
+| Find functions/classes | `get_symbols_overview` | Grep |
+| Locate specific code | `find_symbol` | Glob |
+| Find usages/references | `find_referencing_symbols` | Grep |
+| Regex search | `search_for_pattern` | Grep |
+| Reflect on findings | `think_about_collected_information` | — |
+| List directory | `list_dir` | LS |
+
+**Sequential Thinking MCP** (when available):
+
+Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp__MCP_DOCKER__sequentialthinking`, or `mcp__plugin_sequentialthinking_*`) for:
+- Complex planning decisions
+- Multi-step analysis
+- Architectural trade-off evaluation
+
+---
+
 ## Operating Mode
 
 **Directory Format Only (v2.0.0+)**: This agent uses incremental sub-agent delegation for all features.

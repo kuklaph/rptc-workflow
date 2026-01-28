@@ -218,13 +218,30 @@ Determine mode from topic keywords:
 
 ## Tool Usage
 
-**Prefer MCP tools when available:**
+**Serena MCP Priority** (when available, use over native tools):
+
+Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` — use whichever is available.
+
+| Task | Prefer Serena | Over Native |
+|------|---------------|-------------|
+| Find functions/classes | `get_symbols_overview` | Grep |
+| Locate specific code | `find_symbol` | Glob |
+| Find usages/references | `find_referencing_symbols` | Grep |
+| Regex search | `search_for_pattern` | Grep |
+| Reflect on findings | `think_about_collected_information` | — |
+| List directory | `list_dir` | LS |
+
+**Sequential Thinking MCP** (when available):
+
+Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp__MCP_DOCKER__sequentialthinking`, or `mcp__plugin_sequentialthinking_*`) for complex research requiring multi-step reasoning.
+
+**Other MCP tools:**
 
 - `mcp__MCP_DOCKER__fetch` over WebFetch for web content
 
 **Directory Exploration:**
 
-- Use `LS` for quick directory listing
+- Use Serena `list_dir` or `LS` for quick directory listing
 - Use `NotebookRead` for Jupyter notebooks in data science codebases
 
 **Progress Tracking:**
