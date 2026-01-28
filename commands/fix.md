@@ -21,12 +21,12 @@ Systematic bug fixing: Reproduction → Root Cause Analysis → Fix → Verifica
 
 | Severity | Description | Response |
 |----------|-------------|----------|
-| **S1 Blocker** | System unusable, crashes, data loss | Immediate fix, skip optional steps |
-| **S2 Critical** | Core functionality broken, no workaround | High priority, full workflow |
+| **S1 Blocker** | System unusable, crashes, data loss | Immediate fix, skip plan mode |
+| **S2 Critical** | Core functionality broken, no workaround | High priority, skip plan mode |
 | **S3 Major** | Significant impact, workarounds exist | Normal priority, full workflow |
-| **S4 Minor** | UI issues, inconveniences | Lower priority, simplified workflow |
+| **S4 Minor** | UI issues, inconveniences | Lower priority, skip plan mode |
 
-**Result**: Set `severity` for Phase 2 routing (S1-S2 may skip plan mode).
+**Result**: Set `severity` for Phase 2 routing (S1-S2, S4 may skip plan mode). Phase 4 (Verification) is always required.
 
 ---
 
@@ -200,11 +200,15 @@ Apply MINIMAL fix to make the test pass:
    - If fix causes new failures: Analyze regression, adjust fix
    - If fix attempt fails 3x: Ask user for guidance
 
+4. **Proceed to Phase 4** (Verification) after fix is applied and tests pass
+
 ---
 
-## Phase 4: Verification
+## Phase 4: Verification (REQUIRED - Do Not Skip)
 
 **Goal**: Verify the fix works and didn't introduce regressions.
+
+**This phase runs for ALL bugs regardless of severity (S1-S4).** Even urgent S1 fixes must be reviewed before completion.
 
 **Actions**:
 

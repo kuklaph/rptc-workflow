@@ -41,7 +41,7 @@ Complete feature development: Discovery → Architecture → Implementation → 
 1. **Classify task type** (see Task Classification above)
 2. **Create initial todo list** with phases based on task type:
    - Code tasks: Discovery, Architecture, TDD Implementation, Quality Review, Complete
-   - Non-Code tasks: Discovery, Architecture, Implementation, Review, Complete
+   - Non-Code tasks: Discovery, Architecture, Implementation, Quality Review, Complete
 3. **If codebase exploration needed**, launch 2-3 research agents in parallel (NOT the built-in Explore agent):
 
 ```
@@ -143,7 +143,7 @@ Approach descriptions:
    - Make changes using Edit/Write tools
    - Verify changes are correct
 3. **Update TodoWrite** as each step completes
-4. **Proceed to Phase 4** (Quality Review)
+4. **Execute Phase 4** (Quality Review) — required for all task types
 
 ---
 
@@ -237,7 +237,7 @@ Then move to next step in batch.
 
 8. **Update TodoWrite** as each batch completes
 9. **Handle failures**: If batch fails after 3 attempts, ask user for guidance
-10. **Proceed to Phase 4** (Quality Review) after all batches complete
+10. **Execute Phase 4** (Quality Review) after all batches complete — do not skip
 
 **Example Batching**:
 ```
@@ -254,9 +254,11 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
 
 ---
 
-## Phase 4: Quality Review
+## Phase 4: Quality Review (REQUIRED - Do Not Skip)
 
 **Goal**: Review changes and report findings for main context to address.
+
+**This phase is REQUIRED for ALL task types (code and non-code). Always launch all three review agents.**
 
 **Mode**: Report-only. Review agents DO NOT make changes—they report findings. Main context handles all fixes.
 

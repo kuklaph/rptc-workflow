@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.23.0] - 2026-01-27
+
+### Fixed
+
+- **Missing Phase 4 transition in `fix.md`**: Phase 3 had no instruction to proceed to Phase 4, causing review agents to never trigger for bug fixes
+- **Phase 4 not marked as mandatory**: Added `(REQUIRED - Do Not Skip)` to Phase 4 headers in both `feat.md` and `fix.md` with explicit statements that it runs for all task types and severities
+- **Ambiguous severity skip language in `fix.md`**: Replaced vague "skip optional steps" (S1) and "simplified workflow" (S4) with specific "skip plan mode" and added "Phase 4 is always required"
+- **Weak transition wording in `feat.md`**: Changed "Proceed to Phase 4" to "Execute Phase 4" with mandatory qualifiers in both Route A and Route B
+- **TodoWrite phase name inconsistency**: Non-code tasks used "Review" instead of "Quality Review", potentially causing LLM to skip full agent-based review
+
+---
+
 ## [2.22.0] - 2026-01-27
 
 ### Fixed
