@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 2.25.6
+**Version**: 2.26.0
 **Status**: Beta
 **License**: MIT
 
@@ -61,6 +61,7 @@ All phases unified in one command: `/rptc:feat`
 
 | Command | Purpose | When to Use |
 |---------|---------|-------------|
+| `/rptc:start` | Initialize or update RPTC configuration in project | First-time setup, after plugin updates |
 | `/rptc:research "topic"` | Standalone research and discovery | Exploring unfamiliar topics separately |
 | `/rptc:commit [pr]` | Verify and ship | After completing implementation |
 | `/rptc:sync-prod-to-tests "[dir]"` | Sync tests to production code with auto-fix | Test maintenance |
@@ -272,6 +273,7 @@ rptc-workflow/
 │   ├── feat.md                  # /rptc:feat (PRIMARY)
 │   ├── fix.md                   # /rptc:fix
 │   ├── research.md              # /rptc:research
+│   ├── start.md                 # /rptc:start (project initialization)
 │   └── sync-prod-to-tests.md    # /rptc:sync-prod-to-tests
 ├── agents/                      # 8 specialist agents
 │   ├── research-agent.md

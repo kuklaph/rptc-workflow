@@ -410,10 +410,9 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
 
 5. **Consolidate findings** from launched agents:
    - Categorize: bugs, security, style, structural, documentation
-   - Show only high-confidence issues (≥80)
-   - Present summary to user
+   - Filter to high-confidence issues only (≥80)
 
-6. **Create TodoWrite for fixes** (if any findings):
+6. **Create TodoWrite for ALL findings** (auto-fix by default):
    ```
    TodoWrite with status="pending":
    - [Category] Finding 1: description (file:line)
@@ -421,12 +420,28 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
    ...
    ```
 
-7. **Main context addresses findings**:
-   - Use Sequential Thinking to analyze each finding before fixing
-   - Work through TodoWrite items
-   - Simple fixes: Apply directly
-   - Structural changes: Show proposed change, get user approval
-   - Mark todos complete as addressed
+7. **Auto-fix findings** (no user approval needed for most issues):
+
+   **Fix automatically** (Tier 2-4):
+   - Nits: naming, formatting, minor style issues
+   - Dead code removal
+   - Missing error handling
+   - Documentation updates
+   - Test coverage gaps
+   - Minor refactoring (<30 lines)
+
+   **Ask user FIRST** (Tier 1 or significant work):
+   - Architecture changes (layer violations, new abstractions)
+   - Security vulnerabilities (may need broader review)
+   - Breaking API changes
+   - Major refactoring (>50 lines or multiple files)
+   - Integration issues (orphan code - user decides: wire up or remove)
+
+   **Process**:
+   - Work through TodoWrite items sequentially
+   - For auto-fix items: Apply fix, mark complete
+   - For ask-first items: Use AskUserQuestion with fix proposal, then apply or skip
+   - Mark all todos complete as addressed
 
 8. **Update TodoWrite**: Mark "Quality Review" as completed
 
@@ -537,7 +552,7 @@ For each step in order: RED → GREEN → REFACTOR, then next step.
 2. **Ask when uncertain**: Use AskUserQuestion only when genuinely unclear
 3. **Smart parallelism**: Parallelize independent steps, sequence dependent ones
 4. **Task-appropriate workflow**: TDD for code, direct execution for non-code
-5. **Report-only reviews**: Agents report findings, main context fixes via TodoWrite
+5. **Auto-fix by default**: Fix Tier 2-4 issues automatically; ask only for Tier 1 or major changes
 6. **Confidence filtering**: Only surface issues ≥80 confidence
 7. **Goal+Actions format**: Trust agents to handle details
 

@@ -336,13 +336,27 @@ Apply MINIMAL fix to make the test pass:
    - Regression risk: Side effects identified?
    - Documentation: Updates needed?
 
-5. **Create TodoWrite for any issues** found by reviewers
+5. **Create TodoWrite for ALL findings** (auto-fix by default)
 
-6. **Main context addresses findings**:
-   - Use Sequential Thinking to analyze each finding before fixing
-   - Simple fixes: Apply directly
-   - Scope expansion needed: Ask user first
-   - Mark todos complete as addressed
+6. **Auto-fix findings** (no user approval needed for most issues):
+
+   **Fix automatically**:
+   - Nits: naming, formatting, minor style issues
+   - Documentation updates
+   - Minor code improvements (<30 lines)
+   - Test assertions or coverage gaps
+
+   **Ask user FIRST**:
+   - Fix scope expansion (touches files outside original bug scope)
+   - Regression risks identified by reviewers
+   - Security concerns raised
+   - Architectural issues
+
+   **Process**:
+   - Work through TodoWrite items sequentially
+   - For auto-fix items: Apply fix, mark complete
+   - For ask-first items: Use AskUserQuestion with fix proposal, then apply or skip
+   - Mark all todos complete as addressed
 
 7. **Update TodoWrite**: Mark "Verification Review" as completed
 

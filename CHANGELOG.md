@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.26.0] - 2026-01-29
+
+### Added
+
+- **`/rptc:start` command**: Initialize or update RPTC configuration in project CLAUDE.md
+  - First-time setup: Creates CLAUDE.md with RPTC configuration block
+  - Sync updates: Detects outdated configuration and updates to current version
+  - Preserves user customizations (review-agent-mode, project-specific notes)
+  - Version-tracked with `<!-- RPTC-START v{version} -->` markers
+
+### Changed
+
+- **Auto-fix by default**: Review findings (Tier 2-4) are now automatically fixed without user approval
+  - Nits, dead code, documentation, minor refactoring → auto-fixed
+  - Only Tier 1 (architecture, security) or major changes (>50 lines) require user approval
+  - Significantly faster review phase completion
+- **Project initialization simplified**: No manual setup required, `/rptc:start` handles everything
+
+---
+
 ## [2.25.6] - 2026-01-29
 
 ### Changed
