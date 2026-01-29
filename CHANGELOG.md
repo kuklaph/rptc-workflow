@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.25.4] - 2026-01-28
+
+### Added
+
+- **Integration Completeness checking**: code-review-agent now detects orphan code (functions/classes created but never wired to entry points)
+- **Phase 2.5**: New review phase uses `find_referencing_symbols` to verify new exports have production callers (not just test callers)
+- **INTEGRATION tag**: New issue tag for orphan code, missing entry point wiring, unregistered routes
+
+### Fixed
+
+- **Orphan code detection gap**: Previously, TDD could create working functions that passed all tests but were never integrated into the actual application flow. The review process now catches this.
+
+---
+
+## [2.25.3] - 2026-01-28
+
+### Added
+
+- **Docker MCP variants for all agents**: All 8 agents now have complete MCP tool coverage with normal, plugin, and Docker naming conventions
+- **Serena Docker tools**: `mcp__MCP_DOCKER__list_dir`, `mcp__MCP_DOCKER__find_symbol`, etc.
+- **IDE Docker tools**: `mcp__MCP_DOCKER__getDiagnostics`, `mcp__MCP_DOCKER__executeCode`
+- **Fetch normal variant**: Added `mcp__fetch__fetch` for non-Docker/plugin setups
+- **Intelligent test framework selection**: tdd-agent now detects code context (utility, frontend-ui, browser-dependent, backend-api) and selects appropriate framework
+- **Playwright for browser-dependent code**: Code using `window.`, `document.`, `localStorage` automatically triggers Playwright tests instead of unit runner
+- **Framework-specific test patterns**: Added templates for unit runner, RTL, Playwright, and supertest
+- **Test framework configuration**: Projects can specify preferred frameworks in CLAUDE.md
+
+### Changed
+
+- **Sequential Thinking emphasis**: Now STRONGLY RECOMMENDED for anything beyond basic tasks (moved to prominent position in commands)
+- **Tool reminders at each phase**: Added inline reminders in feat.md and fix.md for Sequential Thinking and Serena usage
+- **Tool Prioritization moved earlier**: Section now appears before Phase 1 in fix.md for visibility
+
+---
+
 ## [2.25.2] - 2026-01-28
 
 ### Fixed

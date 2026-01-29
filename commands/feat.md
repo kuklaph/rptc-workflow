@@ -46,15 +46,24 @@ Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` �
 | Regex search | `search_for_pattern` | Grep |
 | Reflect on progress | `think_about_collected_information` | — |
 
-**Sequential Thinking MCP** (when available):
+**Sequential Thinking MCP** (STRONGLY RECOMMENDED):
 
-Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp__MCP_DOCKER__sequentialthinking`, or `mcp__plugin_sequentialthinking_*`) for complex planning and analysis.
+Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp__MCP_DOCKER__sequentialthinking`, or `mcp__plugin_sequentialthinking_*`) for **anything beyond the most basic tasks**.
+
+| When to Use | Examples |
+|-------------|----------|
+| **Always use** | Multi-step analysis, architecture decisions, debugging, planning |
+| **Skip only for** | Single-line fixes, typo corrections, trivial config changes |
+
+**Default behavior**: When in doubt, use Sequential Thinking. It improves reasoning quality significantly.
 
 ---
 
 ## Phase 1: Discovery
 
 **Goal**: Understand what to build and existing patterns.
+
+> 💡 **Tool Reminder**: Use Sequential Thinking for feature analysis. Use Serena for code exploration.
 
 **Actions**:
 
@@ -92,6 +101,8 @@ Return: external dependencies, internal dependencies, API boundaries."
 ## Phase 2: Architecture
 
 **Goal**: Design the implementation approach with user approval.
+
+> 💡 **Tool Reminder**: Use Sequential Thinking when reviewing/comparing agent outputs.
 
 **Actions**:
 
@@ -176,13 +187,16 @@ options:
 
 **Goal**: Execute the plan using the appropriate method for the task type.
 
+> 💡 **Tool Reminder**: Use Sequential Thinking before each implementation step. Use Serena for code navigation.
+
 ### Route A: Non-Code Tasks (Direct Execution)
 
 **When**: `task_type = non-code` (documentation, config, markdown, plugin updates)
 
 **Actions**:
 
-1. **Execute steps directly** in main context (no sub-agent delegation)
+1. **Use Sequential Thinking** to plan each step before executing
+2. **Execute steps directly** in main context (no sub-agent delegation)
 2. **For each step**:
    - Read target files
    - Make changes using Edit/Write tools
@@ -403,6 +417,7 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
    ```
 
 7. **Main context addresses findings**:
+   - Use Sequential Thinking to analyze each finding before fixing
    - Work through TodoWrite items
    - Simple fixes: Apply directly
    - Structural changes: Show proposed change, get user approval

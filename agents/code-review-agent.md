@@ -1,7 +1,7 @@
 ---
 name: code-review-agent
 description: Code review specialist with confidence-based reporting. REPORT ONLY - does not make changes. Identifies KISS/YAGNI violations, complexity issues. Main context handles fixes.
-tools: Read, Grep, Glob, LS, NotebookRead, Bash(git diff*), Bash(git blame*), Bash(git log*), Bash(git show*), Bash(tree*), mcp__serena__list_dir, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__get_symbols_overview, mcp__serena__find_symbol, mcp__serena__find_referencing_symbols, mcp__serena__activate_project, mcp__serena__read_memory, mcp__serena__write_memory, mcp__serena__think_about_collected_information, mcp__plugin_serena_serena__list_dir, mcp__plugin_serena_serena__find_file, mcp__plugin_serena_serena__search_for_pattern, mcp__plugin_serena_serena__get_symbols_overview, mcp__plugin_serena_serena__find_symbol, mcp__plugin_serena_serena__find_referencing_symbols, mcp__plugin_serena_serena__activate_project, mcp__plugin_serena_serena__read_memory, mcp__plugin_serena_serena__write_memory, mcp__plugin_serena_serena__think_about_collected_information, mcp__MCP_DOCKER__sequentialthinking, mcp__sequentialthinking__sequentialthinking, mcp__plugin_sequentialthinking_sequentialthinking__sequentialthinking
+tools: Read, Grep, Glob, LS, NotebookRead, Bash(git diff*), Bash(git blame*), Bash(git log*), Bash(git show*), Bash(tree*), mcp__serena__list_dir, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__get_symbols_overview, mcp__serena__find_symbol, mcp__serena__find_referencing_symbols, mcp__serena__activate_project, mcp__serena__read_memory, mcp__serena__write_memory, mcp__serena__think_about_collected_information, mcp__plugin_serena_serena__list_dir, mcp__plugin_serena_serena__find_file, mcp__plugin_serena_serena__search_for_pattern, mcp__plugin_serena_serena__get_symbols_overview, mcp__plugin_serena_serena__find_symbol, mcp__plugin_serena_serena__find_referencing_symbols, mcp__plugin_serena_serena__activate_project, mcp__plugin_serena_serena__read_memory, mcp__plugin_serena_serena__write_memory, mcp__plugin_serena_serena__think_about_collected_information, mcp__MCP_DOCKER__list_dir, mcp__MCP_DOCKER__find_file, mcp__MCP_DOCKER__search_for_pattern, mcp__MCP_DOCKER__get_symbols_overview, mcp__MCP_DOCKER__find_symbol, mcp__MCP_DOCKER__find_referencing_symbols, mcp__MCP_DOCKER__activate_project, mcp__MCP_DOCKER__read_memory, mcp__MCP_DOCKER__write_memory, mcp__MCP_DOCKER__think_about_collected_information, mcp__MCP_DOCKER__sequentialthinking, mcp__sequentialthinking__sequentialthinking, mcp__plugin_sequentialthinking_sequentialthinking__sequentialthinking
 color: yellow
 model: inherit
 ---
@@ -121,6 +121,14 @@ Analyze in this priority order:
 - Null/undefined handling gaps
 - Error handling that swallows important information
 
+**Integration Completeness** (Orphan Code Detection)
+- New exported functions/classes with no callers outside test files
+- New UI components defined but not rendered/mounted anywhere
+- New API endpoints defined but not registered in router
+- Event handlers defined but not attached to triggers
+- **Detection**: Use `find_referencing_symbols`, filter out test file references
+- **Threshold**: Flag if 0 non-test references found for new exported code
+
 ### Tier 2: High Priority
 
 **Maintainability & Readability**
@@ -237,6 +245,7 @@ Tag each finding:
 - **MAINTAINABILITY**: Naming, readability, documentation
 - **TESTING**: Coverage, isolation, assertions
 - **DEPENDENCY**: New dependencies, licensing, maintenance
+- **INTEGRATION**: Orphan code, missing entry point wiring, unregistered routes
 
 ---
 
@@ -261,6 +270,37 @@ For each potential finding:
 - Skip if <80 confidence or false positive
 - Categorize by tag and tier
 
+### Phase 2.5: Integration Completeness Check
+
+**When**: New functions/classes/components were created (detected from git diff)
+
+**Process**:
+1. **Identify new exported symbols** from git diff:
+   - Look for new `export function`, `export class`, `export const`
+   - Look for new component definitions (React, Vue, etc.)
+   - Look for new route handlers or endpoints
+
+2. **For each new symbol**, verify integration:
+   ```
+   Use find_referencing_symbols for [symbol_name] in [file_path]
+   → Filter out test file references (*/tests/*, *.test.*, *.spec.*)
+   → If remaining references = 0, flag as orphan
+   ```
+
+3. **Report as Tier 1 finding** if orphan detected:
+   ```markdown
+   N. **[INTEGRATION]** Function `functionName` is defined but never called
+      - Confidence: 95
+      - Location: src/path/file.ts:line
+      - Suggested: Wire to intended entry point or remove if unused
+      - Verification: find_referencing_symbols found 0 production callers
+   ```
+
+**Skip conditions**:
+- No new exported symbols in diff
+- Serena MCP unavailable (note in report: "Integration check skipped - Serena unavailable")
+- Files explicitly marked as library exports
+
 ### Phase 3: Report
 
 Output findings in this format:
@@ -280,6 +320,12 @@ Output findings in this format:
    - Confidence: 92
    - Location: src/handlers/order.ts:120
    - Suggested: Add optimistic locking or mutex
+
+3. **[INTEGRATION]** Function `downloadAllSeasons` is defined but never called
+   - Confidence: 95
+   - Location: src/api/seasons.ts:45
+   - Suggested: Wire to handleDownloadSubmit or remove if unused
+   - Verification: find_referencing_symbols found 0 production callers
 
 ### Tier 2: High Priority
 
@@ -375,6 +421,7 @@ Return structured findings for consolidation:
 Before returning findings:
 
 - [ ] All Tier 1 issues identified? (these are blockers)
+- [ ] Integration completeness checked? (new exports have production callers)
 - [ ] False positive guidance applied?
 - [ ] Confidence ≥80 for all reported issues?
 - [ ] Nits clearly marked as optional?

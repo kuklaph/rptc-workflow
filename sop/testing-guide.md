@@ -504,11 +504,74 @@ describe("shopping cart", () => {
 
 ---
 
+## Test Framework Selection (Intelligent Detection)
+
+### When This Applies
+
+This section guides tdd-agent in selecting the appropriate test framework based on the code being tested. It prevents using unit test runners (Bun/Jest) for browser-dependent code that requires Playwright.
+
+### Code Context Detection
+
+Before writing tests, analyze each target file to determine its code context:
+
+| Context | Detection Keywords | Primary Framework |
+|---------|-------------------|-------------------|
+| `utility` | Pure functions, no UI/backend/browser imports | Unit runner (Bun/Jest/Vitest) |
+| `frontend-ui` | `React`, `Vue`, `useState`, `component`, `.jsx`, `.tsx` | RTL (component) or Playwright (E2E) |
+| `backend-api` | `express`, `fastify`, `req`, `res`, `router`, `middleware` | supertest/httpx |
+| `database` | `prisma`, `sequelize`, `typeorm`, `mongoose`, `query` | Test DB + repository pattern |
+| `browser-dependent` | `window.`, `document.`, `localStorage`, `navigator` | **Playwright REQUIRED** |
+| `external-api` | `fetch`, `axios`, `http.request` | MSW/nock mocks |
+| `cli` | `process.argv`, `commander`, `yargs` | Process spawn tests |
+| `realtime` | `WebSocket`, `socket.io`, `EventSource` | Integration with test server |
+
+### Framework Selection Matrix
+
+| Code Context | If Playwright Available | If No Playwright | Notes |
+|--------------|------------------------|------------------|-------|
+| `utility` | Unit runner | Unit runner | Direct function tests |
+| `frontend-ui` | RTL (component) + Playwright (E2E) | RTL + JSDOM | Component tests preferred |
+| `backend-api` | supertest | supertest | HTTP assertions |
+| `database` | Test DB integration | Mocked repository | Depends on setup |
+| `browser-dependent` | **Playwright REQUIRED** | **FLAG + SKIP** | Cannot unit test browser APIs |
+| `external-api` | MSW/nock mocks | MSW/nock mocks | Always mock external |
+| `cli` | Process spawn | Process spawn | Test stdout/stderr |
+| `realtime` | Test server integration | Test server | WebSocket testing |
+
+### Handling Missing Frameworks
+
+When `browser-dependent` code is detected but Playwright is not installed:
+
+1. **DO NOT attempt to write tests with unit runner** - they will fail or give false positives
+2. **Flag the file for manual review**
+3. **Suggest installation**: `npm install -D @playwright/test && npx playwright install`
+4. **Continue with other testable files**
+
+### Project Configuration (Optional)
+
+Projects can specify default frameworks in `CLAUDE.md`:
+
+```markdown
+## RPTC Test Framework Configuration
+test-framework:
+  unit: bun          # bun, jest, vitest, pytest
+  component: rtl     # rtl, vtl, playwright
+  e2e: playwright    # playwright, cypress
+  api: supertest     # supertest, httpx
+```
+
+**Behavior**:
+- If config exists: Use specified frameworks
+- If no config: Auto-detect from package.json/dependencies
+- `browser-dependent`: ALWAYS requires Playwright (not configurable)
+
+---
+
 ## Testing Frameworks
 
 ### JavaScript/TypeScript
 
-- **Unit**: Jest, Vitest, Mocha
+- **Unit**: Jest, Vitest, Mocha, Bun
 - **Assertions**: Chai, Jest built-in
 - **Mocking**: Jest, Sinon, MSW
 - **E2E**: Playwright, Cypress, Puppeteer

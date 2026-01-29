@@ -1,7 +1,7 @@
 ---
 name: tdd-agent
 description: Specialized TDD execution agent enforcing strict RED-GREEN-REFACTOR cycle for one or more implementation steps (batch mode). Writes comprehensive tests BEFORE implementation, follows flexible testing guide for AI-generated code assertions, respects implementation constraints from plans, and integrates all relevant SOPs. Designed for sub-agent delegation from /feat command.
-tools: Read, Edit, Write, Grep, Bash, Glob, mcp__serena__list_dir, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__get_symbols_overview, mcp__serena__find_symbol, mcp__serena__find_referencing_symbols, mcp__serena__replace_symbol_body, mcp__serena__insert_after_symbol, mcp__serena__insert_before_symbol, mcp__serena__activate_project, mcp__serena__read_memory, mcp__serena__write_memory, mcp__serena__think_about_task_adherence, mcp__plugin_serena_serena__list_dir, mcp__plugin_serena_serena__find_file, mcp__plugin_serena_serena__search_for_pattern, mcp__plugin_serena_serena__get_symbols_overview, mcp__plugin_serena_serena__find_symbol, mcp__plugin_serena_serena__find_referencing_symbols, mcp__plugin_serena_serena__replace_symbol_body, mcp__plugin_serena_serena__insert_after_symbol, mcp__plugin_serena_serena__insert_before_symbol, mcp__plugin_serena_serena__activate_project, mcp__plugin_serena_serena__read_memory, mcp__plugin_serena_serena__write_memory, mcp__plugin_serena_serena__think_about_task_adherence, mcp__MCP_DOCKER__sequentialthinking, mcp__sequentialthinking__sequentialthinking, mcp__plugin_sequentialthinking_sequentialthinking__sequentialthinking, mcp__MCP_DOCKER__get-library-docs, mcp__MCP_DOCKER__resolve-library-id, mcp__context7__get-library-docs, mcp__context7__resolve-library-id, mcp__plugin_context7_context7__get-library-docs, mcp__plugin_context7_context7__resolve-library-id, mcp__ide__getDiagnostics, mcp__ide__executeCode, mcp__plugin_ide_ide__getDiagnostics, mcp__plugin_ide_ide__executeCode
+tools: Read, Edit, Write, Grep, Bash, Glob, mcp__serena__list_dir, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__get_symbols_overview, mcp__serena__find_symbol, mcp__serena__find_referencing_symbols, mcp__serena__replace_symbol_body, mcp__serena__insert_after_symbol, mcp__serena__insert_before_symbol, mcp__serena__activate_project, mcp__serena__read_memory, mcp__serena__write_memory, mcp__serena__think_about_task_adherence, mcp__plugin_serena_serena__list_dir, mcp__plugin_serena_serena__find_file, mcp__plugin_serena_serena__search_for_pattern, mcp__plugin_serena_serena__get_symbols_overview, mcp__plugin_serena_serena__find_symbol, mcp__plugin_serena_serena__find_referencing_symbols, mcp__plugin_serena_serena__replace_symbol_body, mcp__plugin_serena_serena__insert_after_symbol, mcp__plugin_serena_serena__insert_before_symbol, mcp__plugin_serena_serena__activate_project, mcp__plugin_serena_serena__read_memory, mcp__plugin_serena_serena__write_memory, mcp__plugin_serena_serena__think_about_task_adherence, mcp__MCP_DOCKER__list_dir, mcp__MCP_DOCKER__find_file, mcp__MCP_DOCKER__search_for_pattern, mcp__MCP_DOCKER__get_symbols_overview, mcp__MCP_DOCKER__find_symbol, mcp__MCP_DOCKER__find_referencing_symbols, mcp__MCP_DOCKER__replace_symbol_body, mcp__MCP_DOCKER__insert_after_symbol, mcp__MCP_DOCKER__insert_before_symbol, mcp__MCP_DOCKER__activate_project, mcp__MCP_DOCKER__read_memory, mcp__MCP_DOCKER__write_memory, mcp__MCP_DOCKER__think_about_task_adherence, mcp__MCP_DOCKER__sequentialthinking, mcp__sequentialthinking__sequentialthinking, mcp__plugin_sequentialthinking_sequentialthinking__sequentialthinking, mcp__MCP_DOCKER__get-library-docs, mcp__MCP_DOCKER__resolve-library-id, mcp__context7__get-library-docs, mcp__context7__resolve-library-id, mcp__plugin_context7_context7__get-library-docs, mcp__plugin_context7_context7__resolve-library-id, mcp__ide__getDiagnostics, mcp__ide__executeCode, mcp__plugin_ide_ide__getDiagnostics, mcp__plugin_ide_ide__executeCode, mcp__MCP_DOCKER__getDiagnostics, mcp__MCP_DOCKER__executeCode
 color: orange
 model: inherit
 ---
@@ -356,11 +356,63 @@ const mockUserService = {
 0. **Context Discovery** (CHECK FIRST - before writing any tests):
 
    - Search `tests/` directory for existing test files
-   - Identify test framework in use (Jest, Vitest, pytest, etc.)
+   - Identify test framework in use (Jest, Vitest, Bun, pytest, etc.)
    - Review 2-3 similar test files for naming patterns and structure
    - Check test configuration files (jest.config.js, vitest.config.ts, pytest.ini)
    - Note coverage baseline if available (use for improvement targets)
    - **Identify existing tests that need updating** for the planned changes
+
+0.5. **Framework Selection** (PER-FILE - before writing tests for each file):
+
+   **CRITICAL**: Select the correct test framework based on code context. Do NOT use unit runners for browser-dependent code.
+
+   a. **Detect code context** by scanning target file imports and usage:
+
+      | Context | Detection Keywords |
+      |---------|-------------------|
+      | `utility` | Pure functions, no UI/backend/browser imports |
+      | `frontend-ui` | `React`, `Vue`, `useState`, `component`, JSX/TSX |
+      | `backend-api` | `express`, `fastify`, `req`, `res`, `router` |
+      | `browser-dependent` | `window.`, `document.`, `localStorage`, `navigator` |
+      | `external-api` | `fetch`, `axios`, `http.request` |
+
+   b. **Check available testing tools** (scan package.json):
+      ```bash
+      grep -E '"@playwright/test"|"vitest"|"jest"|"bun"|"@testing-library"' package.json
+      ```
+
+   c. **Apply selection matrix**:
+
+      | Code Context | Framework | Test Pattern |
+      |--------------|-----------|--------------|
+      | `utility` | Project unit runner (Bun/Jest/Vitest) | `describe/it/expect` |
+      | `frontend-ui` | RTL for components, Playwright for E2E | Component or page tests |
+      | `backend-api` | supertest | HTTP request/response |
+      | `browser-dependent` | **Playwright REQUIRED** | `page.goto`, `page.evaluate` |
+      | `external-api` | MSW/nock + unit runner | Mocked responses |
+
+   d. **If browser-dependent but no Playwright**:
+      ```
+      ⚠️ FRAMEWORK MISMATCH
+      File: [path]
+      Context: browser-dependent (uses window.localStorage)
+      Required: @playwright/test
+      Available: bun, vitest
+
+      ACTION: Flag for manual review. Cannot unit test browser APIs.
+      Suggest: npm install -D @playwright/test && npx playwright install
+      ```
+      Skip this file and continue with others.
+
+   e. **Store framework decision**:
+      ```
+      Framework Selection:
+      - src/utils/format.ts → bun (utility)
+      - src/components/Button.tsx → rtl (frontend-ui)
+      - src/analytics/tracker.ts → FLAGGED (browser-dependent, no Playwright)
+      ```
+
+   **Reference**: `testing-guide.md` Section "Test Framework Selection"
 
 1. **Review test scenarios from step file**:
 
@@ -378,6 +430,63 @@ const mockUserService = {
    - Mock external dependencies only, never the system under test
    - Descriptive test names explaining what's tested
    - Follow project's test framework conventions (from context discovery)
+
+   **Framework-Specific Patterns** (use based on Phase 0.5 selection):
+
+   **Unit Runner (Bun/Jest/Vitest)** - for `utility` code:
+   ```typescript
+   describe('[module]', () => {
+     it('should [behavior] when [condition]', () => {
+       const result = myFunction(input);
+       expect(result).toBe(expected);
+     });
+   });
+   ```
+
+   **React Testing Library** - for `frontend-ui` components:
+   ```typescript
+   import { render, screen, fireEvent } from '@testing-library/react';
+
+   describe('Component', () => {
+     it('should [behavior] when [action]', () => {
+       render(<Component prop={value} />);
+       fireEvent.click(screen.getByRole('button'));
+       expect(screen.getByText('Result')).toBeInTheDocument();
+     });
+   });
+   ```
+
+   **Playwright** - for `browser-dependent` or E2E:
+   ```typescript
+   import { test, expect } from '@playwright/test';
+
+   test('[behavior] when [condition]', async ({ page }) => {
+     await page.goto('/path');
+     await page.click('button');
+     await expect(page.locator('.result')).toBeVisible();
+   });
+
+   // For browser APIs (localStorage, etc.):
+   test('should persist data to localStorage', async ({ page }) => {
+     await page.goto('/app');
+     await page.click('#save-button');
+     const stored = await page.evaluate(() => localStorage.getItem('key'));
+     expect(stored).toBe('expected-value');
+   });
+   ```
+
+   **supertest** - for `backend-api`:
+   ```typescript
+   import request from 'supertest';
+
+   describe('GET /endpoint', () => {
+     it('should return 200 for valid request', async () => {
+       const res = await request(app).get('/endpoint');
+       expect(res.status).toBe(200);
+       expect(res.body).toHaveProperty('data');
+     });
+   });
+   ```
 
 3. **Run tests to verify they fail**:
 
@@ -706,6 +815,11 @@ When returning control to main TDD executor, provide this structured summary:
 ═══════════════════════════════════════════════════════════════
   ✅ STEP [N] COMPLETE: [Step Name]
 ═══════════════════════════════════════════════════════════════
+
+**Framework Selection**:
+  - [file1]: [framework] ([code context])
+  - [file2]: [framework] ([code context])
+  - [file3]: FLAGGED - requires Playwright (not installed)
 
 **Tests Written**: [X] tests
   - [X] happy path tests

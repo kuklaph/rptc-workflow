@@ -30,9 +30,38 @@ Systematic bug fixing: Reproduction → Root Cause Analysis → Fix → Verifica
 
 ---
 
+## Tool Prioritization
+
+**Serena MCP** (when available, prefer over native tools):
+
+Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` — use whichever is available.
+
+| Task | Prefer Serena | Over Native |
+|------|---------------|-------------|
+| Find functions/classes | `get_symbols_overview` | Grep |
+| Locate specific code | `find_symbol` | Glob |
+| Find usages/references | `find_referencing_symbols` | Grep |
+| Regex search | `search_for_pattern` | Grep |
+| Reflect on progress | `think_about_collected_information` | — |
+
+**Sequential Thinking MCP** (STRONGLY RECOMMENDED):
+
+Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp__MCP_DOCKER__sequentialthinking`, or `mcp__plugin_sequentialthinking_*`) for **anything beyond the most basic tasks**.
+
+| When to Use | Examples |
+|-------------|----------|
+| **Always use** | Root cause analysis, debugging, multi-step fixes, 5 Whys |
+| **Skip only for** | Single-line typo fixes, trivial config changes |
+
+**Default behavior**: When in doubt, use Sequential Thinking. It improves reasoning quality significantly.
+
+---
+
 ## Phase 1: Reproduction & Triage
 
 **Goal**: Confirm the bug exists and understand its triggering conditions.
+
+> 💡 **Tool Reminder**: Use Sequential Thinking to analyze bug context. Use Serena for code tracing.
 
 **Actions**:
 
@@ -85,9 +114,11 @@ Return: Affected files/functions, related code with same pattern, potential regr
 
 **Goal**: Identify the fundamental cause and plan the fix.
 
+> 💡 **Tool Reminder**: Use Sequential Thinking for 5 Whys analysis — it excels at multi-step reasoning.
+
 **Actions**:
 
-1. **Apply 5 Whys methodology** to findings from Phase 1:
+1. **Apply 5 Whys methodology** (use Sequential Thinking) to findings from Phase 1:
    ```
    Why? [Symptom observed]
    Why? [Immediate cause]
@@ -141,6 +172,8 @@ Constraints:
 ## Phase 3: Fix Application
 
 **Goal**: Apply the fix using test-driven approach (regression test first).
+
+> 💡 **Tool Reminder**: Use Serena for precise code navigation when applying fixes.
 
 **CRITICAL - Test-First Ordering**: Whether delegating to tdd-agent OR executing in main context, ALWAYS write the regression test that reproduces the bug BEFORE modifying production code. Update any existing tests BEFORE changing production code. Never fix production code first.
 
@@ -301,6 +334,7 @@ Apply MINIMAL fix to make the test pass:
 5. **Create TodoWrite for any issues** found by reviewers
 
 6. **Main context addresses findings**:
+   - Use Sequential Thinking to analyze each finding before fixing
    - Simple fixes: Apply directly
    - Scope expansion needed: Ask user first
    - Mark todos complete as addressed
@@ -444,22 +478,3 @@ VERIFY: Run full test suite, check for regressions
 - **Fix attempt fails 3x**: Pause, present findings, ask user for guidance
 - **Larger refactoring needed**: Flag it, complete minimal fix, suggest follow-up task
 
----
-
-## Tool Prioritization
-
-**Serena MCP** (when available, prefer over native tools):
-
-Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` — use whichever is available.
-
-| Task | Prefer Serena | Over Native |
-|------|---------------|-------------|
-| Find functions/classes | `get_symbols_overview` | Grep |
-| Locate specific code | `find_symbol` | Glob |
-| Find usages/references | `find_referencing_symbols` | Grep |
-| Regex search | `search_for_pattern` | Grep |
-| Reflect on progress | `think_about_collected_information` | — |
-
-**Sequential Thinking MCP** (when available):
-
-Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp__MCP_DOCKER__sequentialthinking`, or `mcp__plugin_sequentialthinking_*`) for complex analysis, root cause investigation, and multi-step reasoning.
