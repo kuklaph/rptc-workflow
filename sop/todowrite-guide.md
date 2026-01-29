@@ -192,8 +192,7 @@
   "todos": [
     {"content": "Batch 1: Steps 1-2 TDD cycle", "status": "pending", "activeForm": "Executing Batch 1 TDD"},
     {"content": "Batch 2: Step 3 TDD cycle", "status": "pending", "activeForm": "Executing Batch 2 TDD"},
-    {"content": "Quality Review: All agents (parallel)", "status": "pending", "activeForm": "Running quality review agents"},
-    {"content": "Process review findings", "status": "pending", "activeForm": "Processing review findings"},
+    {"content": "Quality Review", "status": "pending", "activeForm": "Running quality review agents"},
     {"content": "Complete implementation", "status": "pending", "activeForm": "Completing implementation"}
   ]
 }
@@ -201,7 +200,9 @@
 
 **Notes**:
 - Smart batching groups related steps for ~40% token reduction
-- Quality review runs 3 agents in parallel (code-review, security, docs) - report-only mode
+- **Quality Review is MANDATORY** - must be marked in_progress when Phase 4 starts, completed when Phase 4 ends
+- Quality review runs agents in parallel (code-review, security, docs) - report-only mode
+- Phase 5 CANNOT begin until Quality Review is marked completed
 - Main context handles fixes from review findings via additional TODOs if needed
 
 **Commit Command** (7 phases):
@@ -409,16 +410,17 @@ Before [NEXT PHASE]:
 ---
 ```
 
-### All 6 Blocking Locations
+### All 7 Blocking Locations
 
 1. **Research** (commands/research.md): Block save without PM approval
 2. **Plan** (Phase 2): Block plan save without PM approval
 3. **TDD** (Phase 3): Block implementation until plan approved
-4. **Quality Review** (Phase 4): Review agents report findings (no PM pre-approval needed)
-5. **Commit** (commands/commit.md): Block commit if tests failing
-6. **Commit** (commands/commit.md): Block commit if code quality issues
+4. **Quality Review** (Phase 4): **MANDATORY gate** - TodoWrite "Quality Review" must be marked completed before Phase 5
+5. **Phase 5 Entry**: Block Phase 5 until Quality Review TodoWrite item is completed
+6. **Commit** (commands/commit.md): Block commit if tests failing
+7. **Commit** (commands/commit.md): Block commit if code quality issues
 
-**Note**: Quality review agents (code-review, security, docs) run automatically in parallel and report findings. Main context processes findings - no individual agent approval gates needed.
+**Note**: Quality review is enforced via TodoWrite tracking. The "Quality Review" item MUST be marked in_progress when Phase 4 starts and completed when Phase 4 ends. Phase 5 has a blocking checkpoint that verifies this.
 
 ### Imperative Language Keywords
 

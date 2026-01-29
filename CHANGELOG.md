@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.25.5] - 2026-01-29
+
+### Added
+
+- **Mandatory Quality Review gate**: Phase 4 now has TodoWrite tracking that MUST be marked completed before Phase 5 can begin
+- **Blocking checkpoint at Phase 5**: Explicit verification that Quality Review ran before completion
+- **TodoWrite enforcement**: "Quality Review" item tracks Phase 4 execution (in_progress → completed)
+
+### Fixed
+
+- **Review phase skipping**: Previously, Phase 4 could be bypassed because there was no enforcement mechanism. Now TodoWrite tracking creates an audit trail and Phase 5 has a blocking checkpoint.
+
+---
+
 ## [2.25.4] - 2026-01-28
 
 ### Added

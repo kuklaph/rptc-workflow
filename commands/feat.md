@@ -296,7 +296,8 @@ Then move to next step in batch.
 
 8. **Update TodoWrite** as each batch completes
 9. **Handle failures**: If batch fails after 3 attempts, ask user for guidance
-10. **Execute Phase 4** (Quality Review) after all batches complete — do not skip
+10. **MANDATORY**: Add TodoWrite item "Quality Review" with status "pending" (if not exists)
+11. **Transition to Phase 4** — MUST execute before Phase 5
 
 **Example Batching**:
 ```
@@ -313,13 +314,17 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
 
 ---
 
-## Phase 4: Quality Review (REQUIRED - Do Not Skip)
+## Phase 4: Quality Review (MANDATORY - BLOCKING GATE)
 
 **Goal**: Review changes and report findings for main context to address.
 
 **Mode**: Report-only. Review agents DO NOT make changes—they report findings. Main context handles all fixes.
 
+**CRITICAL**: This phase MUST execute. Phase 5 CANNOT begin until this phase completes.
+
 **Actions**:
+
+0. **Update TodoWrite**: Mark "Quality Review" as in_progress
 
 1. **Collect files modified** during Phase 3 for review
 
@@ -423,9 +428,20 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
    - Structural changes: Show proposed change, get user approval
    - Mark todos complete as addressed
 
+8. **Update TodoWrite**: Mark "Quality Review" as completed
+
 ---
 
 ## Phase 5: Complete
+
+**BLOCKING CHECKPOINT** — Before Phase 5 can begin:
+
+- [ ] TodoWrite "Quality Review" item MUST be marked "completed"
+- [ ] At least one review agent MUST have been launched
+
+If Quality Review not completed → **STOP**. Return to Phase 4.
+
+---
 
 **Goal**: Summarize what was built.
 

@@ -233,17 +233,22 @@ Apply MINIMAL fix to make the test pass:
    - If fix causes new failures: Analyze regression, adjust fix
    - If fix attempt fails 3x: Ask user for guidance
 
-4. **Proceed to Phase 4** (Verification) after fix is applied and tests pass
+4. **MANDATORY**: Add TodoWrite item "Verification Review" with status "pending" (if not exists)
+5. **Transition to Phase 4** — MUST execute before Phase 5
 
 ---
 
-## Phase 4: Verification (REQUIRED - Do Not Skip)
+## Phase 4: Verification (MANDATORY - BLOCKING GATE)
 
 **Goal**: Verify the fix works and didn't introduce regressions.
+
+**CRITICAL**: This phase MUST execute. Phase 5 CANNOT begin until this phase completes.
 
 **This phase runs for ALL bugs regardless of severity (S1-S4).** Even urgent S1 fixes must be reviewed before completion.
 
 **Actions**:
+
+0. **Update TodoWrite**: Mark "Verification Review" as in_progress
 
 1. **Determine review agent mode** (one-time project configuration):
 
@@ -339,9 +344,20 @@ Apply MINIMAL fix to make the test pass:
    - Scope expansion needed: Ask user first
    - Mark todos complete as addressed
 
+7. **Update TodoWrite**: Mark "Verification Review" as completed
+
 ---
 
 ## Phase 5: Complete
+
+**BLOCKING CHECKPOINT** — Before Phase 5 can begin:
+
+- [ ] TodoWrite "Verification Review" item MUST be marked "completed"
+- [ ] At least one review agent MUST have been launched
+
+If Verification Review not completed → **STOP**. Return to Phase 4.
+
+---
 
 **Goal**: Summarize what was fixed and document for future reference.
 
