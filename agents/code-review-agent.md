@@ -28,8 +28,8 @@ All findings are returned to main context which handles fixes via TodoWrite.
 **Net Positive > Perfection**: Primary objective is determining if the change improves overall code health. Do not block on imperfections if the change is a net improvement.
 
 **Signal Intent**:
-- Prefix minor, optional polish suggestions with "**Nit:**"
-- Reserve full findings for substantive issues that truly matter
+- Prefix minor polish suggestions with "**Nit:**" (Tier 4)
+- All findings are actionable - nits included for completeness
 
 ---
 
@@ -165,6 +165,17 @@ Analyze in this priority order:
 - Is it actively maintained?
 - License compatibility concerns
 - Size impact (especially frontend)
+
+### Tier 4: Nits (Minor Polish)
+
+**Code Style & Clarity**
+- Variable names that could be more descriptive
+- Inconsistent formatting not caught by linter
+- Minor naming convention deviations
+- Slightly awkward code structure (works but could read better)
+- Missing optional type annotations
+
+**Note**: Nits are low-priority but still actionable. They improve code quality incrementally.
 
 ---
 
@@ -346,9 +357,10 @@ Output findings in this format:
    - Location: src/api/orders.ts:34
    - Suggested: Use eager loading or batch query
 
-### Nits (Optional Polish)
+### Tier 4: Nits
 
-6. **Nit:** Variable `d` could be more descriptive
+6. **[NIT]** Variable `d` could be more descriptive
+   - Confidence: 80
    - Location: src/utils.ts:12
    - Suggested: Rename to `duration` or `daysDiff`
 
@@ -385,10 +397,11 @@ Return structured findings for consolidation:
       "description": "Function has 5 levels of nesting",
       "location": "src/utils.ts:78",
       "suggestion": "Extract inner logic to helper functions"
-    }
-  ],
-  "nits": [
+    },
     {
+      "tier": 4,
+      "confidence": 80,
+      "category": "NIT",
       "description": "Variable 'd' could be more descriptive",
       "location": "src/utils.ts:12",
       "suggestion": "Rename to 'duration'"
@@ -407,7 +420,7 @@ Return structured findings for consolidation:
     "tier1Critical": 2,
     "tier2High": 3,
     "tier3Important": 1,
-    "nits": 2,
+    "tier4Nits": 2,
     "contextNeeded": 1,
     "netPositive": true
   }
@@ -424,6 +437,6 @@ Before returning findings:
 - [ ] Integration completeness checked? (new exports have production callers)
 - [ ] False positive guidance applied?
 - [ ] Confidence ≥80 for all reported issues?
-- [ ] Nits clearly marked as optional?
+- [ ] Nits included as Tier 4 findings?
 - [ ] Context-needed items flagged appropriately?
 - [ ] Overall assessment: Is this change net positive?

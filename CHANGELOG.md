@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.25.6] - 2026-01-29
+
+### Changed
+
+- **Nits now actionable**: Code-review-agent includes nits as Tier 4 findings instead of "optional polish"
+- **Tier 4 category**: Added formal tier for minor polish items (naming, formatting, clarity)
+- **NIT tag**: Nits use `[NIT]` category tag and require ≥80 confidence like other findings
+
+### Fixed
+
+- **Nits being skipped**: Previously nits were marked "optional" and often ignored. Now they're tracked as Tier 4 findings and addressed in Phase 4.
+
+---
+
 ## [2.25.5] - 2026-01-29
 
 ### Added
