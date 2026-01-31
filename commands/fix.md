@@ -10,11 +10,67 @@ allowed-tools: Bash(git *), Bash(npm *), Bash(npx *), Bash(bunx *), Bash(pnpm *)
 
 Systematic bug fixing: Reproduction → Root Cause Analysis → Fix → Verification.
 
-## Skills (Auto-Loaded via Frontmatter)
+## Step 0: RPTC Workflow Initialization (MANDATORY - CANNOT SKIP)
 
-The following skills are automatically loaded when this command runs:
-- **brainstorming** - Structured dialogue for fix approach exploration
-- **writing-clearly-and-concisely** - Apply Strunk's Elements of Style to all prose
+**Before ANY other action, establish RPTC workflow context.**
+
+### 0.1 Load Required Skills
+
+```
+Skill(skill: "rptc:brainstorming")
+Skill(skill: "rptc:writing-clearly-and-concisely")
+```
+
+**Wait for skills to load before proceeding.**
+
+### 0.2 RPTC Workflow Understanding (INTERNALIZE)
+
+You are executing the **RPTC (Research → Plan → TDD → Commit)** workflow for bug fixing.
+
+**Core Philosophy:**
+- Reproduce before fixing (confirm the bug exists)
+- Root cause analysis (fix the cause, not symptoms)
+- Test-first development (regression test proves the bug)
+- Quality gates before shipping (no shortcuts)
+
+**Non-Negotiable Directives:**
+
+| Directive | Meaning | Verification |
+|-----------|---------|--------------|
+| **Surgical Coding** | Find 3 similar patterns before creating new code | Search codebase first |
+| **KISS/YAGNI** | Minimal fix; no refactoring beyond the bug | Smallest possible change |
+| **Test-First** | Write regression test BEFORE fixing | Test reproduces bug first |
+| **Pattern Alignment** | Match existing codebase conventions | Study before implementing |
+| **User Authority** | User is PM; approves all major decisions | Ask when uncertain |
+
+**SOP Reference Chain:**
+- Architecture: `${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md`
+- Testing: `${CLAUDE_PLUGIN_ROOT}/sop/testing-guide.md`
+- Security: `${CLAUDE_PLUGIN_ROOT}/sop/security-and-performance.md`
+
+### 0.3 Phase Structure Awareness
+
+This workflow has **5 mandatory phases**. You MUST NOT skip phases.
+
+| Phase | Name | Key Deliverable | Blocking? |
+|-------|------|-----------------|-----------|
+| 1 | Reproduction & Triage | Confirmed bug with repro steps | No |
+| 2 | Root Cause Analysis | 5 Whys result, fix approach | No |
+| 3 | Fix Application | Regression test + minimal fix | No |
+| 4 | Verification | All review findings addressed | **YES** |
+| 5 | Complete | Summary for commit | **YES** |
+
+**Phase 4 and 5 transitions are BLOCKING GATES. Cannot proceed without verification.**
+
+### 0.4 Initialization Verification
+
+Before proceeding to Phase 1, confirm:
+- Skills loaded and active
+- RPTC directives understood
+- SOP references noted
+- Phase structure clear
+
+**CRITICAL: If verification fails, STOP. Do not proceed to Phase 1.**
 
 ---
 

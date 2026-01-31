@@ -10,11 +10,67 @@ allowed-tools: Bash(git *), Bash(npm *), Bash(npx *), Bash(bunx *), Bash(pnpm *)
 
 Complete feature development: Discovery → Architecture → Implementation → Quality Review.
 
-## Skills (Auto-Loaded via Frontmatter)
+## Step 0: RPTC Workflow Initialization (MANDATORY - CANNOT SKIP)
 
-The following skills are automatically loaded when this command runs:
-- **brainstorming** - Structured dialogue for requirement clarification
-- **writing-clearly-and-concisely** - Apply Strunk's Elements of Style to all prose
+**Before ANY other action, establish RPTC workflow context.**
+
+### 0.1 Load Required Skills
+
+```
+Skill(skill: "rptc:brainstorming")
+Skill(skill: "rptc:writing-clearly-and-concisely")
+```
+
+**Wait for skills to load before proceeding.**
+
+### 0.2 RPTC Workflow Understanding (INTERNALIZE)
+
+You are executing the **RPTC (Research → Plan → TDD → Commit)** workflow.
+
+**Core Philosophy:**
+- Research before coding (understand before building)
+- Plan with user approval (user is PM)
+- Test-first development (tests define behavior)
+- Quality gates before shipping (no shortcuts)
+
+**Non-Negotiable Directives:**
+
+| Directive | Meaning | Verification |
+|-----------|---------|--------------|
+| **Surgical Coding** | Find 3 similar patterns before creating new code | Search codebase first |
+| **KISS/YAGNI** | Simplest solution; no abstractions until 3+ use cases | Rule of Three |
+| **Test-First** | Write tests BEFORE implementation, ALWAYS | RED phase before GREEN |
+| **Pattern Alignment** | Match existing codebase conventions | Study before implementing |
+| **User Authority** | User is PM; approves all major decisions | Ask when uncertain |
+
+**SOP Reference Chain:**
+- Architecture: `${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md`
+- Testing: `${CLAUDE_PLUGIN_ROOT}/sop/testing-guide.md`
+- Security: `${CLAUDE_PLUGIN_ROOT}/sop/security-and-performance.md`
+
+### 0.3 Phase Structure Awareness
+
+This workflow has **5 mandatory phases**. You MUST NOT skip phases.
+
+| Phase | Name | Key Deliverable | Blocking? |
+|-------|------|-----------------|-----------|
+| 1 | Discovery | Understanding of what to build | No |
+| 2 | Architecture | User-approved implementation plan | No |
+| 3 | Implementation | Working code with tests | No |
+| 4 | Quality Review | All findings addressed | **YES** |
+| 5 | Complete | Summary for commit | **YES** |
+
+**Phase 4 and 5 transitions are BLOCKING GATES. Cannot proceed without verification.**
+
+### 0.4 Initialization Verification
+
+Before proceeding to Phase 1, confirm:
+- Skills loaded and active
+- RPTC directives understood
+- SOP references noted
+- Phase structure clear
+
+**CRITICAL: If verification fails, STOP. Do not proceed to Phase 1.**
 
 ---
 

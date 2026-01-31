@@ -15,10 +15,46 @@ Verify quality gates and ship. Final step in the workflow.
 
 ---
 
-## Skills (Auto-Loaded via Frontmatter)
+## Step 0: RPTC Workflow Initialization (MANDATORY - CANNOT SKIP)
 
-The following skills are automatically loaded when this command runs:
-- **writing-clearly-and-concisely** - Apply Strunk's Elements of Style to commit prose
+**Before ANY other action, establish RPTC workflow context.**
+
+### 0.1 Load Required Skills
+
+```
+Skill(skill: "rptc:writing-clearly-and-concisely")
+```
+
+**Wait for skill to load before proceeding.**
+
+### 0.2 RPTC Workflow Understanding (INTERNALIZE)
+
+You are executing **RPTC Commit** - the final quality gate before shipping.
+
+**Core Philosophy:**
+- Verify before committing
+- Quality gates are non-negotiable
+- Clear commit messages for history
+- User approves the final commit
+
+**Non-Negotiable Directives:**
+
+| Directive | Meaning |
+|-----------|---------|
+| **Quality Verification** | All tests pass, no critical issues |
+| **Clear Communication** | Commit messages follow conventions |
+| **User Authority** | User approves commit message and PR |
+| **No Shortcuts** | All verification steps must complete |
+
+**SOP Reference Chain:**
+- Git workflow: `${CLAUDE_PLUGIN_ROOT}/sop/git-and-deployment.md`
+
+### 0.3 Initialization Verification
+
+Before proceeding to Phase 1, confirm:
+- Skill loaded and active
+- RPTC directives understood
+- Commit scope clear
 
 ---
 

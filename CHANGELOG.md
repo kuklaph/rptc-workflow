@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.30.0] - 2026-01-31
+
+### Added
+
+- **RPTC Context Enforcement**: Mandatory RPTC workflow understanding at all entry points
+  - Commands now have enhanced Step 0 with full RPTC initialization
+  - All 8 agents now include RPTC Workflow Context section with directives and exit verification
+  - Phase structure awareness with blocking gates clearly identified
+- **Active Skill Loading**: Skills now loaded via Skill tool (not passive frontmatter)
+  - Commands explicitly instruct to call `Skill(skill: "rptc:...")` before proceeding
+  - Ensures skills are actually present in context
+
+### Changed
+
+- **Command Step 0**: Expanded from simple skill loading to full RPTC workflow initialization
+  - Includes RPTC directives table (Surgical Coding, KISS/YAGNI, Test-First, Pattern Alignment, User Authority)
+  - Includes SOP reference chain
+  - Includes phase structure with blocking gates
+- **Agent Headers**: All agents now include standardized RPTC context block
+  - Phase identification (which phase the agent operates in)
+  - Directive responsibilities (what each directive means for that agent)
+  - Exit verification block (agents must confirm RPTC compliance)
+
+---
+
+
 ## [2.29.0] - 2026-01-31
 
 ### Added

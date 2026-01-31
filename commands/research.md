@@ -14,11 +14,47 @@ Research partner for discovery and brainstorming. Use before `/rptc:feat` when y
 
 ---
 
-## Skills (Auto-Loaded via Frontmatter)
+## Step 0: RPTC Workflow Initialization (MANDATORY - CANNOT SKIP)
 
-The following skills are automatically loaded when this command runs:
-- **writing-clearly-and-concisely** - Apply Strunk's Elements of Style to research output
-- **html-report-generator** - Generate professional HTML reports when user requests HTML output
+**Before ANY other action, establish RPTC workflow context.**
+
+### 0.1 Load Required Skills
+
+```
+Skill(skill: "rptc:writing-clearly-and-concisely")
+Skill(skill: "rptc:html-report-generator")
+```
+
+**Wait for skills to load before proceeding.**
+
+### 0.2 RPTC Workflow Understanding (INTERNALIZE)
+
+You are executing **RPTC Research** - the discovery phase that feeds into `/rptc:feat`.
+
+**Core Philosophy:**
+- Understand before building
+- Explore thoroughly before recommending
+- Document findings for future phases
+- User guides the research direction
+
+**Non-Negotiable Directives:**
+
+| Directive | Meaning |
+|-----------|---------|
+| **Thorough Exploration** | Check multiple sources, patterns, and approaches |
+| **Pattern Discovery** | Find existing patterns before proposing new ones |
+| **User Collaboration** | Validate understanding with user throughout |
+| **Clear Documentation** | Apply writing skill to all output |
+
+**SOP Reference Chain:**
+- Architecture: `${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md`
+
+### 0.3 Initialization Verification
+
+Before proceeding to Phase 1, confirm:
+- Skills loaded and active
+- RPTC directives understood
+- Research scope clear
 
 ---
 
