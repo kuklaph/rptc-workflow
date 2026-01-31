@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.28.1] - 2026-01-31
+
+### Fixed
+
+- **Skill loading**: `/rptc:feat` and `/rptc:fix` now explicitly load `brainstorming` and `writing-clearly-and-concisely` skills at start of command execution
+
+---
+
+
 ## [2.28.0] - 2026-01-31
 
 ### Added
