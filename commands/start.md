@@ -45,11 +45,51 @@ Initialize RPTC workflow for a project or sync configuration to latest version.
    ```
    If found, extract version number from the marker line.
 
+5. **Scan for legacy/orphaned RPTC content** (content without proper markers):
+
+   Search patterns to detect legacy content:
+   - `## RPTC` or `### RPTC` headers without markers nearby
+   - `/rptc:feat` or `/rptc:fix` command references outside marked section
+   - `rptc:research-agent` or `rptc:tdd-agent` mentions outside marked section
+   - `review-agent-mode:` outside marked section
+   - Duplicate `<!-- RPTC-START` markers (multiple sections)
+
+   If legacy content detected, set `legacy_cleanup_needed = true`.
+
 ---
 
-## Phase 2: Generate Configuration
+## Phase 2: User Preferences (New Installs Only)
 
-**Goal**: Build the RPTC configuration block.
+**Goal**: Gather user preferences before generating configuration.
+
+**Skip this phase if**: Updating an existing RPTC section (preserve existing settings).
+
+**Actions**:
+
+1. **Ask user for review mode preference** using AskUserQuestion:
+
+   ```
+   Question: "Which review mode would you like for Phase 4 quality reviews?"
+   Header: "Review Mode"
+   Options:
+   - label: "Automatic (Recommended)"
+     description: "Smart selection based on file types and change patterns. Launches relevant reviewers only."
+   - label: "All"
+     description: "Always launch all 3 review agents (code-review, security, docs) regardless of changes."
+   - label: "Minimal"
+     description: "Only launch reviewers when strongly indicated (>50 lines changed or security keywords)."
+   ```
+
+2. **Map selection to config value**:
+   - "Automatic (Recommended)" → `automatic`
+   - "All" → `all`
+   - "Minimal" → `minimal`
+
+---
+
+## Phase 3: Generate Configuration
+
+**Goal**: Build the RPTC configuration block with user's selected review mode.
 
 **Configuration Template**:
 
@@ -94,11 +134,11 @@ Initialize RPTC workflow for a project or sync configuration to latest version.
 
 ### Review Configuration
 
-review-agent-mode: automatic
+review-agent-mode: {REVIEW_MODE}
 
 <!--
 Review mode options:
-- automatic: Smart selection based on file types and change patterns (default)
+- automatic: Smart selection based on file types and change patterns
 - all: Always launch all 3 review agents (code-review, security, docs)
 - minimal: Only launch when strongly indicated (>50 lines or keywords)
 -->
@@ -110,49 +150,61 @@ Review mode options:
 <!-- RPTC-END -->
 ```
 
-**Replace `{VERSION}` with actual version from plugin.json.**
+**Replace placeholders:**
+- `{VERSION}` → actual version from plugin.json
+- `{REVIEW_MODE}` → user's selection from Phase 2 (or preserved value for updates)
 
 ---
 
-## Phase 3: Apply Configuration
+## Phase 4: Apply Configuration
 
 **Goal**: Update or create CLAUDE.md with the configuration.
 
 ### Case A: No CLAUDE.md exists
 
-1. **Create new CLAUDE.md** with:
+1. **Create new CLAUDE.md** with RPTC section prominently at top:
    ```markdown
    # CLAUDE.md
 
-   Project-specific instructions for Claude Code.
+   {RPTC_CONFIGURATION_BLOCK}
 
    ---
 
-   {RPTC_CONFIGURATION_BLOCK}
+   ## Project-Specific Instructions
+
+   <!-- Add your project-specific Claude Code instructions here -->
    ```
 
 2. **Inform user**:
    ```
-   Created CLAUDE.md with RPTC v{VERSION} configuration.
+   Created CLAUDE.md with RPTC v{VERSION} configuration at top.
 
    You can customize:
    - review-agent-mode (automatic/all/minimal)
-   - Project-specific notes section
+   - Project-specific notes section within RPTC block
+   - Add project instructions below the RPTC section
    ```
 
 ### Case B: CLAUDE.md exists, no RPTC section
 
-1. **Append RPTC section** to end of file:
+1. **Insert RPTC section near the TOP** (after main heading):
+   - Look for the first `# ` heading in the file
+   - Insert RPTC section immediately after that heading (and any tagline/description on the next line)
+   - If no heading found, insert at the very top
+
    ```markdown
+   # Existing Title
+
+   {RPTC_CONFIGURATION_BLOCK}
 
    ---
 
-   {RPTC_CONFIGURATION_BLOCK}
+   [Rest of existing CLAUDE.md content]
    ```
 
 2. **Inform user**:
    ```
-   Added RPTC v{VERSION} configuration to existing CLAUDE.md.
+   Added RPTC v{VERSION} configuration to existing CLAUDE.md (near top, after title).
    ```
 
 ### Case C: CLAUDE.md exists, RPTC section outdated
@@ -190,9 +242,54 @@ Review mode options:
    - review-agent-mode: {current_mode}
    ```
 
+### Case E: Legacy/orphaned RPTC content detected
+
+**Applies to**: Any case where `legacy_cleanup_needed = true` from Phase 1 scan.
+
+1. **Show user what was found**:
+   ```
+   ⚠️  Legacy RPTC content detected outside the marked configuration section:
+
+   - Line 45: "## RPTC Workflow" (unmarked header)
+   - Line 78-82: Command reference table (duplicate)
+   - Line 120: "review-agent-mode: all" (orphaned setting)
+   ```
+
+2. **Ask user for cleanup preference** using AskUserQuestion:
+   ```
+   Question: "How should I handle the legacy RPTC content?"
+   Header: "Cleanup"
+   Options:
+   - label: "Remove legacy content (Recommended)"
+     description: "Delete orphaned RPTC references. The marked section contains all needed configuration."
+   - label: "Keep legacy content"
+     description: "Leave orphaned content in place. May cause confusion with duplicate settings."
+   - label: "Show me the content first"
+     description: "Display the legacy content so I can decide what to do."
+   ```
+
+3. **If "Remove legacy content" selected**:
+   - Remove identified legacy sections/lines
+   - Preserve any non-RPTC content around them
+   - Report what was removed
+
+4. **If "Show me the content first" selected**:
+   - Display each legacy section with surrounding context
+   - Re-prompt for cleanup decision
+
+5. **Inform user**:
+   ```
+   ✓ Cleaned up legacy RPTC content:
+   - Removed unmarked "## RPTC Workflow" section (lines 45-72)
+   - Removed duplicate command table (lines 78-82)
+   - Removed orphaned setting (line 120)
+
+   All RPTC configuration is now in the marked section at the top.
+   ```
+
 ---
 
-## Phase 4: Verify Setup
+## Phase 5: Verify Setup
 
 **Goal**: Confirm configuration is valid and complete.
 
@@ -234,6 +331,9 @@ Review mode options:
 | Cannot write CLAUDE.md | Check permissions, report error |
 | Malformed existing RPTC section | Backup existing, replace entirely |
 | Markers corrupted | Remove partial markers, insert fresh section |
+| Legacy content without markers | Prompt user for cleanup (Case E) |
+| Multiple RPTC sections | Keep first marked section, flag others as legacy |
+| Orphaned settings outside markers | Include in legacy cleanup prompt |
 
 ---
 

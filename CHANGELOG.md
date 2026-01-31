@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.27.0] - 2026-01-30
+
+### Added
+
+- **Interactive review mode selection**: `/rptc:start` now prompts users to choose their preferred review mode (automatic/all/minimal) during initial setup
+- **Legacy content cleanup**: `/rptc:start` now scans for orphaned RPTC content outside marked sections and offers to clean it up
+  - Detects unmarked RPTC headers, duplicate command tables, orphaned settings
+  - Prompts user before removing (remove/keep/show options)
+
+### Changed
+
+- **RPTC config placement**: Configuration is now inserted at the **top** of CLAUDE.md (after title) instead of appended to the bottom, ensuring workflow settings are prominently visible
+
+---
+
+
 ## [2.26.0] - 2026-01-29
 
 ### Added
