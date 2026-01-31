@@ -7,6 +7,19 @@ allowed-tools: Bash(git *), Bash(npm *), Bash(npx *), Bash(bunx *), Bash(pnpm *)
 
 Systematic bug fixing: Reproduction → Root Cause Analysis → Fix → Verification.
 
+## Load Skills (REQUIRED - Do First)
+
+**Before any other action**, read these skill files:
+
+```
+Read: ${CLAUDE_PLUGIN_ROOT}/skills/brainstorming/SKILL.md
+Read: ${CLAUDE_PLUGIN_ROOT}/skills/writing-clearly-and-concisely/SKILL.md
+```
+
+These skills guide requirement clarification and prose quality throughout the workflow.
+
+---
+
 ## Arguments
 
 `/rptc:fix <bug-description>`
