@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.29.0] - 2026-01-31
+
+### Added
+
+- **Skills frontmatter**: Commands now use `skills:` frontmatter field for automatic skill loading
+  - Skills are injected at command startup, not via prose instructions
+  - Follows Claude Code's native skill preloading pattern
+- **html-report-generator**: Added to `/rptc:research` for HTML report generation
+
+### Changed
+
+- **brainstorming skill**: Now enters plan mode first via `EnterPlanMode` tool
+- **Skill loading refactor**: Replaced manual "Load Skills" prose instructions with frontmatter-based auto-loading
+  - `/rptc:feat`: brainstorming, writing-clearly-and-concisely
+  - `/rptc:fix`: brainstorming, writing-clearly-and-concisely
+  - `/rptc:research`: writing-clearly-and-concisely, html-report-generator
+  - `/rptc:commit`: writing-clearly-and-concisely
+
+### Fixed
+
+- **Skills not loading**: Fixed issue where skills could be skipped when using prose-based "Read these files" instructions
+
+---
+
+
 ## [2.28.1] - 2026-01-31
 
 ### Fixed

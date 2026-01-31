@@ -1,5 +1,8 @@
 ---
 description: Research → Plan → TDD → Review in one seamless flow
+skills:
+  - brainstorming
+  - writing-clearly-and-concisely
 allowed-tools: Bash(git *), Bash(npm *), Bash(npx *), Bash(bunx *), Bash(pnpm *), Bash(yarn *), Bash(bun *), Bash(cargo *), Bash(go *), Bash(pytest *), Bash(python -m pytest *), Bash(make *), Bash(dotnet *), Read, Write, Edit, Glob, Grep, LS, Task, TodoWrite, AskUserQuestion, EnterPlanMode, ExitPlanMode
 ---
 
@@ -7,16 +10,11 @@ allowed-tools: Bash(git *), Bash(npm *), Bash(npx *), Bash(bunx *), Bash(pnpm *)
 
 Complete feature development: Discovery → Architecture → Implementation → Quality Review.
 
-## Load Skills (REQUIRED - Do First)
+## Skills (Auto-Loaded via Frontmatter)
 
-**Before any other action**, read these skill files:
-
-```
-Read: ${CLAUDE_PLUGIN_ROOT}/skills/brainstorming/SKILL.md
-Read: ${CLAUDE_PLUGIN_ROOT}/skills/writing-clearly-and-concisely/SKILL.md
-```
-
-These skills guide requirement clarification and prose quality throughout the workflow.
+The following skills are automatically loaded when this command runs:
+- **brainstorming** - Structured dialogue for requirement clarification
+- **writing-clearly-and-concisely** - Apply Strunk's Elements of Style to all prose
 
 ---
 
@@ -72,7 +70,7 @@ Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp_
 
 ---
 
-## Skills Reference
+## Skills Usage Guide
 
 **`brainstorming`** - Structured dialogue for requirement clarification:
 

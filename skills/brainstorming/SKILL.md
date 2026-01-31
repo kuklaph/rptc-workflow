@@ -21,6 +21,12 @@ Use this skill in planning phases:
 
 ## The Process
 
+### First: Enter Plan Mode
+
+**Before brainstorming begins**, enter plan mode using the `EnterPlanMode` tool. Brainstorming is a planning activity—plan mode provides the appropriate context for collaborative design work.
+
+---
+
 ### Phase 1: Understanding the Idea
 
 **Actions**:
@@ -89,10 +95,10 @@ Options:
 
 ## After the Design
 
-**Documentation** (optional):
+**Documentation**:
 - Write validated design to plan file
 - Reference `writing-clearly-and-concisely` skill for prose quality
-- Design feeds directly into implementation phase
+- Use `ExitPlanMode` to get user approval on the final design
 
 **Transition**:
 - For `/rptc:feat`: Proceed to Phase 3 (TDD Implementation)
@@ -114,8 +120,10 @@ Options:
 
 | Action | Tool |
 |--------|------|
+| Enter planning context | EnterPlanMode (first step) |
 | Ask clarifying questions | AskUserQuestion (one at a time) |
 | Present approach options | AskUserQuestion with 2-4 options |
 | Validate design sections | AskUserQuestion (yes/changes/back) |
 | Explore codebase | Serena MCP or native tools |
 | Document design | Write to plan file |
+| Complete planning | ExitPlanMode (when design is ready) |

@@ -1,5 +1,8 @@
 ---
 description: Interactive discovery and brainstorming with parallel exploration
+skills:
+  - writing-clearly-and-concisely
+  - html-report-generator
 allowed-tools: Bash(git *), Read, Glob, Grep, LS, Task, TodoWrite, AskUserQuestion, WebFetch, WebSearch
 ---
 
@@ -11,16 +14,15 @@ Research partner for discovery and brainstorming. Use before `/rptc:feat` when y
 
 ---
 
-## Skills Reference
+## Skills (Auto-Loaded via Frontmatter)
 
-**`brainstorming`** - Structured dialogue for research refinement:
+The following skills are automatically loaded when this command runs:
+- **writing-clearly-and-concisely** - Apply Strunk's Elements of Style to research output
+- **html-report-generator** - Generate professional HTML reports when user requests HTML output
 
-| When | Apply To |
-|------|----------|
-| Phase 1 | Clarify research scope and focus |
-| Phase 3 | Explore findings with user, validate conclusions |
+---
 
-**Method**: One question at a time via AskUserQuestion, multiple choice preferred.
+## Skills Usage Guide
 
 **`writing-clearly-and-concisely`** - Apply Strunk's Elements of Style to research output:
 

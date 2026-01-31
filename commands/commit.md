@@ -1,5 +1,7 @@
 ---
 description: Verify and ship with quality gates
+skills:
+  - writing-clearly-and-concisely
 allowed-tools: Bash(git *), Bash(npm *), Bash(npx *), Bash(pnpm *), Bash(yarn *), Bash(bun *), Bash(cargo *), Bash(go *), Bash(pytest *), Bash(python -m pytest *), Bash(make *), Bash(dotnet *), Bash(gh *), Read, Write, Edit, Glob, Grep, LS, Task, TodoWrite
 ---
 
@@ -13,7 +15,14 @@ Verify quality gates and ship. Final step in the workflow.
 
 ---
 
-## Skills Reference
+## Skills (Auto-Loaded via Frontmatter)
+
+The following skills are automatically loaded when this command runs:
+- **writing-clearly-and-concisely** - Apply Strunk's Elements of Style to commit prose
+
+---
+
+## Skills Usage Guide
 
 **`writing-clearly-and-concisely`** - Apply Strunk's Elements of Style to commit prose:
 
