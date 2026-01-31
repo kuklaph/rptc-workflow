@@ -23,8 +23,9 @@ rptc-workflow/                      # ${CLAUDE_PLUGIN_ROOT}
 │   ├── plugin.json                 # Plugin metadata & version
 │   └── marketplace.json            # Marketplace listing
 │
-├── commands/                       # Flat structure (5 commands)
+├── commands/                       # Flat structure (6 commands)
 │   ├── commit.md                   # /rptc:commit
+│   ├── config.md                   # /rptc:config
 │   ├── feat.md                     # /rptc:feat (PRIMARY)
 │   ├── fix.md                      # /rptc:fix
 │   ├── research.md                 # /rptc:research
@@ -52,10 +53,12 @@ rptc-workflow/                      # ${CLAUDE_PLUGIN_ROOT}
 │   ├── testing-guide.md
 │   └── todowrite-guide.md
 │
-├── skills/                         # Skills (3 skills)
+├── skills/                         # Skills (5 skills)
+│   ├── brainstorming/
 │   ├── discord-notify/
 │   ├── html-report-generator/
-│   └── tdd-methodology/
+│   ├── tdd-methodology/
+│   └── writing-clearly-and-concisely/
 │
 ├── templates/                      # Document templates
 │   ├── plan-overview.md
@@ -108,7 +111,7 @@ rptc-workflow/
 
 - Claude clones repo to plugin directory
 - This becomes `${CLAUDE_PLUGIN_ROOT}`
-- All 5 commands registered and available
+- All 6 commands registered and available
 - Agents available for delegation
 - SOPs available for agent reference
 
@@ -379,7 +382,7 @@ Pre-commit hook automatically blocks commits with version mismatch.
 | Before | After |
 |--------|-------|
 | Separate `/rptc:plan` + `/rptc:tdd` | Unified `/rptc:feat` |
-| 16 commands | 5 commands |
+| 16 commands | 6 commands |
 | `.rptc/` workspace required | Not needed |
 | `.claude/settings.json` config | Not needed |
 | SOP fallback chain (3 levels) | Plugin SOPs only |
@@ -408,10 +411,10 @@ Pre-commit hook automatically blocks commits with version mismatch.
 
 **Plugin provides:**
 
-- 5 commands (2 primary, 3 supporting)
+- 6 commands (2 primary, 4 supporting)
 - 8 specialist agents
 - 10 SOPs
-- 3 skills
+- 5 skills
 
 **User provides:**
 

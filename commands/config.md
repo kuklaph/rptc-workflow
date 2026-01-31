@@ -1,11 +1,11 @@
 ---
-description: Initialize or update RPTC workflow configuration in project CLAUDE.md
+description: Configure RPTC workflow in project CLAUDE.md - sync with current version
 allowed-tools: Read, Write, Edit, Glob, Grep
 ---
 
-# /rptc:start
+# /rptc:config
 
-Initialize RPTC workflow for a project or sync configuration to latest version.
+Configure and maintain RPTC workflow settings in your project's CLAUDE.md.
 
 **Arguments**: None
 
@@ -108,7 +108,7 @@ Initialize RPTC workflow for a project or sync configuration to latest version.
 | `/rptc:research "topic"` | Standalone research and exploration |
 | `/rptc:commit [pr]` | Verify quality gates and ship (add `pr` for pull request) |
 | `/rptc:sync-prod-to-tests "dir"` | Sync tests to match production code |
-| `/rptc:start` | Initialize or update this configuration |
+| `/rptc:config` | Initialize or update this configuration |
 
 ### Workflow Overview
 
@@ -341,7 +341,7 @@ Review mode options:
 
 ### First-time setup
 ```
-User: /rptc:start
+User: /rptc:config
 
 Claude: Checking RPTC configuration...
 
@@ -360,7 +360,7 @@ Next steps:
 
 ### Update existing
 ```
-User: /rptc:start
+User: /rptc:config
 
 Claude: Checking RPTC configuration...
 
@@ -380,7 +380,7 @@ Key changes in this update:
 
 ### Already current
 ```
-User: /rptc:start
+User: /rptc:config
 
 Claude: Checking RPTC configuration...
 

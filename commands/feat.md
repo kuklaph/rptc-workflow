@@ -59,6 +59,30 @@ Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp_
 
 ---
 
+## Skills Reference
+
+**`brainstorming`** - Structured dialogue for requirement clarification:
+
+| When | Apply To |
+|------|----------|
+| Phase 2 (before architect agents) | Clarify unclear requirements with user |
+| Throughout | Explore approaches with 2-3 options, validate incrementally |
+
+**Method**: One question at a time via AskUserQuestion, multiple choice preferred, YAGNI ruthlessly.
+**Timing**: Main context uses this BEFORE delegating to architect agents.
+
+**`writing-clearly-and-concisely`** - Apply Strunk's Elements of Style to all prose:
+
+| When | Apply To |
+|------|----------|
+| Phase 2 | Plan descriptions, rationales, step explanations |
+| Phase 5 | Summary output, implementation notes |
+| Throughout | Commit messages, documentation updates, user-facing text |
+
+**Key rules**: Active voice, positive form, definite language, omit needless words.
+
+---
+
 ## Phase 1: Discovery
 
 **Goal**: Understand what to build and existing patterns.
@@ -66,6 +90,11 @@ Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp_
 > 💡 **Tool Reminder**: Use Sequential Thinking for feature analysis. Use Serena for code exploration.
 
 **Actions**:
+
+0. **Check for RPTC configuration** in project's CLAUDE.md:
+   - Look for `<!-- RPTC-START` marker in local CLAUDE.md
+   - If NOT found: Suggest user run `/rptc:config` for best experience
+   - If found but outdated: Suggest user run `/rptc:config` to sync with current plugin version
 
 1. **Classify task type** (see Task Classification above)
 2. **Create initial todo list** with phases based on task type:
@@ -108,7 +137,15 @@ Return: external dependencies, internal dependencies, API boundaries."
 
 1. **Enter plan mode** using EnterPlanMode tool
 
-2. **Launch 3 plan agents in parallel** with different perspectives:
+2. **Clarify requirements using `brainstorming` skill** (BEFORE launching agents):
+   - Use AskUserQuestion to clarify unclear requirements ONE question at a time
+   - Prefer multiple choice options when possible
+   - Focus on: purpose, constraints, success criteria, scope boundaries
+   - Continue until requirements are clear enough for planning
+
+   **Skip if**: Requirements are already crystal clear from Phase 1 discovery.
+
+3. **Launch 3 plan agents in parallel** with different perspectives:
 
 ```
 Use Task tool with subagent_type="rptc:architect-agent" (launch all 3 in parallel):

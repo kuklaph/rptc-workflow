@@ -57,6 +57,30 @@ Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp_
 
 ---
 
+## Skills Reference
+
+**`brainstorming`** - Structured dialogue for fix approach exploration:
+
+| When | Apply To |
+|------|----------|
+| Phase 2 (before architect agent) | Explore fix approaches when multiple options exist |
+| Throughout | Validate assumptions, clarify constraints |
+
+**Method**: One question at a time via AskUserQuestion, multiple choice preferred, YAGNI ruthlessly.
+**Timing**: Main context uses this BEFORE delegating to architect agent.
+
+**`writing-clearly-and-concisely`** - Apply Strunk's Elements of Style to all prose:
+
+| When | Apply To |
+|------|----------|
+| Phase 2 | Root cause explanation, fix rationale |
+| Phase 5 | Bug summary, regression notes |
+| Throughout | Commit messages, documentation updates |
+
+**Key rules**: Active voice, positive form, definite language, omit needless words.
+
+---
+
 ## Phase 1: Reproduction & Triage
 
 **Goal**: Confirm the bug exists and understand its triggering conditions.
@@ -64,6 +88,11 @@ Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp_
 > 💡 **Tool Reminder**: Use Sequential Thinking to analyze bug context. Use Serena for code tracing.
 
 **Actions**:
+
+0. **Check for RPTC configuration** in project's CLAUDE.md:
+   - Look for `<!-- RPTC-START` marker in local CLAUDE.md
+   - If NOT found: Suggest user run `/rptc:config` for best experience
+   - If found but outdated: Suggest user run `/rptc:config` to sync with current plugin version
 
 1. **Create initial todo list** with phases:
    - Reproduction & Triage, Root Cause Analysis, Fix Application, Verification, Complete
@@ -133,6 +162,11 @@ Return: Affected files/functions, related code with same pattern, potential regr
 
 3. **For complex bugs (S1-S2, or unclear root cause)**: Enter plan mode
    - Use EnterPlanMode tool
+   - **Clarify fix approach using `brainstorming` skill** (BEFORE architect-agent):
+     - Use AskUserQuestion to explore fix options ONE question at a time
+     - Present 2-3 fix approaches with trade-offs
+     - Clarify: acceptable scope, risk tolerance, timeline constraints
+     - Skip if: fix approach is obvious from root cause analysis
    - Launch architect-agent for fix planning:
 
 ```

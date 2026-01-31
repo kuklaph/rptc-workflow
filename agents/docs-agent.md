@@ -109,6 +109,11 @@ Think harder and thoroughly examine similar areas of the codebase to ensure your
    - TDD methodology
    - Test coverage requirements (80%+ critical paths)
 
+4. **`writing-clearly-and-concisely` skill** (Step 4 enhancement)
+   - Apply Strunk's Elements of Style to documentation prose
+   - Report style issues as Tier 4 (Nits) - non-blocking
+   - For extensive editing: dispatch subagent with full reference (~12K tokens)
+
 ---
 
 ### Tool Prioritization

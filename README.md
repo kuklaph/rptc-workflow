@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 2.27.0
+**Version**: 2.28.0
 **Status**: Beta
 **License**: MIT
 
@@ -61,7 +61,7 @@ All phases unified in one command: `/rptc:feat`
 
 | Command | Purpose | When to Use |
 |---------|---------|-------------|
-| `/rptc:start` | Initialize or update RPTC configuration in project | First-time setup, after plugin updates |
+| `/rptc:config` | Configure RPTC in project CLAUDE.md | First-time setup, after plugin updates, sync settings |
 | `/rptc:research "topic"` | Standalone research and discovery | Exploring unfamiliar topics separately |
 | `/rptc:commit [pr]` | Verify and ship | After completing implementation |
 | `/rptc:sync-prod-to-tests "[dir]"` | Sync tests to production code with auto-fix | Test maintenance |
@@ -257,6 +257,18 @@ Standard Operating Procedures provide guidance for agents:
 **Purpose**: Enables TDD methodology guidance within main context
 **When**: Alternative to sub-agent delegation for simple features
 
+### Writing Clearly and Concisely
+
+**Purpose**: Apply Strunk's *Elements of Style* (1918) to prose
+**When**: Documentation, commit messages, error messages, UI copy
+**Integration**: docs-agent references for Tier 4 style suggestions
+
+### Brainstorming
+
+**Purpose**: Transform unclear ideas into actionable designs through structured dialogue
+**When**: Planning phases when requirements need clarification
+**Method**: One question at a time via AskUserQuestion, explore 2-3 approaches, YAGNI ruthlessly
+
 ---
 
 ## Directory Structure
@@ -273,7 +285,7 @@ rptc-workflow/
 │   ├── feat.md                  # /rptc:feat (PRIMARY)
 │   ├── fix.md                   # /rptc:fix
 │   ├── research.md              # /rptc:research
-│   ├── start.md                 # /rptc:start (project initialization)
+│   ├── config.md                # /rptc:config (sync config with version)
 │   └── sync-prod-to-tests.md    # /rptc:sync-prod-to-tests
 ├── agents/                      # 8 specialist agents
 │   ├── research-agent.md
@@ -286,10 +298,12 @@ rptc-workflow/
 │   └── test-fixer-agent.md
 ├── sop/                         # 10 SOPs
 ├── templates/                   # Templates for artifacts
-├── skills/                      # 3 skills
+├── skills/                      # 5 skills
+│   ├── brainstorming/
 │   ├── discord-notify/
 │   ├── html-report-generator/
-│   └── tdd-methodology/
+│   ├── tdd-methodology/
+│   └── writing-clearly-and-concisely/
 └── docs/                        # Documentation
 ```
 

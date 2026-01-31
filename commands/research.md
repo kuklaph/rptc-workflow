@@ -11,6 +11,28 @@ Research partner for discovery and brainstorming. Use before `/rptc:feat` when y
 
 ---
 
+## Skills Reference
+
+**`brainstorming`** - Structured dialogue for research refinement:
+
+| When | Apply To |
+|------|----------|
+| Phase 1 | Clarify research scope and focus |
+| Phase 3 | Explore findings with user, validate conclusions |
+
+**Method**: One question at a time via AskUserQuestion, multiple choice preferred.
+
+**`writing-clearly-and-concisely`** - Apply Strunk's Elements of Style to research output:
+
+| When | Apply To |
+|------|----------|
+| Phase 3 | Research summaries, findings reports |
+| Phase 4 | Recommendations, next steps |
+
+**Key rules**: Active voice, positive form, definite language, omit needless words.
+
+---
+
 ## Phase 1: Understand the Question
 
 **Goal**: Clarify what the user wants to learn.

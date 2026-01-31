@@ -13,6 +13,19 @@ Verify quality gates and ship. Final step in the workflow.
 
 ---
 
+## Skills Reference
+
+**`writing-clearly-and-concisely`** - Apply Strunk's Elements of Style to commit prose:
+
+| When | Apply To |
+|------|----------|
+| Phase 3 | Commit message subject and body |
+| Phase 4 | PR title and description |
+
+**Key rules**: Active voice, positive form, definite language, omit needless words.
+
+---
+
 ## Phase 1: Pre-Commit Verification
 
 **Goal**: Ensure code is ready to ship.

@@ -197,6 +197,24 @@ For documentation, config, and non-code changes:
 4. Creates commit
 5. Optional: Creates pull request (with `pr` argument)
 
+### `/rptc:config`
+
+**Purpose**: Configure RPTC in your project's CLAUDE.md.
+
+**When to use:**
+- First time setting up RPTC in a project
+- After updating the RPTC plugin to sync configuration
+- To verify project is properly configured
+
+**How it works:**
+1. Detects current RPTC configuration state in project CLAUDE.md
+2. Prompts for review mode preference (automatic/all/minimal)
+3. Inserts or updates RPTC configuration section at top of CLAUDE.md
+4. Preserves user customizations (review mode, project-specific notes)
+5. Cleans up legacy/orphaned RPTC content if detected
+
+**Note:** `/rptc:feat` and `/rptc:fix` will suggest running `/rptc:config` if no RPTC configuration is found in your project.
+
 ### `/rptc:sync-prod-to-tests "[directory]"`
 
 **Purpose**: Sync tests to production code.

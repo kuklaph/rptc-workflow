@@ -7,18 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.27.0] - 2026-01-30
+## [2.28.0] - 2026-01-31
 
 ### Added
 
-- **Interactive review mode selection**: `/rptc:start` now prompts users to choose their preferred review mode (automatic/all/minimal) during initial setup
-- **Legacy content cleanup**: `/rptc:start` now scans for orphaned RPTC content outside marked sections and offers to clean it up
-  - Detects unmarked RPTC headers, duplicate command tables, orphaned settings
-  - Prompts user before removing (remove/keep/show options)
+- **Skill**: `writing-clearly-and-concisely` - Strunk's Elements of Style (1918) for prose quality
+  - Referenced in all commands: `/rptc:feat`, `/rptc:fix`, `/rptc:commit`, `/rptc:research`
+  - Integrated with architect-agent (plans) and docs-agent (documentation review)
+  - Modular section files for token efficiency
+  - Includes AI writing pattern detection guide
+- **Skill**: `brainstorming` - Structured dialogue for requirement clarification
+  - Integrated into planning phases BEFORE architect agents
+  - Uses AskUserQuestion for one-question-at-a-time dialogue
+  - Explore 2-3 approaches, validate incrementally, YAGNI ruthlessly
+- **Config check**: `/rptc:feat` and `/rptc:fix` now check for RPTC config in project CLAUDE.md
+  - Suggests `/rptc:config` if not found or outdated
+- **Interactive review mode selection**: `/rptc:config` prompts for review mode preference
+- **Legacy content cleanup**: `/rptc:config` detects and offers to clean orphaned RPTC content
 
 ### Changed
 
-- **RPTC config placement**: Configuration is now inserted at the **top** of CLAUDE.md (after title) instead of appended to the bottom, ensuring workflow settings are prominently visible
+- **Command renamed**: `/rptc:start` → `/rptc:config` (better reflects ongoing configuration sync)
+- **RPTC config placement**: Now inserted at **top** of CLAUDE.md (after title)
+- **Brainstorming timing**: Happens in main context BEFORE architect agent delegation
 
 ---
 
@@ -27,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **`/rptc:start` command**: Initialize or update RPTC configuration in project CLAUDE.md
+- **`/rptc:config` command**: Initialize or update RPTC configuration in project CLAUDE.md
   - First-time setup: Creates CLAUDE.md with RPTC configuration block
   - Sync updates: Detects outdated configuration and updates to current version
   - Preserves user customizations (review-agent-mode, project-specific notes)
@@ -39,7 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Nits, dead code, documentation, minor refactoring → auto-fixed
   - Only Tier 1 (architecture, security) or major changes (>50 lines) require user approval
   - Significantly faster review phase completion
-- **Project initialization simplified**: No manual setup required, `/rptc:start` handles everything
+- **Project initialization simplified**: No manual setup required, `/rptc:config` handles everything
 
 ---
 

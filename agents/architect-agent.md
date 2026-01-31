@@ -88,6 +88,11 @@ Think harder and thoroughly examine similar areas of the codebase to ensure your
    - TDD methodology
    - Test coverage requirements (80%+ critical paths)
 
+4. **`writing-clearly-and-concisely` skill**
+   - Apply Strunk's Elements of Style to plan prose
+   - Clear, concise step descriptions and rationales
+   - Active voice, definite language, omit needless words
+
 ---
 
 ### Evidence-Based Rationale

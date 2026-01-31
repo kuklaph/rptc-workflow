@@ -92,8 +92,9 @@ Before suggesting a feature:
 ```text
 rptc-workflow/
 ├── .claude-plugin/        # Plugin metadata
-├── commands/              # Slash command definitions (flat structure, 5 commands)
+├── commands/              # Slash command definitions (flat structure, 6 commands)
 │   ├── commit.md         # /rptc:commit
+│   ├── config.md         # /rptc:config
 │   ├── feat.md           # /rptc:feat (PRIMARY)
 │   ├── fix.md            # /rptc:fix
 │   ├── research.md       # /rptc:research
@@ -101,7 +102,7 @@ rptc-workflow/
 ├── agents/                # Specialist agent definitions (8 agents)
 ├── sop/                   # Standard Operating Procedures (10 SOPs)
 ├── templates/             # Templates for artifacts
-├── skills/                # Skills (3 skills)
+├── skills/                # Skills (5 skills)
 └── docs/                  # Documentation
 ```
 
