@@ -43,10 +43,17 @@ You are executing the **RPTC (Research → Plan → TDD → Commit)** workflow f
 | **Pattern Alignment** | Match existing codebase conventions | Study before implementing |
 | **User Authority** | User is PM; approves all major decisions | Ask when uncertain |
 
-**SOP Reference Chain:**
-- Architecture: `${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md`
-- Testing: `${CLAUDE_PLUGIN_ROOT}/sop/testing-guide.md`
-- Security: `${CLAUDE_PLUGIN_ROOT}/sop/security-and-performance.md`
+**SOP Reference Chain (with Precedence):**
+
+| Topic | Check First (User) | Fallback (RPTC) |
+|-------|-------------------|-----------------|
+| Architecture | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md` |
+| Testing | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/testing-guide.md` |
+| Security | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/security-and-performance.md` |
+| Progress Tracking | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/todowrite-guide.md` |
+| Refactoring | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/post-tdd-refactoring.md` |
+
+**Precedence Rule**: If user specifies custom SOPs (in project CLAUDE.md, project `sop/` dir, or `~/.claude/global/`), use those for the matching topic. RPTC SOPs are the fallback default.
 
 ### 0.3 Phase Structure Awareness
 

@@ -46,8 +46,14 @@ You are executing **RPTC Commit** - the final quality gate before shipping.
 | **User Authority** | User approves commit message and PR |
 | **No Shortcuts** | All verification steps must complete |
 
-**SOP Reference Chain:**
-- Git workflow: `${CLAUDE_PLUGIN_ROOT}/sop/git-and-deployment.md`
+**SOP Reference Chain (with Precedence):**
+
+| Topic | Check First (User) | Fallback (RPTC) |
+|-------|-------------------|-----------------|
+| Git workflow | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/git-and-deployment.md` |
+| Security | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/security-and-performance.md` |
+
+**Precedence Rule**: If user specifies custom SOPs (in project CLAUDE.md, project `sop/` dir, or `~/.claude/global/`), use those for the matching topic. RPTC SOPs are the fallback default.
 
 ### 0.3 Initialization Verification
 

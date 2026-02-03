@@ -28,11 +28,17 @@ You are invoked during **Phase 3: Implementation** to execute TDD cycles.
 | **Pattern Alignment** | Match existing codebase conventions exactly |
 | **Quality Gates** | All tests must pass before reporting completion |
 
-### SOPs to Reference
+### SOPs to Reference (with Precedence)
 
-- `${CLAUDE_PLUGIN_ROOT}/sop/testing-guide.md` - TDD methodology, coverage requirements
-- `${CLAUDE_PLUGIN_ROOT}/sop/flexible-testing-guide.md` - AI-specific test patterns
-- `${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md` - Code structure patterns
+**Precedence Rule**: Check project `sop/` or `~/.claude/global/` first for matching topics. Use RPTC SOPs as fallback.
+
+| Topic | RPTC Fallback |
+|-------|---------------|
+| Testing | `${CLAUDE_PLUGIN_ROOT}/sop/testing-guide.md` |
+| AI Test Patterns | `${CLAUDE_PLUGIN_ROOT}/sop/flexible-testing-guide.md` |
+| Architecture | `${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md` |
+| Security | `${CLAUDE_PLUGIN_ROOT}/sop/security-and-performance.md` |
+| Languages/Style | `${CLAUDE_PLUGIN_ROOT}/sop/languages-and-style.md` |
 
 ### Exit Verification
 

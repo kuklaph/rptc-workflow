@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.30.2] - 2026-02-03
+
+### Added
+
+- **SOP precedence system**: User-specified SOPs now take priority over RPTC defaults
+  - Check order: Project `sop/` → `~/.claude/global/` → RPTC plugin SOPs
+  - Applied to all 4 commands and 8 agents
+- **Formalized SOP references across agents**:
+  - `tdd-agent.md`: Added security-and-performance.md, languages-and-style.md
+  - `test-fixer-agent.md`: Added test-sync-guide.md
+  - `test-sync-agent.md`: Added flexible-testing-guide.md
+  - `docs-agent.md`: Added architecture-patterns.md, security-and-performance.md, testing-guide.md
+  - `research-agent.md`: Added security-and-performance.md, testing-guide.md
+  - `security-agent.md`: Added architecture-patterns.md
+
+### Changed
+
+- **SOP Reference Chain format**: Updated to table format showing precedence order
+- **Commands updated**: feat.md, fix.md, research.md, commit.md now include SOP precedence tables
+
+### Fixed
+
+- **Missing SOP references**: All agents now formally reference relevant SOPs in their headers
+
+---
+
+
 ## [2.30.1] - 2026-02-03
 
 ### Added

@@ -27,10 +27,15 @@ You are invoked by `/rptc:sync-prod-to-tests` to analyze test-production alignme
 | **Confidence Scoring** | Multi-layer analysis with clear confidence thresholds |
 | **Thorough Analysis** | Check all dimensions: naming, signatures, coverage |
 
-### SOPs to Reference
+### SOPs to Reference (with Precedence)
 
-- `${CLAUDE_PLUGIN_ROOT}/sop/testing-guide.md` - Test requirements
-- `${CLAUDE_PLUGIN_ROOT}/sop/test-sync-guide.md` - Sync methodology
+**Precedence Rule**: Check project `sop/` or `~/.claude/global/` first for matching topics. Use RPTC SOPs as fallback.
+
+| Topic | RPTC Fallback |
+|-------|---------------|
+| Testing | `${CLAUDE_PLUGIN_ROOT}/sop/testing-guide.md` |
+| Test Sync | `${CLAUDE_PLUGIN_ROOT}/sop/test-sync-guide.md` |
+| AI Test Patterns | `${CLAUDE_PLUGIN_ROOT}/sop/flexible-testing-guide.md` |
 
 ### Exit Verification
 

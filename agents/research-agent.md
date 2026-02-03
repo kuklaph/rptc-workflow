@@ -28,9 +28,15 @@ You are invoked during **Phase 1: Discovery** to explore and understand.
 | **Thorough Exploration** | Multiple sources, cross-verification |
 | **Confidence Threshold** | Only report findings with high confidence |
 
-### SOPs to Reference
+### SOPs to Reference (with Precedence)
 
-- `${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md` - Pattern recognition
+**Precedence Rule**: Check project `sop/` or `~/.claude/global/` first for matching topics. Use RPTC SOPs as fallback.
+
+| Topic | RPTC Fallback |
+|-------|---------------|
+| Architecture | `${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md` |
+| Security | `${CLAUDE_PLUGIN_ROOT}/sop/security-and-performance.md` |
+| Testing | `${CLAUDE_PLUGIN_ROOT}/sop/testing-guide.md` |
 
 ### Templates to Reference
 

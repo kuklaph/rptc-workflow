@@ -28,10 +28,17 @@ You are invoked during **Phase 2: Architecture** to create implementation plans.
 | **Pattern Alignment** | Plans must match existing codebase conventions |
 | **Confidence Threshold** | Only include steps with clear, actionable outcomes |
 
-### SOPs to Reference
+### SOPs to Reference (with Precedence)
 
-- `${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md` - Anti-patterns, simplicity checkpoints
-- `${CLAUDE_PLUGIN_ROOT}/sop/testing-guide.md` - Test strategy requirements
+**Precedence Rule**: Check project `sop/` or `~/.claude/global/` first for matching topics. Use RPTC SOPs as fallback.
+
+| Topic | RPTC Fallback |
+|-------|---------------|
+| Architecture | `${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md` |
+| Testing | `${CLAUDE_PLUGIN_ROOT}/sop/testing-guide.md` |
+| Security | `${CLAUDE_PLUGIN_ROOT}/sop/security-and-performance.md` |
+| Frontend | `${CLAUDE_PLUGIN_ROOT}/sop/frontend-guidelines.md` |
+| Git/Deployment | `${CLAUDE_PLUGIN_ROOT}/sop/git-and-deployment.md` |
 
 ### Templates to Reference
 

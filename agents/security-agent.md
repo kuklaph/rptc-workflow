@@ -27,9 +27,14 @@ You are invoked during **Phase 4: Quality Review** to verify security.
 | **Confidence Threshold** | Only report findings with confidence >= 80 |
 | **Report Only** | Document issues; do not attempt fixes |
 
-### SOPs to Reference
+### SOPs to Reference (with Precedence)
 
-- `${CLAUDE_PLUGIN_ROOT}/sop/security-and-performance.md` - Security checklist
+**Precedence Rule**: Check project `sop/` or `~/.claude/global/` first for matching topics. Use RPTC SOPs as fallback.
+
+| Topic | RPTC Fallback |
+|-------|---------------|
+| Security | `${CLAUDE_PLUGIN_ROOT}/sop/security-and-performance.md` |
+| Architecture | `${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md` |
 
 ### Exit Verification
 

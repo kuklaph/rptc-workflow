@@ -46,8 +46,18 @@ You are executing **RPTC Research** - the discovery phase that feeds into `/rptc
 | **User Collaboration** | Validate understanding with user throughout |
 | **Clear Documentation** | Apply writing skill to all output |
 
-**SOP Reference Chain:**
-- Architecture: `${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md`
+**SOP Reference Chain (with Precedence):**
+
+| Topic | Check First (User) | Fallback (RPTC) |
+|-------|-------------------|-----------------|
+| Architecture | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md` |
+
+**Precedence Rule**: If user specifies custom SOPs (in project CLAUDE.md, project `sop/` dir, or `~/.claude/global/`), use those for the matching topic. RPTC SOPs are the fallback default.
+
+**Output Templates:**
+- Codebase research: `${CLAUDE_PLUGIN_ROOT}/templates/research-codebase.md`
+- Web research: `${CLAUDE_PLUGIN_ROOT}/templates/research-web.md`
+- Hybrid research: `${CLAUDE_PLUGIN_ROOT}/templates/research-hybrid.md`
 
 ### 0.3 Initialization Verification
 
