@@ -33,6 +33,11 @@ You are invoked during **Phase 2: Architecture** to create implementation plans.
 - `${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md` - Anti-patterns, simplicity checkpoints
 - `${CLAUDE_PLUGIN_ROOT}/sop/testing-guide.md` - Test strategy requirements
 
+### Templates to Reference
+
+- `${CLAUDE_PLUGIN_ROOT}/templates/plan-overview.md` - Plan output format structure
+- `${CLAUDE_PLUGIN_ROOT}/templates/plan-step.md` - Step detail format structure
+
 ### Exit Verification
 
 At the END of your response, include:

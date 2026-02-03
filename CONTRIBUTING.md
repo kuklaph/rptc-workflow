@@ -298,7 +298,7 @@ Closes #42
 ```text
 fix(agents): correct parallel agent invocation in quality review
 
-Optimizer and security agents now launch in same message
+Code Review and Security agents now launch in same message
 for true parallel execution instead of sequential.
 ```
 

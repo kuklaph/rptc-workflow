@@ -164,6 +164,86 @@
 
 ---
 
+## Implementation Constraints
+
+**File Size**: <500 lines (standard) | <300 lines (security-critical)
+
+**Complexity**:
+- Functions: <50 lines, cyclomatic complexity <10
+- Classes: <100 lines
+
+**Dependencies**:
+- PROHIBITED: [List any prohibited patterns or libraries]
+- REQUIRED: [List any required patterns or existing code to reuse]
+
+**Platforms**: [Node.js 18+, Python 3.10+, etc.]
+
+**Performance**: [Response time targets, resource limits, or "No special requirements"]
+
+**Security**: [BLOCKING checkpoints, compliance requirements, or "Standard practices"]
+
+---
+
+## Research References
+
+**Research Document:** [Link to `docs/research/[topic].md` if saved, or "Inline findings below"]
+
+**Key Findings from Discovery Phase:**
+- [Finding 1 - relevant pattern or insight]
+- [Finding 2 - existing code to reuse]
+- [Finding 3 - constraint or consideration]
+
+**External Resources Consulted:**
+- [Resource 1 with link if applicable]
+- [Resource 2]
+
+---
+
+## Assumptions
+
+**IMPORTANT:** Verify these assumptions before implementation:
+
+- [ ] **Assumption 1:** [Description - e.g., "Existing auth middleware handles token validation"]
+- [ ] **Assumption 2:** [Description - e.g., "Database schema allows nullable field X"]
+- [ ] **Assumption 3:** [Description - e.g., "API consumers handle 429 rate limit responses"]
+
+**If any assumption is invalid, STOP and request plan modification.**
+
+---
+
+## Plan Maintenance
+
+**This is a living document.**
+
+**During Implementation:**
+
+1. **Small Adjustments:** Update plan inline, note in "Deviations" section below
+2. **Major Changes:** Request plan modification before continuing
+3. **Blockers:** Document in "Implementation Notes" section below
+
+### Deviations Log
+
+| Date | Step | Deviation | Reason | Impact |
+|------|------|-----------|--------|--------|
+| [YYYY-MM-DD] | [N] | [What changed] | [Why] | [Low/Medium/High] |
+
+---
+
+## Implementation Notes (Updated During TDD Phase)
+
+**This section filled during implementation by TDD phase.**
+
+### Discoveries
+- [Important finding during implementation]
+
+### Decisions Made
+- [Decision and rationale]
+
+### Technical Debt Identified
+- [Item to address later with justification]
+
+---
+
 ## Next Actions
 
 **After Plan Approval:**

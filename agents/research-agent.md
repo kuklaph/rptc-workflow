@@ -32,6 +32,12 @@ You are invoked during **Phase 1: Discovery** to explore and understand.
 
 - `${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md` - Pattern recognition
 
+### Templates to Reference
+
+- `${CLAUDE_PLUGIN_ROOT}/templates/research-codebase.md` - Mode A output format
+- `${CLAUDE_PLUGIN_ROOT}/templates/research-web.md` - Mode B output format
+- `${CLAUDE_PLUGIN_ROOT}/templates/research-hybrid.md` - Mode C output format
+
 ### Exit Verification
 
 At the END of your response, include:

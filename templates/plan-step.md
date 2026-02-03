@@ -17,6 +17,21 @@
 
 ## Tests to Write First
 
+**Step Complexity**: [Simple/Medium/Complex]
+
+**Test Allocation** (based on complexity):
+| Complexity | Files | Lines | Target Tests |
+|------------|-------|-------|--------------|
+| Simple | 1 file | <30 lines | ~15 tests |
+| Medium | 1-2 files | 30-80 lines | ~30 tests |
+| Complex | 3+ files | >80 lines | ~50 tests |
+
+**Framework Selection**: Determine test framework per file based on code context:
+- `utility` code → Project unit runner (Bun/Jest/Vitest)
+- `frontend-ui` → React Testing Library or Playwright
+- `backend-api` → supertest
+- `browser-dependent` → Playwright REQUIRED
+
 ### Happy Path Tests
 
 - [ ] **Test:** [Test name and description]

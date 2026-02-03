@@ -268,7 +268,7 @@ RPTC maximizes efficiency through parallelization:
 - **Discovery**: 2-3 exploration agents run simultaneously
 - **Architecture**: 3 plan perspectives generated in parallel
 - **TDD**: Independent batches execute in parallel
-- **Quality Review**: Optimizer and Security agents run together
+- **Quality Review**: Code Review and Security agents run together
 
 ### Report-Only Review System
 
@@ -295,7 +295,7 @@ Main context receives findings via TodoWrite and handles all fixes with user app
 - **Mode B (Web)**: Consults 20+ sources with cross-verification
 - **Mode C (Hybrid)**: Combines both with gap analysis
 
-### Plan Agent (`rptc:architect-agent`)
+### Architect Agent (`rptc:architect-agent`)
 
 **Purpose**: Create comprehensive TDD-ready implementation plans
 
@@ -405,10 +405,11 @@ Main context receives findings via TodoWrite and handles all fixes with user app
 
 ### Q: Feature is too complex for one session?
 
-RPTC uses auto-handoff with dynamic prediction:
-- 80% hard cap (160K tokens)
-- Automatic checkpoint creation
-- Resume in fresh context by referencing the plan
+Break the feature into smaller, manageable steps:
+- Use `/rptc:research` to explore and understand the scope
+- Plan implementation in phases with clear boundaries
+- Each phase should be completable in one session
+- Resume by referencing the plan and picking up where you left off
 
 ### Q: Tests failing after implementation?
 
@@ -466,9 +467,11 @@ You can ask for modifications:
 
 ### Skills
 
-- `html-report-generator` - Convert research to HTML reports
+- `brainstorming` - Structured dialogue for requirement clarification
 - `discord-notify` - Real-time notifications
+- `html-report-generator` - Convert research to HTML reports
 - `tdd-methodology` - TDD guidance in main context
+- `writing-clearly-and-concisely` - Apply Strunk's Elements of Style to prose
 
 ---
 

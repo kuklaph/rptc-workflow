@@ -35,7 +35,7 @@ The unified `/rptc:feat` command handles the complete workflow:
 **DISCOVERY** → Codebase exploration and pattern analysis
 **ARCHITECTURE** → User-selected planning approach (Minimal/Clean/Pragmatic)
 **TDD** → Test-driven implementation with smart batching
-**QUALITY REVIEW** → Parallel efficiency and security agents
+**QUALITY REVIEW** → Parallel Code Review, Security, and Documentation agents
 **COMPLETE** → Summary and documentation
 
 ### Your Role as PM
@@ -137,7 +137,7 @@ When `/rptc:feat` presents 3 planning approaches, consider:
 
 ### Quality Gates
 
-- **Efficiency Gate**: Catches over-engineering, enforces KISS/YAGNI
+- **Code Review Gate**: Catches over-engineering, enforces KISS/YAGNI
 - **Security Gate**: Prevents vulnerabilities before they ship
 - **Documentation Gate**: Ensures docs stay in sync with code
 - All three run in parallel for speed
@@ -389,7 +389,7 @@ docs/research/
 [Progress shown via todos]
 
 # Phase 4: Quality Review
-[Optimizer and Security agents run in parallel]
+[Code Review and Security agents run in parallel]
 [You review findings, approve fixes]
 
 # Phase 5: Complete

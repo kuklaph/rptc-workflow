@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.30.1] - 2026-02-03
+
+### Added
+
+- **Mode-specific research templates**: Created 3 specialized templates for research-agent output
+  - `templates/research-codebase.md` - Mode A (codebase exploration) format
+  - `templates/research-web.md` - Mode B (web research) format
+  - `templates/research-hybrid.md` - Mode C (hybrid analysis) format
+- **Template wiring to agents**: Templates now properly referenced in agent definitions
+  - `architect-agent.md` references `plan-overview.md` and `plan-step.md`
+  - `research-agent.md` references all 3 mode-specific research templates
+- **TDG content consolidated into tdd-agent**: Test distribution targets (20-30% happy path, 50-60% edge cases, 20-30% error conditions), deduplication strategy
+- **Verification content consolidated into tdd-agent**: Overfitting detection, intent fulfillment checks, coverage gap detection
+
+### Changed
+
+- **plan-overview.md**: Added 5 missing sections (Implementation Constraints, Research References, Assumptions, Plan Maintenance with Deviations Log, Implementation Notes)
+- **plan-step.md**: Added test allocation table by complexity and framework selection guidance
+- **Terminology updates**: "Optimizer" → "Code Review", "Plan Agent" → "Architect Agent", "Efficiency Gate" → "Code Review Gate" across all docs
+- **Skills documentation**: Added missing skills (brainstorming, writing-clearly-and-concisely) to RPTC_WORKFLOW_GUIDE.md
+
+### Fixed
+
+- **Removed false feature claims**: Deleted non-existent "Auto-Handoff with Dynamic Prediction" section from README.md and RPTC_WORKFLOW_GUIDE.md
+- **Removed orphaned templates**: Deleted 4 unused templates (handoff.md, tdg-prompt.md, verification-checklist.md, research.md) - valuable content consolidated into agents before deletion
+- **Updated directory listings**: PLUGIN_ARCHITECTURE.md and CLAUDE.md now reflect actual templates directory contents
+
+---
+
+
 ## [2.30.0] - 2026-01-31
 
 ### Added

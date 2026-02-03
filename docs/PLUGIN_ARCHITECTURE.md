@@ -61,13 +61,12 @@ rptc-workflow/                      # ${CLAUDE_PLUGIN_ROOT}
 │   └── writing-clearly-and-concisely/
 │
 ├── templates/                      # Document templates
+│   ├── ai-sop-enhancement-pattern.md
 │   ├── plan-overview.md
 │   ├── plan-step.md
-│   ├── research.md
-│   ├── handoff.md
-│   ├── tdg-prompt.md
-│   ├── verification-checklist.md
-│   └── ai-sop-enhancement-pattern.md
+│   ├── research-codebase.md
+│   ├── research-hybrid.md
+│   └── research-web.md
 │
 ├── docs/                           # Documentation
 │   ├── PLUGIN_ARCHITECTURE.md      # This file

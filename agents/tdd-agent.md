@@ -468,6 +468,28 @@ const mockUserService = {
    - Descriptive test names explaining what's tested
    - Follow project's test framework conventions (from context discovery)
 
+   **Test Distribution Targets** (for comprehensive coverage):
+
+   | Category | Target | Focus |
+   |----------|--------|-------|
+   | Happy path | 20-30% | Standard inputs, typical use cases, boundary values within valid range |
+   | Edge cases | 50-60% | Boundary values (min/max), empty collections, single items, unicode, concurrency |
+   | Error conditions | 20-30% | Invalid inputs, type mismatches, auth failures, timeouts, external service failures |
+
+   **Deduplication Strategy** (avoid redundant tests):
+
+   - Compare each test with existing tests before adding
+   - Keep variations that add value (different input type, different edge case)
+   - Remove tests that are slight variations with identical logic
+   - Example: Keep "valid email with subdomain" but remove "valid email with different TLD" if testing same validation path
+
+   **Test Quality Requirements** (each test must):
+
+   - Have clear rationale: Why this scenario matters (don't generate tests "just to hit count")
+   - Be executable: Match project test format and conventions
+   - Add value: Cover gaps not addressed by existing tests
+   - Be maintainable: Simple, focused assertions (not overly complex)
+
    **Framework-Specific Patterns** (use based on Phase 0.5 selection):
 
    **Unit Runner (Bun/Jest/Vitest)** - for `utility` code:
@@ -632,7 +654,7 @@ const mockUserService = {
 
 ### Phase 4: VERIFY - Run Full Suite and Check Coverage
 
-**CRITICAL**: Ensure no regressions and coverage targets met.
+**CRITICAL**: Ensure no regressions, coverage targets met, and implementation fulfills intent.
 
 **Steps**:
 
@@ -653,7 +675,39 @@ const mockUserService = {
    - No commented-out code
    - No TODO comments without tracking
 
-4. **Report verification complete**:
+4. **Intent Fulfillment Check** (CRITICAL):
+
+   - Does implementation fulfill the step's stated purpose?
+   - Review step purpose from plan vs actual implementation
+   - Verify expected outcomes are achieved, not just tests passing
+   - If intent gap detected: Document specific gaps before proceeding
+
+5. **Overfitting Detection** (CRITICAL - catch test gaming):
+
+   **Red Flags to Check For**:
+   - Functions returning exact test expected values without real logic
+   - Switch statements mapping test inputs directly to expected outputs
+   - Commented-out logic with hardcoded returns
+   - Tests pass but implementation lacks business logic
+
+   **If Overfitting Detected**:
+   ```text
+   ⚠️ OVERFITTING DETECTED
+
+   File: [path]
+   Issue: [Description - e.g., "Function returns hardcoded 'success' without validation"]
+   Evidence: [Code snippet showing the problem]
+
+   Action: Rewrite implementation with proper logic, not test-specific shortcuts.
+   ```
+
+6. **Coverage Gap Detection**:
+
+   - Compare planned test scenarios vs implemented tests
+   - Identify any planned scenarios not yet covered
+   - List missing coverage (not additional tests, only planned ones missing)
+
+7. **Report verification complete**:
 
    ```text
    ✅ VERIFICATION Complete - Step [N]
@@ -662,6 +716,9 @@ const mockUserService = {
    - Coverage: [Y]% (target: [Z]%)
    - No regressions detected
    - No debug code present
+   - Intent fulfillment: ✅ Verified
+   - Overfitting check: ✅ No test gaming detected
+   - Coverage gaps: [None / List missing scenarios]
    ```
 
 ---

@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 2.30.0
+**Version**: 2.30.1
 **Status**: Beta
 **License**: MIT
 
@@ -174,7 +174,7 @@ When you approve delegation, specialized AI agents provide expert analysis:
 **Provides**: Existing patterns, implementation examples, dependencies
 **Architecture**: Parallel sub-agents using code-explorer methodology
 
-### Plan Agent
+### Architect Agent
 
 **Purpose**: Create comprehensive TDD-ready plans
 **When**: Architecture phase (Phase 2)
@@ -335,17 +335,6 @@ your-project/
 
 **Usage** (within /rptc:feat TDD phase): Agents automatically generate comprehensive tests based on step complexity.
 
-### Auto-Handoff with Dynamic Prediction
-
-**Purpose**: Enables unlimited feature size by intelligently predicting context usage.
-
-**How it works**:
-- Hybrid prediction model (file-based, historical average, growth rate)
-- 80% hard cap (triggers handoff before capacity issues)
-- Automatic checkpoint creation for resume
-
-**Resume after handoff**: Start a new session and reference the plan - RPTC detects the handoff checkpoint automatically.
-
 ### Smart Batching
 
 **Purpose**: Combine related TDD steps for efficiency.
@@ -378,7 +367,7 @@ your-project/
 
 ### Quality Gate Best Practices
 
-- **Efficiency Gate**: Catches over-engineering, enforces KISS/YAGNI
+- **Code Review Gate**: Catches over-engineering, enforces KISS/YAGNI
 - **Security Gate**: Prevents vulnerabilities before they ship
 - **All tests must remain passing** after each gate
 

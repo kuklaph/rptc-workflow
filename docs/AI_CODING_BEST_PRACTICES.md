@@ -1008,5 +1008,5 @@ Track these metrics before/after applying principles:
 
 ---
 
-_This guide is part of the RPTC Workflow v2.0 documentation._
+_This guide is part of the RPTC Workflow documentation._
 _For questions or contributions, see CONTRIBUTING.md in the plugin repository._
