@@ -1,11 +1,11 @@
 ---
 name: tdd-methodology
-description: TDD execution methodology for main context. Load when handling code changes directly (not via /rptc:feat). Provides surgical coding approach, context discovery, and strict RED-GREEN-REFACTOR enforcement.
+description: TDD execution methodology for main context. Provides surgical coding approach, context discovery, and strict RED-GREEN-REFACTOR enforcement. Loaded by /rptc:feat and /rptc:fix for main context code changes.
 ---
 
 # TDD Methodology Skill
 
-**When to use**: Load this skill when you're handling code changes directly in main context (not delegating to `rptc:tdd-agent`). This ensures the same quality standards apply whether work is done by a sub-agent or main context.
+**When to use**: This skill is loaded by `/rptc:feat` and `/rptc:fix` for main context code changes. Apply its methodology whenever writing or modifying code directly (not delegating to `rptc:tdd-agent`). This ensures the same quality standards apply whether work is done by a sub-agent or main context.
 
 ---
 

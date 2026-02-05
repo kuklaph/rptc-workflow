@@ -1,8 +1,5 @@
 ---
 description: Reproduction → Root Cause → Fix → Verification
-skills:
-  - brainstorming
-  - writing-clearly-and-concisely
 allowed-tools: Bash(git *), Bash(npm *), Bash(npx *), Bash(bunx *), Bash(pnpm *), Bash(yarn *), Bash(bun *), Bash(cargo *), Bash(go *), Bash(pytest *), Bash(python -m pytest *), Bash(make *), Bash(dotnet *), Read, Write, Edit, Glob, Grep, LS, Task, TodoWrite, AskUserQuestion, EnterPlanMode, ExitPlanMode
 ---
 
@@ -19,9 +16,20 @@ Systematic bug fixing: Reproduction → Root Cause Analysis → Fix → Verifica
 ```
 Skill(skill: "rptc:brainstorming")
 Skill(skill: "rptc:writing-clearly-and-concisely")
+Skill(skill: "rptc:tdd-methodology")
 ```
 
 **Wait for skills to load before proceeding.**
+
+### 0.1.1 Conditional Skills (Load When Applicable)
+
+**Frontend work** — If the bug involves HTML, CSS, UI components, web pages, or frontend interfaces:
+
+```
+Skill(skill: "frontend-design:frontend-design")
+```
+
+> This is an external plugin skill (Anthropic's `frontend-design` plugin) that provides creative direction and distinctive aesthetics. If unavailable, skip silently — the RPTC `frontend-guidelines.md` SOP (loaded via the SOP Reference Chain) still applies for engineering standards. Both are complementary: the SOP ensures correctness (accessibility, performance, responsive), the skill ensures distinction (bold aesthetics, memorable design). Do NOT error or warn the user if the plugin is missing.
 
 ### 0.2 RPTC Workflow Understanding (INTERNALIZE)
 
@@ -152,6 +160,24 @@ Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp_
 | Throughout | Commit messages, documentation updates |
 
 **Key rules**: Active voice, positive form, definite language, omit needless words.
+
+**`tdd-methodology`** - RED-GREEN-REFACTOR enforcement for main context code changes:
+
+| When | Apply To |
+|------|----------|
+| Phase 3 (Fix Application) | Any code written in main context (not delegated to tdd-agent) |
+
+**Method**: Surgical coding (search 3 similar patterns first), context discovery (check existing tests), strict RED-GREEN-REFACTOR cycle. For bug fixes: write a test that reproduces the bug FIRST (RED), then fix (GREEN).
+**Timing**: Main context applies this when handling fix directly. Sub-agent `rptc:tdd-agent` has equivalent guidance built in.
+
+**`frontend-design:frontend-design`** *(conditional)* - Distinctive, production-grade frontend interfaces:
+
+| When | Apply To |
+|------|----------|
+| Phase 3 (when bug involves frontend) | HTML, CSS, UI components, web pages, visual fixes |
+
+**Method**: Maintain design quality when fixing frontend bugs — preserve aesthetic intent, typography, color themes, and motion patterns.
+**Timing**: Load in Step 0.1.1 only when the bug involves frontend code. Additive creative layer on top of `frontend-guidelines.md` SOP (which always applies for engineering standards).
 
 ---
 

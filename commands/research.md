@@ -1,8 +1,5 @@
 ---
 description: Interactive discovery and brainstorming with parallel exploration
-skills:
-  - writing-clearly-and-concisely
-  - html-report-generator
 allowed-tools: Bash(git *), Read, Glob, Grep, LS, Task, TodoWrite, AskUserQuestion, WebFetch, WebSearch
 ---
 
