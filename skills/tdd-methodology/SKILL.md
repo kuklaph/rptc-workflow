@@ -184,7 +184,7 @@ If constraints conflict with your intended approach:
 RED    → Write failing tests FIRST (defines desired behavior)
 GREEN  → Write MINIMAL code to pass tests (no more, no less)
 REFACTOR → Improve code quality (while keeping tests green)
-VERIFY → Run full suite, check coverage, no regressions
+VERIFY → Run affected tests, check coverage, no regressions
 ```
 
 ---
@@ -283,15 +283,18 @@ VERIFY → Run full suite, check coverage, no regressions
 
 ---
 
-## Phase 4: VERIFY - Full Suite and Coverage
+## Phase 4: VERIFY - Affected Tests and Coverage
 
 **CRITICAL**: Ensure no regressions and coverage targets met.
 
 ### Steps
 
-1. **Run full test suite** (not just current tests):
-   - All tests must pass
+1. **Run affected tests** (changed files + files that import/reference them):
+   - Identify test files for modified production files
+   - Include tests that import or reference changed modules
+   - All affected tests must pass
    - If any existing tests fail, fix before proceeding
+   - If project is small (<50 test files) or change touches shared utilities, run the full suite instead
 
 2. **Check test coverage**:
    - Overall coverage >= 80% (or project target)
@@ -306,7 +309,7 @@ VERIFY → Run full suite, check coverage, no regressions
 4. **Report verification complete**:
    ```
    VERIFICATION Complete
-   Full test suite: [X] tests passing
+   Affected tests: [X]/[Y total] passing
    Coverage: [Y]% (target: [Z]%)
    No regressions detected
    ```
@@ -416,7 +419,7 @@ When determining how many tests to write:
 - [ ] RED: All tests written and failing before implementation
 - [ ] GREEN: Minimal code to pass tests
 - [ ] REFACTOR: Code improved while maintaining green tests
-- [ ] VERIFY: Full suite passing, coverage met, no regressions
+- [ ] VERIFY: Affected tests passing, coverage met, no regressions
 
 ---
 
@@ -505,7 +508,7 @@ Next: REFACTOR phase - improve code quality
 ```text
 VERIFY Complete
 
-Tests: 47/47 passing (full suite)
+Affected tests: 12/47 passing (3 files changed)
 Files: src/user-service.ts, tests/user-service.test.ts
 Coverage: 87% overall, 100% critical paths
 Status: Ready for review/commit
@@ -521,7 +524,7 @@ Status: Ready for review/commit
 3. RED: Write failing tests (behavior, not implementation)
 4. GREEN: Minimal code to pass (no premature optimization)
 5. REFACTOR: Improve while green (one change at a time)
-6. VERIFY: Full suite, coverage, no debug code
+6. VERIFY: Affected tests, coverage, no debug code
 ```
 
 **Remember**: Tests FIRST, simplicity ALWAYS, patterns from CODEBASE.

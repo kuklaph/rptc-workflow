@@ -462,8 +462,8 @@ rg "interface I[A-Z]" --type cs
 ### 6.1 Test Verification (BLOCKING)
 
 ```bash
-# Full test suite
-[test_runner] test
+# Affected tests (changed + dependent files)
+[test_runner] test <affected-test-files>
 
 ✅ MUST: 100% tests passing
 ✅ MUST: Coverage ≥ baseline

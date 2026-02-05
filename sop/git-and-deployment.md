@@ -736,8 +736,8 @@ Use this checklist before every commit. Automated checks catch mechanical issues
 
 #### Category 2: Testing (3 items)
 
-- [ ] **All tests passing** - Run: `npm test` or `pytest` or `go test ./...`
-  - **Check:** Full test suite passes (0 failures)
+- [ ] **Affected tests passing** - Run targeted tests for changed + dependent files
+  - **Check:** Affected tests pass (0 failures in changed + dependent files)
   - **Why:** Broken tests indicate broken code or inadequate test coverage
   - **Automation:** Pre-commit hook blocks commits if tests fail (configurable)
 

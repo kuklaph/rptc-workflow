@@ -658,16 +658,19 @@ const mockUserService = {
 
 ---
 
-### Phase 4: VERIFY - Run Full Suite and Check Coverage
+### Phase 4: VERIFY - Run Affected Tests and Check Coverage
 
 **CRITICAL**: Ensure no regressions, coverage targets met, and implementation fulfills intent.
 
 **Steps**:
 
-1. **Run full test suite** (not just current step tests):
+1. **Run affected tests** (changed files + files that import/reference them):
 
-   - All tests must pass
+   - Identify test files for modified production files
+   - Include tests that import or reference changed modules
+   - All affected tests must pass
    - If any existing tests fail, fix before proceeding
+   - If project is small (<50 test files) or change touches shared utilities (e.g. base classes, config), run the full suite instead
 
 2. **Check test coverage**:
 
@@ -718,7 +721,7 @@ const mockUserService = {
    ```text
    ✅ VERIFICATION Complete - Step [N]
 
-   - Full test suite: [X] tests passing
+   - Affected tests: [X]/[Y total] passing
    - Coverage: [Y]% (target: [Z]%)
    - No regressions detected
    - No debug code present
@@ -957,7 +960,7 @@ When returning control to main TDD executor, provide this structured summary:
 Before returning control, verify:
 
 - [ ] **All tests passing**: 100% of tests for this step must pass
-- [ ] **Full suite passing**: No regressions in existing tests
+- [ ] **Affected tests passing**: No regressions in related tests
 - [ ] **Coverage met**: Step coverage ≥ plan target (default: 80%)
 - [ ] **No debug code**: All `console.log`, `debugger`, `print()` removed
 - [ ] **Constraints respected**: All implementation constraints followed
@@ -998,7 +1001,7 @@ Your work will be considered successful when:
 ✅ **RED Phase**: All tests written and failing before implementation
 ✅ **GREEN Phase**: Minimal code to pass tests, no premature optimization
 ✅ **REFACTOR Phase**: Code improved while maintaining green tests
-✅ **VERIFY Phase**: Full suite passing, coverage targets met, no regressions
+✅ **VERIFY Phase**: Affected tests passing, coverage targets met, no regressions
 
 ---
 

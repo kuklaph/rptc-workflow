@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 2.30.2
+**Version**: 2.31.0
 **Status**: Beta
 **License**: MIT
 
@@ -363,7 +363,7 @@ your-project/
 1. **RED**: Write failing test first
 2. **GREEN**: Minimal code to pass
 3. **REFACTOR**: Improve while keeping tests green
-4. **VERIFY**: Run full suite
+4. **VERIFY**: Run affected tests
 
 ### Quality Gate Best Practices
 

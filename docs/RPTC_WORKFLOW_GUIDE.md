@@ -191,7 +191,7 @@ For documentation, config, and non-code changes:
 - Ready to commit and optionally create PR
 
 **How it works:**
-1. Runs full test suite (blocks if any fail)
+1. Runs affected tests (blocks if any fail)
 2. Validates coverage (80%+ target)
 3. Generates conventional commit message
 4. Creates commit

@@ -325,7 +325,8 @@ Apply MINIMAL fix to make the test pass:
 ### VERIFY Phase (Regression Check)
 - Run the new regression test (must pass)
 - Run related test files (must pass)
-- Run full test suite if available (must pass)
+- Run affected tests — files that import or reference changed modules (must pass)
+- If project is small (<50 test files) or change touches shared utilities, run the full suite instead
 - Report any new failures
 
 ## Constraints
@@ -509,7 +510,7 @@ If Verification Review not completed → **STOP**. Return to Phase 4.
 ### Verification
 - [ ] Regression test passes
 - [ ] Related tests pass
-- [ ] Full suite passes (if run)
+- [ ] Affected tests pass
 - [ ] Review findings addressed
 
 ### Notes
@@ -558,7 +559,7 @@ Use Task tool with subagent_type="rptc:tdd-agent":
 ## TDD Bug Fix Cycle
 RED: Write test that reproduces bug (must fail with same symptom)
 GREEN: Apply minimal fix (surgical, no scope creep)
-VERIFY: Run full test suite, check for regressions
+VERIFY: Run affected tests, check for regressions
 ```
 
 ### Review Agents (Phase 4) - Semantic Selection

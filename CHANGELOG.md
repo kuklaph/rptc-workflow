@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.31.0] - 2026-02-05
+
+### Changed
+
+- **Targeted testing at VERIFY gates**: VERIFY phases now run affected tests (changed files + files that import/reference them) instead of the full test suite
+  - Small projects (<50 test files) or changes to shared utilities fall back to full suite
+  - Framework-specific targeted commands: `jest --findRelatedTests`, `vitest related`, `pytest <files>`, `go test <packages>`
+  - Pre-commit hook intentionally retains full suite as the final safety net
+  - Updated across: `tdd-agent.md`, `tdd-methodology/SKILL.md`, `fix.md`, `commit.md`, `sync-prod-to-tests.md`, `README.md`, `git-and-deployment.md`, `post-tdd-refactoring.md`, `RPTC_WORKFLOW_GUIDE.md`
+
+---
+
 ## [2.30.2] - 2026-02-03
 
 ### Added

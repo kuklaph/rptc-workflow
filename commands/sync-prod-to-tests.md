@@ -67,7 +67,7 @@ Your role is to:
   - Step 2.2: **Check exit condition** (EXIT_CHECK) ← immediately after explore
   - Step 2.3: Obtain PM approval for production changes (PM_APPROVAL)
   - Step 2.4: **Delegate fixes to `rptc:test-fixer-agent`** (FIX)
-  - Step 2.5: Run test suite verification (VERIFY)
+  - Step 2.5: Run affected test verification (VERIFY)
   - Step 2.6: Increment iteration and loop back
 - ✅ **Verify all tests pass** (Phase 3: Final Test Verification)
 - ✅ Generate final report with audit trail (Phase 4)
@@ -668,7 +668,7 @@ if [ "$ITERATION_GAPS_TOTAL" -eq 0 ]; then
   # Update TodoWrite to mark EXIT_CHECK completed, skip PM_APPROVAL/FIX/VERIFY
 
   # ─────────────────────────────────────────────────────────
-  # EXIT TO PHASE 3: Final Test Suite Verification
+  # EXIT TO PHASE 3: Final Test Verification
   # ─────────────────────────────────────────────────────────
 fi
 ```
@@ -956,31 +956,37 @@ echo "  Iteration ${ITERATION} fixes: Updated=$UPDATED_COUNT, Created=$CREATED_C
 
 **Update TodoWrite:** Mark "Iter ${ITERATION}: VERIFY" as `in_progress`
 
-**Run test suite to verify fixes:**
+**Run affected tests to verify fixes** (only test files modified/created in this iteration):
 
 ```bash
+# MODIFIED_TEST_FILES: Collect from test-fixer-agent output — all test files
+# updated or created during Step 2.4 (FIX) of this iteration.
+# MODIFIED_TEST_PACKAGES: Go equivalent — packages containing modified tests.
+# MODIFIED_TEST_MODULES/CLASSES: JUnit equivalents for Maven/Gradle.
+
 echo ""
-echo "Running test suite verification for iteration ${ITERATION}..."
+echo "Running affected test verification for iteration ${ITERATION}..."
+echo "Test files to verify: ${MODIFIED_TEST_FILES}"
 
 case $FRAMEWORK in
   jest)
-    TEST_OUTPUT=$(npm test 2>&1)
+    TEST_OUTPUT=$(npx jest ${MODIFIED_TEST_FILES} 2>&1)
     TEST_EXIT_CODE=$?
     ;;
   vitest)
-    TEST_OUTPUT=$(npx vitest run 2>&1)
+    TEST_OUTPUT=$(npx vitest run ${MODIFIED_TEST_FILES} 2>&1)
     TEST_EXIT_CODE=$?
     ;;
   pytest)
-    TEST_OUTPUT=$(pytest 2>&1)
+    TEST_OUTPUT=$(pytest ${MODIFIED_TEST_FILES} 2>&1)
     TEST_EXIT_CODE=$?
     ;;
   go)
-    TEST_OUTPUT=$(go test ./... 2>&1)
+    TEST_OUTPUT=$(go test ${MODIFIED_TEST_PACKAGES} 2>&1)
     TEST_EXIT_CODE=$?
     ;;
   junit)
-    TEST_OUTPUT=$(mvn test 2>&1 || gradle test 2>&1)
+    TEST_OUTPUT=$(mvn test -pl ${MODIFIED_TEST_MODULES} 2>&1 || gradle test --tests "${MODIFIED_TEST_CLASSES}" 2>&1)
     TEST_EXIT_CODE=$?
     ;;
 esac
@@ -991,12 +997,12 @@ if [ $TEST_EXIT_CODE -ne 0 ]; then
   echo "Failing tests:"
   echo "$TEST_OUTPUT" | grep -E "(FAIL|ERROR|✗)" | head -10
 else
-  echo "✅ All tests passing for this iteration"
+  echo "✅ All affected tests passing for this iteration"
 fi
 ```
 
 **VALIDATION CHECKPOINT (VERIFY):**
-- [ ] Test suite executed for appropriate framework
+- [ ] Affected tests executed for appropriate framework
 - [ ] TEST_EXIT_CODE captured
 - [ ] Failing tests logged (if any)
 
@@ -1082,42 +1088,48 @@ echo "Starting iteration ${ITERATION}..."
 
 ---
 
-## Phase 3: Final Test Suite Verification
+## Phase 3: Final Test Verification
 
 **This phase runs ONLY after convergence is achieved (gaps=0) in Phase 2.**
 
 **Update TodoWrite:** Mark "Phase 3: Final test verification" as `in_progress`
 
-### Step 3a: Run Complete Test Suite
+### Step 3a: Run Affected Tests (Final Verification)
 
 ```bash
+# ALL_MODIFIED_TEST_FILES: Accumulate from all iterations — every test file
+# that was updated or created across all Phase 2 iterations.
+# ALL_MODIFIED_TEST_PACKAGES: Go equivalent.
+# ALL_MODIFIED_TEST_MODULES/CLASSES: JUnit equivalents for Maven/Gradle.
+
 echo ""
 echo "════════════════════════════════════════════════════════"
-echo "  FINAL TEST SUITE VERIFICATION"
+echo "  FINAL TEST VERIFICATION"
 echo "════════════════════════════════════════════════════════"
 echo "  All sync gaps resolved after ${ITERATION} iteration(s)"
-echo "  Running full test suite to confirm all tests pass..."
+echo "  Running affected tests to confirm all fixes pass..."
+echo "  Files to verify: ${ALL_MODIFIED_TEST_FILES}"
 echo "════════════════════════════════════════════════════════"
 
 case $FRAMEWORK in
   jest)
-    TEST_OUTPUT=$(npm test 2>&1)
+    TEST_OUTPUT=$(npx jest ${ALL_MODIFIED_TEST_FILES} 2>&1)
     TEST_EXIT_CODE=$?
     ;;
   vitest)
-    TEST_OUTPUT=$(npx vitest run 2>&1)
+    TEST_OUTPUT=$(npx vitest run ${ALL_MODIFIED_TEST_FILES} 2>&1)
     TEST_EXIT_CODE=$?
     ;;
   pytest)
-    TEST_OUTPUT=$(pytest 2>&1)
+    TEST_OUTPUT=$(pytest ${ALL_MODIFIED_TEST_FILES} 2>&1)
     TEST_EXIT_CODE=$?
     ;;
   go)
-    TEST_OUTPUT=$(go test ./... 2>&1)
+    TEST_OUTPUT=$(go test ${ALL_MODIFIED_TEST_PACKAGES} 2>&1)
     TEST_EXIT_CODE=$?
     ;;
   junit)
-    TEST_OUTPUT=$(mvn test 2>&1 || gradle test 2>&1)
+    TEST_OUTPUT=$(mvn test -pl ${ALL_MODIFIED_TEST_MODULES} 2>&1 || gradle test --tests "${ALL_MODIFIED_TEST_CLASSES}" 2>&1)
     TEST_EXIT_CODE=$?
     ;;
 esac
@@ -1132,7 +1144,7 @@ if [ $TEST_EXIT_CODE -eq 0 ]; then
   echo "  ✅ ALL TESTS PASSING"
   echo "════════════════════════════════════════════════════════"
   echo ""
-  echo "  Test suite: PASSED"
+  echo "  Affected tests: PASSED"
   echo "  Total iterations: $((ITERATION - 1))"
   echo "  Total fixes: Updated=$TOTAL_UPDATED, Created=$TOTAL_CREATED"
   echo ""
@@ -1231,7 +1243,7 @@ fi
 
 ---
 
-## Test Suite Verification
+## Test Verification
 
 - Status: ✅ PASSED / ❌ FAILED
 - Failing tests: [count if failed]

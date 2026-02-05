@@ -82,10 +82,16 @@ Before proceeding to Phase 1, confirm:
 **Goal**: Ensure code is ready to ship.
 
 **Actions**:
-1. **Run tests**:
+1. **Run affected tests** (targeted to changed files):
    ```bash
-   # Detect test runner and execute
-   npm test || pytest || cargo test || go test ./... || dotnet test
+   # Identify changed files via git diff, then run their associated tests
+   # Use framework-specific targeted run where available:
+   #   jest:   npm test -- --findRelatedTests <changed-files>
+   #   vitest: npx vitest related <changed-files>
+   #   pytest: pytest <test-files-for-changed-modules>
+   #   go:     go test <changed-packages>
+   # If project is small (<50 test files) or changes touch shared utilities, run full suite:
+   #   npm test || pytest || cargo test || go test ./... || dotnet test
    ```
    **BLOCKER**: If tests fail, STOP and fix before proceeding.
 
