@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.32.0] - 2026-02-05
+
+### Added
+
+- `tdd-methodology` skill now loaded by `/rptc:feat` and `/rptc:fix` via explicit `Skill()` calls
+- Conditional `frontend-design:frontend-design` (Anthropic plugin) loading for frontend tasks in feat and fix
+- Skills Usage Guide entries for `tdd-methodology` and `frontend-design` in both commands
+- Existing design system constraint: frontend-design skill must respect project's established aesthetics
+
+### Changed
+
+- Removed non-functional `skills:` frontmatter from all 4 commands (feat, fix, research, commit) — frontmatter skill loading only works for subagents, not commands
+- Updated `tdd-methodology/SKILL.md` description to reflect it is now loaded by feat and fix
+
+### Fixed
+
+- Skills were declared in command frontmatter but never actually injected into context — explicit `Skill()` calls are the correct mechanism for commands
+
+---
+
+
 ## [2.31.0] - 2026-02-05
 
 ### Changed
