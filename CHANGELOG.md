@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.33.1] - 2026-02-07
+
+### Fixed
+
+- Review agent namespace collision: added disambiguation warnings to prevent `code-review:code-review` from being selected instead of `rptc:code-review-agent` in Phase 4
+- Phase 4 reviews skipped: added AskUserQuestion blocking gate after review consolidation to enforce review execution
+- Minimal review mode could select zero agents: code-review now always launches as minimum floor
+
+### Changed
+
+- Phase 3-to-4 transition wording strengthened with explicit "MANDATORY" and "Do NOT skip" directives
+- Phase 5 blocking checkpoint now requires user acknowledgment via AskUserQuestion
+- Error handling sections in both feat.md and fix.md include "Phase 4 not executed" recovery path
+
+---
+
 ## [2.33.0] - 2026-02-06
 
 ### Added

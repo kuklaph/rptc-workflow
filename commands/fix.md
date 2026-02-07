@@ -398,7 +398,7 @@ Apply MINIMAL fix to make the test pass:
    - If fix attempt fails 3x: Ask user for guidance
 
 4. **MANDATORY**: Add TodoWrite item "Verification Review" with status "pending" (if not exists)
-5. **Transition to Phase 4** — MUST execute before Phase 5
+5. **MANDATORY: Execute Phase 4 next** — Verification Review MUST run before Phase 5. Do NOT skip to completion.
 
 ---
 
@@ -462,11 +462,13 @@ Apply MINIMAL fix to make the test pass:
    **Default**: If uncertain, include the agent
 
    **Mode: `minimal`** — Only launch when strongly indicated:
-   - code-review: Only if >50 lines changed
+   - code-review: **ALWAYS** (minimum floor — at least one review agent must launch)
    - security: Only if auth/api paths OR security keywords found
    - docs: Only if doc files changed OR export keyword found
 
 3. **Launch selected review agents**:
+
+   IMPORTANT: All review agents MUST use the `rptc:` namespace. Use `rptc:code-review-agent`, NOT `code-review:code-review` or `feature-dev:code-reviewer`.
 
    **Code Review Agent** (if selected):
    ```
@@ -524,6 +526,26 @@ Apply MINIMAL fix to make the test pass:
 
 7. **Update TodoWrite**: Mark "Verification Review" as completed
 
+8. **BLOCKING GATE — User Acknowledgment** (MANDATORY, cannot skip):
+
+   Present review results to the user. This is a tool-enforced gate — you MUST call AskUserQuestion here.
+
+   ```
+   Use AskUserQuestion:
+   question: "Phase 4 verification complete. [N] findings addressed. Proceed to completion?"
+   header: "Review Gate"
+   options:
+     - label: "Proceed to Phase 5"
+       description: "All review findings addressed, ready to wrap up"
+     - label: "Re-review needed"
+       description: "I want to revisit some findings before completing"
+     - label: "Add more review scope"
+       description: "Launch additional review agents or expand scope"
+   ```
+
+   If user selects "Re-review needed" → return to step 6 (auto-fix).
+   If user selects "Add more review scope" → return to step 3 (launch agents).
+
 ---
 
 ## Phase 5: Complete
@@ -532,6 +554,7 @@ Apply MINIMAL fix to make the test pass:
 
 - [ ] TodoWrite "Verification Review" item MUST be marked "completed"
 - [ ] At least one review agent MUST have been launched
+- [ ] User acknowledged review results via AskUserQuestion (step 8)
 
 If Verification Review not completed → **STOP**. Return to Phase 4.
 
@@ -619,10 +642,12 @@ VERIFY: Run affected tests, check for regressions
 
 ### Review Agents (Phase 4) - Semantic Selection
 
+IMPORTANT: Use `rptc:code-review-agent`, NOT `code-review:code-review` or `feature-dev:code-reviewer`.
+
 **Selection based on `review-agent-mode` in project CLAUDE.md:**
 - `all`: Launch all 3 agents
 - `automatic`: Select based on file types/keywords (default if no CLAUDE.md)
-- `minimal`: Only when strongly indicated
+- `minimal`: code-review always launches; others when strongly indicated
 
 **Agents:**
 1. `rptc:code-review-agent`: Root cause fix? Minimal? Regression risk?
@@ -671,4 +696,5 @@ VERIFY: Run affected tests, check for regressions
 - **Fix causes regressions**: Analyze what broke, adjust fix approach
 - **Fix attempt fails 3x**: Pause, present findings, ask user for guidance
 - **Larger refactoring needed**: Flag it, complete minimal fix, suggest follow-up task
+- **Phase 4 not executed**: INVALID STATE. Return to Phase 4 and execute it. Phase 5 cannot proceed without verification.
 

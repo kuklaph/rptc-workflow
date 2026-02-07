@@ -342,7 +342,7 @@ options:
    - Make changes using Edit/Write tools
    - Verify changes are correct
 3. **Update TodoWrite** as each step completes
-4. **Execute Phase 4** (Quality Review) — required for all task types
+4. **MANDATORY: Execute Phase 4 next** — Quality Review is required for ALL task types, including non-code. Do NOT skip to Phase 5.
 
 ---
 
@@ -468,7 +468,7 @@ Then move to next step in batch.
 8. **Update TodoWrite** as each batch completes
 9. **Handle failures**: If batch fails after 3 attempts, ask user for guidance
 10. **MANDATORY**: Add TodoWrite item "Quality Review" with status "pending" (if not exists)
-11. **Transition to Phase 4** — MUST execute before Phase 5
+11. **MANDATORY: Execute Phase 4 next** — Quality Review MUST run before Phase 5. Do NOT skip to completion.
 
 **Example Batching**:
 ```
@@ -549,11 +549,13 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
    **Default**: If uncertain, include the agent
 
    **Mode: `minimal`** — Only launch when strongly indicated:
-   - code-review: Only if >50 lines of source code changed
+   - code-review: **ALWAYS** (minimum floor — at least one review agent must launch)
    - security: Only if auth/api paths OR security keywords found
    - docs: Only if doc files changed OR `export` keyword found
 
 4. **Launch selected review agents** — Make Task tool calls for each selected agent:
+
+   IMPORTANT: All review agents MUST use the `rptc:` namespace. Use `rptc:code-review-agent`, NOT `code-review:code-review` or `feature-dev:code-reviewer`.
 
    **Code Review Agent** (if selected):
    ```
@@ -616,6 +618,26 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
 
 8. **Update TodoWrite**: Mark "Quality Review" as completed
 
+9. **BLOCKING GATE — User Acknowledgment** (MANDATORY, cannot skip):
+
+   Present review results to the user. This is a tool-enforced gate — you MUST call AskUserQuestion here.
+
+   ```
+   Use AskUserQuestion:
+   question: "Phase 4 review complete. [N] findings addressed. Proceed to completion?"
+   header: "Review Gate"
+   options:
+     - label: "Proceed to Phase 5"
+       description: "All review findings addressed, ready to wrap up"
+     - label: "Re-review needed"
+       description: "I want to revisit some findings before completing"
+     - label: "Add more review scope"
+       description: "Launch additional review agents or expand scope"
+   ```
+
+   If user selects "Re-review needed" → return to step 7 (auto-fix).
+   If user selects "Add more review scope" → return to step 4 (launch agents).
+
 ---
 
 ## Phase 5: Complete
@@ -624,6 +646,7 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
 
 - [ ] TodoWrite "Quality Review" item MUST be marked "completed"
 - [ ] At least one review agent MUST have been launched
+- [ ] User acknowledged review results via AskUserQuestion (step 9)
 
 If Quality Review not completed → **STOP**. Return to Phase 4.
 
@@ -697,12 +720,14 @@ For each step in order: RED → GREEN → REFACTOR, then next step.
 
 ### Review Agents (Phase 4) - Semantic Selection
 
+IMPORTANT: Use `rptc:code-review-agent`, NOT `code-review:code-review` or `feature-dev:code-reviewer`.
+
 **Mode**: Report-only. Agents report findings; main context handles fixes via TodoWrite.
 
 **Selection based on `review-agent-mode` in project CLAUDE.md:**
 - `all`: Launch all 3 agents
 - `automatic`: Select based on file types/keywords (default if no CLAUDE.md)
-- `minimal`: Only when strongly indicated
+- `minimal`: code-review always launches; others when strongly indicated
 
 **Agents:**
 1. `rptc:code-review-agent`: Code quality, complexity, KISS/YAGNI
@@ -748,3 +773,4 @@ For each step in order: RED → GREEN → REFACTOR, then next step.
 - **All plans miss requirements**: Re-run planning with additional constraints from user
 - **TDD step fails 3x**: Pause, ask user for guidance
 - **Quality review finds critical issues**: Block completion, show findings
+- **Phase 4 not executed**: INVALID STATE. Return to Phase 4 and execute it. Phase 5 cannot proceed without review.
