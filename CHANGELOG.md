@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.33.0] - 2026-02-06
+
+### Added
+
+- Delegation decision in `/rptc:feat` Phase 3 Route B: main context can handle simple code tasks directly (1-2 steps, 1-2 files, <50 lines) instead of always delegating to tdd-agent
+- Delegation decision in `/rptc:fix` Phase 3: main context can handle simple fixes directly (1 step, 1-2 files, <30 lines)
+- Explicit `Skill(skill: "rptc:tdd-methodology")` invocation in both direct execution paths
+
+### Changed
+
+- `/rptc:feat` Phase 3 Route B restructured: delegation decision first, then smart batching as sub-section for agent delegation path
+
+---
+
 ## [2.32.0] - 2026-02-05
 
 ### Added

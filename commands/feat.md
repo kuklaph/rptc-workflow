@@ -346,15 +346,46 @@ options:
 
 ---
 
-### Route B: Code Tasks (TDD with Smart Batching)
+### Route B: Code Tasks (TDD)
 
 **When**: `task_type = code` (source files, tests, application logic)
 
-**Goal**: Build with tests first, using intelligent step batching for efficiency.
+**Goal**: Build with tests first, maintaining TDD discipline whether delegated or direct.
 
 **CRITICAL - Test-First Ordering**: Whether delegating to tdd-agent OR executing in main context, ALWAYS write/update tests BEFORE modifying production code. This applies to new tests, updated existing tests, and regression tests. Never change production code first.
 
-**Smart Batching**: Combines related steps into fewer tdd-agent calls, reducing overhead while maintaining TDD discipline.
+#### Delegation Decision: Direct or Agent?
+
+**Before batching**, decide how to execute based on plan complexity:
+
+| Criteria | Execute Directly (Main Context) | Delegate to tdd-agent |
+|----------|--------------------------------|----------------------|
+| Plan steps | 1-2 steps | 3+ steps |
+| Files affected | 1-2 files | 3+ files |
+| Estimated lines | <50 lines of new/changed code | 50+ lines |
+| Complexity | Straightforward, clear pattern | Complex logic, multi-component |
+
+**If Direct**: Execute code changes in main context using TDD methodology.
+
+```
+Skill(skill: "rptc:tdd-methodology")
+```
+
+Follow the skill's full cycle for each plan step:
+1. **Surgical Coding**: Search 3 similar patterns first
+2. **Context Discovery**: Check existing tests, framework, naming conventions
+3. **RED**: Write failing tests first
+4. **GREEN**: Minimal code to pass
+5. **REFACTOR**: Improve while green
+6. **VERIFY**: Run affected tests, check coverage
+
+Then skip to step 8 (Update TodoWrite) below.
+
+**If Delegate**: Use smart batching with tdd-agent (continue below).
+
+#### Smart Batching (tdd-agent delegation)
+
+Combines related steps into fewer tdd-agent calls, reducing overhead while maintaining TDD discipline.
 
 **Actions**:
 

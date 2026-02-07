@@ -313,6 +313,33 @@ Constraints:
 
 **CRITICAL - Test-First Ordering**: Whether delegating to tdd-agent OR executing in main context, ALWAYS write the regression test that reproduces the bug BEFORE modifying production code. Update any existing tests BEFORE changing production code. Never fix production code first.
 
+#### Delegation Decision: Direct or Agent?
+
+| Criteria | Execute Directly (Main Context) | Delegate to tdd-agent |
+|----------|--------------------------------|----------------------|
+| Fix steps | 1 step (single root cause) | 2+ steps or multi-component |
+| Files affected | 1-2 files | 3+ files |
+| Estimated lines | <30 lines changed | 30+ lines |
+| Complexity | Clear root cause, obvious fix | Complex interactions, cascading changes |
+
+**If Direct**: Execute fix in main context using TDD methodology.
+
+```
+Skill(skill: "rptc:tdd-methodology")
+```
+
+Follow the skill's full cycle for the fix:
+1. **Surgical Coding**: Search 3 similar patterns first
+2. **Context Discovery**: Check existing tests, framework, naming conventions
+3. **RED**: Write a test that reproduces the exact bug (must fail with same symptom)
+4. **GREEN**: Apply minimal fix to make the test pass
+5. **REFACTOR**: Clean up only if needed (keep fix surgical)
+6. **VERIFY**: Run affected tests, confirm regression test passes
+
+Then skip to step 2 (Update TodoWrite) below.
+
+**If Delegate**: Use tdd-agent (continue below).
+
 **Actions**:
 
 1. **Delegate to TDD agent** with regression emphasis:
