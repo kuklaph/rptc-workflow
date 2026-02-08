@@ -8,8 +8,8 @@ model: inherit
 
 # Master Documentation Specialist Agent
 
-**Phase:** Quality Review (Phase 4 of RPTC Workflow)
-**Trigger:** Automatic during `/rptc:feat` Phase 4 (parallel with Efficiency and Security)
+**Phase:** Quality Verification (Phase 4 of RPTC Workflow)
+**Trigger:** Automatic during `/rptc:feat` Phase 4 (parallel with Code Review and Security)
 **Mode:** REPORT ONLY - does not make changes
 
 ---
@@ -18,7 +18,7 @@ model: inherit
 
 **You are operating within the RPTC (Research → Plan → TDD → Commit) workflow.**
 
-You are invoked during **Phase 4: Quality Review** to verify documentation.
+You are invoked during **Phase 4: Quality Verification** to verify documentation.
 
 ### RPTC Directives (MUST FOLLOW)
 
@@ -213,9 +213,9 @@ Use `write_memory` to persist valuable discoveries for future sessions:
 
 ## When You're Invoked
 
-You are automatically triggered during `/rptc:feat` Phase 4 (Quality Review) in **parallel with Efficiency and Security agents**.
+You are automatically triggered during `/rptc:feat` Phase 4 (Quality Verification) in **parallel with Code Review and Security agents**.
 
-**Timing:** After Implementation phase complete, running in parallel with other review agents.
+**Timing:** After Implementation phase complete, running in parallel with other verification agents.
 
 **Context provided to you:**
 
@@ -658,7 +658,7 @@ You've succeeded when:
   ├─ Phase 1: Discovery ✅
   ├─ Phase 2: Architecture (Planning) ✅
   ├─ Phase 3: Implementation ✅
-  ├─ Phase 4: Quality Review (ALL 3 IN PARALLEL, REPORT-ONLY)
+  ├─ Phase 4: Quality Verification (ALL 3 IN PARALLEL, REPORT-ONLY)
   │     ├─ Code Review Agent → Reports code quality findings
   │     ├─ Security Agent → Reports security findings
   │     └─ 📚 YOU → Reports documentation findings
@@ -798,7 +798,7 @@ Detect: package.json dependencies changed
 ## Example Interaction Flow
 
 ```text
-Main Context: Phase 4 - Quality Review (Documentation)
+Main Context: Phase 4 - Quality Verification (Documentation)
 
 [Provides list of modified files and feature context]
 

@@ -1,11 +1,11 @@
 ---
-description: Research → Plan → TDD → Review in one seamless flow
+description: Research → Plan → TDD → Verify in one seamless flow
 allowed-tools: Bash(git *), Bash(npm *), Bash(npx *), Bash(bunx *), Bash(pnpm *), Bash(yarn *), Bash(bun *), Bash(cargo *), Bash(go *), Bash(pytest *), Bash(python -m pytest *), Bash(make *), Bash(dotnet *), Read, Write, Edit, Glob, Grep, LS, Task, TodoWrite, AskUserQuestion, EnterPlanMode, ExitPlanMode
 ---
 
 # /rptc:feat
 
-Complete feature development: Discovery → Architecture → Implementation → Quality Review.
+Complete feature development: Discovery → Architecture → Implementation → Quality Verification.
 
 ## Step 0: RPTC Workflow Initialization (MANDATORY - CANNOT SKIP)
 
@@ -90,7 +90,7 @@ This workflow has **5 mandatory phases**. You MUST NOT skip phases.
 | 1 | Discovery | Understanding of what to build | No |
 | 2 | Architecture | User-approved implementation plan | No |
 | 3 | Implementation | Working code with tests | No |
-| 4 | Quality Review | All findings addressed | **YES** |
+| 4 | Quality Verification | All findings addressed | **YES** |
 | 5 | Complete | Summary for commit | **YES** |
 
 **Phase 4 and 5 transitions are BLOCKING GATES. Cannot proceed without verification.**
@@ -226,8 +226,8 @@ Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp_
 
 1. **Classify task type** (see Task Classification above)
 2. **Create initial todo list** with phases based on task type:
-   - Code tasks: Discovery, Architecture, TDD Implementation, Quality Review, Complete
-   - Non-Code tasks: Discovery, Architecture, Implementation, Quality Review, Complete
+   - Code tasks: Discovery, Architecture, TDD Implementation, Quality Verification, Complete
+   - Non-Code tasks: Discovery, Architecture, Implementation, Quality Verification, Complete
 3. **If codebase exploration needed**, launch 2-3 research agents in parallel (NOT the built-in Explore agent):
 
 ```
@@ -379,7 +379,7 @@ options:
    - Make changes using Edit/Write tools
    - Verify changes are correct
 3. **Update TodoWrite** as each step completes
-4. **MANDATORY: Execute Phase 4 next** — Quality Review is required for ALL task types, including non-code. Do NOT skip to Phase 5.
+4. **MANDATORY: Execute Phase 4 next** — Quality Verification is required for ALL task types, including non-code. Do NOT skip to Phase 5.
 
 ---
 
@@ -532,8 +532,8 @@ Then move to next step in batch.
 
 8. **Update TodoWrite** as each batch completes
 9. **Handle failures**: If batch fails after 3 attempts, ask user for guidance
-10. **MANDATORY**: Add TodoWrite item "Quality Review" with status "pending" (if not exists)
-11. **MANDATORY: Execute Phase 4 next** — Quality Review MUST run before Phase 5. Do NOT skip to completion.
+10. **MANDATORY**: Add TodoWrite item "Quality Verification" with status "pending" (if not exists)
+11. **MANDATORY: Execute Phase 4 next** — Quality Verification MUST run before Phase 5. Do NOT skip to completion.
 
 **Example Batching**:
 ```
@@ -550,43 +550,43 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
 
 ---
 
-## Phase 4: Quality Review (MANDATORY - BLOCKING GATE)
+## Phase 4: Quality Verification (MANDATORY - BLOCKING GATE)
 
-**Goal**: Review changes and report findings for main context to address.
+**Goal**: Verify changes and report findings for main context to address.
 
-**Mode**: Report-only. Review agents DO NOT make changes—they report findings. Main context handles all fixes.
+**Mode**: Report-only. Verification agents DO NOT make changes—they report findings. Main context handles all fixes.
 
 **CRITICAL**: This phase MUST execute. Phase 5 CANNOT begin until this phase completes.
 
 **Actions**:
 
-0. **Update TodoWrite**: Mark "Quality Review" as in_progress
+0. **Update TodoWrite**: Mark "Quality Verification" as in_progress
 
-1. **Collect files modified** during Phase 3 for review
+1. **Collect files modified** during Phase 3 for verification
 
-2. **Determine review agent mode** (one-time project configuration):
+2. **Determine verification agent mode** (one-time project configuration):
 
    a. **Check if project CLAUDE.md exists** (in project root)
 
-   b. **If CLAUDE.md exists**, look for `review-agent-mode:` setting:
+   b. **If CLAUDE.md exists**, look for `verification-agent-mode:` setting:
       - If found: Use that mode (`automatic`, `all`, or `minimal`)
       - If not found: Ask user via AskUserQuestion (one-time setup):
         ```
         Use AskUserQuestion:
-        question: "How should review agents be selected for this project? (saved to CLAUDE.md)"
-        header: "Review Mode"
+        question: "How should verification agents be selected for this project? (saved to CLAUDE.md)"
+        header: "Verification Mode"
         options:
           - label: "Automatic (Recommended)"
             description: "Smart selection based on file types and change patterns"
           - label: "All Agents"
-            description: "Always launch all 3 review agents"
+            description: "Always launch all 3 verification agents"
           - label: "Minimal"
             description: "Only launch agents when strongly indicated"
         ```
         Then append to CLAUDE.md:
         ```markdown
-        ## RPTC Review Configuration
-        review-agent-mode: [selected mode]
+        ## RPTC Verification Configuration
+        verification-agent-mode: [selected mode]
         ```
 
    c. **If no CLAUDE.md exists**: Use `automatic` mode (don't ask, don't create file)
@@ -614,17 +614,17 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
    **Default**: If uncertain, include the agent
 
    **Mode: `minimal`** — Only launch when strongly indicated:
-   - code-review: **ALWAYS** (minimum floor — at least one review agent must launch)
+   - code-review: **ALWAYS** (minimum floor — at least one verification agent must launch)
    - security: Only if auth/api paths OR security keywords found
    - docs: Only if doc files changed OR `export` keyword found
 
-4. **Launch selected review agents** — Make Task tool calls for each selected agent:
+4. **Launch selected verification agents** — Make Task tool calls for each selected agent:
 
    **AGENT NAMESPACE LOCKOUT (Phase 4):**
    - ✅ CORRECT: `subagent_type="rptc:code-review-agent"`
    - ❌ WRONG: `subagent_type="feature-dev:code-reviewer"` — different plugin, not RPTC
    - ❌ WRONG: `subagent_type="code-review:code-review"` — different plugin, not RPTC
-   - The `rptc:` prefix is required for ALL review agents. No exceptions.
+   - The `rptc:` prefix is required for ALL verification agents. No exceptions.
 
    **Code Review Agent** (if selected):
    ```
@@ -687,7 +687,7 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
    - For ask-first items: Use AskUserQuestion with fix proposal, then apply or skip
    - Mark all todos complete as addressed
 
-8. **Update TodoWrite**: Mark "Quality Review" as completed
+8. **Update TodoWrite**: Mark "Quality Verification" as completed
 
 9. **BLOCKING GATE — User Acknowledgment** (MANDATORY, cannot skip):
 
@@ -695,19 +695,19 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
 
    ```
    Use AskUserQuestion:
-   question: "Phase 4 review complete. [N] findings addressed. Proceed to completion?"
-   header: "Review Gate"
+   question: "Phase 4 verification complete. [N] findings addressed. Proceed to completion?"
+   header: "Verification Gate"
    options:
      - label: "Proceed to Phase 5"
-       description: "All review findings addressed, ready to wrap up"
-     - label: "Re-review needed"
+       description: "All verification findings addressed, ready to wrap up"
+     - label: "Re-verify needed"
        description: "I want to revisit some findings before completing"
-     - label: "Add more review scope"
-       description: "Launch additional review agents or expand scope"
+     - label: "Add more verification scope"
+       description: "Launch additional verification agents or expand scope"
    ```
 
-   If user selects "Re-review needed" → return to step 7 (auto-fix).
-   If user selects "Add more review scope" → return to step 4 (launch agents).
+   If user selects "Re-verify needed" → return to step 7 (auto-fix).
+   If user selects "Add more verification scope" → return to step 4 (launch agents).
 
 ---
 
@@ -715,11 +715,11 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
 
 **BLOCKING CHECKPOINT** — Before Phase 5 can begin:
 
-- [ ] TodoWrite "Quality Review" item MUST be marked "completed"
-- [ ] At least one review agent MUST have been launched
-- [ ] User acknowledged review results via AskUserQuestion (step 9)
+- [ ] TodoWrite "Quality Verification" item MUST be marked "completed"
+- [ ] At least one verification agent MUST have been launched
+- [ ] User acknowledged verification results via AskUserQuestion (step 9)
 
-If Quality Review not completed → **STOP**. Return to Phase 4.
+If Quality Verification not completed → **STOP**. Return to Phase 4.
 
 ---
 
@@ -793,7 +793,7 @@ For each step in order:
 Then next step.
 ```
 
-### Review Agents (Phase 4) - Semantic Selection
+### Verification Agents (Phase 4) - Semantic Selection
 
 **AGENT NAMESPACE LOCKOUT:**
 - ✅ CORRECT: `subagent_type="rptc:code-review-agent"`
@@ -802,7 +802,7 @@ Then next step.
 
 **Mode**: Report-only. Agents report findings; main context handles fixes via TodoWrite.
 
-**Selection based on `review-agent-mode` in project CLAUDE.md:**
+**Selection based on `verification-agent-mode` in project CLAUDE.md:**
 - `all`: Launch all 3 agents
 - `automatic`: Select based on file types/keywords (default if no CLAUDE.md)
 - `minimal`: code-review always launches; others when strongly indicated
@@ -840,7 +840,7 @@ Then next step.
 | Config loading  | 80 lines              | 0                |
 | Plan formats    | 5 modes               | Native only      |
 | Approval gates  | 4+                    | 1 (ExitPlanMode) |
-| Quality reviews | Sequential            | Parallel         |
+| Quality verification | Sequential            | Parallel         |
 | Lines of code   | 1800+                 | ~200             |
 
 ---
@@ -850,5 +850,5 @@ Then next step.
 - **Discovery fails**: Ask user for more context
 - **All plans miss requirements**: Re-run planning with additional constraints from user
 - **TDD step fails 3x**: Pause, ask user for guidance
-- **Quality review finds critical issues**: Block completion, show findings
-- **Phase 4 not executed**: INVALID STATE. Return to Phase 4 and execute it. Phase 5 cannot proceed without review.
+- **Quality verification finds critical issues**: Block completion, show findings
+- **Phase 4 not executed**: INVALID STATE. Return to Phase 4 and execute it. Phase 5 cannot proceed without verification.

@@ -23,13 +23,14 @@ rptc-workflow/                      # ${CLAUDE_PLUGIN_ROOT}
 │   ├── plugin.json                 # Plugin metadata & version
 │   └── marketplace.json            # Marketplace listing
 │
-├── commands/                       # Flat structure (6 commands)
+├── commands/                       # Flat structure (7 commands)
 │   ├── commit.md                   # /rptc:commit
 │   ├── config.md                   # /rptc:config
 │   ├── feat.md                     # /rptc:feat (PRIMARY)
 │   ├── fix.md                      # /rptc:fix
 │   ├── research.md                 # /rptc:research
-│   └── sync-prod-to-tests.md       # /rptc:sync-prod-to-tests
+│   ├── sync-prod-to-tests.md       # /rptc:sync-prod-to-tests
+│   └── verify.md                   # /rptc:verify
 │
 ├── agents/                         # Specialist agents (8 agents)
 │   ├── docs-agent.md               # Documentation sync
@@ -111,7 +112,7 @@ rptc-workflow/
 
 - Claude clones repo to plugin directory
 - This becomes `${CLAUDE_PLUGIN_ROOT}`
-- All 6 commands registered and available
+- All 7 commands registered and available
 - Agents available for delegation
 - SOPs available for agent reference
 
@@ -127,7 +128,7 @@ rptc-workflow/
 - Phase 1: Discovery (codebase exploration)
 - Phase 2: Architecture (plan creation in `~/.claude/plans/`)
 - Phase 3: TDD Implementation
-- Phase 4: Quality Review
+- Phase 4: Quality Verification
 - Phase 5: Complete
 
 **No workspace initialization required.** RPTC uses Claude's native plan mode.
@@ -178,7 +179,7 @@ Phase 3: Implementation
     → Route A (non-code): Main context executes directly
     → Route B (code): TDD with smart batching via rptc:tdd-agent
     ↓
-Phase 4: Quality Review (Report-Only)
+Phase 4: Quality Verification (Report-Only)
     → Parallel: code-review-agent + security-agent + docs-agent
     → Agents report findings only (no auto-fix)
     → Main context handles fixes via TodoWrite
@@ -194,6 +195,8 @@ Phase 5: Complete
 |---------|---------|---------------|
 | `/rptc:research "topic"` | Standalone research | Before `/rptc:feat` for unfamiliar topics |
 | `/rptc:commit [pr]` | Verify and ship | After completing implementation |
+| `/rptc:verify [path]` | Run verification agents on demand | After any code change |
+| `/rptc:config` | Configure RPTC in project CLAUDE.md | First-time setup, after plugin updates |
 | `/rptc:sync-prod-to-tests "[dir]"` | Test maintenance | When tests drift from production |
 
 ---
@@ -277,7 +280,7 @@ RPTC maximizes efficiency through parallelization:
     User Selects One
 ```
 
-### Phase 4: Quality Review (Report-Only)
+### Phase 4: Quality Verification (Report-Only)
 
 ```text
 ┌─────────────────────┐
@@ -300,9 +303,9 @@ RPTC maximizes efficiency through parallelization:
 
 ---
 
-## Report-Only Review System
+## Report-Only Verification System
 
-Quality review agents (code-review, security, docs) operate in **report-only mode**:
+Quality verification agents (code-review, security, docs) operate in **report-only mode**:
 
 | Confidence | Priority | Action |
 |------------|----------|--------|
@@ -386,7 +389,7 @@ Pre-commit hook automatically blocks commits with version mismatch.
 | Before | After |
 |--------|-------|
 | Separate `/rptc:plan` + `/rptc:tdd` | Unified `/rptc:feat` |
-| 16 commands | 6 commands |
+| 16 commands | 7 commands |
 | `.rptc/` workspace required | Not needed |
 | `.claude/settings.json` config | Not needed |
 | SOP fallback chain (3 levels) | Plugin SOPs only |
@@ -415,7 +418,7 @@ Pre-commit hook automatically blocks commits with version mismatch.
 
 **Plugin provides:**
 
-- 6 commands (2 primary, 4 supporting)
+- 7 commands (2 primary, 5 supporting)
 - 8 specialist agents
 - 10 SOPs
 - 6 skills

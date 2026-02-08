@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.1.0] - 2026-02-08
+
+### Added
+
+- **Standalone `/rptc:verify` command** (`commands/verify.md`): Run quality verification agents on demand, independent of `/rptc:feat` or `/rptc:fix`
+  - Default scope: uncommitted changes via git diff
+  - Optional path argument for targeted or full-app verification
+  - 3-option agent selection via AskUserQuestion: Full (all 3), Code + Security, Docs only
+  - Same AGENT NAMESPACE LOCKOUT, confidence filtering, and auto-fix tiering as Phase 4
+
+### Changed
+
+- **Phase 4 renamed** from "Quality Review" to "Quality Verification" across all commands, docs, agents, SOPs, and skills
+  - `feat.md`: Phase header, TodoWrite items, blocking gates, AskUserQuestion prompts
+  - `fix.md`: TodoWrite items, blocking gates, AskUserQuestion prompts (header was already "Verification")
+  - `config.md`: Template, examples, user prompts
+  - All documentation, agent files, SOPs, and skill references updated
+- **Configuration key renamed**: `review-agent-mode` → `verification-agent-mode` in all commands and config template
+- **Agent group terminology standardized**: "review agents" → "verification agents" throughout (agent proper names like "Code Review Agent" and `subagent_type` values unchanged)
+- **AskUserQuestion labels updated**: "Review Mode" → "Verification Mode", "Review Gate" → "Verification Gate", "Re-review" → "Re-verify"
+- **TDD VERIFY phase scoped to affected tests only**: Removed full suite fallback (`<50 test files` clause) from `tdd-agent.md`, `fix.md`, and `tdd-methodology` skill. Full suite runs are now reserved for `/rptc:commit` only, reducing TDD cycle time
+
+---
+
 ## [3.0.1] - 2026-02-07
 
 ### Fixed

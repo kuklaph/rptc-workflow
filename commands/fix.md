@@ -90,7 +90,7 @@ This workflow has **5 mandatory phases**. You MUST NOT skip phases.
 | 1 | Reproduction & Triage | Confirmed bug with repro steps | No |
 | 2 | Root Cause Analysis | 5 Whys result, fix approach | No |
 | 3 | Fix Application | Regression test + minimal fix | No |
-| 4 | Verification | All review findings addressed | **YES** |
+| 4 | Verification | All verification findings addressed | **YES** |
 | 5 | Complete | Summary for commit | **YES** |
 
 **Phase 4 and 5 transitions are BLOCKING GATES. Cannot proceed without verification.**
@@ -453,7 +453,7 @@ Apply MINIMAL fix to make the test pass:
 - Run the new regression test (must pass)
 - Run related test files (must pass)
 - Run affected tests — files that import or reference changed modules (must pass)
-- If project is small (<50 test files) or change touches shared utilities, run the full suite instead
+- Run ONLY affected tests — do NOT run the full test suite (full suite runs are reserved for `/rptc:commit`)
 - Report any new failures
 
 ## Constraints
@@ -473,8 +473,8 @@ Apply MINIMAL fix to make the test pass:
    - If fix causes new failures: Analyze regression, adjust fix
    - If fix attempt fails 3x: Ask user for guidance
 
-4. **MANDATORY**: Add TodoWrite item "Verification Review" with status "pending" (if not exists)
-5. **MANDATORY: Execute Phase 4 next** — Verification Review MUST run before Phase 5. Do NOT skip to completion.
+4. **MANDATORY**: Add TodoWrite item "Quality Verification" with status "pending" (if not exists)
+5. **MANDATORY: Execute Phase 4 next** — Quality Verification MUST run before Phase 5. Do NOT skip to completion.
 
 ---
 
@@ -488,31 +488,31 @@ Apply MINIMAL fix to make the test pass:
 
 **Actions**:
 
-0. **Update TodoWrite**: Mark "Verification Review" as in_progress
+0. **Update TodoWrite**: Mark "Quality Verification" as in_progress
 
-1. **Determine review agent mode** (one-time project configuration):
+1. **Determine verification agent mode** (one-time project configuration):
 
    a. **Check if project CLAUDE.md exists** (in project root)
 
-   b. **If CLAUDE.md exists**, look for `review-agent-mode:` setting:
+   b. **If CLAUDE.md exists**, look for `verification-agent-mode:` setting:
       - If found: Use that mode (`automatic`, `all`, or `minimal`)
       - If not found: Ask user via AskUserQuestion (one-time setup):
         ```
         Use AskUserQuestion:
-        question: "How should review agents be selected for this project? (saved to CLAUDE.md)"
-        header: "Review Mode"
+        question: "How should verification agents be selected for this project? (saved to CLAUDE.md)"
+        header: "Verification Mode"
         options:
           - label: "Automatic (Recommended)"
             description: "Smart selection based on file types and change patterns"
           - label: "All Agents"
-            description: "Always launch all 3 review agents"
+            description: "Always launch all 3 verification agents"
           - label: "Minimal"
             description: "Only launch agents when strongly indicated"
         ```
         Then append to CLAUDE.md:
         ```markdown
-        ## RPTC Review Configuration
-        review-agent-mode: [selected mode]
+        ## RPTC Verification Configuration
+        verification-agent-mode: [selected mode]
         ```
 
    c. **If no CLAUDE.md exists**: Use `automatic` mode (don't ask, don't create file)
@@ -538,17 +538,17 @@ Apply MINIMAL fix to make the test pass:
    **Default**: If uncertain, include the agent
 
    **Mode: `minimal`** — Only launch when strongly indicated:
-   - code-review: **ALWAYS** (minimum floor — at least one review agent must launch)
+   - code-review: **ALWAYS** (minimum floor — at least one verification agent must launch)
    - security: Only if auth/api paths OR security keywords found
    - docs: Only if doc files changed OR export keyword found
 
-3. **Launch selected review agents**:
+3. **Launch selected verification agents**:
 
    **AGENT NAMESPACE LOCKOUT (Phase 4):**
    - ✅ CORRECT: `subagent_type="rptc:code-review-agent"`
    - ❌ WRONG: `subagent_type="feature-dev:code-reviewer"` — different plugin, not RPTC
    - ❌ WRONG: `subagent_type="code-review:code-review"` — different plugin, not RPTC
-   - The `rptc:` prefix is required for ALL review agents. No exceptions.
+   - The `rptc:` prefix is required for ALL verification agents. No exceptions.
 
    **Code Review Agent** (if selected):
    ```
@@ -606,7 +606,7 @@ Apply MINIMAL fix to make the test pass:
    - For ask-first items: Use AskUserQuestion with fix proposal, then apply or skip
    - Mark all todos complete as addressed
 
-7. **Update TodoWrite**: Mark "Verification Review" as completed
+7. **Update TodoWrite**: Mark "Quality Verification" as completed
 
 8. **BLOCKING GATE — User Acknowledgment** (MANDATORY, cannot skip):
 
@@ -615,18 +615,18 @@ Apply MINIMAL fix to make the test pass:
    ```
    Use AskUserQuestion:
    question: "Phase 4 verification complete. [N] findings addressed. Proceed to completion?"
-   header: "Review Gate"
+   header: "Verification Gate"
    options:
      - label: "Proceed to Phase 5"
-       description: "All review findings addressed, ready to wrap up"
-     - label: "Re-review needed"
+       description: "All verification findings addressed, ready to wrap up"
+     - label: "Re-verify needed"
        description: "I want to revisit some findings before completing"
-     - label: "Add more review scope"
-       description: "Launch additional review agents or expand scope"
+     - label: "Add more verification scope"
+       description: "Launch additional verification agents or expand scope"
    ```
 
-   If user selects "Re-review needed" → return to step 6 (auto-fix).
-   If user selects "Add more review scope" → return to step 3 (launch agents).
+   If user selects "Re-verify needed" → return to step 6 (auto-fix).
+   If user selects "Add more verification scope" → return to step 3 (launch agents).
 
 ---
 
@@ -634,11 +634,11 @@ Apply MINIMAL fix to make the test pass:
 
 **BLOCKING CHECKPOINT** — Before Phase 5 can begin:
 
-- [ ] TodoWrite "Verification Review" item MUST be marked "completed"
-- [ ] At least one review agent MUST have been launched
-- [ ] User acknowledged review results via AskUserQuestion (step 8)
+- [ ] TodoWrite "Quality Verification" item MUST be marked "completed"
+- [ ] At least one verification agent MUST have been launched
+- [ ] User acknowledged verification results via AskUserQuestion (step 8)
 
-If Verification Review not completed → **STOP**. Return to Phase 4.
+If Quality Verification not completed → **STOP**. Return to Phase 4.
 
 ---
 
@@ -671,7 +671,7 @@ If Verification Review not completed → **STOP**. Return to Phase 4.
 - [ ] Regression test passes
 - [ ] Related tests pass
 - [ ] Affected tests pass
-- [ ] Review findings addressed
+- [ ] Verification findings addressed
 
 ### Notes
 [Any follow-up items, related issues to watch, or technical debt flagged]
@@ -724,14 +724,14 @@ GREEN: Apply minimal fix (NOW edit production files, surgical, no scope creep)
 VERIFY: Run affected tests, check for regressions
 ```
 
-### Review Agents (Phase 4) - Semantic Selection
+### Verification Agents (Phase 4) - Semantic Selection
 
 **AGENT NAMESPACE LOCKOUT:**
 - ✅ CORRECT: `subagent_type="rptc:code-review-agent"`
 - ❌ WRONG: `subagent_type="feature-dev:code-reviewer"` — different plugin, not RPTC
 - ❌ WRONG: `subagent_type="code-review:code-review"` — different plugin, not RPTC
 
-**Selection based on `review-agent-mode` in project CLAUDE.md:**
+**Selection based on `verification-agent-mode` in project CLAUDE.md:**
 - `all`: Launch all 3 agents
 - `automatic`: Select based on file types/keywords (default if no CLAUDE.md)
 - `minimal`: code-review always launches; others when strongly indicated
@@ -768,7 +768,7 @@ VERIFY: Run affected tests, check for regressions
 | **Phase 1** | Discover patterns | Reproduce failure |
 | **Phase 2** | Design (3 perspectives) | Diagnose (single analysis) |
 | **Phase 3** | Multi-step TDD | Regression test + minimal fix |
-| **Phase 4** | Quality review | Quality review + regression focus |
+| **Phase 4** | Quality verification | Quality verification + regression focus |
 | **Test Focus** | Define NEW behavior | Prevent RECURRENCE |
 | **Scope** | Can be large | Must be minimal |
 | **Plan Mode** | Always required | Optional for simple bugs |
@@ -783,5 +783,5 @@ VERIFY: Run affected tests, check for regressions
 - **Fix causes regressions**: Analyze what broke, adjust fix approach
 - **Fix attempt fails 3x**: Pause, present findings, ask user for guidance
 - **Larger refactoring needed**: Flag it, complete minimal fix, suggest follow-up task
-- **Phase 4 not executed**: INVALID STATE. Return to Phase 4 and execute it. Phase 5 cannot proceed without verification.
+- **Phase 4 not executed**: INVALID STATE. Return to Phase 4. Phase 5 cannot proceed without verification.
 

@@ -92,13 +92,14 @@ Before suggesting a feature:
 ```text
 rptc-workflow/
 ├── .claude-plugin/        # Plugin metadata
-├── commands/              # Slash command definitions (flat structure, 6 commands)
+├── commands/              # Slash command definitions (flat structure, 7 commands)
 │   ├── commit.md         # /rptc:commit
 │   ├── config.md         # /rptc:config
 │   ├── feat.md           # /rptc:feat (PRIMARY)
 │   ├── fix.md            # /rptc:fix
 │   ├── research.md       # /rptc:research
-│   └── sync-prod-to-tests.md  # /rptc:sync-prod-to-tests
+│   ├── sync-prod-to-tests.md  # /rptc:sync-prod-to-tests
+│   └── verify.md         # /rptc:verify
 ├── agents/                # Specialist agent definitions (8 agents)
 ├── sop/                   # Standard Operating Procedures (10 SOPs)
 ├── templates/             # Templates for artifacts
@@ -128,6 +129,7 @@ Before submitting a PR, test the following:
 - [ ] `/rptc:fix "test bug"` completes all 5 phases (Reproduction → RCA → Fix → Verification → Complete)
 - [ ] `/rptc:research "test topic"` performs discovery with exploration agents
 - [ ] `/rptc:commit` verifies and creates commits
+- [ ] `/rptc:verify` runs selected verification agents on demand
 - [ ] `/rptc:sync-prod-to-tests "src/"` analyzes and syncs tests
 
 **Workflow Verification:**
@@ -135,7 +137,7 @@ Before submitting a PR, test the following:
 - [ ] Phase 1 (Discovery) launches parallel exploration agents
 - [ ] Phase 2 (Architecture) presents 3 planning perspectives
 - [ ] Phase 3 (TDD) uses smart batching for implementation
-- [ ] Phase 4 (Quality Review) runs code-review, security, and docs agents in parallel (report-only)
+- [ ] Phase 4 (Quality Verification) runs code-review, security, and docs agents in parallel (report-only)
 - [ ] Plans are stored in Claude's native plan mode (`~/.claude/plans/`)
 
 ### Test on Multiple Platforms

@@ -561,7 +561,7 @@ VERIFY Phase:
 - Flags **unnecessary patterns** (factories with one variant)
 - References this guide's Section 5 in findings
 
-**Security Agent** (executes after efficiency review):
+**Security Agent** (executes after code review):
 - Checks for **security red flags** from Section 5
 - Validates **input validation** exists at boundaries
 - Verifies **parameterized queries** (no string concatenation)

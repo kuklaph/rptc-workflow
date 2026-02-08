@@ -20,8 +20,9 @@
 [test command]     # Run all tests
 
 # RPTC Workflow (v2.8.0+)
-/rptc:feat "feature description"     # Complete feature: Discovery → Plan → TDD → Review
+/rptc:feat "feature description"     # Complete feature: Discovery → Plan → TDD → Verification
 /rptc:research "topic"               # Standalone research (optional)
+/rptc:verify [path]                  # Run quality verification agents on demand
 /rptc:commit [pr]                    # Verify and ship (optional PR)
 /rptc:sync-prod-to-tests "[dir]"     # Sync tests to production code
 ```
@@ -35,7 +36,7 @@ The unified `/rptc:feat` command handles the complete workflow:
 **DISCOVERY** → Codebase exploration and pattern analysis
 **ARCHITECTURE** → User-selected planning approach (Minimal/Clean/Pragmatic)
 **TDD** → Test-driven implementation with smart batching
-**QUALITY REVIEW** → Parallel Code Review, Security, and Documentation agents
+**QUALITY VERIFICATION** → Parallel Code Review, Security, and Documentation agents
 **COMPLETE** → Summary and documentation
 
 ### Your Role as PM
@@ -51,7 +52,7 @@ The unified `/rptc:feat` command handles the complete workflow:
 - Codebase exploration and pattern discovery
 - Present 3 planning perspectives for your selection
 - Execute strict TDD cycles
-- Run parallel quality reviews
+- Run parallel quality verification
 - Summarize work completed
 
 ## The `/rptc:feat` Workflow
@@ -91,7 +92,7 @@ The unified `/rptc:feat` command handles the complete workflow:
 - Parallel execution of independent batches
 - ~40% token reduction vs. sequential execution
 
-### Phase 4: Quality Review
+### Phase 4: Quality Verification
 
 **Purpose**: Review changes and create fix list (report-only).
 
@@ -297,7 +298,7 @@ Any feature work?
      → Agent handles complexity automatically
      → You select planning approach
      → TDD implementation
-     → Quality review
+     → Quality verification
      → Ready for /rptc:commit
 
 Need standalone research first?
@@ -388,7 +389,7 @@ docs/research/
 [RED → GREEN → REFACTOR per step]
 [Progress shown via todos]
 
-# Phase 4: Quality Review
+# Phase 4: Quality Verification
 [Code Review and Security agents run in parallel]
 [You review findings, approve fixes]
 
@@ -403,4 +404,4 @@ docs/research/
 
 ---
 
-**Remember**: The unified `/rptc:feat` command puts YOU in control while handling the complexity of research, planning, TDD, and quality review.
+**Remember**: The unified `/rptc:feat` command puts YOU in control while handling the complexity of research, planning, TDD, and quality verification.

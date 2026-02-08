@@ -55,7 +55,7 @@ Phase 3: Implementation
     → Route A (non-code): Direct execution
     → Route B (code): TDD with smart batching
     ↓
-Phase 4: Quality Review (report-only, parallel agents)
+Phase 4: Quality Verification (report-only, parallel agents)
     ↓
 Phase 5: Complete (summary)
 ```
@@ -133,7 +133,7 @@ For documentation, config, and non-code changes:
 
 **Agents used:** `rptc:tdd-agent` (one per batch, code tasks only)
 
-### Phase 4: Quality Review
+### Phase 4: Quality Verification
 
 **Goal**: Review changes and create fix list for main context.
 
@@ -141,7 +141,7 @@ For documentation, config, and non-code changes:
 
 **What happens:**
 1. Collects all files modified during Implementation phase
-2. Launches ALL THREE review agents in parallel:
+2. Launches ALL THREE verification agents in parallel:
    - **Code Review Agent**: Complexity, KISS/YAGNI violations, dead code, readability
    - **Security Agent**: Input validation, auth checks, injection vulnerabilities, data exposure
    - **Documentation Agent**: README updates, API doc changes, inline comment accuracy
@@ -201,6 +201,21 @@ For documentation, config, and non-code changes:
 4. Creates commit
 5. Optional: Creates pull request (with `pr` argument)
 
+### `/rptc:verify [path]`
+
+**Purpose**: Run quality verification agents on demand.
+
+**When to use:**
+- After any code change, independent of `/rptc:feat` or `/rptc:fix`
+- To verify specific areas or the entire application
+- As a standalone quality check before shipping
+
+**How it works:**
+1. Determines scope (default: uncommitted changes via `git diff`)
+2. Asks which agents to run: Full (all 3), Code + Security, or Docs only
+3. Launches selected verification agents in parallel (report-only)
+4. Consolidates findings and applies fixes via TodoWrite
+
 ### `/rptc:config`
 
 **Purpose**: Configure RPTC in your project's CLAUDE.md.
@@ -212,9 +227,9 @@ For documentation, config, and non-code changes:
 
 **How it works:**
 1. Detects current RPTC configuration state in project CLAUDE.md
-2. Prompts for review mode preference (automatic/all/minimal)
+2. Prompts for verification mode preference (automatic/all/minimal)
 3. Inserts or updates RPTC configuration section at top of CLAUDE.md
-4. Preserves user customizations (review mode, project-specific notes)
+4. Preserves user customizations (verification mode, project-specific notes)
 5. Cleans up legacy/orphaned RPTC content if detected
 
 **Note:** `/rptc:feat` and `/rptc:fix` will suggest running `/rptc:config` if no RPTC configuration is found in your project.
@@ -272,11 +287,11 @@ RPTC maximizes efficiency through parallelization:
 - **Discovery**: 2-3 exploration agents run simultaneously
 - **Architecture**: 3 plan perspectives generated in parallel
 - **TDD**: Independent batches execute in parallel
-- **Quality Review**: Code Review and Security agents run together
+- **Quality Verification**: Code Review and Security agents run together
 
-### Report-Only Review System
+### Report-Only Verification System
 
-Quality review agents analyze code and report findings—they do NOT make changes.
+Quality verification agents analyze code and report findings—they do NOT make changes.
 
 | Confidence | Action |
 |------------|--------|
@@ -397,7 +412,7 @@ Main context receives findings via TodoWrite and handles all fixes with user app
 3. **Refactor with confidence** - Tests catch regressions
 4. **All tests must pass** - Never commit broken tests
 
-### Quality Review
+### Quality Verification
 
 - **Review high-confidence findings** (≥90%) - These are clear issues
 - **Consider medium-confidence findings** (80-89%) - Verify impact before fixing
@@ -421,7 +436,7 @@ Break the feature into smaller, manageable steps:
 2. Use `/rptc:sync-prod-to-tests` to analyze alignment
 3. Let Test Fixer agent repair mismatches
 
-### Q: Quality review found many issues?
+### Q: Quality verification found many issues?
 
 1. Focus on high-confidence findings (≥90) first
 2. Review medium-confidence findings (80-89) for context

@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 3.0.1
+**Version**: 3.1.0
 **Status**: Beta
 **License**: MIT
 
@@ -44,7 +44,7 @@ All phases unified in one command: `/rptc:feat`
 - **You are the PM**: Final decision authority
 - **Task-appropriate workflow**: TDD for code, direct execution for non-code tasks
 - **Ask permission, not forgiveness**: Explicit approvals required
-- **Quality gates matter**: Efficiency, Security & Documentation reviews
+- **Quality gates matter**: Code Review, Security & Documentation verification
 
 ---
 
@@ -54,7 +54,7 @@ All phases unified in one command: `/rptc:feat`
 
 | Command | Purpose | When to Use |
 |---------|---------|-------------|
-| `/rptc:feat "description"` | **Complete feature development**: Discovery → Architecture → Implementation → Quality Review | New features, enhancements, refactoring |
+| `/rptc:feat "description"` | **Complete feature development**: Discovery → Architecture → Implementation → Quality Verification | New features, enhancements, refactoring |
 | `/rptc:fix "bug description"` | **Systematic bug fixing**: Reproduction → Root Cause → Fix → Verify | Bug triaging and fixing |
 
 ### Supporting Commands
@@ -64,6 +64,7 @@ All phases unified in one command: `/rptc:feat`
 | `/rptc:config` | Configure RPTC in project CLAUDE.md | First-time setup, after plugin updates, sync settings |
 | `/rptc:research "topic"` | Standalone research and discovery | Exploring unfamiliar topics separately |
 | `/rptc:commit [pr]` | Verify and ship | After completing implementation |
+| `/rptc:verify [path]` | Run quality verification agents on demand | After any code change, independent verification |
 | `/rptc:sync-prod-to-tests "[dir]"` | Sync tests to production code with auto-fix | Test maintenance |
 
 ---
@@ -103,7 +104,7 @@ All phases unified in one command: `/rptc:feat`
 - Strict RED → GREEN → REFACTOR cycle per step
 - ~40% token reduction vs. individual step execution
 
-### Phase 4: Quality Review
+### Phase 4: Quality Verification
 
 **Goal**: Review changes and create fix list for main context.
 
@@ -132,7 +133,7 @@ All phases unified in one command: `/rptc:feat`
 ```bash
 # One command does everything
 /rptc:feat "add user profile avatar upload"
-# → Discovery → Architecture → TDD Implementation → Quality Review → Complete
+# → Discovery → Architecture → TDD Implementation → Quality Verification → Complete
 
 # Then ship
 /rptc:commit pr
@@ -201,21 +202,21 @@ When you approve delegation, specialized AI agents provide expert analysis:
 ### Code Review Agent
 
 **Purpose**: Review code for simplicity issues (KISS/YAGNI)
-**When**: Quality Review phase (Phase 4, parallel with Security and Docs)
+**When**: Quality Verification phase (Phase 4, parallel with Security and Docs)
 **Provides**: Findings for dead code, complexity, readability improvements
 **Architecture**: Report-only with confidence scoring
 
 ### Security Agent
 
 **Purpose**: Identify vulnerabilities and security issues
-**When**: Quality Review phase (Phase 4, parallel with Code Review and Docs)
+**When**: Quality Verification phase (Phase 4, parallel with Code Review and Docs)
 **Provides**: OWASP audit findings, input validation issues, auth/authz concerns
 **Architecture**: Report-only with confidence scoring
 
 ### Documentation Agent
 
 **Purpose**: Review documentation impact of changes
-**When**: Quality Review phase (Phase 4, parallel with Code Review and Security)
+**When**: Quality Verification phase (Phase 4, parallel with Code Review and Security)
 **Provides**: Findings for README updates, API doc changes, inline comment accuracy
 **Architecture**: Report-only with confidence scoring
 
@@ -303,6 +304,7 @@ rptc-workflow/
 │   ├── fix.md                   # /rptc:fix
 │   ├── research.md              # /rptc:research
 │   ├── config.md                # /rptc:config (sync config with version)
+│   ├── verify.md                # /rptc:verify (standalone verification)
 │   └── sync-prod-to-tests.md    # /rptc:sync-prod-to-tests
 ├── agents/                      # 8 specialist agents
 │   ├── research-agent.md

@@ -51,7 +51,7 @@ Configure and maintain RPTC workflow settings in your project's CLAUDE.md.
    - `## RPTC` or `### RPTC` headers without markers nearby
    - `/rptc:feat` or `/rptc:fix` command references outside marked section
    - `rptc:research-agent` or `rptc:tdd-agent` mentions outside marked section
-   - `review-agent-mode:` outside marked section
+   - `verification-agent-mode:` outside marked section
    - Duplicate `<!-- RPTC-START` markers (multiple sections)
 
    If legacy content detected, set `legacy_cleanup_needed = true`.
@@ -66,18 +66,18 @@ Configure and maintain RPTC workflow settings in your project's CLAUDE.md.
 
 **Actions**:
 
-1. **Ask user for review mode preference** using AskUserQuestion:
+1. **Ask user for verification mode preference** using AskUserQuestion:
 
    ```
-   Question: "Which review mode would you like for Phase 4 quality reviews?"
-   Header: "Review Mode"
+   Question: "Which verification mode would you like for Phase 4 quality verification?"
+   Header: "Verification Mode"
    Options:
    - label: "Automatic (Recommended)"
-     description: "Smart selection based on file types and change patterns. Launches relevant reviewers only."
+     description: "Smart selection based on file types and change patterns. Launches relevant agents only."
    - label: "All"
-     description: "Always launch all 3 review agents (code-review, security, docs) regardless of changes."
+     description: "Always launch all 3 verification agents (code-review, security, docs) regardless of changes."
    - label: "Minimal"
-     description: "Only launch reviewers when strongly indicated (>50 lines changed or security keywords)."
+     description: "Only launch agents when strongly indicated (>50 lines changed or security keywords)."
    ```
 
 2. **Map selection to config value**:
@@ -89,7 +89,7 @@ Configure and maintain RPTC workflow settings in your project's CLAUDE.md.
 
 ## Phase 3: Generate Configuration
 
-**Goal**: Build the RPTC configuration block with user's selected review mode.
+**Goal**: Build the RPTC configuration block with user's selected verification mode.
 
 **Configuration Template**:
 
@@ -103,10 +103,11 @@ Configure and maintain RPTC workflow settings in your project's CLAUDE.md.
 
 | Command | Purpose |
 |---------|---------|
-| `/rptc:feat "description"` | Full workflow: Research → Plan → TDD → Review |
+| `/rptc:feat "description"` | Full workflow: Research → Plan → TDD → Verify |
 | `/rptc:fix "bug description"` | Bug fixing: Reproduce → Root Cause → Fix → Verify |
 | `/rptc:research "topic"` | Standalone research and exploration |
 | `/rptc:commit [pr]` | Verify quality gates and ship (add `pr` for pull request) |
+| `/rptc:verify [path]` | Run quality verification agents on demand |
 | `/rptc:sync-prod-to-tests "dir"` | Sync tests to match production code |
 | `/rptc:config` | Initialize or update this configuration |
 
@@ -117,7 +118,7 @@ Configure and maintain RPTC workflow settings in your project's CLAUDE.md.
         ├─► Phase 1: Discovery (parallel research agents)
         ├─► Phase 2: Architecture (3 perspectives, user chooses)
         ├─► Phase 3: Implementation (TDD with smart batching)
-        ├─► Phase 4: Quality Review (parallel review agents)
+        ├─► Phase 4: Quality Verification (parallel verification agents)
         └─► Phase 5: Complete → /rptc:commit
 
 ### Tool Prioritization
@@ -132,14 +133,14 @@ Configure and maintain RPTC workflow settings in your project's CLAUDE.md.
 - Use for ALL non-trivial tasks: analysis, planning, debugging, multi-step work
 - Skip only for: single-line fixes, typo corrections, trivial changes
 
-### Review Configuration
+### Verification Configuration
 
-review-agent-mode: {REVIEW_MODE}
+verification-agent-mode: {VERIFICATION_MODE}
 
 <!--
-Review mode options:
+Verification mode options:
 - automatic: Smart selection based on file types and change patterns
-- all: Always launch all 3 review agents (code-review, security, docs)
+- all: Always launch all 3 verification agents (code-review, security, docs)
 - minimal: Only launch when strongly indicated (>50 lines or keywords)
 -->
 
@@ -152,7 +153,7 @@ Review mode options:
 
 **Replace placeholders:**
 - `{VERSION}` → actual version from plugin.json
-- `{REVIEW_MODE}` → user's selection from Phase 2 (or preserved value for updates)
+- `{VERIFICATION_MODE}` → user's selection from Phase 2 (or preserved value for updates)
 
 ---
 
@@ -180,7 +181,7 @@ Review mode options:
    Created CLAUDE.md with RPTC v{VERSION} configuration at top.
 
    You can customize:
-   - review-agent-mode (automatic/all/minimal)
+   - verification-agent-mode (automatic/all/minimal)
    - Project-specific notes section within RPTC block
    - Add project instructions below the RPTC section
    ```
@@ -214,8 +215,8 @@ Review mode options:
    - End marker: `<!-- RPTC-END -->`
    - Replace everything between (inclusive) with new configuration
 
-2. **Preserve review-agent-mode** if user has customized it:
-   - Before replacing, extract current `review-agent-mode:` value
+2. **Preserve verification-agent-mode** if user has customized it:
+   - Before replacing, extract current `verification-agent-mode:` value
    - After generating new block, restore the user's setting
 
 3. **Preserve project-specific notes**:
@@ -239,7 +240,7 @@ Review mode options:
    RPTC v{VERSION} configuration is already up to date.
 
    Current settings:
-   - review-agent-mode: {current_mode}
+   - verification-agent-mode: {current_mode}
    ```
 
 ### Case E: Legacy/orphaned RPTC content detected
@@ -252,7 +253,7 @@ Review mode options:
 
    - Line 45: "## RPTC Workflow" (unmarked header)
    - Line 78-82: Command reference table (duplicate)
-   - Line 120: "review-agent-mode: all" (orphaned setting)
+   - Line 120: "verification-agent-mode: all" (orphaned setting)
    ```
 
 2. **Ask user for cleanup preference** using AskUserQuestion:
@@ -300,7 +301,7 @@ Review mode options:
    - [ ] RPTC version marker present
    - [ ] Quick reference table present
    - [ ] Tool prioritization section present
-   - [ ] Review configuration present
+   - [ ] Verification configuration present
 
 3. **Report status**:
 
@@ -312,11 +313,11 @@ Review mode options:
 **Status**: ✓ Configured
 
 ### Configuration
-- Review Mode: {review_agent_mode}
+- Verification Mode: {verification_agent_mode}
 - CLAUDE.md Location: ./CLAUDE.md
 
 ### Next Steps
-1. Customize `review-agent-mode` if needed (automatic/all/minimal)
+1. Customize `verification-agent-mode` if needed (automatic/all/minimal)
 2. Add project-specific notes to the configuration section
 3. Start developing with `/rptc:feat "your feature"`
 ```
@@ -351,7 +352,7 @@ Creating CLAUDE.md with RPTC v2.25.6 configuration...
 ✓ Created ./CLAUDE.md
 
 Configuration:
-- review-agent-mode: automatic (default)
+- verification-agent-mode: automatic (default)
 
 Next steps:
 1. Review and customize the configuration
@@ -368,14 +369,14 @@ Found CLAUDE.md with RPTC v2.24.0 configuration.
 Current RPTC version: v2.25.6
 
 Updating configuration...
-- Preserved review-agent-mode: all
+- Preserved verification-agent-mode: all
 - Preserved project-specific notes
 
 ✓ Updated RPTC configuration to v2.25.6
 
 Key changes in this update:
 - Added Tier 4 nits to code review
-- Mandatory Phase 4 quality review gate
+- Mandatory Phase 4 quality verification gate
 ```
 
 ### Already current
@@ -387,14 +388,14 @@ Claude: Checking RPTC configuration...
 ✓ RPTC v2.25.6 configuration is already up to date.
 
 Current settings:
-- review-agent-mode: automatic
+- verification-agent-mode: automatic
 ```
 
 ---
 
 ## Key Principles
 
-1. **Preserve user customizations**: Never overwrite `review-agent-mode` or project-specific notes
+1. **Preserve user customizations**: Never overwrite `verification-agent-mode` or project-specific notes
 2. **Non-destructive updates**: Only modify the RPTC section, leave rest of CLAUDE.md untouched
 3. **Graceful degradation**: If plugin.json unreadable, use "unknown" version and warn user
 4. **Always report status**: Show current configuration after every run

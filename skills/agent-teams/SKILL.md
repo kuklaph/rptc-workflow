@@ -115,7 +115,7 @@ independently. This depends on how independent the tasks are.
 no shared dependencies.
 
 Each teammate runs the complete flow: Discovery → Architecture → Implementation
-→ Quality Review → Complete. The Team Lead only coordinates task assignment,
+→ Quality Verification → Complete. The Team Lead only coordinates task assignment,
 collects results, and runs final integration verification.
 
 **Approval handling**: Pre-authorize plan selection (Pragmatic default) and
@@ -131,10 +131,10 @@ of independent plan steps.
 
 Team Lead runs: Phase 1 (Discovery) + Phase 2 (Architecture) → user approves plan
 Teammates run: Phase 3 (Implementation) + report findings
-Team Lead runs: Phase 4 (Quality Review) + Phase 5 (Complete)
+Team Lead runs: Phase 4 (Quality Verification) + Phase 5 (Complete)
 
 **Approval handling**: User approved the plan already. Teammates execute assigned
-steps and report back. Team Lead consolidates and runs quality review.
+steps and report back. Team Lead consolidates and runs quality verification.
 
 ### Level C: Debate / Review Only
 

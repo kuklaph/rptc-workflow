@@ -680,7 +680,7 @@ const mockUserService = {
    - Include tests that import or reference changed modules
    - All affected tests must pass
    - If any existing tests fail, fix before proceeding
-   - If project is small (<50 test files) or change touches shared utilities (e.g. base classes, config), run the full suite instead
+   - Run ONLY affected tests — do NOT run the full test suite (full suite runs are reserved for `/rptc:commit`)
 
 2. **Check test coverage**:
 

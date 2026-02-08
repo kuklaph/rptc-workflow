@@ -39,7 +39,7 @@ Run `/rptc:feat "[feature description]"` to execute the full workflow:
 - Phase 1: Discovery (explore codebase for relevant patterns)
 - Phase 2: Architecture (design implementation approach)
 - Phase 3: Implementation (TDD with smart batching)
-- Phase 4: Quality Review (parallel review agents)
+- Phase 4: Quality Verification (parallel verification agents)
 - Phase 5: Complete (summary)
 
 [RPTC DIRECTIVES BLOCK — paste from § 4 below]
@@ -98,7 +98,7 @@ Run `/rptc:fix "[bug description]"` to execute the systematic fix flow:
 - Phase 1: Reproduction & Triage (parallel research agents)
 - Phase 2: Root Cause Analysis (5 Whys methodology)
 - Phase 3: Fix Application (regression test first, then fix)
-- Phase 4: Verification (review agents with regression focus)
+- Phase 4: Verification (verification agents with regression focus)
 - Phase 5: Complete (summary with root cause documentation)
 
 [RPTC DIRECTIVES BLOCK — paste from § 4 below]

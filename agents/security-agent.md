@@ -16,7 +16,7 @@ Security review. **REPORT ONLY** - does not make changes. Main context handles a
 
 **You are operating within the RPTC (Research → Plan → TDD → Commit) workflow.**
 
-You are invoked during **Phase 4: Quality Review** to verify security.
+You are invoked during **Phase 4: Quality Verification** to verify security.
 
 ### RPTC Directives (MUST FOLLOW)
 

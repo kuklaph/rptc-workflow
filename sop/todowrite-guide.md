@@ -184,7 +184,7 @@
 }
 ```
 
-**TDD Phase** (smart batching with parallel quality review, example for 3-step plan):
+**TDD Phase** (smart batching with parallel quality verification, example for 3-step plan):
 
 ```json
 {
@@ -192,7 +192,7 @@
   "todos": [
     {"content": "Batch 1: Steps 1-2 TDD cycle", "status": "pending", "activeForm": "Executing Batch 1 TDD"},
     {"content": "Batch 2: Step 3 TDD cycle", "status": "pending", "activeForm": "Executing Batch 2 TDD"},
-    {"content": "Quality Review", "status": "pending", "activeForm": "Running quality review agents"},
+    {"content": "Quality Verification", "status": "pending", "activeForm": "Running quality verification agents"},
     {"content": "Complete implementation", "status": "pending", "activeForm": "Completing implementation"}
   ]
 }
@@ -200,9 +200,9 @@
 
 **Notes**:
 - Smart batching groups related steps for ~40% token reduction
-- **Quality Review is MANDATORY** - must be marked in_progress when Phase 4 starts, completed when Phase 4 ends
-- Quality review runs agents in parallel (code-review, security, docs) - report-only mode
-- Phase 5 CANNOT begin until Quality Review is marked completed
+- **Quality Verification is MANDATORY** - must be marked in_progress when Phase 4 starts, completed when Phase 4 ends
+- Quality verification runs agents in parallel (code-review, security, docs) - report-only mode
+- Phase 5 CANNOT begin until Quality Verification is marked completed
 - Main context handles fixes from review findings via additional TODOs if needed
 
 **Commit Command** (7 phases):
@@ -350,7 +350,7 @@ Repeat for all 6 phases sequentially.
 **Initialize** based on plan steps:
 1. Group related steps into batches for efficiency
 2. Create batch-level TODOs (not per-step)
-3. Quality review TODO (runs 3 agents in parallel)
+3. Quality verification TODO (runs 3 agents in parallel)
 4. Findings processing TODO
 
 **Update pattern**:
@@ -362,7 +362,7 @@ Repeat for all 6 phases sequentially.
 
 **Smart batching**: Groups related steps for ~40% token reduction vs sequential execution.
 
-**Quality review**: Runs code-review, security, and docs agents in parallel (report-only mode).
+**Quality verification**: Runs code-review, security, and docs agents in parallel (report-only mode).
 
 ### Commit Command Pattern
 
@@ -415,12 +415,12 @@ Before [NEXT PHASE]:
 1. **Research** (commands/research.md): Block save without PM approval
 2. **Plan** (Phase 2): Block plan save without PM approval
 3. **TDD** (Phase 3): Block implementation until plan approved
-4. **Quality Review** (Phase 4): **MANDATORY gate** - TodoWrite "Quality Review" must be marked completed before Phase 5
-5. **Phase 5 Entry**: Block Phase 5 until Quality Review TodoWrite item is completed
+4. **Quality Verification** (Phase 4): **MANDATORY gate** - TodoWrite "Quality Verification" must be marked completed before Phase 5
+5. **Phase 5 Entry**: Block Phase 5 until Quality Verification TodoWrite item is completed
 6. **Commit** (commands/commit.md): Block commit if tests failing
 7. **Commit** (commands/commit.md): Block commit if code quality issues
 
-**Note**: Quality review is enforced via TodoWrite tracking. The "Quality Review" item MUST be marked in_progress when Phase 4 starts and completed when Phase 4 ends. Phase 5 has a blocking checkpoint that verifies this.
+**Note**: Quality verification is enforced via TodoWrite tracking. The "Quality Verification" item MUST be marked in_progress when Phase 4 starts and completed when Phase 4 ends. Phase 5 has a blocking checkpoint that verifies this.
 
 ### Imperative Language Keywords
 
@@ -454,13 +454,13 @@ Before [NEXT PHASE]:
 |---------|-------|-------------------|
 | Research | Save document | YES |
 | /rptc:feat | Plan approval (Phase 2) | YES |
-| /rptc:feat | Quality review findings (Phase 4) | PM decides which fixes to apply |
+| /rptc:feat | Quality verification findings (Phase 4) | PM decides which fixes to apply |
 | /rptc:feat | Mark complete | YES |
 | Commit | Final commit | YES |
 
 ### Automatic Phases (No Approval)
 
-**Quality Review Agents** (Phase 4):
+**Quality Verification Agents** (Phase 4):
 - All 3 agents (code-review, security, docs) run automatically in parallel
 - Agents operate in **report-only mode** - they don't make changes
 - PM reviews findings and decides which to address
@@ -606,7 +606,7 @@ Original: "Write tests for Step 1"
    - Verify 5-phase workflow (Discovery → Architecture → Implementation → Quality → Complete)
    - Test PM approval at plan phase
    - Verify smart batching during TDD phase
-   - Verify quality review (code-review, security, docs) run in parallel
+   - Verify quality verification (code-review, security, docs) run in parallel
    - Confirm agents are report-only (no auto-fixes)
 
 4. Run `/rptc:commit pr`

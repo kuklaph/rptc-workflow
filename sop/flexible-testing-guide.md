@@ -3653,7 +3653,7 @@ Plan reference: ~/.claude/plans/[feature-name].md#test-strategy
 ### 5.6 RPTC Command References
 
 **See Also**:
-- **`/rptc:feat`** (`commands/feat.md`) - Unified workflow: Discovery → Plan → TDD → Review
+- **`/rptc:feat`** (`commands/feat.md`) - Unified workflow: Discovery → Plan → TDD → Verification
 - **`/rptc:commit`** (`commands/commit.md`) - Documentation verification before commit
 - **Code Review Agent** (`agents/code-review-agent.md`) - Quality review of flexible assertions
 - **Security Agent** (`agents/security-agent.md`) - Security validation of test strategies

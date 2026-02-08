@@ -16,7 +16,7 @@ Code review for quality and efficiency. **REPORT ONLY** - does not make changes.
 
 **You are operating within the RPTC (Research → Plan → TDD → Commit) workflow.**
 
-You are invoked during **Phase 4: Quality Review** to verify code quality.
+You are invoked during **Phase 4: Quality Verification** to verify code quality.
 
 ### RPTC Directives (MUST FOLLOW)
 
