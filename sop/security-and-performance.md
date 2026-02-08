@@ -1320,7 +1320,7 @@ def test_security_breach_response():
 
 **Cross-SOP Integration:**
 
-- **Security Testing Methodology**: See `testing-guide.md` for TDD workflow, coverage requirements, test-driven generation patterns applied to security features
+- **Security Testing Methodology**: See `testing-guide.md` for TDD workflow, coverage requirements, test allocation patterns applied to security features
 - **Secure Architecture Patterns**: See `architecture-patterns.md` for error handling security, fail-secure patterns, exception hierarchies
 - **Security in Git Workflow**: See `git-and-deployment.md` for pre-commit security gates, secret scanning, dependency audit automation, CI/CD security integration
 - **Simplicity in Security**: Apply KISS/YAGNI/DRY principles from Core Principles (prefer vetted libraries vs custom crypto, simple proven patterns vs complex designs)

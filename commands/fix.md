@@ -328,11 +328,14 @@ Constraints:
 Skill(skill: "rptc:tdd-methodology")
 ```
 
-Follow the skill's full cycle for the fix:
+**Test-First Gate (Direct Execution)**: Execute in strict order. Do NOT edit production files until step 3 is verified.
+
 1. **Surgical Coding**: Search 3 similar patterns first
 2. **Context Discovery**: Check existing tests, framework, naming conventions
-3. **RED**: Write a test that reproduces the exact bug (must fail with same symptom)
-4. **GREEN**: Apply minimal fix to make the test pass
+3. **RED**: Write regression test reproducing the bug. Run it. Confirm it fails with same symptom.
+   **CHECKPOINT**: Regression test written and failing with correct symptom? Only test files touched?
+   → If NO: fix before continuing. Do NOT proceed to GREEN.
+4. **GREEN**: Apply minimal fix (NOW you may edit production files)
 5. **REFACTOR**: Clean up only if needed (keep fix surgical)
 6. **VERIFY**: Run affected tests, confirm regression test passes
 
@@ -389,6 +392,10 @@ Apply MINIMAL fix to make the test pass:
 - Keep fix surgical and minimal
 - Flag if fix suggests larger refactoring need (don't do it, just flag)
 ```
+
+1b. **Verify fix compliance**: After tdd-agent returns, check the exit verification block:
+    - `Test-First Followed: YES` → continue
+    - `Test-First Followed: NO` → flag as TDD violation, ask user whether to re-run or accept
 
 2. **Update TodoWrite** as fix progresses
 

@@ -400,10 +400,16 @@ When determining how many tests to write:
 
 ---
 
-## Quality Checklist (Before Completing)
+## Quality Gate (HALT if any fails)
+
+### Test-First Compliance (Blocking — stop if any fails)
+- [ ] Tests written BEFORE implementation (RED complete before GREEN)
+- [ ] Only test files modified during RED phase
+- [ ] All tests failed for expected reasons before implementation began
+
+→ If ANY fails: STOP. Return to RED phase. Do not continue to GREEN.
 
 ### Test Quality
-- [ ] Tests written BEFORE implementation (RED phase complete before GREEN)
 - [ ] Comprehensive coverage: happy path, edge cases, error conditions
 - [ ] Descriptive test names explaining what's tested
 - [ ] Independent tests (can run in any order)

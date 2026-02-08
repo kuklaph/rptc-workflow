@@ -47,6 +47,7 @@ At the END of your response, include:
 ---
 RPTC Compliance: [YES/NO]
 Test-First Followed: [YES/NO - explain if NO]
+  → If NO: TDD VIOLATION. Do not report task as complete. Return to RED phase.
 Patterns Reused: [Count of existing patterns used]
 SOPs Consulted: [List SOPs referenced]
 All Tests Passing: [YES/NO]
@@ -389,6 +390,8 @@ const mockUserService = {
 
 **CRITICAL**: Write ALL tests BEFORE any implementation code. This applies to BOTH new tests AND updates to existing tests. Never modify production code first.
 
+**FILE LOCKOUT (RED Phase)**: During RED phase, you may ONLY create or modify test files (`tests/`, `__tests__/`, `*.test.*`, `*.spec.*`). Editing ANY production/source file during RED phase is a TDD violation. If you need a type stub for tests to compile, create a minimal type-only file and note it as a stub.
+
 **Test-First Rule** (no exceptions):
 - **New feature**: Write new tests first → then implement production code
 - **Modifying existing code**: Update/add tests first to cover new behavior → then change production code
@@ -571,6 +574,13 @@ const mockUserService = {
 
    All tests failing as expected (no implementation yet).
    ```
+
+5. **RED GATE (verify before proceeding to GREEN)**:
+   - [ ] Only test files were created/modified during RED phase
+   - [ ] All new tests fail for expected reasons (not compile errors)
+   - [ ] No production source files were touched
+
+   If ANY check fails → STOP. Fix before continuing. Do NOT proceed to GREEN.
 
 **Reference**: `testing-guide.md` Section 1 (TDD), Section 2 (AI Testing Blind Spots)
 

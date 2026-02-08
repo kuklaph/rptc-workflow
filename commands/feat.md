@@ -371,11 +371,14 @@ options:
 Skill(skill: "rptc:tdd-methodology")
 ```
 
-Follow the skill's full cycle for each plan step:
+**Test-First Gate (Direct Execution)**: Execute in strict order. Do NOT edit production files until step 3 is verified.
+
 1. **Surgical Coding**: Search 3 similar patterns first
 2. **Context Discovery**: Check existing tests, framework, naming conventions
-3. **RED**: Write failing tests first
-4. **GREEN**: Minimal code to pass
+3. **RED**: Write failing tests. Run them. Confirm they fail.
+   **CHECKPOINT**: All tests written and failing? Only test files touched so far?
+   → If NO: fix before continuing. Do NOT proceed to GREEN.
+4. **GREEN**: Minimal code to pass (NOW you may edit production files)
 5. **REFACTOR**: Improve while green
 6. **VERIFY**: Run affected tests, check coverage
 
@@ -446,7 +449,7 @@ Use Task tool with subagent_type="rptc:tdd-agent":
 - Tests to generate: [calculated count]
 - Complexity: [simple|medium|complex]
 
-## Test-Driven Generation
+## Test Allocation
 Generate tests for ALL steps in batch (~[total] tests):
 - Allocate per step based on complexity scores above
 - Cover: happy paths, edge cases, errors, integration
@@ -464,6 +467,10 @@ Then move to next step in batch.
    - Invoke ALL independent Task tools in the same message (parallel execution)
    - Wait for all to complete before processing dependent batches
    - Example: Batch A and B independent → invoke both `Task(rptc:tdd-agent)` calls together
+
+7b. **Verify batch compliance**: After each tdd-agent batch returns, check the exit verification block:
+    - `Test-First Followed: YES` → mark batch complete
+    - `Test-First Followed: NO` → flag as TDD violation, ask user whether to re-run or accept
 
 8. **Update TodoWrite** as each batch completes
 9. **Handle failures**: If batch fails after 3 attempts, ask user for guidance

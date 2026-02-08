@@ -324,16 +324,16 @@ your-project/
 
 ## Advanced Features
 
-### Test-Driven Generation (TDG) Mode
+### Test Allocation
 
 **Purpose**: AI-accelerated comprehensive test generation from plan specifications.
 
-**Benefits**:
-- Reduces TDD overhead by ~80%
-- Augments manually-planned scenarios
-- Diverse coverage: happy paths, edge cases, error conditions
+**How it works**: During `/rptc:feat` Phase 3, the tdd-agent automatically generates tests based on step complexity:
+- Simple steps (~15 tests): 1 file, <30 lines
+- Medium steps (~30 tests): 1-2 files, 30-80 lines
+- Complex steps (~50 tests): 3+ files, >80 lines
 
-**Usage** (within /rptc:feat TDD phase): Agents automatically generate comprehensive tests based on step complexity.
+Coverage targets: happy paths, edge cases, error conditions, integration.
 
 ### Smart Batching
 
