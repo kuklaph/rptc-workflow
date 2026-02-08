@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 2.33.2
+**Version**: 2.34.0
 **Status**: Beta
 **License**: MIT
 
@@ -161,6 +161,16 @@ All phases unified in one command: `/rptc:feat`
 /rptc:commit
 ```
 
+### Pattern 4: Parallel Features (Agent Teams)
+
+```bash
+# Multiple independent features in parallel
+/rptc:feat "add user auth, build notification system, create admin dashboard"
+# → Teams analysis detects 3 independent streams → parallel teammates
+
+/rptc:commit pr
+```
+
 ---
 
 ## Specialist Agents
@@ -269,6 +279,13 @@ Standard Operating Procedures provide guidance for agents:
 **When**: Planning phases when requirements need clarification
 **Method**: One question at a time via AskUserQuestion, explore 2-3 approaches, YAGNI ruthlessly
 
+### Agent Teams
+
+**Purpose**: Parallel execution via Claude Code Agent Teams
+**When**: Multiple independent features/fixes, batch work, or user requests teams
+**Provides**: RPTC-compliant team creation, spawn prompts, file ownership, approval coordination
+**Architecture**: Flexible autonomy levels (full RPTC per teammate, shared planning, or debate mode)
+
 ---
 
 ## Directory Structure
@@ -298,7 +315,8 @@ rptc-workflow/
 │   └── test-fixer-agent.md
 ├── sop/                         # 10 SOPs
 ├── templates/                   # Templates for artifacts
-├── skills/                      # 5 skills
+├── skills/                      # 6 skills
+│   ├── agent-teams/
 │   ├── brainstorming/
 │   ├── discord-notify/
 │   ├── html-report-generator/

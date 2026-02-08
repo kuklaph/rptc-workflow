@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.34.0] - 2026-02-07
+
+### Added
+
+- **Agent Teams skill** (`skills/agent-teams/`): Adds Claude Code Agent Teams as a first-class RPTC execution path for parallel work
+  - Three autonomy levels: Full (A), Shared Planning (B), Debate/Review (C)
+  - RPTC-compliant spawn prompts with FILE LOCKOUT, RED GATE, and exit verification
+  - File ownership strategies (directory-based, feature-based, layer-based)
+  - Hook-based quality gates (TaskCompleted with test, coverage, debug code checks)
+  - Approval pre-authorization (Pragmatic default, auto-fix ≥90%, batch 80-89% to PM)
+  - Cost-aware: recommends teams only when parallel benefit exceeds overhead
+  - Recursion guard: teammates cannot spawn sub-teams (SKILL.md gate + spawn prompt directives)
+- **feat.md**: Agent-teams skill added to required skills (Step 0.1), skills usage guide entry, teams analysis checkpoint after Phase 1 Discovery
+- **fix.md**: Same required skill loading and teams analysis integration
+- **Compatibility**: Requires RPTC v2.33.2+
+
+---
+
 ## [2.33.2] - 2026-02-07
 
 ### Fixed

@@ -47,6 +47,8 @@ The `/rptc:feat` command is RPTC's primary interface. It combines what used to b
     ↓
 Phase 1: Discovery (codebase exploration)
     ↓
+Teams Analysis (single task → Phase 2, multiple → Agent Teams)
+    ↓
 Phase 2: Architecture (you select approach)
     ↓
 Phase 3: Implementation
@@ -72,6 +74,8 @@ Phase 5: Complete (summary)
 4. Summarizes findings: patterns found, files to modify, dependencies
 
 **Agents used:** `rptc:research-agent` with code-explorer methodology
+
+**After Discovery:** The `agent-teams` skill runs Teams Analysis. If multiple independent work streams are detected (or the user requested teams), the skill takes over orchestration with parallel Agent Teams. Otherwise, the workflow continues to Phase 2.
 
 ### Phase 2: Architecture
 
@@ -472,6 +476,7 @@ You can ask for modifications:
 - `html-report-generator` - Convert research to HTML reports
 - `tdd-methodology` - TDD guidance in main context
 - `writing-clearly-and-concisely` - Apply Strunk's Elements of Style to prose
+- `agent-teams` - Parallel execution via Agent Teams for batch/multi-feature work
 
 ---
 

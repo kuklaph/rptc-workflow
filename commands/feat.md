@@ -17,6 +17,7 @@ Complete feature development: Discovery → Architecture → Implementation → 
 Skill(skill: "rptc:brainstorming")
 Skill(skill: "rptc:writing-clearly-and-concisely")
 Skill(skill: "rptc:tdd-methodology")
+Skill(skill: "rptc:agent-teams")
 ```
 
 **Wait for skills to load before proceeding.**
@@ -184,6 +185,15 @@ Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp_
 **Method**: Bold aesthetic direction, distinctive typography, cohesive color themes, purposeful motion/animation. Avoids generic AI aesthetics.
 **Timing**: Load in Step 0.1.1 only when the task involves frontend work. Additive creative layer on top of `frontend-guidelines.md` SOP (which always applies for engineering standards).
 
+**`rptc:agent-teams`** - Parallel execution via Agent Teams:
+
+| When | Apply To |
+|------|----------|
+| Phase 1 (after discovery) | Batch features, parallel fixes, user-requested teams |
+
+**Method**: Analyzes work for teams suitability, determines autonomy level (A/B/C), builds spawn prompts with RPTC enforcement.
+**Timing**: Always loaded. Self-detects at end of Phase 1 — routes to teams mode or continues standard RPTC.
+
 ---
 
 ## Phase 1: Discovery
@@ -227,6 +237,18 @@ Return: external dependencies, internal dependencies, API boundaries."
 5. **If hybrid research needed** (codebase + best practices), use `rptc:research-agent` with Mode C
 6. **If unclear about requirements**, ask user for clarification
 7. **Summarize findings**: Key patterns, files to modify, dependencies, gap analysis (if hybrid)
+
+### Teams Analysis
+
+Run the `agent-teams` skill's Teams Analysis. It evaluates three signals:
+1. Multiple independent work streams detected
+2. Cross-agent debate would improve outcomes
+3. User explicitly requested teams
+
+**If teams mode activates**: The skill takes over orchestration. Do NOT continue
+to Phase 2 — the skill handles the remaining workflow.
+
+**If teams mode does NOT activate**: Continue to Phase 2 as normal.
 
 ---
 

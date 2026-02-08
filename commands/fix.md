@@ -17,6 +17,7 @@ Systematic bug fixing: Reproduction → Root Cause Analysis → Fix → Verifica
 Skill(skill: "rptc:brainstorming")
 Skill(skill: "rptc:writing-clearly-and-concisely")
 Skill(skill: "rptc:tdd-methodology")
+Skill(skill: "rptc:agent-teams")
 ```
 
 **Wait for skills to load before proceeding.**
@@ -181,6 +182,15 @@ Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp_
 **Method**: Maintain design quality when fixing frontend bugs — preserve aesthetic intent, typography, color themes, and motion patterns.
 **Timing**: Load in Step 0.1.1 only when the bug involves frontend code. Additive creative layer on top of `frontend-guidelines.md` SOP (which always applies for engineering standards).
 
+**`rptc:agent-teams`** - Parallel execution via Agent Teams:
+
+| When | Apply To |
+|------|----------|
+| Phase 1 (after triage) | Batch bug fixes, parallel independent fixes, user-requested teams |
+
+**Method**: Analyzes work for teams suitability, determines autonomy level (A/B/C), builds spawn prompts with RPTC enforcement.
+**Timing**: Always loaded. Self-detects at end of Phase 1 — routes to teams mode or continues standard RPTC.
+
 ---
 
 ## Phase 1: Reproduction & Triage
@@ -238,6 +248,18 @@ Return: Affected files/functions, related code with same pattern, potential regr
    - Failure point: file:line
    - Affected code paths
    - Severity classification
+
+### Teams Analysis
+
+Run the `agent-teams` skill's Teams Analysis. It evaluates three signals:
+1. Multiple independent work streams detected
+2. Cross-agent debate would improve outcomes
+3. User explicitly requested teams
+
+**If teams mode activates**: The skill takes over orchestration. Do NOT continue
+to Phase 2 — the skill handles the remaining workflow.
+
+**If teams mode does NOT activate**: Continue to Phase 2 as normal.
 
 ---
 

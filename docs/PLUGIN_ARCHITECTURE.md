@@ -53,7 +53,8 @@ rptc-workflow/                      # ${CLAUDE_PLUGIN_ROOT}
 │   ├── testing-guide.md
 │   └── todowrite-guide.md
 │
-├── skills/                         # Skills (5 skills)
+├── skills/                         # Skills (6 skills)
+│   ├── agent-teams/
 │   ├── brainstorming/
 │   ├── discord-notify/
 │   ├── html-report-generator/
@@ -162,6 +163,10 @@ The primary command handles the complete workflow:
 Phase 1: Discovery
     → Launches 2-3 parallel exploration agents
     → Uses rptc:research-agent with code-explorer methodology
+    ↓
+Teams Analysis
+    → Single task: continue to Phase 2
+    → Multiple independent tasks: Agent Teams mode (skill orchestrates)
     ↓
 Phase 2: Architecture
     → Enters Claude's native plan mode
@@ -413,7 +418,7 @@ Pre-commit hook automatically blocks commits with version mismatch.
 - 6 commands (2 primary, 4 supporting)
 - 8 specialist agents
 - 10 SOPs
-- 5 skills
+- 6 skills
 
 **User provides:**
 
