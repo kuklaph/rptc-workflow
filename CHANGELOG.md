@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.33.2] - 2026-02-07
+
+### Fixed
+
+- **Test-first enforcement across all execution paths**: Text directives alone proved insufficient; added concrete checkpoints
+  - `tdd-agent.md`: FILE LOCKOUT restricts RED phase to test files only
+  - `tdd-agent.md`: RED GATE checklist blocks GREEN phase until tests verified failing
+  - `tdd-agent.md`: "Test-First Followed: NO" in exit block now blocks task completion
+  - `feat.md`/`fix.md`: CHECKPOINT in direct execution prevents production file edits before RED
+  - `feat.md`/`fix.md`: Post-delegation verification checks tdd-agent exit block for compliance
+  - `tdd-methodology` skill: Quality checklist upgraded to blocking gate with halt-on-failure
+- **Stale TDG terminology cleanup**: Renamed "Test-Driven Generation" to "Test Allocation" across README, feat.md delegation template, and security SOP cross-reference
+
+---
+
+
 ## [2.33.1] - 2026-02-07
 
 ### Fixed
