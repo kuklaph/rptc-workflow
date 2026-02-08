@@ -11,7 +11,9 @@ Systematic bug fixing: Reproduction → Root Cause Analysis → Fix → Verifica
 
 **Before ANY other action, establish RPTC workflow context.**
 
-### 0.1 Load Required Skills
+### 0.1 Load Required Skills (ALL FOUR MANDATORY)
+
+Load ALL four skills below. Each `Skill()` call is MANDATORY — do not skip any.
 
 ```
 Skill(skill: "rptc:brainstorming")
@@ -20,7 +22,19 @@ Skill(skill: "rptc:tdd-methodology")
 Skill(skill: "rptc:agent-teams")
 ```
 
-**Wait for skills to load before proceeding.**
+**BLOCKING GATE — Skill Loading Verification**:
+
+After loading, confirm ALL four skills loaded by listing them:
+
+```
+Skills loaded:
+1. rptc:brainstorming — ✅
+2. rptc:writing-clearly-and-concisely — ✅
+3. rptc:tdd-methodology — ✅
+4. rptc:agent-teams — ✅
+```
+
+If ANY skill fails to load, STOP and report the failure. Do NOT proceed to Phase 1 with missing skills. The `rptc:agent-teams` skill is infrastructure — it must load even when teams mode may not activate.
 
 ### 0.1.1 Conditional Skills (Load When Applicable)
 
@@ -63,6 +77,7 @@ You are executing the **RPTC (Research → Plan → TDD → Commit)** workflow f
 | Security | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/security-and-performance.md` |
 | Progress Tracking | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/todowrite-guide.md` |
 | Refactoring | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/post-tdd-refactoring.md` |
+| Frontend | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/frontend-guidelines.md` |
 
 **Precedence Rule**: If user specifies custom SOPs (in project CLAUDE.md, project `sop/` dir, or `~/.claude/global/`), use those for the matching topic. RPTC SOPs are the fallback default.
 
@@ -182,14 +197,15 @@ Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp_
 **Method**: Maintain design quality when fixing frontend bugs — preserve aesthetic intent, typography, color themes, and motion patterns.
 **Timing**: Load in Step 0.1.1 only when the bug involves frontend code. Additive creative layer on top of `frontend-guidelines.md` SOP (which always applies for engineering standards).
 
-**`rptc:agent-teams`** - Parallel execution via Agent Teams:
+**`rptc:agent-teams`** - Parallel execution via Agent Teams (MANDATORY LOAD):
 
 | When | Apply To |
 |------|----------|
+| Step 0 (always loaded) | Infrastructure — required for Teams Analysis after Phase 1 |
 | Phase 1 (after triage) | Batch bug fixes, parallel independent fixes, user-requested teams |
 
 **Method**: Analyzes work for teams suitability, determines autonomy level (A/B/C), builds spawn prompts with RPTC enforcement.
-**Timing**: Always loaded. Self-detects at end of Phase 1 — routes to teams mode or continues standard RPTC.
+**Timing**: ALWAYS loaded in Step 0. Runs Teams Analysis at end of Phase 1. Routes to teams mode or continues standard RPTC. Must be loaded even if teams mode does not activate — the analysis itself requires it.
 
 ---
 
@@ -333,7 +349,16 @@ Constraints:
 
 > 💡 **Tool Reminder**: Use Serena for precise code navigation when applying fixes.
 
-**CRITICAL - Test-First Ordering**: Whether delegating to tdd-agent OR executing in main context, ALWAYS write the regression test that reproduces the bug BEFORE modifying production code. Update any existing tests BEFORE changing production code. Never fix production code first.
+**CRITICAL - Test-First Ordering (NON-NEGOTIABLE)**:
+
+Whether delegating to tdd-agent OR executing in main context:
+
+1. Write the regression test that reproduces the bug BEFORE modifying ANY production code
+2. Update any existing tests BEFORE changing production code
+3. Run tests and confirm they fail BEFORE writing the fix
+4. Only after tests exist and fail may you edit production files
+
+**FILE LOCKOUT RULE**: During RED phase, you may ONLY create or modify test files (`tests/`, `__tests__/`, `*.test.*`, `*.spec.*`). Any edit to a production/source file during RED phase is a TDD violation. STOP and revert if this happens.
 
 #### Delegation Decision: Direct or Agent?
 
@@ -350,13 +375,24 @@ Constraints:
 Skill(skill: "rptc:tdd-methodology")
 ```
 
-**Test-First Gate (Direct Execution)**: Execute in strict order. Do NOT edit production files until step 3 is verified.
+**Test-First Gate (Direct Execution)**: Execute in strict order.
 
 1. **Surgical Coding**: Search 3 similar patterns first
 2. **Context Discovery**: Check existing tests, framework, naming conventions
 3. **RED**: Write regression test reproducing the bug. Run it. Confirm it fails with same symptom.
-   **CHECKPOINT**: Regression test written and failing with correct symptom? Only test files touched?
-   → If NO: fix before continuing. Do NOT proceed to GREEN.
+
+   **BLOCKING GATE — RED Phase Verification** (MANDATORY, cannot skip):
+
+   Before ANY production file edit, verify via output:
+   ```
+   RED GATE CHECK:
+   - Regression test written: [test file path]
+   - Test failing: confirms bug symptom "[symptom]"
+   - Production files touched: NONE
+   → PASS: Proceed to GREEN
+   ```
+   If production files were touched → STOP. Revert production changes. Complete RED first.
+
 4. **GREEN**: Apply minimal fix (NOW you may edit production files)
 5. **REFACTOR**: Clean up only if needed (keep fix surgical)
 6. **VERIFY**: Run affected tests, confirm regression test passes
@@ -380,11 +416,12 @@ Use Task tool with subagent_type="rptc:tdd-agent":
 
 ## TDD Bug Fix Cycle
 
-### RED Phase (Critical)
+### RED Phase (Critical — test files ONLY)
 Write a test that REPRODUCES the exact bug:
 - Test must fail with the SAME symptom as the bug
 - Test must use the SAME conditions that trigger the bug
 - Verify: test fails for the right reason (not compile error)
+- FILE LOCKOUT: Only test files may be created/modified during RED phase. Do NOT touch production files.
 
 Example structure:
 ```
@@ -395,7 +432,17 @@ test('should [expected behavior] when [condition]', () => {
 });
 ```
 
-### GREEN Phase (Surgical)
+After writing tests, output RED GATE CHECK:
+```
+RED GATE CHECK:
+- Regression test written: [test file path]
+- Test failing: confirms bug symptom "[symptom]"
+- Production files touched: NONE
+→ PASS: Proceed to GREEN
+```
+If production files were touched → STOP. Revert. Complete RED first.
+
+### GREEN Phase (Surgical — NOW edit production files)
 Apply MINIMAL fix to make the test pass:
 - Change ONLY what's necessary to fix the root cause
 - Do NOT refactor nearby code
@@ -497,11 +544,17 @@ Apply MINIMAL fix to make the test pass:
 
 3. **Launch selected review agents**:
 
-   IMPORTANT: All review agents MUST use the `rptc:` namespace. Use `rptc:code-review-agent`, NOT `code-review:code-review` or `feature-dev:code-reviewer`.
+   **AGENT NAMESPACE LOCKOUT (Phase 4):**
+   - ✅ CORRECT: `subagent_type="rptc:code-review-agent"`
+   - ❌ WRONG: `subagent_type="feature-dev:code-reviewer"` — different plugin, not RPTC
+   - ❌ WRONG: `subagent_type="code-review:code-review"` — different plugin, not RPTC
+   - The `rptc:` prefix is required for ALL review agents. No exceptions.
 
    **Code Review Agent** (if selected):
    ```
    Use Task tool with subagent_type="rptc:code-review-agent":
+   ⚠️ WRONG agents: "feature-dev:code-reviewer", "code-review:code-review" — DO NOT USE
+
    prompt: "Review bug fix for: [bug description].
    Files modified: [list files].
    Focus: Is this the ACTUAL root cause fix (not band-aid)? Is the fix minimal and surgical? Similar patterns elsewhere? Regression risk?
@@ -664,21 +717,26 @@ Use Task tool with subagent_type="rptc:tdd-agent":
 [Bug, root cause, fix location, approach]
 
 ## TDD Bug Fix Cycle
-RED: Write test that reproduces bug (must fail with same symptom)
-GREEN: Apply minimal fix (surgical, no scope creep)
+RED: Write test that reproduces bug (must fail with same symptom).
+  FILE LOCKOUT: Only test files during RED. No production file edits.
+  Output RED GATE CHECK before proceeding to GREEN.
+GREEN: Apply minimal fix (NOW edit production files, surgical, no scope creep)
 VERIFY: Run affected tests, check for regressions
 ```
 
 ### Review Agents (Phase 4) - Semantic Selection
 
-IMPORTANT: Use `rptc:code-review-agent`, NOT `code-review:code-review` or `feature-dev:code-reviewer`.
+**AGENT NAMESPACE LOCKOUT:**
+- ✅ CORRECT: `subagent_type="rptc:code-review-agent"`
+- ❌ WRONG: `subagent_type="feature-dev:code-reviewer"` — different plugin, not RPTC
+- ❌ WRONG: `subagent_type="code-review:code-review"` — different plugin, not RPTC
 
 **Selection based on `review-agent-mode` in project CLAUDE.md:**
 - `all`: Launch all 3 agents
 - `automatic`: Select based on file types/keywords (default if no CLAUDE.md)
 - `minimal`: code-review always launches; others when strongly indicated
 
-**Agents:**
+**Agents (use these exact `subagent_type` values):**
 1. `rptc:code-review-agent`: Root cause fix? Minimal? Regression risk?
 2. `rptc:security-agent`: Security invariants maintained? New vulnerabilities?
 3. `rptc:docs-agent`: Behavior changes need doc updates?

@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.0.1] - 2026-02-07
+
+### Fixed
+
+- **TDD test-first enforcement** (`feat.md`, `fix.md`): Replaced text-only "CRITICAL/MUST" directives with structured enforcement gates
+  - Added FILE LOCKOUT RULE explicitly prohibiting production file edits during RED phase
+  - Added BLOCKING GATE — RED Phase Verification with mandatory `RED GATE CHECK:` output format
+  - Added RED GATE CHECK requirement to tdd-agent delegation prompts in both commands
+  - Updated Agent Delegation Reference sections with FILE LOCKOUT and RED GATE CHECK language
+- **Agent Teams skill loading** (`feat.md`, `fix.md`): Upgraded from suggestion to mandatory infrastructure
+  - Changed Step 0.1 heading to "ALL FOUR MANDATORY" with explicit instruction text
+  - Added BLOCKING GATE — Skill Loading Verification with 4-skill confirmation checklist
+  - Updated `rptc:agent-teams` Skills Usage Guide entry to "(MANDATORY LOAD)" with infrastructure framing
+  - Added "must load even if teams mode does not activate" explanation
+- **fix.md SOP Reference Chain**: Added missing Frontend row to match feat.md
+- **Review agent namespace collision** (`feat.md`, `fix.md`): Upgraded disambiguation from text-only `IMPORTANT:` note to structural AGENT NAMESPACE LOCKOUT
+  - Added ✅/❌ lockout block before code block templates in Phase 4
+  - Embedded `⚠️ WRONG agents` warning inside code blocks (not just above them)
+  - Updated Agent Delegation Reference with same lockout format
+  - Prevents LLM from substituting `feature-dev:code-reviewer` or `code-review:code-review` for `rptc:code-review-agent`
+
+---
+
 ## [3.0.0] - 2026-02-07
 
 Major version bump — Agent Teams integration marks a significant expansion of the RPTC workflow from single-session to multi-session parallel execution.
