@@ -299,21 +299,58 @@ options:
    - Prefix with `fix/`
    - Example: `"Cart items disappear"` → `fix/cart-items-disappear`
 
-2. **Create worktree and switch to it**:
+2. **Compute absolute worktree path** (do NOT use relative paths):
    ```bash
-   git worktree add -b <branch-name> ../<project-dir>-<branch-name> HEAD
+   # Get the repo root as an absolute path — no ".." segments
+   REPO_ROOT=$(git rev-parse --show-toplevel)
+   PARENT_DIR=$(dirname "$REPO_ROOT")
+   PROJECT_DIR=$(basename "$REPO_ROOT")
+   WORKTREE_PATH="${PARENT_DIR}/${PROJECT_DIR}-<branch-name>"
+   ```
+   Store `WORKTREE_PATH` — you will reference it throughout this session.
+
+3. **Create worktree** using the absolute path:
+   ```bash
+   git worktree add -b <branch-name> "$WORKTREE_PATH" HEAD
    ```
 
-3. **Change working directory** to the new worktree path. All subsequent work (Root Cause Analysis, Fix, Verification) proceeds inside the worktree.
-
-4. **Confirm to user**:
+4. **Activate worktree** — change into the new worktree directory:
+   ```bash
+   cd "$WORKTREE_PATH"
    ```
-   Worktree created at ../<path>
+
+5. **Verify activation** — confirm the worktree is the working directory:
+   ```bash
+   git rev-parse --show-toplevel
+   ```
+   The output MUST match `WORKTREE_PATH`. If it does not, STOP and fix before continuing.
+
+6. **Confirm to user**:
+   ```
+   Worktree created and activated at <WORKTREE_PATH>
    Branch: <branch-name>
-   All work proceeds in this worktree.
+   Verified: working directory is inside worktree.
+   All subsequent work proceeds here.
    ```
 
-**If "Current branch" selected:** Continue to Phase 2.
+7. **Set worktree active flag**: Remember that `WORKTREE_PATH` is set. ALL agent delegation
+   prompts in Phases 2-4 MUST include the Worktree Context Block (defined below).
+
+**If "Current branch" selected:** `WORKTREE_PATH` is not set. Continue to Phase 2.
+
+#### Worktree Context Block
+
+When `WORKTREE_PATH` is set, prepend this block to EVERY agent prompt in Phases 2-4 (architect, tdd, code-review, security, docs):
+
+```
+WORKTREE: This project is checked out in a git worktree.
+Working directory: <WORKTREE_PATH>
+You MUST cd to this path before doing ANY work:
+  cd "<WORKTREE_PATH>"
+All file paths are relative to this worktree root, NOT the original repo.
+```
+
+When `WORKTREE_PATH` is NOT set, omit this block entirely.
 
 ---
 
@@ -349,6 +386,8 @@ options:
 
 ```
 Use Task tool with subagent_type="rptc:architect-agent":
+
+[If WORKTREE_PATH is set, prepend the Worktree Context Block]
 
 ## Bug Context
 - Description: [bug description]
@@ -445,6 +484,8 @@ Then skip to step 2 (Update TodoWrite) below.
 
 ```
 Use Task tool with subagent_type="rptc:tdd-agent":
+
+[If WORKTREE_PATH is set, prepend the Worktree Context Block]
 
 ## Bug Fix Context
 - Bug: [description]
@@ -593,6 +634,8 @@ Apply MINIMAL fix to make the test pass:
    Use Task tool with subagent_type="rptc:code-review-agent":
    ⚠️ WRONG agents: "feature-dev:code-reviewer", "code-review:code-review" — DO NOT USE
 
+   [If WORKTREE_PATH is set, prepend the Worktree Context Block]
+
    prompt: "Review bug fix for: [bug description].
    Files modified: [list files].
    Focus: Is this the ACTUAL root cause fix (not band-aid)? Is the fix minimal and surgical? Similar patterns elsewhere? Regression risk?
@@ -602,6 +645,9 @@ Apply MINIMAL fix to make the test pass:
    **Security Agent** (if selected):
    ```
    Use Task tool with subagent_type="rptc:security-agent":
+
+   [If WORKTREE_PATH is set, prepend the Worktree Context Block]
+
    prompt: "Security review for bug fix: [bug description].
    Files modified: [list files].
    Focus: Did the fix maintain security invariants? Any new vulnerabilities introduced?
@@ -611,6 +657,9 @@ Apply MINIMAL fix to make the test pass:
    **Documentation Agent** (if selected):
    ```
    Use Task tool with subagent_type="rptc:docs-agent":
+
+   [If WORKTREE_PATH is set, prepend the Worktree Context Block]
+
    prompt: "Documentation review for bug fix: [bug description].
    Files modified: [list files].
    Focus: Does the bug affect documented behavior? Any docs need updating?
@@ -738,6 +787,8 @@ Agent 3: "Map impact. Affected components, similar patterns elsewhere."
 ```
 Use Task tool with subagent_type="rptc:architect-agent":
 
+[If WORKTREE_PATH is set, prepend the Worktree Context Block]
+
 ## Bug Context
 [Description, symptom, root cause, failure point]
 
@@ -750,6 +801,8 @@ Provide: Fix steps (1-3 max), files, test strategy, risk assessment.
 
 ```
 Use Task tool with subagent_type="rptc:tdd-agent":
+
+[If WORKTREE_PATH is set, prepend the Worktree Context Block]
 
 ## Bug Fix Context
 [Bug, root cause, fix location, approach]
@@ -773,6 +826,8 @@ VERIFY: Run affected tests, check for regressions
 - `all`: Launch all 3 agents
 - `automatic`: Select based on file types/keywords (default if no CLAUDE.md)
 - `minimal`: code-review always launches; others when strongly indicated
+
+**[If WORKTREE_PATH is set, prepend the Worktree Context Block to each agent prompt]**
 
 **Agents (use these exact `subagent_type` values):**
 1. `rptc:code-review-agent`: Root cause fix? Minimal? Regression risk?

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.2.1] - 2026-02-08
+
+### Fixed
+
+- **Worktree path uses absolute paths** — worktree creation now anchors to `git rev-parse --show-toplevel` instead of relative `../` which resolved incorrectly when session wasn't at repo root
+- **Sub-agents receive worktree context** — all Task tool delegation prompts (architect, tdd, code-review, security, docs) now include the Worktree Context Block telling agents to `cd` into the worktree before starting work
+- **Agent Teams worktree propagation** — spawn prompt templates include worktree path so teammates also work in the correct directory
+
+---
+
 ## [3.2.0] - 2026-02-08
 
 ### Added

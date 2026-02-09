@@ -289,7 +289,7 @@ RPTC maximizes efficiency through parallelization:
 - **Discovery**: 2-3 exploration agents run simultaneously
 - **Architecture**: 3 plan perspectives generated in parallel
 - **TDD**: Independent batches execute in parallel
-- **Quality Verification**: Code Review and Security agents run together
+- **Quality Verification**: Code Review, Security, and Documentation agents run together
 
 ### Report-Only Verification System
 

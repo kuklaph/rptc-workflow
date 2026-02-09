@@ -392,7 +392,7 @@ docs/research/
 [Progress shown via todos]
 
 # Phase 4: Quality Verification
-[Code Review and Security agents run in parallel]
+[Code Review, Security, and Documentation agents run in parallel]
 [You review findings, approve fixes]
 
 # Phase 5: Complete

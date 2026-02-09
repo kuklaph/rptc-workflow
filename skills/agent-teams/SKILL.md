@@ -190,6 +190,7 @@ Every spawn prompt includes:
 4. **File ownership**: Explicit list of files/directories they own and must not touch
 5. **Approval pre-authorization**: Plan selection default and quality fix thresholds
 6. **Completion protocol**: What to report and how to signal done
+7. **Worktree path** (if active): Teammates must `cd` to the worktree before any work
 
 ### Step 3: Create the Team
 

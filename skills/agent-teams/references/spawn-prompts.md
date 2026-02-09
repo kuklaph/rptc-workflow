@@ -309,6 +309,11 @@ Use RPTC plugin SOPs as fallback:
 - Architecture: `${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md`
 - Security: `${CLAUDE_PLUGIN_ROOT}/sop/security-and-performance.md`
 - Refactoring: `${CLAUDE_PLUGIN_ROOT}/sop/post-tdd-refactoring.md`
+
+## Worktree (if applicable)
+If the Team Lead provides a WORKTREE_PATH, you MUST cd to it before ANY work:
+  cd "<WORKTREE_PATH>"
+All file paths are relative to this worktree root, NOT the original repo.
 ```
 
 ---

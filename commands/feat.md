@@ -287,21 +287,58 @@ options:
    - Prefix with `feature/`
    - Example: `"Add user auth"` → `feature/add-user-auth`
 
-2. **Create worktree and switch to it**:
+2. **Compute absolute worktree path** (do NOT use relative paths):
    ```bash
-   git worktree add -b <branch-name> ../<project-dir>-<branch-name> HEAD
+   # Get the repo root as an absolute path — no ".." segments
+   REPO_ROOT=$(git rev-parse --show-toplevel)
+   PARENT_DIR=$(dirname "$REPO_ROOT")
+   PROJECT_DIR=$(basename "$REPO_ROOT")
+   WORKTREE_PATH="${PARENT_DIR}/${PROJECT_DIR}-<branch-name>"
+   ```
+   Store `WORKTREE_PATH` — you will reference it throughout this session.
+
+3. **Create worktree** using the absolute path:
+   ```bash
+   git worktree add -b <branch-name> "$WORKTREE_PATH" HEAD
    ```
 
-3. **Change working directory** to the new worktree path. All subsequent work (Architecture, Implementation, Verification) proceeds inside the worktree.
-
-4. **Confirm to user**:
+4. **Activate worktree** — change into the new worktree directory:
+   ```bash
+   cd "$WORKTREE_PATH"
    ```
-   Worktree created at ../<path>
+
+5. **Verify activation** — confirm the worktree is the working directory:
+   ```bash
+   git rev-parse --show-toplevel
+   ```
+   The output MUST match `WORKTREE_PATH`. If it does not, STOP and fix before continuing.
+
+6. **Confirm to user**:
+   ```
+   Worktree created and activated at <WORKTREE_PATH>
    Branch: <branch-name>
-   All work proceeds in this worktree.
+   Verified: working directory is inside worktree.
+   All subsequent work proceeds here.
    ```
 
-**If "Current branch" selected:** Continue to Phase 2.
+7. **Set worktree active flag**: Remember that `WORKTREE_PATH` is set. ALL agent delegation
+   prompts in Phases 2-4 MUST include the Worktree Context Block (defined below).
+
+**If "Current branch" selected:** `WORKTREE_PATH` is not set. Continue to Phase 2.
+
+#### Worktree Context Block
+
+When `WORKTREE_PATH` is set, prepend this block to EVERY agent prompt in Phases 2-4 (architect, tdd, code-review, security, docs):
+
+```
+WORKTREE: This project is checked out in a git worktree.
+Working directory: <WORKTREE_PATH>
+You MUST cd to this path before doing ANY work:
+  cd "<WORKTREE_PATH>"
+All file paths are relative to this worktree root, NOT the original repo.
+```
+
+When `WORKTREE_PATH` is NOT set, omit this block entirely.
 
 ---
 
@@ -327,6 +364,8 @@ options:
 
 ```
 Use Task tool with subagent_type="rptc:architect-agent" (launch all 3 in parallel):
+
+[If WORKTREE_PATH is set, prepend the Worktree Context Block to each agent prompt]
 
 Agent 1: "Design implementation for [feature]. Perspective: Minimal. Provide: files to modify, component design, data flow, build sequence. [If code task: include test strategy]"
 
@@ -526,6 +565,8 @@ Combines related steps into fewer tdd-agent calls, reducing overhead while maint
 ```
 Use Task tool with subagent_type="rptc:tdd-agent":
 
+[If WORKTREE_PATH is set, prepend the Worktree Context Block]
+
 ## Context
 - Feature: [description]
 - Batch: Steps [N, N+1, ...] - [batch summary]
@@ -669,6 +710,8 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
    Use Task tool with subagent_type="rptc:code-review-agent":
    ⚠️ WRONG agents: "feature-dev:code-reviewer", "code-review:code-review" — DO NOT USE
 
+   [If WORKTREE_PATH is set, prepend the Worktree Context Block]
+
    prompt: "Review code quality for these files: [list files].
    Focus: complexity, KISS/YAGNI violations, dead code, readability.
    REPORT ONLY - do not make changes. Output: confidence-scored findings (≥80 only)."
@@ -677,6 +720,9 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
    **Security Agent** (if selected):
    ```
    Use Task tool with subagent_type="rptc:security-agent":
+
+   [If WORKTREE_PATH is set, prepend the Worktree Context Block]
+
    prompt: "Security review for these files: [list files].
    Focus: input validation, auth checks, injection vulnerabilities, data exposure.
    REPORT ONLY - do not make changes. Output: confidence-scored findings (≥80 only)."
@@ -685,6 +731,9 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
    **Documentation Agent** (if selected):
    ```
    Use Task tool with subagent_type="rptc:docs-agent":
+
+   [If WORKTREE_PATH is set, prepend the Worktree Context Block]
+
    prompt: "Review documentation impact for these files: [list files].
    Focus: README updates, API doc changes, inline comment accuracy, breaking changes.
    REPORT ONLY - do not make changes. Output: documentation updates needed (≥80 only)."
@@ -800,6 +849,8 @@ prompt: "Research [topic]. Mode: [A=codebase|B=web|C=hybrid]. Return: findings w
 ```
 Use Task tool with subagent_type="rptc:architect-agent" (launch all 3 in parallel):
 
+[If WORKTREE_PATH is set, prepend the Worktree Context Block]
+
 Agent 1: "Design implementation for [feature]. Perspective: Minimal. ..."
 Agent 2: "Design implementation for [feature]. Perspective: Clean. ..."
 Agent 3: "Design implementation for [feature]. Perspective: Pragmatic. ..."
@@ -811,6 +862,8 @@ After all complete: MUST ask user to choose via AskUserQuestion (skip only for t
 
 ```
 Use Task tool with subagent_type="rptc:tdd-agent":
+
+[If WORKTREE_PATH is set, prepend the Worktree Context Block]
 
 ## Context
 - Feature: [description]
@@ -844,6 +897,8 @@ Then next step.
 - `all`: Launch all 3 agents
 - `automatic`: Select based on file types/keywords (default if no CLAUDE.md)
 - `minimal`: code-review always launches; others when strongly indicated
+
+**[If WORKTREE_PATH is set, prepend the Worktree Context Block to each agent prompt]**
 
 **Agents (use these exact `subagent_type` values):**
 1. `rptc:code-review-agent`: Code quality, complexity, KISS/YAGNI
