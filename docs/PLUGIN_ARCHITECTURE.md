@@ -185,7 +185,7 @@ Phase 3: Implementation
 Phase 4: Quality Verification (Report-Only)
     → Parallel: code-review-agent + security-agent + docs-agent
     → Agents report findings only (no auto-fix)
-    → Main context handles fixes via TodoWrite
+    → Main context handles fixes via TaskCreate/TaskUpdate
     ↓
 Phase 5: Complete
     → Summary of changes
@@ -299,7 +299,7 @@ RPTC maximizes efficiency through parallelization:
    │       │       │
    └───────┼───────┘
            ▼
-    Findings → TodoWrite
+    Findings → TaskCreate
            ▼
     Main Context Fixes
 ```
@@ -319,7 +319,7 @@ Quality verification agents (code-review, security, docs) operate in **report-on
 **Principles:**
 
 - Agents DO NOT edit, write, or auto-fix anything
-- All findings returned to main context via TodoWrite
+- All findings returned to main context via TaskCreate/TaskUpdate
 - Main context handles fixes with user approval as needed
 - User decides which findings to address
 

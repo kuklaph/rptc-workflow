@@ -101,7 +101,7 @@ The unified `/rptc:feat` command handles the complete workflow:
 - **Security Agent**: Input validation, auth checks, injection vulnerabilities
 - **Documentation Agent**: README updates, API doc changes
 - All three run in parallel, **report findings only**
-- Main context handles fixes via TodoWrite
+- Main context handles fixes via TaskCreate/TaskUpdate
 
 ### Phase 5: Complete
 

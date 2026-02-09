@@ -148,7 +148,7 @@ For documentation, config, and non-code changes:
    - **Security Agent**: Input validation, auth checks, injection vulnerabilities, data exposure
    - **Documentation Agent**: README updates, API doc changes, inline comment accuracy
 3. Consolidates findings with confidence scoring (only shows ≥80 confidence)
-4. Creates TodoWrite with findings for main context to address
+4. Creates tasks with findings for main context to address
 5. **Main context handles fixes**:
    - Simple fixes: Applied directly
    - Structural changes: Shown to you for approval
@@ -216,7 +216,7 @@ For documentation, config, and non-code changes:
 1. Determines scope (default: uncommitted changes via `git diff`)
 2. Asks which agents to run: Full (all 3), Code + Security, or Docs only
 3. Launches selected verification agents in parallel (report-only)
-4. Consolidates findings and applies fixes via TodoWrite
+4. Consolidates findings and applies fixes via TaskCreate/TaskUpdate
 
 ### `/rptc:config`
 
@@ -301,7 +301,7 @@ Quality verification agents analyze code and report findings—they do NOT make 
 | 80-89% | Medium priority finding, reported |
 | <80% | Skipped (below confidence threshold) |
 
-Main context receives findings via TodoWrite and handles all fixes with user approval as needed.
+Main context receives findings via TaskCreate/TaskUpdate and handles all fixes with user approval as needed.
 
 ---
 
@@ -442,7 +442,7 @@ Break the feature into smaller, manageable steps:
 
 1. Focus on high-confidence findings (≥90) first
 2. Review medium-confidence findings (80-89) for context
-3. Address findings via TodoWrite—main context handles all changes
+3. Address findings via TaskCreate/TaskUpdate—main context handles all changes
 
 ### Q: Plan approach doesn't fit?
 

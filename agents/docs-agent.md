@@ -61,7 +61,7 @@ SOPs Consulted: [List SOPs referenced]
 - Write changes
 - Auto-update documentation
 
-All findings are returned to main context which handles fixes via TodoWrite.
+All findings are returned to main context which handles fixes via TaskCreate/TaskUpdate.
 
 ---
 
@@ -466,7 +466,7 @@ Return structured findings for consolidation:
 - 🟡 Medium priority findings: 1
 - 🔵 Flagged for review: 1
 
-Main context will address findings via TodoWrite.
+Main context will address findings via TaskCreate/TaskUpdate.
 
 ════════════════════════════════════════
 ```
@@ -663,7 +663,7 @@ You've succeeded when:
   │     ├─ Security Agent → Reports security findings
   │     └─ 📚 YOU → Reports documentation findings
   │
-  │     Main context receives all findings via TodoWrite
+  │     Main context receives all findings via TaskCreate/TaskUpdate
   │     Main context handles all fixes
   │
   └─ Phase 5: Complete
@@ -870,7 +870,7 @@ Found 5 potentially affected files:
 
 Token usage: 2,100 tokens
 
-Returning findings to main context for TodoWrite...
+Returning findings to main context for task tracking...
 ════════════════════════════════════════
 ```
 
@@ -930,7 +930,7 @@ After each execution:
 4. ✅ Report-only mode (no direct changes)
 5. ✅ Multi-document impact analysis (consistency)
 6. ✅ Main context handles all fixes
-7. ✅ TodoWrite integration for tracking
+7. ✅ TaskCreate/TaskUpdate integration for tracking
 8. ✅ Incremental context building (token efficiency)
 
 **Industry best practices:**

@@ -6,7 +6,9 @@
 **Created**: 2025-10-16
 **Last Updated**: 2025-10-16
 
-**Applies To**: `/rptc:feat` (unified workflow), `/rptc:research`, `/rptc:commit`, `/rptc:sync-prod-to-tests`
+**Applies To**: `/rptc:research`, `/rptc:commit`, `/rptc:sync-prod-to-tests`, `/rptc:verify`
+
+> **Note**: `/rptc:feat` and `/rptc:fix` no longer use TodoWrite. As of v3.3.0, they use TaskCreate/TaskUpdate with `addBlockedBy` for phase ordering and progress tracking.
 
 ---
 
@@ -99,111 +101,9 @@
 }
 ```
 
-**Plan Command - Simple** (4 phases, for features ≤3 steps):
+**Plan/TDD Command patterns** (deprecated — `/rptc:feat` and `/rptc:fix` now use TaskCreate/TaskUpdate as of v3.3.0):
 
-```json
-{
-  "tool": "TodoWrite",
-  "todos": [
-    {
-      "content": "Load configuration and context",
-      "status": "pending",
-      "activeForm": "Loading configuration"
-    },
-    {
-      "content": "Create plan scaffold",
-      "status": "pending",
-      "activeForm": "Creating plan"
-    },
-    {
-      "content": "Get PM approval",
-      "status": "pending",
-      "activeForm": "Requesting PM approval"
-    },
-    {
-      "content": "Save plan document",
-      "status": "pending",
-      "activeForm": "Saving plan"
-    }
-  ]
-}
-```
-
-**Plan Command - Complex** (9 phases, for features >3 steps):
-
-```json
-{
-  "tool": "TodoWrite",
-  "todos": [
-    {
-      "content": "Load configuration and context",
-      "status": "pending",
-      "activeForm": "Loading configuration"
-    },
-    {
-      "content": "Create initial plan scaffold with PM",
-      "status": "pending",
-      "activeForm": "Creating plan scaffold"
-    },
-    {
-      "content": "Ask clarifying questions to PM",
-      "status": "pending",
-      "activeForm": "Asking clarifying questions"
-    },
-    {
-      "content": "Get PM approval for Master Architect delegation",
-      "status": "pending",
-      "activeForm": "Requesting Master Architect approval"
-    },
-    {
-      "content": "Delegate to Master Architect Agent",
-      "status": "pending",
-      "activeForm": "Delegating to Master Architect"
-    },
-    {
-      "content": "Present comprehensive plan to PM",
-      "status": "pending",
-      "activeForm": "Presenting plan to PM"
-    },
-    {
-      "content": "Support iterative refinement if needed",
-      "status": "pending",
-      "activeForm": "Supporting plan refinement"
-    },
-    {
-      "content": "Get final PM sign-off",
-      "status": "pending",
-      "activeForm": "Getting final PM approval"
-    },
-    {
-      "content": "Save plan document to ~/.claude/plans/",
-      "status": "pending",
-      "activeForm": "Saving plan document"
-    }
-  ]
-}
-```
-
-**TDD Phase** (smart batching with parallel quality verification, example for 3-step plan):
-
-```json
-{
-  "tool": "TodoWrite",
-  "todos": [
-    {"content": "Batch 1: Steps 1-2 TDD cycle", "status": "pending", "activeForm": "Executing Batch 1 TDD"},
-    {"content": "Batch 2: Step 3 TDD cycle", "status": "pending", "activeForm": "Executing Batch 2 TDD"},
-    {"content": "Quality Verification", "status": "pending", "activeForm": "Running quality verification agents"},
-    {"content": "Complete implementation", "status": "pending", "activeForm": "Completing implementation"}
-  ]
-}
-```
-
-**Notes**:
-- Smart batching groups related steps for ~40% token reduction
-- **Quality Verification is MANDATORY** - must be marked in_progress when Phase 4 starts, completed when Phase 4 ends
-- Quality verification runs agents in parallel (code-review, security, docs) - report-only mode
-- Phase 5 CANNOT begin until Quality Verification is marked completed
-- Main context handles fixes from review findings via additional TODOs if needed
+> Retained for reference. See `commands/feat.md` Step 0.5 for the current TaskCreate/TaskUpdate pattern.
 
 **Commit Command** (7 phases):
 
@@ -332,37 +232,9 @@ Bad pattern (batching):
 
 Repeat for all 6 phases sequentially.
 
-### Plan Command Pattern
+### Plan/TDD Phase Patterns (Deprecated for feat/fix)
 
-**Initialize** based on complexity assessment:
-- Simple features (≤3 steps): 4-phase list
-- Complex features (>3 steps): 9-phase list
-
-**Update pattern** (same as research):
-```markdown
-**Update TodoWrite**: Mark "[phase name]" as in_progress
-[Execute phase work...]
-**Update TodoWrite**: Mark "[phase name]" as completed
-```
-
-### TDD Phase Pattern (within /rptc:feat)
-
-**Initialize** based on plan steps:
-1. Group related steps into batches for efficiency
-2. Create batch-level TODOs (not per-step)
-3. Quality verification TODO (runs 3 agents in parallel)
-4. Findings processing TODO
-
-**Update pattern**:
-```markdown
-**Update TodoWrite**: Mark "Batch 1: Steps 1-2 TDD cycle" as in_progress
-[Execute RED-GREEN-REFACTOR for each step in batch...]
-**Update TodoWrite**: Mark "Batch 1: Steps 1-2 TDD cycle" as completed
-```
-
-**Smart batching**: Groups related steps for ~40% token reduction vs sequential execution.
-
-**Quality verification**: Runs code-review, security, and docs agents in parallel (report-only mode).
+> As of v3.3.0, `/rptc:feat` and `/rptc:fix` use TaskCreate/TaskUpdate with `addBlockedBy` for phase ordering and batch tracking. The patterns below are retained for reference only.
 
 ### Commit Command Pattern
 
@@ -410,17 +282,13 @@ Before [NEXT PHASE]:
 ---
 ```
 
-### All 7 Blocking Locations
+### Blocking Locations
 
 1. **Research** (commands/research.md): Block save without PM approval
-2. **Plan** (Phase 2): Block plan save without PM approval
-3. **TDD** (Phase 3): Block implementation until plan approved
-4. **Quality Verification** (Phase 4): **MANDATORY gate** - TodoWrite "Quality Verification" must be marked completed before Phase 5
-5. **Phase 5 Entry**: Block Phase 5 until Quality Verification TodoWrite item is completed
-6. **Commit** (commands/commit.md): Block commit if tests failing
-7. **Commit** (commands/commit.md): Block commit if code quality issues
+2. **Commit** (commands/commit.md): Block commit if tests failing
+3. **Commit** (commands/commit.md): Block commit if code quality issues
 
-**Note**: Quality verification is enforced via TodoWrite tracking. The "Quality Verification" item MUST be marked in_progress when Phase 4 starts and completed when Phase 4 ends. Phase 5 has a blocking checkpoint that verifies this.
+> **Note**: `/rptc:feat` and `/rptc:fix` previously used TodoWrite blocking checkpoints for phase ordering. As of v3.3.0, they use TaskCreate/TaskUpdate with `addBlockedBy` instead. The blocking locations above apply to commands that still use TodoWrite.
 
 ### Imperative Language Keywords
 
@@ -453,10 +321,9 @@ Before [NEXT PHASE]:
 | Command | Phase | Approval Required |
 |---------|-------|-------------------|
 | Research | Save document | YES |
-| /rptc:feat | Plan approval (Phase 2) | YES |
-| /rptc:feat | Quality verification findings (Phase 4) | PM decides which fixes to apply |
-| /rptc:feat | Mark complete | YES |
 | Commit | Final commit | YES |
+
+> `/rptc:feat` and `/rptc:fix` approval gates are now managed via AskUserQuestion tool calls and TaskCreate/TaskUpdate, not TodoWrite.
 
 ### Automatic Phases (No Approval)
 
@@ -464,7 +331,7 @@ Before [NEXT PHASE]:
 - All 3 agents (code-review, security, docs) run automatically in parallel
 - Agents operate in **report-only mode** - they don't make changes
 - PM reviews findings and decides which to address
-- Main context handles fixes via TodoWrite if needed
+- Main context handles fixes via TaskCreate/TaskUpdate (feat/fix) or TodoWrite (other commands)
 - Rationale: Agents provide analysis, PM retains decision authority
 
 **Pre-Commit Verification** (Commit phase):
@@ -603,11 +470,8 @@ Original: "Write tests for Step 1"
    - Confirm all tasks "completed" at end
 
 2. Run `/rptc:feat "test feature"`
-   - Verify 5-phase workflow (Discovery → Architecture → Implementation → Quality → Complete)
-   - Test PM approval at plan phase
-   - Verify smart batching during TDD phase
-   - Verify quality verification (code-review, security, docs) run in parallel
-   - Confirm agents are report-only (no auto-fixes)
+   - Verify 5-phase workflow uses TaskCreate/TaskUpdate (not TodoWrite)
+   - This command no longer uses TodoWrite — included here for completeness
 
 4. Run `/rptc:commit pr`
    - Verify 7-phase tracking
@@ -637,7 +501,7 @@ Original: "Write tests for Step 1"
 - [ ] All commands create correct TodoWrite lists
 - [ ] State updates happen immediately (not batched)
 - [ ] Only ONE task in_progress at a time
-- [ ] Blocking gates enforce with imperative language
+- [ ] Blocking gates enforce correctly (TodoWrite for research/commit, TaskCreate for feat/fix)
 - [ ] PM approval gates work correctly
 - [ ] Doc Specialist runs automatically
 - [ ] Compaction doesn't lose state

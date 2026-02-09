@@ -60,7 +60,7 @@ SOPs Consulted: [List SOPs referenced]
 - Write changes
 - Auto-fix anything
 
-All findings are returned to main context which handles fixes via TodoWrite.
+All findings are returned to main context which handles fixes via TaskCreate/TaskUpdate.
 
 ---
 

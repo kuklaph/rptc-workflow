@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.3.0] - 2026-02-09
+
+### Changed
+
+- **Phase ordering uses task dependencies** — replaced text-based enforcement (BLOCKING GATE, ENTRY GUARD, BLOCKING CHECKPOINT) with TaskCreate/TaskUpdate `addBlockedBy` structural blocking. Completing a phase automatically unblocks the next.
+- **Progress tracking uses TaskCreate/TaskUpdate** — replaced all TodoWrite usage with TaskCreate for findings/batch tracking and TaskUpdate for status progression. TodoWrite removed from allowed-tools.
+- **Reduced enforcement prose** — ~100 lines of enforcement directives removed per command file, replaced by ~30 lines of task initialization and status calls
+
+### Fixed
+
+- **Branch Strategy enforced as mandatory gate** — worktree prompt uses AskUserQuestion (tool-enforced gate)
+- **Worktree recommendation is context-aware** — recommendation based on Phase 1 findings (scope, file count, risk) instead of hardcoded "Current branch"
+
+---
+
 ## [3.2.1] - 2026-02-08
 
 ### Fixed

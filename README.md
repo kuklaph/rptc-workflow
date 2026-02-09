@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 3.2.1
+**Version**: 3.3.0
 **Status**: Beta
 **License**: MIT
 
@@ -115,7 +115,7 @@ All phases unified in one command: `/rptc:feat`
 - **Security Agent**: Input validation, auth checks, injection vulnerabilities
 - **Documentation Agent**: README updates, API doc changes, inline comment accuracy
 - All three run in parallel, report findings
-- Main context addresses findings via TodoWrite
+- Main context addresses findings via TaskCreate/TaskUpdate
 
 ### Phase 5: Complete
 
@@ -247,7 +247,7 @@ Standard Operating Procedures provide guidance for agents:
 - `languages-and-style.md` - Language conventions, formatters, linters
 - `security-and-performance.md` - Security practices, performance optimization
 - `post-tdd-refactoring.md` - 5-phase refactoring checklist for code review agent
-- `todowrite-guide.md` - TodoWrite integration patterns and best practices
+- `todowrite-guide.md` - TodoWrite patterns for research, commit, and sync commands
 - `test-sync-guide.md` - Test-production matching algorithms and sync verification
 
 ---

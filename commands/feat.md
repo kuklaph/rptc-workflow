@@ -1,6 +1,6 @@
 ---
 description: Research → Plan → TDD → Verify in one seamless flow
-allowed-tools: Bash(git *), Bash(npm *), Bash(npx *), Bash(bunx *), Bash(pnpm *), Bash(yarn *), Bash(bun *), Bash(cargo *), Bash(go *), Bash(pytest *), Bash(python -m pytest *), Bash(make *), Bash(dotnet *), Read, Write, Edit, Glob, Grep, LS, Task, TodoWrite, AskUserQuestion, EnterPlanMode, ExitPlanMode
+allowed-tools: Bash(git *), Bash(npm *), Bash(npx *), Bash(bunx *), Bash(pnpm *), Bash(yarn *), Bash(bun *), Bash(cargo *), Bash(go *), Bash(pytest *), Bash(python -m pytest *), Bash(make *), Bash(dotnet *), Read, Write, Edit, Glob, Grep, LS, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion, EnterPlanMode, ExitPlanMode
 ---
 
 # /rptc:feat
@@ -22,19 +22,7 @@ Skill(skill: "rptc:tdd-methodology")
 Skill(skill: "rptc:agent-teams")
 ```
 
-**BLOCKING GATE — Skill Loading Verification**:
-
-After loading, confirm ALL four skills loaded by listing them:
-
-```
-Skills loaded:
-1. rptc:brainstorming — ✅
-2. rptc:writing-clearly-and-concisely — ✅
-3. rptc:tdd-methodology — ✅
-4. rptc:agent-teams — ✅
-```
-
-If ANY skill fails to load, STOP and report the failure. Do NOT proceed to Phase 1 with missing skills. The `rptc:agent-teams` skill is infrastructure — it must load even when teams mode may not activate.
+After loading, confirm all four loaded. If ANY skill fails to load, STOP and report the failure.
 
 ### 0.1.1 Conditional Skills (Load When Applicable)
 
@@ -75,7 +63,7 @@ You are executing the **RPTC (Research → Plan → TDD → Commit)** workflow.
 | Architecture | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md` |
 | Testing | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/testing-guide.md` |
 | Security | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/security-and-performance.md` |
-| Progress Tracking | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/todowrite-guide.md` |
+| Progress Tracking | Project `sop/`, `~/.claude/global/` | TaskCreate/TaskUpdate with `addBlockedBy` (see Step 0.5) |
 | Refactoring | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/post-tdd-refactoring.md` |
 | Frontend | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/frontend-guidelines.md` |
 
@@ -83,17 +71,15 @@ You are executing the **RPTC (Research → Plan → TDD → Commit)** workflow.
 
 ### 0.3 Phase Structure Awareness
 
-This workflow has **5 mandatory phases**. You MUST NOT skip phases.
+This workflow has **5 mandatory phases**. Phase ordering is enforced by task dependencies created in Step 0.5.
 
-| Phase | Name | Key Deliverable | Blocking? |
-|-------|------|-----------------|-----------|
-| 1 | Discovery | Understanding of what to build | No |
-| 2 | Architecture | User-approved implementation plan | No |
-| 3 | Implementation | Working code with tests | No |
-| 4 | Quality Verification | All findings addressed | **YES** |
-| 5 | Complete | Summary for commit | **YES** |
-
-**Phase 4 and 5 transitions are BLOCKING GATES. Cannot proceed without verification.**
+| Phase | Name | Key Deliverable |
+|-------|------|-----------------|
+| 1 | Discovery | Understanding of what to build |
+| 2 | Architecture | User-approved implementation plan |
+| 3 | Implementation | Working code with tests |
+| 4 | Quality Verification | All findings addressed |
+| 5 | Complete | Summary for commit |
 
 ### 0.4 Initialization Verification
 
@@ -104,6 +90,25 @@ Before proceeding to Phase 1, confirm:
 - Phase structure clear
 
 **CRITICAL: If verification fails, STOP. Do not proceed to Phase 1.**
+
+### 0.5 Phase Task Initialization
+
+Create the workflow phases as tasks with a dependency chain. Each phase is blocked by the previous one — completing a phase automatically unblocks the next.
+
+```
+TaskCreate("Phase 1: Discovery", description: "Understand what to build and existing patterns")
+TaskCreate("Phase 2: Architecture", description: "Design implementation approach with user approval")
+TaskCreate("Phase 3: Implementation", description: "Execute plan using appropriate method")
+TaskCreate("Phase 4: Quality Verification", description: "Review agents verify changes")
+TaskCreate("Phase 5: Complete", description: "Summarize what was built")
+
+TaskUpdate(Phase 2, addBlockedBy: [Phase 1])
+TaskUpdate(Phase 3, addBlockedBy: [Phase 2])
+TaskUpdate(Phase 4, addBlockedBy: [Phase 3])
+TaskUpdate(Phase 5, addBlockedBy: [Phase 4])
+```
+
+**At each phase**: Call `TaskUpdate(status: "in_progress")` when starting, `TaskUpdate(status: "completed")` when done.
 
 ---
 
@@ -213,6 +218,8 @@ Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp_
 
 ## Phase 1: Discovery
 
+`TaskUpdate(Phase 1, status: "in_progress")`
+
 **Goal**: Understand what to build and existing patterns.
 
 > 💡 **Tool Reminder**: Use Sequential Thinking for feature analysis. Use Serena for code exploration.
@@ -269,15 +276,21 @@ to Phase 2 — the skill handles the remaining workflow.
 
 **Now that the scope is clear**, ask the user how to organize this work.
 
+**Choose recommendation based on Phase 1 findings:**
+- Recommend **New worktree** when: multi-file feature, >3 files to modify, long-running work, or risky changes the user may want to abandon
+- Recommend **Current branch** when: small change, single-file fix, quick task, or already on a feature branch
+
+Put your recommended option first and append "(Recommended)" to its label.
+
 ```
 Use AskUserQuestion:
 question: "How should this feature be organized?"
 header: "Branch"
 options:
-  - label: "Current branch (Recommended)"
-    description: "Work directly on the current branch"
-  - label: "New worktree"
-    description: "Create a git worktree with a dedicated feature branch for isolated work"
+  - label: "[recommended option] (Recommended)"
+    description: "[description]"
+  - label: "[other option]"
+    description: "[description]"
 ```
 
 **If "New worktree" selected:**
@@ -340,9 +353,13 @@ All file paths are relative to this worktree root, NOT the original repo.
 
 When `WORKTREE_PATH` is NOT set, omit this block entirely.
 
+`TaskUpdate(Phase 1, status: "completed")`
+
 ---
 
 ## Phase 2: Architecture
+
+`TaskUpdate(Phase 2, status: "in_progress")`
 
 **Goal**: Design the implementation approach with user approval.
 
@@ -435,9 +452,13 @@ options:
 - Simple features: List steps directly
 - Complex features: Overview + numbered implementation steps
 
+`TaskUpdate(Phase 2, status: "completed")`
+
 ---
 
 ## Phase 3: Implementation
+
+`TaskUpdate(Phase 3, status: "in_progress")`
 
 **Goal**: Execute the plan using the appropriate method for the task type.
 
@@ -455,8 +476,9 @@ options:
    - Read target files
    - Make changes using Edit/Write tools
    - Verify changes are correct
-3. **Update TodoWrite** as each step completes
-4. **MANDATORY: Execute Phase 4 next** — Quality Verification is required for ALL task types, including non-code. Do NOT skip to Phase 5.
+3. **Update task status** as each step completes
+
+`TaskUpdate(Phase 3, status: "completed")`
 
 ---
 
@@ -515,7 +537,7 @@ Skill(skill: "rptc:tdd-methodology")
 5. **REFACTOR**: Improve while green
 6. **VERIFY**: Run affected tests, check coverage
 
-Then skip to step 8 (Update TodoWrite) below.
+Then skip to step 8 (Update task status) below.
 
 **If Delegate**: Use smart batching with tdd-agent (continue below).
 
@@ -553,11 +575,12 @@ Combines related steps into fewer tdd-agent calls, reducing overhead while maint
    - Build dependency graph from step analysis (step 1)
    - Batches are independent if: no batch contains steps that depend on steps in other batch
 
-5. **Create TodoWrite** with batches (not individual steps):
+5. **Create tasks per batch** (with dependencies for dependent batches):
    ```
-   Batch 1 [Steps 1-3]: User model + validation + tests
-   Batch 2 [Steps 4-5]: UserService + tests (parallel with Batch 1 if independent)
-   Batch 3 [Step 6]: API endpoint (waits for Batch 2)
+   TaskCreate("Batch 1 [Steps 1-3]: User model + validation + tests")
+   TaskCreate("Batch 2 [Steps 4-5]: UserService + tests")
+   TaskCreate("Batch 3 [Step 6]: API endpoint")
+   TaskUpdate(Batch 3, addBlockedBy: [Batch 2])  // Batch 3 waits for Batch 2
    ```
 
 6. **For each batch, invoke tdd-agent** using the Task tool:
@@ -609,10 +632,10 @@ Then move to next step in batch.
     - `Test-First Followed: YES` → mark batch complete
     - `Test-First Followed: NO` → flag as TDD violation, ask user whether to re-run or accept
 
-8. **Update TodoWrite** as each batch completes
+8. **Update task status** as each batch completes (`TaskUpdate(batch, status: "completed")`)
 9. **Handle failures**: If batch fails after 3 attempts, ask user for guidance
-10. **MANDATORY**: Add TodoWrite item "Quality Verification" with status "pending" (if not exists)
-11. **MANDATORY: Execute Phase 4 next** — Quality Verification MUST run before Phase 5. Do NOT skip to completion.
+
+`TaskUpdate(Phase 3, status: "completed")`
 
 **Example Batching**:
 ```
@@ -629,17 +652,15 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
 
 ---
 
-## Phase 4: Quality Verification (MANDATORY - BLOCKING GATE)
+## Phase 4: Quality Verification
+
+`TaskUpdate(Phase 4, status: "in_progress")`
 
 **Goal**: Verify changes and report findings for main context to address.
 
 **Mode**: Report-only. Verification agents DO NOT make changes—they report findings. Main context handles all fixes.
 
-**CRITICAL**: This phase MUST execute. Phase 5 CANNOT begin until this phase completes.
-
 **Actions**:
-
-0. **Update TodoWrite**: Mark "Quality Verification" as in_progress
 
 1. **Collect files modified** during Phase 3 for verification
 
@@ -743,11 +764,10 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
    - Categorize: bugs, security, style, structural, documentation
    - Filter to high-confidence issues only (≥80)
 
-6. **Create TodoWrite for ALL findings** (auto-fix by default):
+6. **Create tasks for findings** (auto-fix by default):
    ```
-   TodoWrite with status="pending":
-   - [Category] Finding 1: description (file:line)
-   - [Category] Finding 2: description (file:line)
+   TaskCreate("[Category] Finding 1: description (file:line)")
+   TaskCreate("[Category] Finding 2: description (file:line)")
    ...
    ```
 
@@ -769,14 +789,12 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
    - Integration issues (orphan code - user decides: wire up or remove)
 
    **Process**:
-   - Work through TodoWrite items sequentially
-   - For auto-fix items: Apply fix, mark complete
+   - Work through finding tasks sequentially
+   - For auto-fix items: Apply fix, `TaskUpdate(finding, status: "completed")`
    - For ask-first items: Use AskUserQuestion with fix proposal, then apply or skip
-   - Mark all todos complete as addressed
+   - Mark all finding tasks complete as addressed
 
-8. **Update TodoWrite**: Mark "Quality Verification" as completed
-
-9. **BLOCKING GATE — User Acknowledgment** (MANDATORY, cannot skip):
+8. **User Acknowledgment**:
 
    Present review results to the user. This is a tool-enforced gate — you MUST call AskUserQuestion here.
 
@@ -796,25 +814,19 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
    If user selects "Re-verify needed" → return to step 7 (auto-fix).
    If user selects "Add more verification scope" → return to step 4 (launch agents).
 
+`TaskUpdate(Phase 4, status: "completed")`
+
 ---
 
 ## Phase 5: Complete
 
-**BLOCKING CHECKPOINT** — Before Phase 5 can begin:
-
-- [ ] TodoWrite "Quality Verification" item MUST be marked "completed"
-- [ ] At least one verification agent MUST have been launched
-- [ ] User acknowledged verification results via AskUserQuestion (step 9)
-
-If Quality Verification not completed → **STOP**. Return to Phase 4.
-
----
+`TaskUpdate(Phase 5, status: "in_progress")`
 
 **Goal**: Summarize what was built.
 
 **Actions**:
 
-1. **Mark all todos complete**
+1. **Mark all remaining tasks complete**
 2. **Summary output**:
    - Files created/modified
    - Tests added
@@ -891,7 +903,7 @@ Then next step.
 - ❌ WRONG: `subagent_type="feature-dev:code-reviewer"` — different plugin, not RPTC
 - ❌ WRONG: `subagent_type="code-review:code-review"` — different plugin, not RPTC
 
-**Mode**: Report-only. Agents report findings; main context handles fixes via TodoWrite.
+**Mode**: Report-only. Agents report findings; main context handles fixes via TaskCreate/TaskUpdate.
 
 **Selection based on `verification-agent-mode` in project CLAUDE.md:**
 - `all`: Launch all 3 agents

@@ -1,6 +1,6 @@
 ---
 description: Reproduction → Root Cause → Fix → Verification
-allowed-tools: Bash(git *), Bash(npm *), Bash(npx *), Bash(bunx *), Bash(pnpm *), Bash(yarn *), Bash(bun *), Bash(cargo *), Bash(go *), Bash(pytest *), Bash(python -m pytest *), Bash(make *), Bash(dotnet *), Read, Write, Edit, Glob, Grep, LS, Task, TodoWrite, AskUserQuestion, EnterPlanMode, ExitPlanMode
+allowed-tools: Bash(git *), Bash(npm *), Bash(npx *), Bash(bunx *), Bash(pnpm *), Bash(yarn *), Bash(bun *), Bash(cargo *), Bash(go *), Bash(pytest *), Bash(python -m pytest *), Bash(make *), Bash(dotnet *), Read, Write, Edit, Glob, Grep, LS, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion, EnterPlanMode, ExitPlanMode
 ---
 
 # /rptc:fix
@@ -22,19 +22,7 @@ Skill(skill: "rptc:tdd-methodology")
 Skill(skill: "rptc:agent-teams")
 ```
 
-**BLOCKING GATE — Skill Loading Verification**:
-
-After loading, confirm ALL four skills loaded by listing them:
-
-```
-Skills loaded:
-1. rptc:brainstorming — ✅
-2. rptc:writing-clearly-and-concisely — ✅
-3. rptc:tdd-methodology — ✅
-4. rptc:agent-teams — ✅
-```
-
-If ANY skill fails to load, STOP and report the failure. Do NOT proceed to Phase 1 with missing skills. The `rptc:agent-teams` skill is infrastructure — it must load even when teams mode may not activate.
+After loading, confirm all four loaded. If ANY skill fails to load, STOP and report the failure. The `rptc:agent-teams` skill is infrastructure — it must load even when teams mode may not activate.
 
 ### 0.1.1 Conditional Skills (Load When Applicable)
 
@@ -75,7 +63,7 @@ You are executing the **RPTC (Research → Plan → TDD → Commit)** workflow f
 | Architecture | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md` |
 | Testing | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/testing-guide.md` |
 | Security | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/security-and-performance.md` |
-| Progress Tracking | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/todowrite-guide.md` |
+| Progress Tracking | Project `sop/`, `~/.claude/global/` | TaskCreate/TaskUpdate with `addBlockedBy` (see Step 0.5) |
 | Refactoring | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/post-tdd-refactoring.md` |
 | Frontend | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/frontend-guidelines.md` |
 
@@ -85,15 +73,15 @@ You are executing the **RPTC (Research → Plan → TDD → Commit)** workflow f
 
 This workflow has **5 mandatory phases**. You MUST NOT skip phases.
 
-| Phase | Name | Key Deliverable | Blocking? |
-|-------|------|-----------------|-----------|
-| 1 | Reproduction & Triage | Confirmed bug with repro steps | No |
-| 2 | Root Cause Analysis | 5 Whys result, fix approach | No |
-| 3 | Fix Application | Regression test + minimal fix | No |
-| 4 | Verification | All verification findings addressed | **YES** |
-| 5 | Complete | Summary for commit | **YES** |
+| Phase | Name | Key Deliverable |
+|-------|------|-----------------|
+| 1 | Reproduction & Triage | Confirmed bug with repro steps |
+| 2 | Root Cause Analysis | 5 Whys result, fix approach |
+| 3 | Fix Application | Regression test + minimal fix |
+| 4 | Verification | All verification findings addressed |
+| 5 | Complete | Summary for commit |
 
-**Phase 4 and 5 transitions are BLOCKING GATES. Cannot proceed without verification.**
+Phase ordering is enforced by task dependencies created in Step 0.5.
 
 ### 0.4 Initialization Verification
 
@@ -104,6 +92,25 @@ Before proceeding to Phase 1, confirm:
 - Phase structure clear
 
 **CRITICAL: If verification fails, STOP. Do not proceed to Phase 1.**
+
+### 0.5 Phase Task Initialization
+
+Create the workflow phases as tasks with a dependency chain. Each phase is blocked by the previous one — completing a phase automatically unblocks the next.
+
+```
+TaskCreate("Phase 1: Reproduction & Triage", description: "Confirm bug with reproduction steps")
+TaskCreate("Phase 2: Root Cause Analysis", description: "5 Whys methodology, identify fix approach")
+TaskCreate("Phase 3: Fix Application", description: "Regression test + minimal fix via TDD")
+TaskCreate("Phase 4: Verification", description: "Review agents verify fix quality")
+TaskCreate("Phase 5: Complete", description: "Summarize fix for commit")
+
+TaskUpdate(Phase 2, addBlockedBy: [Phase 1])
+TaskUpdate(Phase 3, addBlockedBy: [Phase 2])
+TaskUpdate(Phase 4, addBlockedBy: [Phase 3])
+TaskUpdate(Phase 5, addBlockedBy: [Phase 4])
+```
+
+**At each phase**: Call `TaskUpdate(status: "in_progress")` when starting, `TaskUpdate(status: "completed")` when done.
 
 ---
 
@@ -211,6 +218,8 @@ Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp_
 
 ## Phase 1: Reproduction & Triage
 
+`TaskUpdate(Phase 1, status: "in_progress")`
+
 **Goal**: Confirm the bug exists and understand its triggering conditions.
 
 > 💡 **Tool Reminder**: Use Sequential Thinking to analyze bug context. Use Serena for code tracing.
@@ -281,15 +290,21 @@ to Phase 2 — the skill handles the remaining workflow.
 
 **Now that the scope is clear**, ask the user how to organize this work.
 
+**Choose recommendation based on Phase 1 findings:**
+- Recommend **New worktree** when: multi-file fix, >3 files to modify, risky changes, or unclear root cause that may require multiple attempts
+- Recommend **Current branch** when: small fix, single-file change, clear root cause, or already on a fix branch
+
+Put your recommended option first and append "(Recommended)" to its label.
+
 ```
 Use AskUserQuestion:
 question: "How should this fix be organized?"
 header: "Branch"
 options:
-  - label: "Current branch (Recommended)"
-    description: "Work directly on the current branch"
-  - label: "New worktree"
-    description: "Create a git worktree with a dedicated fix branch for isolated work"
+  - label: "[recommended option] (Recommended)"
+    description: "[description]"
+  - label: "[other option]"
+    description: "[description]"
 ```
 
 **If "New worktree" selected:**
@@ -338,6 +353,8 @@ options:
 
 **If "Current branch" selected:** `WORKTREE_PATH` is not set. Continue to Phase 2.
 
+`TaskUpdate(Phase 1, status: "completed")`
+
 #### Worktree Context Block
 
 When `WORKTREE_PATH` is set, prepend this block to EVERY agent prompt in Phases 2-4 (architect, tdd, code-review, security, docs):
@@ -355,6 +372,8 @@ When `WORKTREE_PATH` is NOT set, omit this block entirely.
 ---
 
 ## Phase 2: Root Cause Analysis
+
+`TaskUpdate(Phase 2, status: "in_progress")`
 
 **Goal**: Identify the fundamental cause and plan the fix.
 
@@ -418,9 +437,13 @@ Constraints:
 
 5. **If plan mode used**: Exit with ExitPlanMode for user approval
 
+`TaskUpdate(Phase 2, status: "completed")`
+
 ---
 
 ## Phase 3: Fix Application
+
+`TaskUpdate(Phase 3, status: "in_progress")`
 
 **Goal**: Apply the fix using test-driven approach (regression test first).
 
@@ -474,7 +497,7 @@ Skill(skill: "rptc:tdd-methodology")
 5. **REFACTOR**: Clean up only if needed (keep fix surgical)
 6. **VERIFY**: Run affected tests, confirm regression test passes
 
-Then skip to step 2 (Update TodoWrite) below.
+Then skip to step 2 (Update task status) below.
 
 **If Delegate**: Use tdd-agent (continue below).
 
@@ -545,29 +568,26 @@ Apply MINIMAL fix to make the test pass:
     - `Test-First Followed: YES` → continue
     - `Test-First Followed: NO` → flag as TDD violation, ask user whether to re-run or accept
 
-2. **Update TodoWrite** as fix progresses
+2. **Update task status** as fix progresses (`TaskUpdate(task, status: "completed")`)
 
 3. **Handle failures**:
    - If test won't reproduce bug: Return to Phase 1 for better reproduction
    - If fix causes new failures: Analyze regression, adjust fix
    - If fix attempt fails 3x: Ask user for guidance
 
-4. **MANDATORY**: Add TodoWrite item "Quality Verification" with status "pending" (if not exists)
-5. **MANDATORY: Execute Phase 4 next** — Quality Verification MUST run before Phase 5. Do NOT skip to completion.
+`TaskUpdate(Phase 3, status: "completed")`
 
 ---
 
-## Phase 4: Verification (MANDATORY - BLOCKING GATE)
+## Phase 4: Verification
+
+`TaskUpdate(Phase 4, status: "in_progress")`
 
 **Goal**: Verify the fix works and didn't introduce regressions.
-
-**CRITICAL**: This phase MUST execute. Phase 5 CANNOT begin until this phase completes.
 
 **This phase runs for ALL bugs regardless of severity (S1-S4).** Even urgent S1 fixes must be reviewed before completion.
 
 **Actions**:
-
-0. **Update TodoWrite**: Mark "Quality Verification" as in_progress
 
 1. **Determine verification agent mode** (one-time project configuration):
 
@@ -671,7 +691,7 @@ Apply MINIMAL fix to make the test pass:
    - Regression risk: Side effects identified?
    - Documentation: Updates needed?
 
-5. **Create TodoWrite for ALL findings** (auto-fix by default)
+5. **Create tasks for findings** (auto-fix by default)
 
 6. **Auto-fix findings** (no user approval needed for most issues):
 
@@ -688,14 +708,12 @@ Apply MINIMAL fix to make the test pass:
    - Architectural issues
 
    **Process**:
-   - Work through TodoWrite items sequentially
-   - For auto-fix items: Apply fix, mark complete
+   - Work through finding tasks sequentially
+   - For auto-fix items: Apply fix, mark complete (`TaskUpdate(finding, status: "completed")`)
    - For ask-first items: Use AskUserQuestion with fix proposal, then apply or skip
-   - Mark all todos complete as addressed
+   - Mark all finding tasks complete as addressed
 
-7. **Update TodoWrite**: Mark "Quality Verification" as completed
-
-8. **BLOCKING GATE — User Acknowledgment** (MANDATORY, cannot skip):
+7. **User Acknowledgment**:
 
    Present review results to the user. This is a tool-enforced gate — you MUST call AskUserQuestion here.
 
@@ -715,25 +733,19 @@ Apply MINIMAL fix to make the test pass:
    If user selects "Re-verify needed" → return to step 6 (auto-fix).
    If user selects "Add more verification scope" → return to step 3 (launch agents).
 
+`TaskUpdate(Phase 4, status: "completed")`
+
 ---
 
 ## Phase 5: Complete
 
-**BLOCKING CHECKPOINT** — Before Phase 5 can begin:
-
-- [ ] TodoWrite "Quality Verification" item MUST be marked "completed"
-- [ ] At least one verification agent MUST have been launched
-- [ ] User acknowledged verification results via AskUserQuestion (step 8)
-
-If Quality Verification not completed → **STOP**. Return to Phase 4.
-
----
+`TaskUpdate(Phase 5, status: "in_progress")`
 
 **Goal**: Summarize what was fixed and document for future reference.
 
 **Actions**:
 
-1. **Mark all todos complete**
+1. **Mark all remaining tasks complete**
 
 2. **Summary output**:
 
@@ -767,6 +779,8 @@ If Quality Verification not completed → **STOP**. Return to Phase 4.
 3. **Suggest next steps**:
    - Ready for `/rptc:commit`
    - Or: Additional issues identified that need separate fixes
+
+`TaskUpdate(Phase 5, status: "completed")`
 
 ---
 

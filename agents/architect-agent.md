@@ -208,7 +208,7 @@ Use `write_memory` to persist important discoveries for future sessions - things
 **Output**: Directory structure with multiple files
 
 - `~/.claude/plans/[feature-slug].md` - Native plan file (Claude's plan mode)
-- Steps tracked via TodoWrite during TDD execution
+- Steps tracked via TaskCreate/TaskUpdate during TDD execution
 - Files saved immediately as generated (not at end)
 
 **Advantages**:
