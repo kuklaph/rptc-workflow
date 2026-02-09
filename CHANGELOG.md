@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.2.0] - 2026-02-08
+
+### Added
+
+- **Git worktree prompt** in `/rptc:feat` and `/rptc:fix` (Branch Strategy after Phase 1 Discovery): After research completes and scope is clear, users choose to work on the current branch or create a new git worktree with an isolated feature/fix branch. If selected, the worktree is created and activated before Phase 2 begins.
+
+---
+
 ## [3.1.0] - 2026-02-08
 
 ### Added

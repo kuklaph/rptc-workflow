@@ -47,7 +47,9 @@ The `/rptc:feat` command is RPTC's primary interface. It combines what used to b
     ↓
 Phase 1: Discovery (codebase exploration)
     ↓
-Teams Analysis (single task → Phase 2, multiple → Agent Teams)
+Teams Analysis (single task → Branch Strategy, multiple → Agent Teams)
+    ↓
+Branch Strategy (current branch or new git worktree)
     ↓
 Phase 2: Architecture (you select approach)
     ↓
@@ -75,7 +77,7 @@ Phase 5: Complete (summary)
 
 **Agents used:** `rptc:research-agent` with code-explorer methodology
 
-**After Discovery:** The `agent-teams` skill runs Teams Analysis. If multiple independent work streams are detected (or the user requested teams), the skill takes over orchestration with parallel Agent Teams. Otherwise, the workflow continues to Phase 2.
+**After Discovery:** The `agent-teams` skill runs Teams Analysis. If multiple independent work streams are detected (or the user requested teams), the skill takes over orchestration with parallel Agent Teams. Otherwise, the workflow continues to Branch Strategy (current branch or new worktree), then Phase 2.
 
 ### Phase 2: Architecture
 

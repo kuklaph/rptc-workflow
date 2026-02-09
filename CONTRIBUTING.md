@@ -135,6 +135,7 @@ Before submitting a PR, test the following:
 **Workflow Verification:**
 
 - [ ] Phase 1 (Discovery) launches parallel exploration agents
+- [ ] Branch Strategy prompt appears after Phase 1 and offers worktree option
 - [ ] Phase 2 (Architecture) presents 3 planning perspectives
 - [ ] Phase 3 (TDD) uses smart batching for implementation
 - [ ] Phase 4 (Quality Verification) runs code-review, security, and docs agents in parallel (report-only)

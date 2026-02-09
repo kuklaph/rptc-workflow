@@ -65,6 +65,7 @@ The unified `/rptc:feat` command handles the complete workflow:
 - Analyzes existing code patterns
 - Identifies files to modify and dependencies
 - Optional web research for unfamiliar topics
+- **Branch Strategy**: Choose current branch or new git worktree for isolated work
 
 ### Phase 2: Architecture
 
@@ -378,6 +379,7 @@ docs/research/
 # Phase 1: Discovery
 [Agent explores codebase, identifies patterns]
 [Presents findings: files to modify, dependencies]
+[Branch Strategy: current branch or new worktree]
 
 # Phase 2: Architecture
 [3 planning approaches presented]

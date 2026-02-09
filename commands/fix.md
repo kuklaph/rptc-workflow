@@ -275,7 +275,45 @@ Run the `agent-teams` skill's Teams Analysis. It evaluates three signals:
 **If teams mode activates**: The skill takes over orchestration. Do NOT continue
 to Phase 2 — the skill handles the remaining workflow.
 
-**If teams mode does NOT activate**: Continue to Phase 2 as normal.
+**If teams mode does NOT activate**: Continue to Branch Strategy, then Phase 2.
+
+### Branch Strategy
+
+**Now that the scope is clear**, ask the user how to organize this work.
+
+```
+Use AskUserQuestion:
+question: "How should this fix be organized?"
+header: "Branch"
+options:
+  - label: "Current branch (Recommended)"
+    description: "Work directly on the current branch"
+  - label: "New worktree"
+    description: "Create a git worktree with a dedicated fix branch for isolated work"
+```
+
+**If "New worktree" selected:**
+
+1. **Generate branch name** from the bug description:
+   - Lowercase, replace spaces with hyphens, strip special characters
+   - Prefix with `fix/`
+   - Example: `"Cart items disappear"` → `fix/cart-items-disappear`
+
+2. **Create worktree and switch to it**:
+   ```bash
+   git worktree add -b <branch-name> ../<project-dir>-<branch-name> HEAD
+   ```
+
+3. **Change working directory** to the new worktree path. All subsequent work (Root Cause Analysis, Fix, Verification) proceeds inside the worktree.
+
+4. **Confirm to user**:
+   ```
+   Worktree created at ../<path>
+   Branch: <branch-name>
+   All work proceeds in this worktree.
+   ```
+
+**If "Current branch" selected:** Continue to Phase 2.
 
 ---
 

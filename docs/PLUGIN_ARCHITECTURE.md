@@ -166,8 +166,11 @@ Phase 1: Discovery
     → Uses rptc:research-agent with code-explorer methodology
     ↓
 Teams Analysis
-    → Single task: continue to Phase 2
+    → Single task: continue to Branch Strategy
     → Multiple independent tasks: Agent Teams mode (skill orchestrates)
+    ↓
+Branch Strategy
+    → Current branch or new git worktree
     ↓
 Phase 2: Architecture
     → Enters Claude's native plan mode

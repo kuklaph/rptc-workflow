@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 3.1.0
+**Version**: 3.2.0
 **Status**: Beta
 **License**: MIT
 
@@ -78,6 +78,7 @@ All phases unified in one command: `/rptc:feat`
 - Launches 2-3 parallel exploration agents for codebase analysis
 - Optional web research for unfamiliar topics
 - Summarizes key patterns, files to modify, and dependencies
+- **Branch Strategy**: Choose to work on the current branch or create a new git worktree
 
 ### Phase 2: Architecture
 
