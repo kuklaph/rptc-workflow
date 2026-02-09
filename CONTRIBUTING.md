@@ -103,7 +103,7 @@ rptc-workflow/
 ├── agents/                # Specialist agent definitions (8 agents)
 ├── sop/                   # Standard Operating Procedures (10 SOPs)
 ├── templates/             # Templates for artifacts
-├── skills/                # Skills (6 skills)
+├── skills/                # Skills (16 skills)
 └── docs/                  # Documentation
 ```
 
@@ -187,30 +187,32 @@ How failures are handled
 
 ### Agent Documentation
 
-All agent files must include:
+Agent files are thin shells — skills are loaded via frontmatter (`skills:` field), not manual Read calls. All agent files must include:
 
 ```markdown
+---
+name: agent-name
+description: Brief description. REPORT ONLY if applicable.
+tools: [tool list]
+skills:
+  - rptc:core-principles
+  - rptc:tool-guide
+  - rptc:[agent]-methodology
+color: [color]
+model: inherit
+---
+
 # Agent Name
 
-## Purpose
+[One-line role description]. **REPORT ONLY** (if applicable).
 
-What this agent specializes in
+## RPTC Workflow Context (MANDATORY)
 
-## When Used
+[Phase, directives table, SOPs table, exit verification block]
 
-Phase/context when agent is invoked
+## Operating Methodology
 
-## Standard Operating Procedures
-
-List of SOPs this agent consults
-
-## Analysis Process
-
-Detailed steps the agent takes
-
-## Output Format
-
-Expected deliverables
+[Brief reinforcement pointing to preloaded skills]
 ```
 
 ### Code Comments

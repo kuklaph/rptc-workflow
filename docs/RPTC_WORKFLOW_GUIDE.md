@@ -486,14 +486,33 @@ You can ask for modifications:
 - `todowrite-guide.md` - Progress tracking patterns
 - `test-sync-guide.md` - Test synchronization
 
-### Skills
+### User-Facing Skills
 
-- `brainstorming` - Structured dialogue for requirement clarification
-- `discord-notify` - Real-time notifications
-- `html-report-generator` - Convert research to HTML reports
-- `tdd-methodology` - TDD guidance in main context
-- `writing-clearly-and-concisely` - Apply Strunk's Elements of Style to prose
-- `agent-teams` - Parallel execution via Agent Teams for batch/multi-feature work
+| Skill | Purpose |
+|-------|---------|
+| `agent-teams` | Parallel execution via Agent Teams for batch/multi-feature work |
+| `brainstorming` | Structured dialogue for requirement clarification before planning |
+| `discord-notify` | Send Discord notifications on task completion |
+| `html-report-generator` | Convert markdown research to professional HTML reports |
+| `tdd-methodology` | TDD guidance in main context (alternative to sub-agent) |
+| `writing-clearly-and-concisely` | Apply Strunk's Elements of Style to prose |
+
+### Agent Methodology Skills
+
+Preloaded into agents via `skills:` frontmatter at session start. Not invoked directly by users.
+
+| Skill | Agent | Content |
+|-------|-------|---------|
+| `core-principles` | All agents | Surgical Coding, Simplicity, Pattern Reuse |
+| `tool-guide` | All agents | Serena MCP, Sequential Thinking, Memory, Context7 |
+| `architect-methodology` | architect-agent | 6-phase planning, constraints, output template |
+| `code-review-methodology` | code-review-agent | 4-tier review framework, over-engineering checklist |
+| `docs-methodology` | docs-agent | 8-step workflow, anti-patterns, special cases |
+| `research-methodology` | research-agent | 3 research modes, mode selection logic |
+| `security-methodology` | security-agent | Finding categories, OWASP Top 10, confidence scoring |
+| `tdd-agent-methodology` | tdd-agent | Batch execution, RED-GREEN-REFACTOR-VERIFY cycle |
+| `test-fixer-methodology` | test-fixer-agent | Approval-aware execution, 5 fix scenarios |
+| `test-sync-methodology` | test-sync-agent | 5-phase analysis, classification decision tree |
 
 ---
 

@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.4.0] - 2026-02-09
+
+### Added
+
+- **10 new skills** extracted from agent instructions — each agent now loads methodology from standalone skill files at session start:
+  - `core-principles` — Surgical Coding, Simplicity, Pattern Reuse (shared across all 8 agents)
+  - `tool-guide` — Serena MCP, Sequential Thinking, Memory, Context7 (shared across all 8 agents)
+  - `architect-methodology` — 6-phase planning, constraints generation, output template
+  - `code-review-methodology` — 4-tier review framework, over-engineering checklist, confidence scoring
+  - `docs-methodology` — 8-step workflow, anti-patterns, special cases, performance standards
+  - `research-methodology` — 3 research modes (codebase, web, hybrid), mode selection logic
+  - `security-methodology` — Finding categories, OWASP Top 10, confidence scoring
+  - `tdd-agent-methodology` — Batch execution, RED-GREEN-REFACTOR-VERIFY cycle, framework selection
+  - `test-fixer-methodology` — Approval-aware execution, fix decision tree, 5 fix scenarios
+  - `test-sync-methodology` — 5-phase analysis, classification decision tree, output format
+
+### Changed
+
+- **All 8 agents converted to thin shells** — agents now contain only frontmatter (with `skills:` field for platform-injected skill loading), RPTC Workflow Context, and body instructions. Methodology content moved to skills.
+- **Agent skill loading via frontmatter** — skills are injected into the agent's system prompt at startup (zero tool turns, platform-enforced). Replaces manual Session Initialization Read pattern.
+- **Agent size reduction**: architect-agent 1627→72 lines, tdd-agent 1095→70 lines, docs-agent 966→69 lines, test-fixer-agent 910→66 lines, test-sync-agent 766→65 lines, code-review-agent 484→67 lines, research-agent 332→71 lines, security-agent 309→63 lines
+
+---
+
+
 ## [3.3.0] - 2026-02-09
 
 ### Changed

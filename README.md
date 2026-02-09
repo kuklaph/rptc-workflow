@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 3.3.0
+**Version**: 3.4.0
 **Status**: Beta
 **License**: MIT
 
@@ -254,39 +254,33 @@ Standard Operating Procedures provide guidance for agents:
 
 ## Skills
 
-### HTML Report Generator
+### User-Facing Skills
 
-**Purpose**: Convert markdown research to professional HTML reports
-**Invocation**: Automatic when saving research as HTML or manual
+| Skill | Purpose |
+|-------|---------|
+| `agent-teams` | Parallel execution via Agent Teams for batch/multi-feature work |
+| `brainstorming` | Structured dialogue for requirement clarification before planning |
+| `discord-notify` | Send Discord notifications on task completion |
+| `html-report-generator` | Convert markdown research to professional HTML reports |
+| `tdd-methodology` | TDD guidance in main context (alternative to sub-agent) |
+| `writing-clearly-and-concisely` | Apply Strunk's Elements of Style to prose |
 
-### Discord Notifications
+### Agent Methodology Skills
 
-**Purpose**: Real-time notifications via Discord webhooks
-**Configuration**: Optional webhook URL in project settings
+Preloaded into agents via `skills:` frontmatter at session start. Not invoked directly by users.
 
-### TDD Methodology
-
-**Purpose**: Enables TDD methodology guidance within main context
-**When**: Alternative to sub-agent delegation for simple features
-
-### Writing Clearly and Concisely
-
-**Purpose**: Apply Strunk's *Elements of Style* (1918) to prose
-**When**: Documentation, commit messages, error messages, UI copy
-**Integration**: docs-agent references for Tier 4 style suggestions
-
-### Brainstorming
-
-**Purpose**: Transform unclear ideas into actionable designs through structured dialogue
-**When**: Planning phases when requirements need clarification
-**Method**: One question at a time via AskUserQuestion, explore 2-3 approaches, YAGNI ruthlessly
-
-### Agent Teams
-
-**Purpose**: Parallel execution via Claude Code Agent Teams
-**When**: Multiple independent features/fixes, batch work, or user requests teams
-**Provides**: RPTC-compliant team creation, spawn prompts, file ownership, approval coordination
-**Architecture**: Flexible autonomy levels (full RPTC per teammate, shared planning, or debate mode)
+| Skill | Agent | Content |
+|-------|-------|---------|
+| `core-principles` | All agents | Surgical Coding, Simplicity, Pattern Reuse |
+| `tool-guide` | All agents | Serena MCP, Sequential Thinking, Memory, Context7 |
+| `architect-methodology` | architect-agent | 6-phase planning, constraints, output template |
+| `code-review-methodology` | code-review-agent | 4-tier review framework, over-engineering checklist |
+| `docs-methodology` | docs-agent | 8-step workflow, anti-patterns, special cases |
+| `research-methodology` | research-agent | 3 research modes, mode selection logic |
+| `security-methodology` | security-agent | Finding categories, OWASP Top 10, confidence scoring |
+| `tdd-agent-methodology` | tdd-agent | Batch execution, RED-GREEN-REFACTOR-VERIFY cycle |
+| `test-fixer-methodology` | test-fixer-agent | Approval-aware execution, 5 fix scenarios |
+| `test-sync-methodology` | test-sync-agent | 5-phase analysis, classification decision tree |
 
 ---
 
@@ -318,12 +312,22 @@ rptc-workflow/
 │   └── test-fixer-agent.md
 ├── sop/                         # 10 SOPs
 ├── templates/                   # Templates for artifacts
-├── skills/                      # 6 skills
+├── skills/                      # 16 skills
 │   ├── agent-teams/
+│   ├── architect-methodology/
 │   ├── brainstorming/
+│   ├── code-review-methodology/
+│   ├── core-principles/
 │   ├── discord-notify/
+│   ├── docs-methodology/
 │   ├── html-report-generator/
+│   ├── research-methodology/
+│   ├── security-methodology/
+│   ├── tdd-agent-methodology/
 │   ├── tdd-methodology/
+│   ├── test-fixer-methodology/
+│   ├── test-sync-methodology/
+│   ├── tool-guide/
 │   └── writing-clearly-and-concisely/
 └── docs/                        # Documentation
 ```

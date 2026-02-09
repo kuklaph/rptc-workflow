@@ -35,8 +35,8 @@ rptc-workflow/                      # ${CLAUDE_PLUGIN_ROOT}
 ├── agents/                         # Specialist agents (8 agents)
 │   ├── docs-agent.md               # Documentation sync
 │   ├── code-review-agent.md        # Code review
-│   ├── architect-agent.md               # Implementation planning
-│   ├── research-agent.md         # Research and exploration
+│   ├── architect-agent.md          # Implementation planning
+│   ├── research-agent.md          # Research and exploration
 │   ├── security-agent.md           # Security review
 │   ├── tdd-agent.md                # TDD execution
 │   ├── test-fixer-agent.md         # Test repair
@@ -54,12 +54,22 @@ rptc-workflow/                      # ${CLAUDE_PLUGIN_ROOT}
 │   ├── testing-guide.md
 │   └── todowrite-guide.md
 │
-├── skills/                         # Skills (6 skills)
+├── skills/                         # Skills (16 skills)
 │   ├── agent-teams/
+│   ├── architect-methodology/
 │   ├── brainstorming/
+│   ├── code-review-methodology/
+│   ├── core-principles/
 │   ├── discord-notify/
+│   ├── docs-methodology/
 │   ├── html-report-generator/
+│   ├── research-methodology/
+│   ├── security-methodology/
+│   ├── tdd-agent-methodology/
 │   ├── tdd-methodology/
+│   ├── test-fixer-methodology/
+│   ├── test-sync-methodology/
+│   ├── tool-guide/
 │   └── writing-clearly-and-concisely/
 │
 ├── templates/                      # Document templates
@@ -424,7 +434,7 @@ Pre-commit hook automatically blocks commits with version mismatch.
 - 7 commands (2 primary, 5 supporting)
 - 8 specialist agents
 - 10 SOPs
-- 6 skills
+- 16 skills (6 user-facing + 10 agent methodology)
 
 **User provides:**
 
