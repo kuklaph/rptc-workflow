@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.4.1] - 2026-02-10
+
+### Fixed
+
+- **docs-agent Bash safety checker false positive** — removed shell-sensitive characters from `docs-methodology` skill that blocked all Bash commands when injected into the agent's system prompt via frontmatter. Replaced backtick-wrapped `!` (history expansion) and nested backticks (command substitution pattern) with plain text equivalents.
+
+---
+
+
 ## [3.4.0] - 2026-02-09
 
 ### Added

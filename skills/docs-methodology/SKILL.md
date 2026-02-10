@@ -172,7 +172,7 @@ Context matters. When in doubt, flag for review with a note about potential inte
 ## Special Cases
 
 ### Breaking Changes
-Detection: Commit message contains `BREAKING CHANGE:` or `!` in type. Flag ALL affected documentation with high priority. Note migration guide may be needed.
+Detection: Commit message contains "BREAKING CHANGE:" or an exclamation mark in type. Flag ALL affected documentation with high priority. Note migration guide may be needed.
 
 ### Documentation Tests Failing
 Report failing code examples with specific locations. Include expected vs actual behavior. Flag for main context to fix.
@@ -184,7 +184,7 @@ Report existing version-specific sections. Suggest new version section if needed
 Report findings for English (primary) only. Flag translated docs for human translation (below threshold). Never suggest auto-translation.
 
 ### Screenshots or Visual Assets
-Flag for manual review (below threshold). Report: "Screenshot at `images/[name].png` may be outdated."
+Flag for manual review (below threshold). Report: "Screenshot at images/[name].png may be outdated."
 
 ---
 
