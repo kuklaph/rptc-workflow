@@ -92,14 +92,15 @@ Before suggesting a feature:
 ```text
 rptc-workflow/
 ├── .claude-plugin/        # Plugin metadata
-├── commands/              # Slash command definitions (flat structure, 7 commands)
+├── commands/              # Slash command definitions (flat structure, 8 commands)
 │   ├── commit.md         # /rptc:commit
 │   ├── config.md         # /rptc:config
 │   ├── feat.md           # /rptc:feat (PRIMARY)
 │   ├── fix.md            # /rptc:fix
 │   ├── research.md       # /rptc:research
 │   ├── sync-prod-to-tests.md  # /rptc:sync-prod-to-tests
-│   └── verify.md         # /rptc:verify
+│   ├── verify.md         # /rptc:verify
+│   └── verify-loop.md    # /rptc:verify-loop
 ├── agents/                # Specialist agent definitions (8 agents)
 ├── sop/                   # Standard Operating Procedures (10 SOPs)
 ├── templates/             # Templates for artifacts
@@ -130,6 +131,7 @@ Before submitting a PR, test the following:
 - [ ] `/rptc:research "test topic"` performs discovery with exploration agents
 - [ ] `/rptc:commit` verifies and creates commits
 - [ ] `/rptc:verify` runs selected verification agents on demand
+- [ ] `/rptc:verify-loop` runs agents in a convergence loop, exits cleanly
 - [ ] `/rptc:sync-prod-to-tests "src/"` analyzes and syncs tests
 
 **Workflow Verification:**

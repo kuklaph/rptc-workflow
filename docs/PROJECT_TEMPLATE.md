@@ -23,6 +23,7 @@
 /rptc:feat "feature description"     # Complete feature: Discovery → Plan → TDD → Verification
 /rptc:research "topic"               # Standalone research (optional)
 /rptc:verify [path]                  # Run quality verification agents on demand
+/rptc:verify-loop [path]             # Run verification in a convergence loop until 0 findings
 /rptc:commit [pr]                    # Verify and ship (optional PR)
 /rptc:sync-prod-to-tests "[dir]"     # Sync tests to production code
 ```
@@ -308,6 +309,11 @@ Need standalone research first?
 
 Tests out of sync?
   └─ /rptc:sync-prod-to-tests "src/"
+
+Want a fully clean result after fixes?
+  └─ /rptc:verify-loop [path]
+     → Loops until 0 findings, stagnation, or max iterations
+     → Then /rptc:commit [pr]
 
 Ready to ship?
   └─ /rptc:commit [pr]

@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.5.0] - 2026-02-20
+
+### Added
+
+- `/rptc:verify-loop` command: runs verification agents in a loop until all
+  report 0 findings. Auto-fixes Tier 2-4 issues each iteration; asks user
+  before Tier 1 changes (architecture, security vulnerabilities, structural
+  refactoring, breaking API changes). Includes stagnation detection (same
+  finding returning 2+ consecutive iterations) and a configurable max-iteration
+  safety guard (default 5, extendable in increments of 5).
+
+---
+
 ## [3.4.3] - 2026-02-20
 
 ### Fixed

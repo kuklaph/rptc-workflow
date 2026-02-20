@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 3.4.3
+**Version**: 3.5.0
 **Status**: Beta
 **License**: MIT
 
@@ -65,6 +65,7 @@ All phases unified in one command: `/rptc:feat`
 | `/rptc:research "topic"` | Standalone research and discovery | Exploring unfamiliar topics separately |
 | `/rptc:commit [pr]` | Verify and ship | After completing implementation |
 | `/rptc:verify [path]` | Run quality verification agents on demand | After any code change, independent verification |
+| `/rptc:verify-loop [path]` | Run verification in a loop until 0 findings | After implementation, when you want a fully clean result |
 | `/rptc:sync-prod-to-tests "[dir]"` | Sync tests to production code with auto-fix | Test maintenance |
 
 ---
@@ -300,6 +301,7 @@ rptc-workflow/
 │   ├── research.md              # /rptc:research
 │   ├── config.md                # /rptc:config (sync config with version)
 │   ├── verify.md                # /rptc:verify (standalone verification)
+│   ├── verify-loop.md           # /rptc:verify-loop (convergence loop)
 │   └── sync-prod-to-tests.md    # /rptc:sync-prod-to-tests
 ├── agents/                      # 8 specialist agents
 │   ├── research-agent.md

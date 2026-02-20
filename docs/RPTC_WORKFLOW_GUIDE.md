@@ -218,6 +218,21 @@ For documentation, config, and non-code changes:
 3. Launches selected verification agents in parallel (report-only)
 4. Consolidates findings and applies fixes via TaskCreate/TaskUpdate
 
+### `/rptc:verify-loop [path]`
+
+**Purpose**: Run quality verification agents in a convergence loop until all report 0 findings.
+
+**When to use:**
+- After implementation, when you want a fully clean result rather than a single-pass report
+- When iterating on fixes and want auto-convergence with a safety guard
+
+**How it works:**
+1. Determines scope once (default: uncommitted changes via `git diff`)
+2. Asks which agents to run: Full (all 3), Code + Security, or Docs only
+3. Runs selected agents in parallel each iteration; auto-fixes Tier 2-4 findings
+4. Asks user approval before Tier 1 changes (architecture, security, breaking API, structural refactoring)
+5. Loops until all agents return 0 findings, or exits on stagnation, max iterations, or user skip
+
 ### `/rptc:config`
 
 **Purpose**: Configure RPTC in your project's CLAUDE.md.
