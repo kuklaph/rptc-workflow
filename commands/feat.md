@@ -478,6 +478,7 @@ options:
 ```
 
 5. **Write selected plan to plan file** with:
+   - **Step 0: RPTC Re-initialization (ALWAYS FIRST)** — Serena activation, skill loading, task list rebuild for Phase 3/4/5 (use plan-overview template for exact format)
    - Approach used (with rationale)
    - Implementation steps (ordered)
    - Files to create/modify

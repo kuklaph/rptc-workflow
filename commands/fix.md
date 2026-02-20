@@ -466,6 +466,8 @@ Constraints:
 - MINIMAL change - fix the root cause only
 - NO refactoring unrelated code
 - NO scope creep
+
+Plan structure: Begin with Step 0: RPTC Re-initialization (Serena activation, skill loading, task list rebuild for Phase 3/4/5). See plan-overview template for exact format.
 ```
 
 4. **Review fix plan**:
@@ -473,7 +475,7 @@ Constraints:
    - Is the fix minimal and surgical?
    - What's the regression risk?
 
-5. **If plan mode used**: Exit with ExitPlanMode for user approval
+5. **If plan mode used**: Verify plan includes Step 0: RPTC Re-initialization, then exit with ExitPlanMode for user approval
 
 `TaskUpdate(Phase 2, status: "completed")`
 

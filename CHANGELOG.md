@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.4.3] - 2026-02-20
+
+### Fixed
+
+- Plans now include a mandatory Step 0 (RPTC Re-initialization) as their first section, baking Serena activation, skill loading, and task list rebuild directly into the plan file. This ensures the workflow resumes correctly whether or not context was cleared after plan approval.
+
+---
+
+
 ## [3.4.2] - 2026-02-20
 
 ### Fixed

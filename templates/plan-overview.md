@@ -25,6 +25,33 @@
 
 ---
 
+## Step 0: RPTC Re-initialization (ALWAYS FIRST)
+
+**Run before any implementation step.** Idempotent — safe whether or not context was cleared after plan approval.
+
+### 0.1 Activate Serena MCP
+`ToolSearch(query: "serena")`
+
+### 0.2 Load Required Skills
+- `Skill(skill: "rptc:tool-guide")`
+- `Skill(skill: "rptc:tdd-methodology")`
+- `Skill(skill: "rptc:agent-teams")`
+- If frontend/UI work: `Skill(skill: "frontend-design:frontend-design")`
+
+### 0.3 Rebuild Task List
+
+Context clear also clears tasks. Recreate the remaining phases with their dependency chain:
+
+- `TaskCreate("Phase 3: [phase-name]", description: "[description]")`
+- `TaskCreate("Phase 4: [phase-name]", description: "[description]")`
+- `TaskCreate("Phase 5: Complete", description: "Summarize what was built")`
+- `TaskUpdate(Phase 4, addBlockedBy: [Phase 3])`
+- `TaskUpdate(Phase 5, addBlockedBy: [Phase 4])`
+
+**Do not proceed to Phase 3 until 0.1, 0.2, and 0.3 are all complete.**
+
+---
+
 ## Executive Summary
 
 **Feature:** [1-sentence description]
