@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.4.2] - 2026-02-20
+
+### Fixed
+
+- Serena MCP tools not activated in main context for `/rptc:feat` and `/rptc:fix` — added mandatory `ToolSearch(query: "serena")` step (Step 0.1.2) to load deferred tools at session start
+- `rptc:tool-guide` skill not loaded in main context — added as first mandatory skill in Step 0.1 of both primary commands, closing parity gap with agents
+
+### Changed
+
+- Tool Prioritization section in `/rptc:feat` and `/rptc:fix` now covers both read operations and edit operations (`replace_symbol_body`, `insert_after_symbol`, `rename_symbol`, etc.)
+- Phase tool hints in Phases 2, 3, and 4 now name specific Serena tools rather than generic references
+- `rptc:tool-guide` documented in Skills Usage Guide alongside other mandatory skills
+
+---
+
+
 ## [3.4.1] - 2026-02-10
 
 ### Fixed
