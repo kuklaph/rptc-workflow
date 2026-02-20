@@ -11,18 +11,19 @@ Systematic bug fixing: Reproduction → Root Cause Analysis → Fix → Verifica
 
 **Before ANY other action, establish RPTC workflow context.**
 
-### 0.1 Load Required Skills (ALL FOUR MANDATORY)
+### 0.1 Load Required Skills (ALL FIVE MANDATORY)
 
-Load ALL four skills below. Each `Skill()` call is MANDATORY — do not skip any.
+Load ALL five skills below. Each `Skill()` call is MANDATORY — do not skip any.
 
 ```
+Skill(skill: "rptc:tool-guide")
 Skill(skill: "rptc:brainstorming")
 Skill(skill: "rptc:writing-clearly-and-concisely")
 Skill(skill: "rptc:tdd-methodology")
 Skill(skill: "rptc:agent-teams")
 ```
 
-After loading, confirm all four loaded. If ANY skill fails to load, STOP and report the failure. The `rptc:agent-teams` skill is infrastructure — it must load even when teams mode may not activate.
+After loading, confirm all five loaded. If ANY skill fails to load, STOP and report the failure. The `rptc:agent-teams` skill is infrastructure — it must load even when teams mode may not activate.
 
 ### 0.1.1 Conditional Skills (Load When Applicable)
 
@@ -35,6 +36,20 @@ Skill(skill: "frontend-design:frontend-design")
 > This is an external plugin skill (Anthropic's `frontend-design` plugin) that provides creative direction and distinctive aesthetics. If unavailable, skip silently — the RPTC `frontend-guidelines.md` SOP (loaded via the SOP Reference Chain) still applies for engineering standards. Both are complementary: the SOP ensures correctness (accessibility, performance, responsive), the skill ensures distinction (bold aesthetics, memorable design). Do NOT error or warn the user if the plugin is missing.
 
 > **IMPORTANT**: If the project already has an established design system, style guide, or visual aesthetic, the skill's creative direction MUST work within those constraints. Research existing styles first (CSS variables, component library, brand guidelines) and preserve them — do not introduce a conflicting aesthetic when fixing bugs. The skill adds polish and intentionality, not a new identity.
+
+### 0.1.2 Activate Serena MCP (MANDATORY)
+
+Serena tools are **deferred** in the main context — they require explicit loading before they can be called.
+
+Call ToolSearch now to activate them:
+
+```
+ToolSearch(query: "serena")
+```
+
+Once loaded, Serena tools appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*`. This activates both read tools (`find_symbol`, `get_symbols_overview`, `search_for_pattern`, etc.) and edit tools (`replace_symbol_body`, `insert_after_symbol`, etc.). Use them throughout this workflow — refer to the Tool Prioritization section for the full map of Serena vs. native tools.
+
+If Serena is unavailable (not installed), skip silently and fall back to native Grep and Glob.
 
 ### 0.2 RPTC Workflow Understanding (INTERNALIZE)
 
@@ -139,9 +154,11 @@ TaskUpdate(Phase 5, addBlockedBy: [Phase 4])
 
 ## Tool Prioritization
 
-**Serena MCP** (when available, prefer over native tools):
+**Serena MCP** (prefer over native tools — activated via ToolSearch in Step 0.1.2):
 
 Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` — use whichever is available.
+
+**Read operations** (use instead of native Grep/Glob/Read for code):
 
 | Task | Prefer Serena | Over Native |
 |------|---------------|-------------|
@@ -149,7 +166,18 @@ Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` �
 | Locate specific code | `find_symbol` | Glob |
 | Find usages/references | `find_referencing_symbols` | Grep |
 | Regex search | `search_for_pattern` | Grep |
+| List directory | `list_dir` | LS |
 | Reflect on progress | `think_about_collected_information` | — |
+
+**Edit operations** (use instead of Edit tool for code modifications):
+
+| Task | Prefer Serena | Over Native |
+|------|---------------|-------------|
+| Replace function/method body | `replace_symbol_body` | Edit |
+| Insert code after a symbol | `insert_after_symbol` | Edit |
+| Insert code before a symbol | `insert_before_symbol` | Edit |
+| Rename a symbol everywhere | `rename_symbol` | Edit |
+| Reflect on task adherence | `think_about_task_adherence` | — |
 
 **Sequential Thinking MCP** (STRONGLY RECOMMENDED):
 
@@ -165,6 +193,16 @@ Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp_
 ---
 
 ## Skills Usage Guide
+
+**`rptc:tool-guide`** - Tool prioritization for Serena MCP and other MCP servers (MANDATORY LOAD):
+
+| When | Apply To |
+|------|----------|
+| Step 0 (always loaded) | Infrastructure — activates Serena for code navigation throughout |
+| All phases | Serena read ops (`find_symbol`, `search_for_pattern`), Sequential Thinking |
+
+**Method**: ToolSearch activates Serena at session start (Step 0.1.2); then prefer `find_symbol`, `get_symbols_overview`, `search_for_pattern` over native Grep/Glob for all code navigation.
+**Timing**: Loaded first in Step 0. Applies across all phases wherever code navigation or symbol search is needed.
 
 **`brainstorming`** - Structured dialogue for fix approach exploration:
 
@@ -377,7 +415,7 @@ When `WORKTREE_PATH` is NOT set, omit this block entirely.
 
 **Goal**: Identify the fundamental cause and plan the fix.
 
-> 💡 **Tool Reminder**: Use Sequential Thinking for 5 Whys analysis — it excels at multi-step reasoning.
+> 💡 **Tool Reminder**: Use Sequential Thinking for 5 Whys analysis. Use Serena (`find_symbol`, `find_referencing_symbols`) to trace code paths and confirm root cause.
 
 **Actions**:
 
@@ -447,7 +485,7 @@ Constraints:
 
 **Goal**: Apply the fix using test-driven approach (regression test first).
 
-> 💡 **Tool Reminder**: Use Serena for precise code navigation when applying fixes.
+> 💡 **Tool Reminder**: Use Serena for both navigation and edits: `find_symbol` to locate code, `replace_symbol_body` / `insert_after_symbol` to apply changes (prefer over Edit tool).
 
 **CRITICAL - Test-First Ordering (NON-NEGOTIABLE)**:
 
@@ -584,6 +622,8 @@ Apply MINIMAL fix to make the test pass:
 `TaskUpdate(Phase 4, status: "in_progress")`
 
 **Goal**: Verify the fix works and didn't introduce regressions.
+
+> 💡 **Tool Reminder**: Use Serena (`find_referencing_symbols`, `search_for_pattern`) when applying auto-fixes from verification findings.
 
 **This phase runs for ALL bugs regardless of severity (S1-S4).** Even urgent S1 fixes must be reviewed before completion.
 

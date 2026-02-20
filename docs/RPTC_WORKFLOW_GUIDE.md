@@ -499,7 +499,7 @@ You can ask for modifications:
 
 ### Agent Methodology Skills
 
-Preloaded into agents via `skills:` frontmatter at session start. Not invoked directly by users.
+Preloaded into agents via `skills:` frontmatter at session start. Most are not invoked directly by users — exception: `tool-guide` is also loaded as a mandatory skill in `/rptc:feat` and `/rptc:fix` to activate Serena MCP in the main context.
 
 | Skill | Agent | Content |
 |-------|-------|---------|
