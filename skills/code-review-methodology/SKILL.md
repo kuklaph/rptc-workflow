@@ -1,6 +1,6 @@
 ---
 name: code-review-methodology
-description: Code review methodology for the RPTC code-review agent. Covers hierarchical review framework (4 tiers), over-engineering checklist, integration completeness check, false positive guidance, confidence scoring (>=80 threshold), domain-specific checks, and structured output format. Report-only mode.
+description: Code review methodology for the RPTC code-review agent. Covers hierarchical review framework (4 tiers), over-engineering checklist, integration completeness check, behavioral testing checklist, assertion quality checklist, false positive guidance, confidence scoring (>=80 threshold), domain-specific checks, and structured output format. Report-only mode.
 ---
 
 # Code Review Methodology
@@ -90,6 +90,8 @@ Analyze in this priority order:
 - Missing edge case tests
 - Poor test isolation
 - Tests that don't actually verify behavior
+- **Behavioral testing violations** (see checklist below)
+- **Assertion quality issues** (see checklist below)
 
 ### Tier 3: Important
 
@@ -114,6 +116,48 @@ Analyze in this priority order:
 - Minor naming convention deviations
 - Slightly awkward code structure
 - Missing optional type annotations
+
+---
+
+## Behavioral Testing Checklist
+
+Tests should verify **behavior** (what the code does from the caller's perspective), not **implementation** (how it does it internally). Flag tests that violate this principle.
+
+**Flag when**:
+
+| Signal | Example | Why It's a Problem |
+|--------|---------|-------------------|
+| Mocking internal collaborators | Mocking a private helper or an internal service method that isn't an external boundary | Couples test to implementation; refactoring breaks tests without changing behavior |
+| Interaction verification on internals | `.toHaveBeenCalledWith()` or `assert_called_once_with()` on methods that are not external API calls | Asserts *how* code works, not *what* it produces |
+| Test names reference implementation details | `"should call _validateInput"`, `"should set internal state to X"` | Tests should describe observable outcomes, not internal steps |
+| Mocking the system under test | `jest.spyOn(service, 'privateMethod')` on the class being tested | Tests should exercise the real code path |
+
+**Do NOT flag**:
+
+- Mocking external boundaries (databases, HTTP clients, file system, third-party APIs) — this is correct practice
+- Verifying that an external API was called with correct arguments — this is boundary verification, not internal coupling
+- Spying on event emissions or callbacks that are part of the public contract
+
+**Confidence**: Score 85+ when the mock target is clearly internal (same module, private method, helper function). Score 75 (skip) when uncertain whether the dependency is internal or external.
+
+---
+
+## Assertion Quality Checklist
+
+Tests with weak or missing assertions provide false confidence. Flag these patterns:
+
+| Pattern | Example | Fix |
+|---------|---------|-----|
+| **Zero assertions** | Test body calls functions but never asserts | Add assertions verifying return values or side effects |
+| **Truthiness-only** | `assert result is not None` or `expect(x).toBeTruthy()` as sole assertion | Assert specific values, types, or properties |
+| **Mock-only assertions** | Assertions only on mock call counts, never on actual output | Add assertions on the return value or observable state change |
+| **No SUT reference** | Assertions don't reference the function's return value or the object's state after calling it | Ensure at least one assertion checks the system under test's output |
+
+**Scoring guidance**:
+- Zero-assertion test: confidence 95 (always a bug)
+- Truthiness-only as sole assertion: confidence 90
+- Mock-only assertions with no output check: confidence 85
+- Assertions present but weak (e.g., only checks type, not value): confidence 75 (skip — judgment call)
 
 ---
 
@@ -273,6 +317,8 @@ Return structured findings:
 Before returning findings:
 - [ ] All Tier 1 issues identified? (these are blockers)
 - [ ] Integration completeness checked? (new exports have production callers)
+- [ ] Behavioral testing checklist applied? (internal mocking, interaction verification)
+- [ ] Assertion quality checklist applied? (zero-assertion, truthiness-only, mock-only)
 - [ ] False positive guidance applied?
 - [ ] Confidence >=80 for all reported issues?
 - [ ] Nits included as Tier 4 findings?

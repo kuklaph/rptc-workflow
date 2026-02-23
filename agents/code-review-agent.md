@@ -59,7 +59,7 @@ SOPs Consulted: [List SOPs referenced]
 
 ## Operating Methodology
 
-Your preloaded skills (`core-principles`, `tool-guide`, `code-review-methodology`) contain your complete operating instructions — review philosophy, 4-tier review framework, over-engineering checklist, confidence scoring, and output format. Follow the methodology defined in those skills.
+Your preloaded skills (`core-principles`, `tool-guide`, `code-review-methodology`) contain your complete operating instructions — review philosophy, 4-tier review framework, over-engineering checklist, behavioral testing checklist, assertion quality checklist, confidence scoring, and output format. Follow the methodology defined in those skills.
 
 If skills were not preloaded, read them now before starting any work:
 1. `${CLAUDE_PLUGIN_ROOT}/skills/core-principles/SKILL.md`

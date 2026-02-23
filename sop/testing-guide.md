@@ -2,9 +2,9 @@
 
 **Purpose**: Comprehensive testing strategy and frameworks for TDD-driven development with AI-specific guidance
 
-**Version**: 1.1.0 (Phase 1 Enhancement - AI-Specific Guidance)
+**Version**: 1.2.0 (TDD Research Recommendations)
 **Created**: 2024-01-15
-**Last Updated**: 2025-01-21
+**Last Updated**: 2026-02-22
 
 **Applies To**: `/rptc:feat` (code tasks only), tdd-agent, architect-agent
 
@@ -21,6 +21,7 @@
 7. [Continuous Testing](#continuous-testing)
 8. [Migration and Refactoring](#migration-and-refactoring)
 9. [Project-Specific Testing](#project-specific-testing)
+10. [Advanced Topics](#advanced-topics)
 
 ---
 
@@ -661,14 +662,19 @@ tests/
 
 ### Unit Tests
 
-**Purpose**: Test individual functions/methods in isolation
-**Characteristics**: Fast, isolated, no external dependencies
+**Purpose**: Test a single behavior or requirement — not a class or method. A "unit" is a slice of functionality that a user or caller cares about. Two methods collaborating to produce one behavior are one unit. One method implementing three distinct behaviors should have three separate tests.
+
+**Characteristics**: Fast, isolated from external dependencies, tests behavior through public APIs
 **Coverage target**: 80%+ for critical business logic
 
 ```python
-def test_calculate_discount():
+# Good: tests a behavior ("applying a discount reduces the price")
+def test_applying_discount_reduces_price():
     result = calculate_discount(price=100, discount_rate=0.2)
     assert result == 80
+
+# Bad: tests a method name, not a behavior
+# def test_calculate_discount():  # what behavior does this verify?
 ```
 
 ### Integration Tests
@@ -913,5 +919,41 @@ Traditional TDD assumes deterministic outputs: `same_input → same_output`. Thi
 
 ---
 
-_Testing Guide last updated: 2025-01-25_
-_Version: 1.1.0 (Phase 1 Enhancement) + Advanced Topics (Phase 5)_
+### Property-Based Testing
+
+Property-based testing defines universal properties that must hold for all inputs, then generates random inputs to verify them. Instead of writing specific examples (`add(2, 3) == 5`), you define invariants (`add(a, b) == add(b, a)` for all a, b).
+
+**When to use**:
+- Data transformation or parsing (encode/decode roundtrips, format conversions)
+- Mathematical operations (commutativity, associativity, identity elements)
+- Serialization/deserialization (roundtrip property: `deserialize(serialize(x)) == x`)
+- Input validation (all invalid inputs rejected, all valid inputs accepted)
+- Sorting and filtering (output length, element preservation, ordering)
+
+**When NOT to use**:
+- UI components and visual rendering
+- Integration tests with external services
+- Non-deterministic systems (use flexible assertions instead)
+- Simple CRUD operations with few edge cases
+
+**Frameworks**: Hypothesis (Python), fast-check (JS/TS), proptest (Rust), QuickCheck (Haskell/Erlang), jqwik (Java)
+
+```python
+from hypothesis import given
+from hypothesis.strategies import integers
+
+@given(integers(), integers())
+def test_addition_is_commutative(a, b):
+    assert add(a, b) == add(b, a)
+
+@given(integers())
+def test_encode_decode_roundtrip(value):
+    assert decode(encode(value)) == value
+```
+
+Property-based tests complement example-based tests — they do not replace them. Use both: examples for readability and documentation, properties for thorough coverage of edge cases the developer did not anticipate.
+
+---
+
+_Testing Guide last updated: 2026-02-22_
+_Version: 1.2.0 (TDD Research Recommendations)_

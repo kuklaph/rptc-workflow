@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.6.0] - 2026-02-22
+
+### Added
+
+- **Behavioral Testing Checklist** in code-review-methodology: flags tests that mock internal collaborators, use interaction verification on non-boundary methods, or name implementation details instead of behaviors
+- **Assertion Quality Checklist** in code-review-methodology: catches zero-assertion tests, truthiness-only assertions, mock-only assertions, and tests that never reference the system under test's output
+- **Property-Based Testing** section in testing-guide.md: guidance on when to use property-based testing, framework recommendations (Hypothesis, fast-check, proptest), and code examples
+- `.serena/` added to `.gitignore`
+
+### Changed
+
+- **Unit test definition** in testing-guide.md: redefined "unit" from "individual functions/methods in isolation" to behavior-based — a unit is a behavior or requirement, not a class or method (per Ian Cooper synthesis)
+- testing-guide.md version bumped to 1.2.0, ToC updated to include Advanced Topics section
+
+---
+
+
 ## [3.5.0] - 2026-02-20
 
 ### Added
