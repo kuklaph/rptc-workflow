@@ -1,6 +1,6 @@
 ---
 name: docs-methodology
-description: Documentation review methodology for the RPTC docs-agent. Covers diff-driven impact analysis, documentation discovery and tiering (3 tiers), context gathering, confidence scoring (>=80 threshold), multi-document consistency checking, anti-patterns, special cases (breaking changes, version-specific docs, generated files, localization, visual assets), performance standards, and structured output format. Report-only mode.
+description: Documentation review methodology for the RPTC docs-agent. Covers diff-driven impact analysis, documentation discovery and tiering (3 tiers), context gathering, confidence scoring (>=80 threshold), multi-document consistency checking, CLAUDE.md Update Policy (minimal context file discipline), anti-patterns (including Stuffing CLAUDE.md), special cases (breaking changes, version-specific docs, generated files, localization, visual assets), performance standards, and structured output format. Report-only mode.
 ---
 
 # Documentation Review Methodology
@@ -36,7 +36,7 @@ Analyze `git diff --staged` to identify semantic changes. Use AST-level understa
 For each changed file, determine impact:
 - Function signatures changed → API docs, README examples
 - New configuration options → Configuration docs
-- Architecture modifications → CLAUDE.md, architecture docs
+- Architecture modifications → architecture docs
 - New dependencies → Setup instructions
 - API endpoints changed → API reference, integration guides
 - CLI commands modified → Command reference, help text
@@ -60,7 +60,7 @@ Discover all documentation that references changed code using targeted search.
 #### Tier 2: Medium Priority (Report with Context)
 
 - `README.md` usage examples
-- `CLAUDE.md` project guidelines
+- `CLAUDE.md` — only for non-discoverable content (commands, recurring AI mistakes). See CLAUDE.md Update Policy.
 - `.context/**/*.md` project-specific context
 - `docs/guides/**/*.md` tutorials and guides
 - `CONTRIBUTING.md` workflows
@@ -129,7 +129,7 @@ Return structured JSON findings:
 A single code change often affects multiple documents. Check for consistency across:
 
 - `README.md` (quick start examples)
-- `CLAUDE.md` (project conventions)
+- `CLAUDE.md` (apply CLAUDE.md Update Policy before flagging)
 - `.context/*.md` (project-specific context)
 - `docs/` folder (detailed guides)
 - API reference docs
@@ -147,7 +147,37 @@ Generate detailed report with:
 
 ---
 
+## CLAUDE.md Update Policy
+
+`CLAUDE.md` is a minimal context file, not a documentation target. Over-populated context files
+reduce AI task completion performance and increase costs — they distract agents with irrelevant
+detail and become stale faster than code.
+
+**Flag `CLAUDE.md` only for:**
+- Project commands the AI cannot discover by reading the codebase (e.g., `Always use pnpm`, custom scripts)
+- Corrections for recurring, consistent AI mistakes specific to this project
+
+**Do NOT flag `CLAUDE.md` for:**
+- Architecture overviews or folder structure — the AI reads these dynamically
+- Tech stack or dependency changes — the AI checks `package.json` or equivalent directly
+- "What not to use" constraints — mentioning a technology injects it into context, biasing the AI toward it
+- Workflow diagrams or command overviews — discoverable from plugin or project docs
+
+**The test:** Would the AI find this by reading the codebase or its config files? If yes, skip `CLAUDE.md`.
+
+**Diagnostic exception:** When a code change creates a non-obvious pattern that consistently confuses agents
+(surprising conventions, counterintuitive behavior), flag it as a candidate CLAUDE.md note. The maintainer
+decides whether to add it. Frame it as: "If you encounter X in this project, it is intentional because Y."
+
+---
+
 ## Anti-Patterns to Avoid
+
+### Stuffing CLAUDE.md with Architecture
+Flagging `CLAUDE.md` for architecture changes, folder structure updates, or tech stack notes bloats the
+context window and creates stale docs that actively mislead future sessions. Report architectural doc updates
+to `docs/architecture/` or `CONTRIBUTING.md`. Apply the CLAUDE.md Update Policy above before reporting
+any `CLAUDE.md` finding.
 
 ### Over-Aggressive Rewrites
 Update only specific outdated content, not entire sections.

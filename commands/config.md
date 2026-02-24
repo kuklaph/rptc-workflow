@@ -111,28 +111,6 @@ Configure and maintain RPTC workflow settings in your project's CLAUDE.md.
 | `/rptc:sync-prod-to-tests "dir"` | Sync tests to match production code |
 | `/rptc:config` | Initialize or update this configuration |
 
-### Workflow Overview
-
-    /rptc:feat "Add user authentication"
-        │
-        ├─► Phase 1: Discovery (parallel research agents)
-        ├─► Phase 2: Architecture (3 perspectives, user chooses)
-        ├─► Phase 3: Implementation (TDD with smart batching)
-        ├─► Phase 4: Quality Verification (parallel verification agents)
-        └─► Phase 5: Complete → /rptc:commit
-
-### Tool Prioritization
-
-**Serena MCP** (when available, prefer over native tools):
-- `get_symbols_overview` → Find functions/classes (instead of Grep)
-- `find_symbol` → Locate specific code (instead of Glob)
-- `find_referencing_symbols` → Find usages/callers (instead of Grep)
-- `search_for_pattern` → Regex search across codebase
-
-**Sequential Thinking MCP** (STRONGLY RECOMMENDED):
-- Use for ALL non-trivial tasks: analysis, planning, debugging, multi-step work
-- Skip only for: single-line fixes, typo corrections, trivial changes
-
 ### Verification Configuration
 
 verification-agent-mode: {VERIFICATION_MODE}

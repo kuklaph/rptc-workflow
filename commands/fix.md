@@ -179,17 +179,6 @@ Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` �
 | Rename a symbol everywhere | `rename_symbol` | Edit |
 | Reflect on task adherence | `think_about_task_adherence` | — |
 
-**Sequential Thinking MCP** (STRONGLY RECOMMENDED):
-
-Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp__MCP_DOCKER__sequentialthinking`, or `mcp__plugin_sequentialthinking_*`) for **anything beyond the most basic tasks**.
-
-| When to Use | Examples |
-|-------------|----------|
-| **Always use** | Root cause analysis, debugging, multi-step fixes, 5 Whys |
-| **Skip only for** | Single-line typo fixes, trivial config changes |
-
-**Default behavior**: When in doubt, use Sequential Thinking. It improves reasoning quality significantly.
-
 ---
 
 ## Skills Usage Guide
@@ -199,7 +188,7 @@ Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp_
 | When | Apply To |
 |------|----------|
 | Step 0 (always loaded) | Infrastructure — activates Serena for code navigation throughout |
-| All phases | Serena read ops (`find_symbol`, `search_for_pattern`), Sequential Thinking |
+| All phases | Serena read ops (`find_symbol`, `search_for_pattern`) |
 
 **Method**: ToolSearch activates Serena at session start (Step 0.1.2); then prefer `find_symbol`, `get_symbols_overview`, `search_for_pattern` over native Grep/Glob for all code navigation.
 **Timing**: Loaded first in Step 0. Applies across all phases wherever code navigation or symbol search is needed.
@@ -260,7 +249,7 @@ Use `sequentialthinking` tool (may appear as `mcp__sequentialthinking__*`, `mcp_
 
 **Goal**: Confirm the bug exists and understand its triggering conditions.
 
-> 💡 **Tool Reminder**: Use Sequential Thinking to analyze bug context. Use Serena for code tracing.
+> 💡 **Tool Reminder**: Use Serena for code tracing.
 
 **Actions**:
 
@@ -415,11 +404,11 @@ When `WORKTREE_PATH` is NOT set, omit this block entirely.
 
 **Goal**: Identify the fundamental cause and plan the fix.
 
-> 💡 **Tool Reminder**: Use Sequential Thinking for 5 Whys analysis. Use Serena (`find_symbol`, `find_referencing_symbols`) to trace code paths and confirm root cause.
+> 💡 **Tool Reminder**: Use Serena (`find_symbol`, `find_referencing_symbols`) to trace code paths and confirm root cause.
 
 **Actions**:
 
-1. **Apply 5 Whys methodology** (use Sequential Thinking) to findings from Phase 1:
+1. **Apply 5 Whys methodology** to findings from Phase 1:
    ```
    Why? [Symptom observed]
    Why? [Immediate cause]

@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.7.0] - 2026-02-23
+
+### Added
+
+- **CLAUDE.md Update Policy** in `docs-methodology` skill: explicit policy governing when the docs-agent should and should not flag `CLAUDE.md` for updates. CLAUDE.md is minimal context — only for unguessable commands and recurring AI mistakes, not architecture overviews or tech stacks.
+- **"Stuffing CLAUDE.md" anti-pattern** in `docs-methodology` skill: flags over-reporting to CLAUDE.md as a named anti-pattern, redirecting architecture updates to `docs/architecture/` or `CONTRIBUTING.md`.
+
+### Changed
+
+- **Sequential Thinking MCP removed** from all 8 agent tool frontmatters (`architect-agent`, `code-review-agent`, `docs-agent`, `research-agent`, `security-agent`, `tdd-agent`, `test-fixer-agent`, `test-sync-agent`). Agents no longer request or use `mcp__MCP_DOCKER__sequentialthinking`, `mcp__sequentialthinking__sequentialthinking`, or `mcp__plugin_sequentialthinking_sequentialthinking__sequentialthinking`.
+- **Sequential Thinking MCP section removed** from `skills/tool-guide`: the "Sequential Thinking MCP" section (usage guidance, tool name variants) is removed. `tool-guide` now covers Serena MCP, Serena Memory, Context7, Fetch MCP, and directory exploration only.
+- **Sequential Thinking references removed** from `commands/feat.md`, `commands/fix.md`, `commands/sync-prod-to-tests.md`: removed ST block from Tool Prioritization, ST from phase tool reminders, ST from MCP detection and report sections.
+- **RPTC config block trimmed** in `commands/config.md`: removed "Workflow Overview" ASCII diagram and "Tool Prioritization" section from the block injected into user CLAUDE.md files by `/rptc:config`. Block now contains only the Quick Reference commands table, Verification Configuration, and Project-Specific Notes — minimizing context footprint in user projects.
+- **`docs-methodology` skill frontmatter** updated to include CLAUDE.md Update Policy and Stuffing CLAUDE.md anti-pattern in description.
+- **Skills table rows** updated in README.md, `docs/RPTC_WORKFLOW_GUIDE.md`, and CLAUDE.md: `tool-guide` row no longer lists "Sequential Thinking"; `docs-methodology` row now lists "CLAUDE.md Update Policy" and "Stuffing CLAUDE.md" anti-pattern.
+
+---
+
 ## [3.6.0] - 2026-02-22
 
 ### Added

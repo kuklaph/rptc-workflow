@@ -132,7 +132,7 @@ fi
 
 **If `TARGET_DIR` is not provided, intelligently explore the repository.**
 
-Use Sequential Thinking MCP (if available) to reason through detection, and Serena MCP (if available) for semantic code understanding.
+Use Serena MCP (if available) for semantic code understanding.
 
 **Exploration Strategy:**
 
@@ -188,17 +188,9 @@ Verify `TARGET_DIR` exists and is accessible. If not found, display error and ex
 
 ### Step 0e: Detect MCP Availability
 
-**Check for Sequential Thinking MCP (both Docker and non-Docker):**
-
 Examine the available tools in your context to determine MCP availability:
 
-1. **Sequential Thinking MCP:**
-   - Look for `mcp__MCP_DOCKER__sequentialthinking` (Docker version)
-   - Look for `mcp__sequentialthinking__sequentialthinking` (non-Docker version)
-   - Set `SEQUENTIAL_THINKING_AVAILABLE=true` if either tool is present
-   - Set `SEQUENTIAL_THINKING_TOOL` to the available tool name
-
-2. **Serena MCP:**
+1. **Serena MCP:**
    - Look for `mcp__serena__activate_project` and related tools
    - Set `SERENA_AVAILABLE=true` if Serena tools are present
    - Set `SERENA_TOOL_PREFIX="mcp__serena__"`
@@ -207,11 +199,10 @@ Examine the available tools in your context to determine MCP availability:
 
 ```text
 MCP Integration Status:
-  Sequential Thinking: [Available/Not available]
   Serena: [Available/Not available]
 
-[If both unavailable:]
-Note: Proceeding with standard analysis (MCPs enhance but aren't required)
+[If unavailable:]
+Note: Proceeding with standard analysis (Serena enhances but isn't required)
 ```
 
 ### Step 0f: Initialize TodoWrite
@@ -577,7 +568,6 @@ Include detected context in your output for each file so the fixer agent knows t
 **IMPORTANT:** If browser-dependent code is found and HAS_E2E=false, flag it as requiring Playwright setup.
 
 ## MCP Availability
-- Sequential Thinking: ${SEQUENTIAL_THINKING_AVAILABLE} (tool: ${SEQUENTIAL_THINKING_TOOL})
 - Serena: ${SERENA_AVAILABLE} (prefix: ${SERENA_TOOL_PREFIX})
 
 ## SOPs to Reference
@@ -904,7 +894,6 @@ You MUST select the appropriate testing approach based on each file's code conte
 [List from sync report]
 
 ## MCP Availability
-- Sequential Thinking: ${SEQUENTIAL_THINKING_AVAILABLE} (tool: ${SEQUENTIAL_THINKING_TOOL})
 - Serena: ${SERENA_AVAILABLE} (prefix: ${SERENA_TOOL_PREFIX})
 
 ## SOPs to Reference

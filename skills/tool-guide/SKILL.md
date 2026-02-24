@@ -1,6 +1,6 @@
 ---
 name: tool-guide
-description: Shared tool prioritization for all RPTC agents. Covers Serena MCP (read-only and edit operations), Sequential Thinking MCP, Serena Memory, Context7, Fetch MCP, and directory exploration. Load at session start before any work.
+description: Shared tool prioritization for all RPTC agents. Covers Serena MCP (read-only and edit operations), Serena Memory, Context7, Fetch MCP, and directory exploration. Load at session start before any work.
 ---
 
 # Tool Guide
@@ -33,24 +33,6 @@ Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` â€
 | Insert before symbol | `insert_before_symbol` | Edit |
 | Rename symbol | `rename_symbol` | Edit |
 | Reflect on task | `think_about_task_adherence` | â€” |
-
----
-
-## Sequential Thinking MCP
-
-Use `sequentialthinking` tool for complex reasoning. It may appear as:
-- `mcp__sequentialthinking__sequentialthinking`
-- `mcp__MCP_DOCKER__sequentialthinking`
-- `mcp__plugin_sequentialthinking_sequentialthinking__sequentialthinking`
-
-Use whichever variant is available.
-
-**When to use:**
-- Complex planning decisions
-- Multi-step analysis
-- Architectural trade-off evaluation
-- Ambiguous match resolution
-- Complex security analysis
 
 ---
 
