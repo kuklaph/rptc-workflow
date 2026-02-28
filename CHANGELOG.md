@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.8.0] - 2026-02-28
+
+### Added
+
+- Agent Teams support for all 8 agents: added SendMessage, TaskCreate, TaskUpdate, TaskList, TaskGet tools
+
+### Fixed
+
+- YAML frontmatter in code-review-agent, security-agent, and test-sync-agent (missing newline before `skills:` field)
+
+---
+
+
 ## [3.7.0] - 2026-02-23
 
 ### Added
