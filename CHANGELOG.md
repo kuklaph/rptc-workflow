@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.8.1] - 2026-03-05
+
+### Fixed
+
+- **Agent role-awareness**: All 8 agents now include "Execution Context & Team Tools" section that distinguishes sub-agent mode from team-agent mode, preventing incorrect `SendMessage` calls when running as sub-agents
+- **Code-review scope**: Relaxed False Positive Guidance in code-review methodology — the agent now reports pre-existing issues when they are in the same function/class or interact with the current change, instead of skipping all pre-existing issues unconditionally
+
+---
+
+
 ## [3.8.0] - 2026-02-28
 
 ### Added

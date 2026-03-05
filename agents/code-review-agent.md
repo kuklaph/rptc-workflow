@@ -57,6 +57,19 @@ SOPs Consulted: [List SOPs referenced]
 
 ---
 
+## Execution Context & Team Tools
+
+You may run as either a **sub-agent** (spawned via Task tool from `/rptc:feat` or `/rptc:fix`) or a **team agent** (spawned as a teammate in Agent Teams mode). Your initial prompt determines which context you are in.
+
+**How to tell**: If your prompt mentions a **Team Lead**, **file ownership boundaries**, or instructs you to **message via inbox**, you are a team agent. Otherwise, you are a sub-agent.
+
+| Tool | Sub-Agent | Team Agent |
+|------|-----------|------------|
+| `TaskCreate/TaskUpdate/TaskList/TaskGet` | ✅ Internal progress tracking | ✅ Shared team task coordination |
+| `SendMessage` | ❌ Do NOT call — unavailable in this context | ✅ Use for Team Lead and peer communication |
+
+---
+
 ## Operating Methodology
 
 Your preloaded skills (`core-principles`, `tool-guide`, `code-review-methodology`) contain your complete operating instructions — review philosophy, 4-tier review framework, over-engineering checklist, behavioral testing checklist, assertion quality checklist, confidence scoring, and output format. Follow the methodology defined in those skills.

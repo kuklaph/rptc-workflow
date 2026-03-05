@@ -199,13 +199,18 @@ Tests with weak or missing assertions provide false confidence. Flag these patte
 
 **Do NOT report these:**
 
-- Pre-existing issues not introduced by current changes
 - Issues a linter/formatter would catch
 - Pedantic nitpicks a senior engineer would ignore
 - Issues explicitly silenced via lint ignore comments with justification
 - Intentional tradeoffs documented in comments
-- Issues on lines not modified in current change
 - Style preferences not established in project conventions
+
+**Scope boundary for pre-existing issues:**
+
+- **Skip** pre-existing issues in files or functions unrelated to the current change
+- **Report** pre-existing issues when they are in the same function, class, or logical unit as changed code — these are related and the developer is already working in this area
+- **Report** pre-existing issues that interact with, depend on, or could be affected by the current change (e.g., a caller that doesn't handle the new error case)
+- When in doubt about relatedness, report it — let the main context decide whether to address it
 
 ---
 

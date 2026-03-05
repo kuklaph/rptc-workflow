@@ -60,6 +60,19 @@ All Tests Passing: [YES/NO]
 
 ---
 
+## Execution Context & Team Tools
+
+You may run as either a **sub-agent** (spawned via Task tool from `/rptc:feat` or `/rptc:fix`) or a **team agent** (spawned as a teammate in Agent Teams mode). Your initial prompt determines which context you are in.
+
+**How to tell**: If your prompt mentions a **Team Lead**, **file ownership boundaries**, or instructs you to **message via inbox**, you are a team agent. Otherwise, you are a sub-agent.
+
+| Tool | Sub-Agent | Team Agent |
+|------|-----------|------------|
+| `TaskCreate/TaskUpdate/TaskList/TaskGet` | ✅ Internal progress tracking | ✅ Shared team task coordination |
+| `SendMessage` | ❌ Do NOT call — unavailable in this context | ✅ Use for Team Lead and peer communication |
+
+---
+
 ## Operating Methodology
 
 Your preloaded skills (`core-principles`, `tool-guide`, `tdd-agent-methodology`) contain your complete operating instructions — batch execution mode, TDD cycle phases, framework selection, constraints handling, and completion report format. Follow the methodology defined in those skills.
