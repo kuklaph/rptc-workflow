@@ -309,25 +309,34 @@ to Phase 2 — the skill handles the remaining workflow.
 
 Put your recommended option first and append "(Recommended)" to its label.
 
+**Before asking**, prepare the option labels:
+
+1. **Get current branch name**: `git branch --show-current` → e.g. `main`
+2. **Generate worktree branch name** from the feature description:
+   - Lowercase, replace spaces with hyphens, strip special characters
+   - Prefix with `feature/`
+   - Example: `"Add user auth"` → `feature/add-user-auth`
+
 ```
 Use AskUserQuestion:
 question: "How should this feature be organized?"
 header: "Branch"
 options:
-  - label: "[recommended option] (Recommended)"
-    description: "[description]"
-  - label: "[other option]"
-    description: "[description]"
+  - label: "Current branch [<current-branch>] (Recommended)"
+    description: "Stay on the current branch and make changes directly"
+  - label: "New worktree [<generated-branch-name>]"
+    description: "Create a new worktree with an isolated branch for this work"
+```
+
+Example with real values:
+```
+  - label: "Current branch [main] (Recommended)"
+  - label: "New worktree [feature/add-user-auth]"
 ```
 
 **If "New worktree" selected:**
 
-1. **Generate branch name** from the feature description:
-   - Lowercase, replace spaces with hyphens, strip special characters
-   - Prefix with `feature/`
-   - Example: `"Add user auth"` → `feature/add-user-auth`
-
-2. **Compute absolute worktree path** (do NOT use relative paths):
+1. **Compute absolute worktree path** (do NOT use relative paths):
    ```bash
    # Get the repo root as an absolute path — no ".." segments
    REPO_ROOT=$(git rev-parse --show-toplevel)
@@ -337,23 +346,23 @@ options:
    ```
    Store `WORKTREE_PATH` — you will reference it throughout this session.
 
-3. **Create worktree** using the absolute path:
+2. **Create worktree** using the absolute path:
    ```bash
    git worktree add -b <branch-name> "$WORKTREE_PATH" HEAD
    ```
 
-4. **Activate worktree** — change into the new worktree directory:
+3. **Activate worktree** — change into the new worktree directory:
    ```bash
    cd "$WORKTREE_PATH"
    ```
 
-5. **Verify activation** — confirm the worktree is the working directory:
+4. **Verify activation** — confirm the worktree is the working directory:
    ```bash
    git rev-parse --show-toplevel
    ```
    The output MUST match `WORKTREE_PATH`. If it does not, STOP and fix before continuing.
 
-6. **Confirm to user**:
+5. **Confirm to user**:
    ```
    Worktree created and activated at <WORKTREE_PATH>
    Branch: <branch-name>
@@ -361,7 +370,7 @@ options:
    All subsequent work proceeds here.
    ```
 
-7. **Set worktree active flag**: Remember that `WORKTREE_PATH` is set. ALL agent delegation
+6. **Set worktree active flag**: Remember that `WORKTREE_PATH` is set. ALL agent delegation
    prompts in Phases 2-4 MUST include the Worktree Context Block (defined below).
 
 **If "Current branch" selected:** `WORKTREE_PATH` is not set. Continue to Phase 2.
