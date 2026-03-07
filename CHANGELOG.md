@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.9.2] - 2026-03-07
+
+### Fixed
+
+- **Plan re-initialization**: Added missing `rptc:writing-clearly-and-concisely` to plan Step 0 skill loading (needed for Phase 5 summary after context clear)
+- **Plan re-initialization**: Added conditional `frontend-design` skill note to plan Step 0 (preserves creative direction for UI plans resumed after context clear)
+- **Plan re-initialization**: Replaced false idempotency claim with `TaskList()` check before recreating tasks — prevents duplicates when context was not cleared
+- **`/rptc:feat`**: Added Step 0 verification gate before `ExitPlanMode` — plan must include re-initialization block before user approval (parity with `/rptc:fix`)
+
+---
+
+
 ## [3.9.1] - 2026-03-06
 
 ### Changed

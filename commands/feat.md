@@ -488,7 +488,7 @@ options:
    - Files to create/modify
    - Test strategy per step (code tasks only)
 
-6. **Exit plan mode** using ExitPlanMode to get user approval
+6. **Verify plan includes Step 0: RPTC Re-initialization**, then exit with ExitPlanMode to get user approval
 
 **Plan file format** (flexible):
 
