@@ -258,14 +258,41 @@ Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` �
    - If NOT found: Suggest user run `/rptc:config` for best experience
    - If found but outdated: Suggest user run `/rptc:config` to sync with current plugin version
 
-1. **Classify task type** (see Task Classification above)
-2. **Create initial todo list** with phases based on task type:
+1. **Detect repo topology** (run before any git commands that assume a working tree):
+   ```bash
+   # Bare detection assumes the .git-file + .bare/ container convention
+   # (git clone --bare <url> .bare && echo "gitdir: ./.bare" > .git)
+   if [ -f ".git" ] && [ -d ".bare" ]; then
+     # Bare repo container root — git rev-parse --show-toplevel is fatal here
+     REPO_TOPOLOGY="bare"
+     REPO_ROOT="$(pwd)"
+     # Second entry in worktree list is the first checked-out worktree;
+     # empty when no worktrees exist yet — guard for empty PRIMARY_SOURCE below
+     PRIMARY_SOURCE=$(git worktree list --porcelain | grep "^worktree " | sed -n '2p' | awk '{print $2}')
+   else
+     REPO_ROOT=$(git rev-parse --show-toplevel)
+     if [ -d "$REPO_ROOT/.worktrees" ]; then
+       REPO_TOPOLOGY="worktrees-dir"
+     else
+       REPO_TOPOLOGY="standard"
+     fi
+     PRIMARY_SOURCE="$REPO_ROOT"  # unused for non-bare topologies; set for symmetry
+   fi
+   ```
+   Store `REPO_TOPOLOGY`, `REPO_ROOT`, and `PRIMARY_SOURCE` — you will reference them throughout this session.
+
+2. **Classify task type** (see Task Classification above)
+3. **Create initial todo list** with phases based on task type:
    - Code tasks: Discovery, Architecture, TDD Implementation, Quality Verification, Complete
    - Non-Code tasks: Discovery, Architecture, Implementation, Quality Verification, Complete
-3. **If codebase exploration needed**, launch 2-3 research agents in parallel (NOT the built-in Explore agent):
+4. **If codebase exploration needed**, launch 2-3 research agents in parallel (NOT the built-in Explore agent):
 
 ```
 IMPORTANT: Use subagent_type="rptc:research-agent", NOT "Explore"
+
+[If REPO_TOPOLOGY="bare", prepend to each agent prompt:
+"BARE REPO: This is a bare repo container. Source files live in worktree subdirectories,
+not the container root. Explore from: <PRIMARY_SOURCE> (or run `git worktree list` if empty)."]
 
 Use Task tool with subagent_type="rptc:research-agent" (launch all 3 in parallel):
 
@@ -282,10 +309,10 @@ Use code-explorer methodology Phase 2 (Code Flow Tracing): call chains, data tra
 Return: external dependencies, internal dependencies, API boundaries."
 ```
 
-4. **If web research needed**, use `rptc:research-agent` with Mode B (20+ sources, cross-verification)
-5. **If hybrid research needed** (codebase + best practices), use `rptc:research-agent` with Mode C
-6. **If unclear about requirements**, ask user for clarification
-7. **Summarize findings**: Key patterns, files to modify, dependencies, gap analysis (if hybrid)
+5. **If web research needed**, use `rptc:research-agent` with Mode B (20+ sources, cross-verification)
+6. **If hybrid research needed** (codebase + best practices), use `rptc:research-agent` with Mode C
+7. **If unclear about requirements**, ask user for clarification
+8. **Summarize findings**: Key patterns, files to modify, dependencies, gap analysis (if hybrid)
 
 ### Teams Analysis
 
@@ -311,7 +338,9 @@ Put your recommended option first and append "(Recommended)" to its label.
 
 **Before asking**, prepare the option labels:
 
-1. **Get current branch name**: `git branch --show-current` → e.g. `main`
+1. **Get current branch name** (topology-aware):
+   - Standard/worktrees-dir: `git branch --show-current` → e.g. `main`
+   - Bare repo: `git symbolic-ref --short HEAD 2>/dev/null || echo "main"` → e.g. `main`
 2. **Generate worktree branch name** from the feature description:
    - Lowercase, replace spaces with hyphens, strip special characters
    - Prefix with `feature/`
@@ -328,27 +357,42 @@ options:
     description: "<description>"
 ```
 
-Example — small single-file change on a feature branch:
+Example — standard repo, small single-file change on a feature branch:
 ```
   - label: "Current branch [feature/auth] (Recommended)"
   - label: "New worktree [feature/add-user-auth]"
 ```
 
-Example — large multi-file feature on main:
+Example — standard repo, large multi-file feature on main:
 ```
   - label: "New worktree [feature/add-user-auth] (Recommended)"
   - label: "Current branch [main]"
 ```
 
+Example — bare repo (opened at container root), with an existing worktree at `/home/user/project/main`:
+```
+  - label: "New worktree [feature/add-user-auth] (Recommended)"
+  - label: "Use existing worktree [/home/user/project/main]"
+```
+
+Note: For bare repos, "Current branch" is not meaningful (no working tree at container root). Replace that option with "Use existing worktree [<PRIMARY_SOURCE>]" (resolved to an absolute path). If `PRIMARY_SOURCE` is empty (no worktrees checked out yet), omit the "Use existing worktree" option entirely — only offer "New worktree".
+
 **If "New worktree" selected:**
 
-1. **Compute absolute worktree path** (do NOT use relative paths):
+1. **Compute worktree path** using topology detected in Phase 1:
    ```bash
-   # Get the repo root as an absolute path — no ".." segments
-   REPO_ROOT=$(git rev-parse --show-toplevel)
-   PARENT_DIR=$(dirname "$REPO_ROOT")
-   PROJECT_DIR=$(basename "$REPO_ROOT")
-   WORKTREE_PATH="${PARENT_DIR}/${PROJECT_DIR}-<branch-name>"
+   # REPO_TOPOLOGY and REPO_ROOT already set from Phase 1 detection
+   if [ "$REPO_TOPOLOGY" = "bare" ]; then
+     WORKTREE_PATH="${REPO_ROOT}/<branch-name>"
+   elif [ "$REPO_TOPOLOGY" = "worktrees-dir" ]; then
+     WORKTREE_PATH="${REPO_ROOT}/.worktrees/<branch-name>"
+   else
+     # Standard repo: ensure .worktrees/ exists and is gitignored
+     mkdir -p "${REPO_ROOT}/.worktrees"
+     grep -qxF '.worktrees/' "${REPO_ROOT}/.gitignore" 2>/dev/null \
+       || echo '.worktrees/' >> "${REPO_ROOT}/.gitignore"
+     WORKTREE_PATH="${REPO_ROOT}/.worktrees/<branch-name>"
+   fi
    ```
    Store `WORKTREE_PATH` — you will reference it throughout this session.
 
@@ -357,18 +401,13 @@ Example — large multi-file feature on main:
    git worktree add -b <branch-name> "$WORKTREE_PATH" HEAD
    ```
 
-3. **Activate worktree** — change into the new worktree directory:
+3. **Activate and verify worktree** — change into the new directory and confirm it:
    ```bash
-   cd "$WORKTREE_PATH"
-   ```
-
-4. **Verify activation** — confirm the worktree is the working directory:
-   ```bash
-   git rev-parse --show-toplevel
+   cd "$WORKTREE_PATH" && git rev-parse --show-toplevel
    ```
    The output MUST match `WORKTREE_PATH`. If it does not, STOP and fix before continuing.
 
-5. **Confirm to user**:
+4. **Confirm to user**:
    ```
    Worktree created and activated at <WORKTREE_PATH>
    Branch: <branch-name>
@@ -376,8 +415,29 @@ Example — large multi-file feature on main:
    All subsequent work proceeds here.
    ```
 
-6. **Set worktree active flag**: Remember that `WORKTREE_PATH` is set. ALL agent delegation
+5. **Set worktree active flag**: Remember that `WORKTREE_PATH` is set. ALL agent delegation
    prompts in Phases 2-4 MUST include the Worktree Context Block (defined below).
+
+**If "Use existing worktree" selected (bare repo only):**
+
+1. Set `WORKTREE_PATH = PRIMARY_SOURCE`.
+2. **Activate and verify**:
+   ```bash
+   cd "$WORKTREE_PATH" && git rev-parse --show-toplevel
+   ```
+   The output MUST match `WORKTREE_PATH`. If it does not, STOP and fix before continuing.
+3. **Retrieve branch name** for this worktree (used in subsequent agent delegation prompts):
+   ```bash
+   git branch --show-current
+   ```
+4. **Confirm to user**:
+   ```
+   Activated existing worktree at <WORKTREE_PATH>
+   Branch: <branch-name>
+   Verified: working directory is inside worktree.
+   All subsequent work proceeds here.
+   ```
+5. **Set worktree active flag**: Remember that `WORKTREE_PATH` is set. ALL agent delegation prompts in Phases 2-4 MUST include the Worktree Context Block (defined below).
 
 **If "Current branch" selected:** `WORKTREE_PATH` is not set. Continue to Phase 2.
 
@@ -433,9 +493,9 @@ Agent 2: "Design implementation for [feature]. Perspective: Clean. Provide: file
 Agent 3: "Design implementation for [feature]. Perspective: Pragmatic. Provide: files to modify, component design, data flow, build sequence. [If code task: include test strategy]"
 ```
 
-3. **Review all 3 approaches**, form an opinion on which fits best for this specific feature
+4. **Review all 3 approaches**, form an opinion on which fits best for this specific feature
 
-4. **MANDATORY: Ask user to choose** via AskUserQuestion (put recommended option first with "(Recommended)" suffix):
+5. **MANDATORY: Ask user to choose** via AskUserQuestion (put recommended option first with "(Recommended)" suffix):
 
    **Skip asking ONLY if ALL of these are true:**
    - Single-file change with <20 lines
@@ -481,14 +541,14 @@ options:
     description: "[1-sentence trade-off + file count]"
 ```
 
-5. **Write selected plan to plan file** with:
+6. **Write selected plan to plan file** with:
    - **Step 0: RPTC Re-initialization (ALWAYS FIRST)** — Serena activation, skill loading, task list rebuild for Phase 3/4/5 (use plan-overview template for exact format)
    - Approach used (with rationale)
    - Implementation steps (ordered)
    - Files to create/modify
    - Test strategy per step (code tasks only)
 
-6. **Verify plan includes Step 0: RPTC Re-initialization**, then exit with ExitPlanMode to get user approval
+7. **Verify plan includes Step 0: RPTC Re-initialization**, then exit with ExitPlanMode to get user approval
 
 **Plan file format** (flexible):
 
@@ -882,6 +942,10 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
 
 ```
 IMPORTANT: Use "rptc:research-agent", NOT "Explore"
+
+[If REPO_TOPOLOGY="bare", prepend to each agent prompt:
+"BARE REPO: This is a bare repo container. Source files live in worktree subdirectories,
+not the container root. Explore from: <PRIMARY_SOURCE> (or run `git worktree list` if empty)."]
 
 Launch 3 Task tools in parallel with subagent_type="rptc:research-agent":
 

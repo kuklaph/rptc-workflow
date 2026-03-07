@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 3.9.2
+**Version**: 3.9.3
 **Status**: Beta
 **License**: MIT
 
@@ -79,7 +79,7 @@ All phases unified in one command: `/rptc:feat`
 - Launches 2-3 parallel exploration agents for codebase analysis
 - Optional web research for unfamiliar topics
 - Summarizes key patterns, files to modify, and dependencies
-- **Branch Strategy**: Choose to work on the current branch or create a new git worktree
+- **Branch Strategy**: Choose to work on the current branch or create a new git worktree — worktrees are placed inside the project root using auto-detected repo topology (bare, worktrees-dir, or standard), eliminating Claude Code permission prompts from sibling directories
 
 ### Phase 2: Architecture
 
@@ -438,6 +438,15 @@ Plans use Claude's native plan mode: `~/.claude/plans/`
 ### Q: Do I need configuration?
 
 No. RPTC uses sensible defaults. No `.claude/settings.json` required.
+
+### Q: I use a bare repo setup — does RPTC support it?
+
+Yes. RPTC detects the bare repo pattern automatically (`git clone --bare` + `.git` file pointing to `.bare/`). When Claude is opened at the bare container root:
+
+- Topology detection runs before any working-tree git commands
+- Research agents are directed to the correct worktree subdirectory
+- The Branch Strategy offers "New worktree" (creates a sibling inside the container) and "Use existing worktree" (activates an existing checked-out branch — only available when a worktree is already checked out)
+- All worktrees stay inside the container, within Claude Code's permission scope
 
 ---
 

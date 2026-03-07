@@ -258,22 +258,49 @@ Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` �
    - If NOT found: Suggest user run `/rptc:config` for best experience
    - If found but outdated: Suggest user run `/rptc:config` to sync with current plugin version
 
-1. **Create initial todo list** with phases:
+1. **Detect repo topology** (run before any git commands that assume a working tree):
+   ```bash
+   # Bare detection assumes the .git-file + .bare/ container convention
+   # (git clone --bare <url> .bare && echo "gitdir: ./.bare" > .git)
+   if [ -f ".git" ] && [ -d ".bare" ]; then
+     # Bare repo container root — git rev-parse --show-toplevel is fatal here
+     REPO_TOPOLOGY="bare"
+     REPO_ROOT="$(pwd)"
+     # Second entry in worktree list is the first checked-out worktree;
+     # empty when no worktrees exist yet — guard for empty PRIMARY_SOURCE below
+     PRIMARY_SOURCE=$(git worktree list --porcelain | grep "^worktree " | sed -n '2p' | awk '{print $2}')
+   else
+     REPO_ROOT=$(git rev-parse --show-toplevel)
+     if [ -d "$REPO_ROOT/.worktrees" ]; then
+       REPO_TOPOLOGY="worktrees-dir"
+     else
+       REPO_TOPOLOGY="standard"
+     fi
+     PRIMARY_SOURCE="$REPO_ROOT"  # unused for non-bare topologies; set for symmetry
+   fi
+   ```
+   Store `REPO_TOPOLOGY`, `REPO_ROOT`, and `PRIMARY_SOURCE` — you will reference them throughout this session.
+
+2. **Create initial todo list** with phases:
    - Reproduction & Triage, Root Cause Analysis, Fix Application, Verification, Complete
 
-2. **Gather bug context** from user:
+3. **Gather bug context** from user:
    - What is the expected behavior?
    - What is the actual behavior?
    - Steps to reproduce (if known)
    - Environment details (if relevant)
    - Error messages, stack traces, logs
 
-3. **If reproduction steps unclear**, ask user for clarification via AskUserQuestion
+4. **If reproduction steps unclear**, ask user for clarification via AskUserQuestion
 
-4. **Launch 2-3 research agents in parallel** for bug investigation (NOT the built-in Explore agent):
+5. **Launch 2-3 research agents in parallel** for bug investigation (NOT the built-in Explore agent):
 
 ```
 IMPORTANT: Use subagent_type="rptc:research-agent", NOT "Explore"
+
+[If REPO_TOPOLOGY="bare", prepend to each agent prompt:
+"BARE REPO: This is a bare repo container. Source files live in worktree subdirectories,
+not the container root. Explore from: <PRIMARY_SOURCE> (or run `git worktree list` if empty)."]
 
 Use Task tool with subagent_type="rptc:research-agent" (launch all in parallel):
 
@@ -290,12 +317,12 @@ Use code-explorer methodology Phase 3 (Architecture Analysis): What components a
 Return: Affected files/functions, related code with same pattern, potential regression scope."
 ```
 
-5. **Optional: Git bisect** for regressions:
+6. **Optional: Git bisect** for regressions:
    - If bug worked before: "When did this break?"
    - Use `git log` to find likely commit range
    - Suggest bisect if >20 commits in range
 
-6. **Summarize findings**:
+7. **Summarize findings**:
    - Bug confirmed: Y/N
    - Failure point: file:line
    - Affected code paths
@@ -325,7 +352,9 @@ Put your recommended option first and append "(Recommended)" to its label.
 
 **Before asking**, prepare the option labels:
 
-1. **Get current branch name**: `git branch --show-current` → e.g. `main`
+1. **Get current branch name** (topology-aware):
+   - Standard/worktrees-dir: `git branch --show-current` → e.g. `main`
+   - Bare repo: `git symbolic-ref --short HEAD 2>/dev/null || echo "main"` → e.g. `main`
 2. **Generate worktree branch name** from the bug description:
    - Lowercase, replace spaces with hyphens, strip special characters
    - Prefix with `fix/`
@@ -342,27 +371,42 @@ options:
     description: "<description>"
 ```
 
-Example — single-file fix with clear root cause on a fix branch:
+Example — standard repo, single-file fix with clear root cause on a fix branch:
 ```
   - label: "Current branch [fix/auth-bug] (Recommended)"
   - label: "New worktree [fix/cart-items-disappear]"
 ```
 
-Example — risky multi-file fix on main with unclear root cause:
+Example — standard repo, risky multi-file fix on main with unclear root cause:
 ```
   - label: "New worktree [fix/cart-items-disappear] (Recommended)"
   - label: "Current branch [main]"
 ```
 
+Example — bare repo (opened at container root), with an existing worktree at `/home/user/project/main`:
+```
+  - label: "New worktree [fix/cart-items-disappear] (Recommended)"
+  - label: "Use existing worktree [/home/user/project/main]"
+```
+
+Note: For bare repos, "Current branch" is not meaningful (no working tree at container root). Replace that option with "Use existing worktree [<PRIMARY_SOURCE>]" (resolved to an absolute path). If `PRIMARY_SOURCE` is empty (no worktrees checked out yet), omit the "Use existing worktree" option entirely — only offer "New worktree".
+
 **If "New worktree" selected:**
 
-1. **Compute absolute worktree path** (do NOT use relative paths):
+1. **Compute worktree path** using topology detected in Phase 1:
    ```bash
-   # Get the repo root as an absolute path — no ".." segments
-   REPO_ROOT=$(git rev-parse --show-toplevel)
-   PARENT_DIR=$(dirname "$REPO_ROOT")
-   PROJECT_DIR=$(basename "$REPO_ROOT")
-   WORKTREE_PATH="${PARENT_DIR}/${PROJECT_DIR}-<branch-name>"
+   # REPO_TOPOLOGY and REPO_ROOT already set from Phase 1 detection
+   if [ "$REPO_TOPOLOGY" = "bare" ]; then
+     WORKTREE_PATH="${REPO_ROOT}/<branch-name>"
+   elif [ "$REPO_TOPOLOGY" = "worktrees-dir" ]; then
+     WORKTREE_PATH="${REPO_ROOT}/.worktrees/<branch-name>"
+   else
+     # Standard repo: ensure .worktrees/ exists and is gitignored
+     mkdir -p "${REPO_ROOT}/.worktrees"
+     grep -qxF '.worktrees/' "${REPO_ROOT}/.gitignore" 2>/dev/null \
+       || echo '.worktrees/' >> "${REPO_ROOT}/.gitignore"
+     WORKTREE_PATH="${REPO_ROOT}/.worktrees/<branch-name>"
+   fi
    ```
    Store `WORKTREE_PATH` — you will reference it throughout this session.
 
@@ -371,18 +415,13 @@ Example — risky multi-file fix on main with unclear root cause:
    git worktree add -b <branch-name> "$WORKTREE_PATH" HEAD
    ```
 
-3. **Activate worktree** — change into the new worktree directory:
+3. **Activate and verify worktree** — change into the new directory and confirm it:
    ```bash
-   cd "$WORKTREE_PATH"
-   ```
-
-4. **Verify activation** — confirm the worktree is the working directory:
-   ```bash
-   git rev-parse --show-toplevel
+   cd "$WORKTREE_PATH" && git rev-parse --show-toplevel
    ```
    The output MUST match `WORKTREE_PATH`. If it does not, STOP and fix before continuing.
 
-5. **Confirm to user**:
+4. **Confirm to user**:
    ```
    Worktree created and activated at <WORKTREE_PATH>
    Branch: <branch-name>
@@ -390,8 +429,29 @@ Example — risky multi-file fix on main with unclear root cause:
    All subsequent work proceeds here.
    ```
 
-6. **Set worktree active flag**: Remember that `WORKTREE_PATH` is set. ALL agent delegation
+5. **Set worktree active flag**: Remember that `WORKTREE_PATH` is set. ALL agent delegation
    prompts in Phases 2-4 MUST include the Worktree Context Block (defined below).
+
+**If "Use existing worktree" selected (bare repo only):**
+
+1. Set `WORKTREE_PATH = PRIMARY_SOURCE`.
+2. **Activate and verify**:
+   ```bash
+   cd "$WORKTREE_PATH" && git rev-parse --show-toplevel
+   ```
+   The output MUST match `WORKTREE_PATH`. If it does not, STOP and fix before continuing.
+3. **Retrieve branch name** for this worktree (used in subsequent agent delegation prompts):
+   ```bash
+   git branch --show-current
+   ```
+4. **Confirm to user**:
+   ```
+   Activated existing worktree at <WORKTREE_PATH>
+   Branch: <branch-name>
+   Verified: working directory is inside worktree.
+   All subsequent work proceeds here.
+   ```
+5. **Set worktree active flag**: Remember that `WORKTREE_PATH` is set. ALL agent delegation prompts in Phases 2-4 MUST include the Worktree Context Block (defined below).
 
 **If "Current branch" selected:** `WORKTREE_PATH` is not set. Continue to Phase 2.
 
@@ -832,6 +892,10 @@ Apply MINIMAL fix to make the test pass:
 ### Investigation Agents (Phase 1)
 
 ```
+[If REPO_TOPOLOGY="bare", prepend to each agent prompt:
+"BARE REPO: This is a bare repo container. Source files live in worktree subdirectories,
+not the container root. Explore from: <PRIMARY_SOURCE> (or run `git worktree list` if empty)."]
+
 Launch 2-3 Task tools in parallel with subagent_type="rptc:research-agent":
 
 Agent 1: "Investigate bug [description]. Reproduce and verify failure point."

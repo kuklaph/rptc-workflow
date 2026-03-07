@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.9.3] - 2026-03-07
+
+### Fixed
+
+- **Worktree placement**: Auto-detects repo pattern and places worktrees inside the project root, eliminating Claude Code permission prompts caused by sibling directories falling outside the allowed path scope
+  - **Bare repo** (`.git` file + `.bare/` dir): worktrees go as siblings inside the container root
+  - **Worktrees-dir** (`.worktrees/` dir exists): worktrees go inside `.worktrees/`
+  - **Standard repo** (neither): creates `.worktrees/`, adds it to `.gitignore`, places worktrees there
+  - Applies to both `/rptc:feat` and `/rptc:fix`
+- **Bare repo support**: Resolved multiple gaps when Claude is opened at a bare repo container root
+  - **Bare container startup**: Replaced `git rev-parse --show-toplevel` (fatal at bare repo container root) with early topology detection in Phase 1 Step 1, which runs before any working-tree git commands
+  - **Topology detection order**: Topology is now detected before research agents and branch label generation, so all topology-dependent steps have consistent values throughout the session
+  - **Research agents context**: Agents now receive a `BARE REPO` preamble when `REPO_TOPOLOGY="bare"`, directing them to explore from `PRIMARY_SOURCE` instead of the empty container root
+  - **Branch label**: Replaced `git branch --show-current` (returns empty from bare container) with `git symbolic-ref --short HEAD 2>/dev/null || echo "main"`
+  - **Missing option**: Added "Use existing worktree [<PRIMARY_SOURCE>]" option for bare repos where "Current branch" is meaningless (no working tree at container root)
+  - **Worktree verification**: Combined `cd` and post-`cd` git commands into a single Bash call — shell directory changes do not persist across separate Bash invocations
+  - Applies to both `/rptc:feat` and `/rptc:fix`
+
+---
+
 ## [3.9.2] - 2026-03-07
 
 ### Fixed
