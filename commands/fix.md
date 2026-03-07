@@ -336,16 +336,22 @@ Use AskUserQuestion:
 question: "How should this fix be organized?"
 header: "Branch"
 options:
-  - label: "Current branch [<current-branch>] (Recommended)"
-    description: "Stay on the current branch and make changes directly"
-  - label: "New worktree [<generated-branch-name>]"
-    description: "Create a new worktree with an isolated branch for this work"
+  - label: "<recommended-option> (Recommended)"
+    description: "<description>"
+  - label: "<other-option>"
+    description: "<description>"
 ```
 
-Example with real values:
+Example — single-file fix with clear root cause on a fix branch:
 ```
-  - label: "Current branch [main] (Recommended)"
+  - label: "Current branch [fix/auth-bug] (Recommended)"
   - label: "New worktree [fix/cart-items-disappear]"
+```
+
+Example — risky multi-file fix on main with unclear root cause:
+```
+  - label: "New worktree [fix/cart-items-disappear] (Recommended)"
+  - label: "Current branch [main]"
 ```
 
 **If "New worktree" selected:**
@@ -764,14 +770,11 @@ Apply MINIMAL fix to make the test pass:
    options:
      - label: "Proceed to Phase 5"
        description: "All verification findings addressed, ready to wrap up"
-     - label: "Re-verify needed"
-       description: "I want to revisit some findings before completing"
-     - label: "Add more verification scope"
-       description: "Launch additional verification agents or expand scope"
+     - label: "Re-verify with /rptc:verify"
+       description: "Run the standalone verification command to check current state"
    ```
 
-   If user selects "Re-verify needed" → return to step 6 (auto-fix).
-   If user selects "Add more verification scope" → return to step 3 (launch agents).
+   If user selects "Re-verify" → invoke `/rptc:verify` (uses the standalone verify workflow with agent selection and full re-scan).
 
 `TaskUpdate(Phase 4, status: "completed")`
 

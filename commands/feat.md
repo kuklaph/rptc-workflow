@@ -322,16 +322,22 @@ Use AskUserQuestion:
 question: "How should this feature be organized?"
 header: "Branch"
 options:
-  - label: "Current branch [<current-branch>] (Recommended)"
-    description: "Stay on the current branch and make changes directly"
-  - label: "New worktree [<generated-branch-name>]"
-    description: "Create a new worktree with an isolated branch for this work"
+  - label: "<recommended-option> (Recommended)"
+    description: "<description>"
+  - label: "<other-option>"
+    description: "<description>"
 ```
 
-Example with real values:
+Example — small single-file change on a feature branch:
 ```
-  - label: "Current branch [main] (Recommended)"
+  - label: "Current branch [feature/auth] (Recommended)"
   - label: "New worktree [feature/add-user-auth]"
+```
+
+Example — large multi-file feature on main:
+```
+  - label: "New worktree [feature/add-user-auth] (Recommended)"
+  - label: "Current branch [main]"
 ```
 
 **If "New worktree" selected:**
@@ -843,14 +849,11 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
    options:
      - label: "Proceed to Phase 5"
        description: "All verification findings addressed, ready to wrap up"
-     - label: "Re-verify needed"
-       description: "I want to revisit some findings before completing"
-     - label: "Add more verification scope"
-       description: "Launch additional verification agents or expand scope"
+     - label: "Re-verify with /rptc:verify"
+       description: "Run the standalone verification command to check current state"
    ```
 
-   If user selects "Re-verify needed" → return to step 7 (auto-fix).
-   If user selects "Add more verification scope" → return to step 4 (launch agents).
+   If user selects "Re-verify" → invoke `/rptc:verify` (uses the standalone verify workflow with agent selection and full re-scan).
 
 `TaskUpdate(Phase 4, status: "completed")`
 

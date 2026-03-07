@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.9.1] - 2026-03-06
+
+### Changed
+
+- **Branch strategy**: Recommendation is now context-driven (scope, risk, current branch) instead of defaulting to current branch; examples show both directions
+- **Verification gate**: "Re-verify" option now invokes `/rptc:verify` for a full standalone verification pass instead of looping back to internal auto-fix
+- **Verification gate**: Removed "Add more verification scope" option (covered by `/rptc:verify` agent selection)
+
+---
+
+
 ## [3.9.0] - 2026-03-06
 
 ### Changed
