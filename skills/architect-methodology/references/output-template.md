@@ -20,6 +20,21 @@ Follow this template EXACTLY when generating implementation plans. Use checkbox 
 
 ---
 
+## Step 0: RPTC Re-initialization (ALWAYS FIRST)
+
+**Run before any implementation step.** After plan approval, context may be cleared.
+
+Re-invoke the originating RPTC command to restore full context:
+
+- Features: `/rptc:feat Plan is approved, continue to implementation`
+- Bug fixes: `/rptc:fix Plan is approved, continue to implementation`
+
+This handles all re-initialization automatically: skill loading, Serena activation, task tracking, and routing to Phase 3.
+
+**Do not manually load skills or rebuild tasks** — the command handles everything.
+
+---
+
 ## Executive Summary
 
 **Feature:** [1-sentence description]

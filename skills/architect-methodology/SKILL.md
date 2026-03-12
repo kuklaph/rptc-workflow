@@ -194,7 +194,7 @@ You will receive:
 
 Your plan is successful when:
 
-- **Step 0 Present**: Plan begins with Step 0: RPTC Re-initialization (Serena activation, skill loading, task list rebuild) — always, regardless of plan complexity
+- **Step 0 Present**: Plan begins with Step 0: RPTC Re-initialization (re-invokes originating `/rptc:feat` or `/rptc:fix` command) — always, regardless of plan complexity
 - **TDD-Ready**: Tests designed before implementation steps (100% of steps)
 - **Comprehensive**: All acceptance criteria addressed, risks identified, dependencies mapped
 - **Actionable**: Every step has clear instructions, no ambiguous "implement X" directives

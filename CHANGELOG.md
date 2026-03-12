@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.9.4] - 2026-03-12
+
+### Changed
+
+- **Plan re-initialization**: Replaced manual Step 0 (Serena activation, skill loading, task list rebuild) with single command re-invocation (`/rptc:feat` or `/rptc:fix` with "Plan is approved, continue to implementation")
+- **Plan continuation detection**: Added Step 0.6 to both `/rptc:feat` and `/rptc:fix` — detects plan-approved re-entry, skips Phases 1-2, routes directly to Phase 3
+- **Architect output template**: Added Step 0 section to `output-template.md` to match plan-overview template
+
+---
+
 ## [3.9.3] - 2026-03-07
 
 ### Fixed

@@ -125,6 +125,37 @@ TaskUpdate(Phase 5, addBlockedBy: [Phase 4])
 
 **At each phase**: Call `TaskUpdate(status: "in_progress")` when starting, `TaskUpdate(status: "completed")` when done.
 
+### 0.6 Plan Continuation Detection
+
+Check if the feature description argument contains **"Plan is approved"**:
+
+**If YES** — this is a post-plan-approval re-entry (context was cleared after plan approval):
+
+1. Step 0 initialization is already complete (skills loaded, Serena active, tasks created)
+2. **Detect environment** (lightweight — run the same repo topology bash block from Phase 1 step 1):
+   ```bash
+   if [ -f ".git" ] && [ -d ".bare" ]; then
+     REPO_TOPOLOGY="bare"
+     REPO_ROOT="$(pwd)"
+   else
+     REPO_ROOT=$(git rev-parse --show-toplevel)
+     if [ -d "$REPO_ROOT/.worktrees" ]; then
+       REPO_TOPOLOGY="worktrees-dir"
+     else
+       REPO_TOPOLOGY="standard"
+     fi
+   fi
+   ```
+   Check if currently inside a worktree: compare `git rev-parse --show-toplevel` against `git worktree list`. If in a worktree, set `WORKTREE_PATH` accordingly.
+3. Mark Phases 1 and 2 complete:
+   ```
+   TaskUpdate(Phase 1, status: "completed")
+   TaskUpdate(Phase 2, status: "completed")
+   ```
+4. **Proceed directly to Phase 3: Implementation** — the plan is already approved and available in the plan file.
+
+**If NO** — this is a new feature request. Proceed to Phase 1.
+
 ---
 
 ## Arguments
@@ -542,13 +573,13 @@ options:
 ```
 
 6. **Write selected plan to plan file** with:
-   - **Step 0: RPTC Re-initialization (ALWAYS FIRST)** — Serena activation, skill loading, task list rebuild for Phase 3/4/5 (use plan-overview template for exact format)
+   - **Step 0: RPTC Re-initialization (ALWAYS FIRST)** — instructs re-invocation of `/rptc:feat` with "Plan is approved, continue to implementation" to restore full RPTC context
    - Approach used (with rationale)
    - Implementation steps (ordered)
    - Files to create/modify
    - Test strategy per step (code tasks only)
 
-7. **Verify plan includes Step 0: RPTC Re-initialization**, then exit with ExitPlanMode to get user approval
+7. **Verify plan includes Step 0** (re-invocation of `/rptc:feat`), then exit with ExitPlanMode to get user approval
 
 **Plan file format** (flexible):
 

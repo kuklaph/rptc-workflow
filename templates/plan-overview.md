@@ -27,38 +27,16 @@
 
 ## Step 0: RPTC Re-initialization (ALWAYS FIRST)
 
-**Run before any implementation step.** Safe whether or not context was cleared after plan approval.
+**Run before any implementation step.** After plan approval, context may be cleared.
 
-### 0.1 Activate Serena MCP
-`ToolSearch(query: "serena")`
+Re-invoke the originating RPTC command to restore full context:
 
-### 0.2 Load Required Skills
+- Features: `/rptc:feat Plan is approved, continue to implementation`
+- Bug fixes: `/rptc:fix Plan is approved, continue to implementation`
 
-```
-Skill(skill: "rptc:tool-guide")
-Skill(skill: "rptc:writing-clearly-and-concisely")
-Skill(skill: "rptc:tdd-methodology")
-Skill(skill: "rptc:agent-teams")
-```
+This handles all re-initialization automatically: skill loading, Serena activation, task tracking, and routing to Phase 3.
 
-**Conditional** — only if this plan involves frontend/UI work:
-```
-Skill(skill: "frontend-design:frontend-design")
-```
-
-### 0.3 Rebuild Task List
-
-Context clear also clears tasks. Check first: `TaskList()`. If Phases 3–5 are missing, recreate them with their dependency chain:
-
-- `TaskCreate("Phase 3: [phase-name]", description: "[description]")`
-- `TaskCreate("Phase 4: [phase-name]", description: "[description]")`
-- `TaskCreate("Phase 5: Complete", description: "Summarize what was built")`
-- `TaskUpdate(Phase 4, addBlockedBy: [Phase 3])`
-- `TaskUpdate(Phase 5, addBlockedBy: [Phase 4])`
-
-If tasks already exist (context was not cleared), skip creation.
-
-**Do not proceed to Phase 3 until 0.1, 0.2, and 0.3 are all complete.**
+**Do not manually load skills or rebuild tasks** — the command handles everything.
 
 ---
 
