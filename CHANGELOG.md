@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.9.5] - 2026-03-14
+
+### Changed
+
+- **Topology detection moved to Step 0.1.2**: Repo type (bare/worktrees-dir/standard) is now detected before Serena activation, using native tools (Glob, Read) and simple `git` commands instead of a compound bash block that required manual approval every invocation
+- **Serena activation renumbered to Step 0.1.3**: Now receives topology info for correct project activation path
+- **Worktree Context Block → Environment Context Block**: Always prepended to agent prompts (not just when worktree is active), carries repo topology, Serena project name, repo root, and worktree path — sub-agents can now activate Serena without guessing
+- **Agent Teams spawn prompts updated**: Teammate prompts include full environment context instead of worktree-only info
+
+---
+
+
 ## [3.9.4] - 2026-03-12
 
 ### Changed
@@ -27,9 +39,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Standard repo** (neither): creates `.worktrees/`, adds it to `.gitignore`, places worktrees there
   - Applies to both `/rptc:feat` and `/rptc:fix`
 - **Bare repo support**: Resolved multiple gaps when Claude is opened at a bare repo container root
-  - **Bare container startup**: Replaced `git rev-parse --show-toplevel` (fatal at bare repo container root) with early topology detection in Phase 1 Step 1, which runs before any working-tree git commands
-  - **Topology detection order**: Topology is now detected before research agents and branch label generation, so all topology-dependent steps have consistent values throughout the session
-  - **Research agents context**: Agents now receive a `BARE REPO` preamble when `REPO_TOPOLOGY="bare"`, directing them to explore from `PRIMARY_SOURCE` instead of the empty container root
+  - **Bare container startup**: Replaced `git rev-parse --show-toplevel` (fatal at bare repo container root) with early topology detection in Step 0.1.2, which runs before Serena activation and any working-tree git commands
+  - **Topology detection order**: Topology is now detected in Step 0.1.2 (before Serena activation and Phase 1), so all topology-dependent steps have consistent values throughout the session
+  - **Research agents context**: Agents now receive the Environment Context Block with topology, Serena project name, repo root, and worktree path (when applicable)
   - **Branch label**: Replaced `git branch --show-current` (returns empty from bare container) with `git symbolic-ref --short HEAD 2>/dev/null || echo "main"`
   - **Missing option**: Added "Use existing worktree [<PRIMARY_SOURCE>]" option for bare repos where "Current branch" is meaningless (no working tree at container root)
   - **Worktree verification**: Combined `cd` and post-`cd` git commands into a single Bash call — shell directory changes do not persist across separate Bash invocations
@@ -154,7 +166,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Serena MCP tools not activated in main context for `/rptc:feat` and `/rptc:fix` — added mandatory `ToolSearch(query: "serena")` step (Step 0.1.2) to load deferred tools at session start
+- Serena MCP tools not activated in main context for `/rptc:feat` and `/rptc:fix` — added mandatory `ToolSearch(query: "serena")` step (Step 0.1.3) to load deferred tools at session start
 - `rptc:tool-guide` skill not loaded in main context — added as first mandatory skill in Step 0.1 of both primary commands, closing parity gap with agents
 
 ### Changed
@@ -220,8 +232,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **Worktree path uses absolute paths** — worktree creation now anchors to `git rev-parse --show-toplevel` instead of relative `../` which resolved incorrectly when session wasn't at repo root
-- **Sub-agents receive worktree context** — all Task tool delegation prompts (architect, tdd, code-review, security, docs) now include the Worktree Context Block telling agents to `cd` into the worktree before starting work
-- **Agent Teams worktree propagation** — spawn prompt templates include worktree path so teammates also work in the correct directory
+- **Sub-agents receive environment context** — all Task tool delegation prompts (architect, tdd, code-review, security, docs) now include the Environment Context Block with repo topology, Serena project name, repo root, and worktree path (when applicable)
+- **Agent Teams environment propagation** — spawn prompt templates include full environment context so teammates can activate Serena and work in the correct directory
 
 ---
 

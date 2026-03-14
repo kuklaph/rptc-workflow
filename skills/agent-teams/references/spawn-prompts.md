@@ -310,10 +310,16 @@ Use RPTC plugin SOPs as fallback:
 - Security: `${CLAUDE_PLUGIN_ROOT}/sop/security-and-performance.md`
 - Refactoring: `${CLAUDE_PLUGIN_ROOT}/sop/post-tdd-refactoring.md`
 
-## Worktree (if applicable)
-If the Team Lead provides a WORKTREE_PATH, you MUST cd to it before ANY work:
-  cd "<WORKTREE_PATH>"
-All file paths are relative to this worktree root, NOT the original repo.
+## Environment Context (always provided)
+ENVIRONMENT:
+Repo topology: <REPO_TOPOLOGY>
+Repo root: <REPO_ROOT>
+Serena project: <SERENA_PROJECT_NAME>
+  → Call activate_project("<SERENA_PROJECT_NAME>") before using any Serena tools.
+[If worktree is active:]
+Worktree: <WORKTREE_PATH>
+  → cd "<WORKTREE_PATH>" before doing ANY work.
+  → All file paths are relative to this worktree root, NOT the original repo.
 ```
 
 ---

@@ -37,7 +37,34 @@ Skill(skill: "frontend-design:frontend-design")
 
 > **IMPORTANT**: If the project already has an established design system, style guide, or visual aesthetic, the skill's creative direction MUST work within those constraints. Research existing styles first (CSS variables, component library, brand guidelines) and extend them — do not override with a conflicting aesthetic. The skill adds polish and intentionality, not a new identity.
 
-### 0.1.2 Activate Serena MCP (MANDATORY)
+### 0.1.2 Detect Repo Topology (MANDATORY)
+
+Detect the Git repository type **before** activating Serena or running any git commands that assume a working tree. Uses native tools and simple `git` commands only — no compound bash blocks.
+
+**Run these checks in parallel:**
+
+1. **Check for bare repo container**: `Glob(pattern: ".bare")` — if matches exist, bare repo candidate
+2. **Check if `.git` is a file** (not a directory): `Read(".git")` — if readable as a file, confirms bare repo or worktree checkout
+3. **Get repo root**: `Bash("git rev-parse --show-toplevel")` — auto-allowed by frontmatter; may fail at bare repo container root (expected)
+4. **Check for `.worktrees/` directory**: `Glob(pattern: ".worktrees")` — if matches exist, worktrees-dir topology
+
+**Determine topology from results:**
+
+| `.bare/` exists | `.git` is a file | `.worktrees/` exists | Result |
+|:---------------:|:----------------:|:--------------------:|--------|
+| Yes | Yes | — | `REPO_TOPOLOGY="bare"`, `REPO_ROOT` = current working directory |
+| No | — | Yes | `REPO_TOPOLOGY="worktrees-dir"`, `REPO_ROOT` = `git rev-parse --show-toplevel` |
+| No | — | No | `REPO_TOPOLOGY="standard"`, `REPO_ROOT` = `git rev-parse --show-toplevel` |
+
+**For bare repos only** — get the primary worktree source:
+```
+Bash("git worktree list")
+```
+Parse the second line (first checked-out worktree) to set `PRIMARY_SOURCE`. If only one line (bare root, no worktrees), `PRIMARY_SOURCE` is empty.
+
+**For all topologies**: Store `REPO_TOPOLOGY`, `REPO_ROOT`, and `PRIMARY_SOURCE` — reference them throughout this session.
+
+### 0.1.3 Activate Serena MCP (MANDATORY)
 
 Serena tools are **deferred** in the main context — they require explicit loading before they can be called.
 
@@ -50,6 +77,8 @@ ToolSearch(query: "serena")
 Once loaded, Serena tools appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*`. This activates both read tools (`find_symbol`, `get_symbols_overview`, `search_for_pattern`, etc.) and edit tools (`replace_symbol_body`, `insert_after_symbol`, etc.). Use them throughout this workflow — refer to the Tool Prioritization section for the full map of Serena vs. native tools.
 
 If Serena is unavailable (not installed), skip silently and fall back to native Grep and Glob.
+
+**Serena project activation** can now use `REPO_TOPOLOGY` from Step 0.1.2 to determine the correct activation path (e.g., bare repo container root vs. standard project root).
 
 ### 0.2 RPTC Workflow Understanding (INTERNALIZE)
 
@@ -131,21 +160,8 @@ Check if the feature description argument contains **"Plan is approved"**:
 
 **If YES** — this is a post-plan-approval re-entry (context was cleared after plan approval):
 
-1. Step 0 initialization is already complete (skills loaded, Serena active, tasks created)
-2. **Detect environment** (lightweight — run the same repo topology bash block from Phase 1 step 1):
-   ```bash
-   if [ -f ".git" ] && [ -d ".bare" ]; then
-     REPO_TOPOLOGY="bare"
-     REPO_ROOT="$(pwd)"
-   else
-     REPO_ROOT=$(git rev-parse --show-toplevel)
-     if [ -d "$REPO_ROOT/.worktrees" ]; then
-       REPO_TOPOLOGY="worktrees-dir"
-     else
-       REPO_TOPOLOGY="standard"
-     fi
-   fi
-   ```
+1. Step 0 initialization is already complete (skills loaded, Serena active, tasks created, **topology detected in Step 0.1.2**)
+2. **Verify environment**: `REPO_TOPOLOGY`, `REPO_ROOT`, and `PRIMARY_SOURCE` are already set from Step 0.1.2.
    Check if currently inside a worktree: compare `git rev-parse --show-toplevel` against `git worktree list`. If in a worktree, set `WORKTREE_PATH` accordingly.
 3. Mark Phases 1 and 2 complete:
    ```
@@ -289,28 +305,7 @@ Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` �
    - If NOT found: Suggest user run `/rptc:config` for best experience
    - If found but outdated: Suggest user run `/rptc:config` to sync with current plugin version
 
-1. **Detect repo topology** (run before any git commands that assume a working tree):
-   ```bash
-   # Bare detection assumes the .git-file + .bare/ container convention
-   # (git clone --bare <url> .bare && echo "gitdir: ./.bare" > .git)
-   if [ -f ".git" ] && [ -d ".bare" ]; then
-     # Bare repo container root — git rev-parse --show-toplevel is fatal here
-     REPO_TOPOLOGY="bare"
-     REPO_ROOT="$(pwd)"
-     # Second entry in worktree list is the first checked-out worktree;
-     # empty when no worktrees exist yet — guard for empty PRIMARY_SOURCE below
-     PRIMARY_SOURCE=$(git worktree list --porcelain | grep "^worktree " | sed -n '2p' | awk '{print $2}')
-   else
-     REPO_ROOT=$(git rev-parse --show-toplevel)
-     if [ -d "$REPO_ROOT/.worktrees" ]; then
-       REPO_TOPOLOGY="worktrees-dir"
-     else
-       REPO_TOPOLOGY="standard"
-     fi
-     PRIMARY_SOURCE="$REPO_ROOT"  # unused for non-bare topologies; set for symmetry
-   fi
-   ```
-   Store `REPO_TOPOLOGY`, `REPO_ROOT`, and `PRIMARY_SOURCE` — you will reference them throughout this session.
+1. **Repo topology** — already detected in Step 0.1.2. `REPO_TOPOLOGY`, `REPO_ROOT`, and `PRIMARY_SOURCE` are available. No re-detection needed.
 
 2. **Classify task type** (see Task Classification above)
 3. **Create initial todo list** with phases based on task type:
@@ -321,9 +316,7 @@ Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` �
 ```
 IMPORTANT: Use subagent_type="rptc:research-agent", NOT "Explore"
 
-[If REPO_TOPOLOGY="bare", prepend to each agent prompt:
-"BARE REPO: This is a bare repo container. Source files live in worktree subdirectories,
-not the container root. Explore from: <PRIMARY_SOURCE> (or run `git worktree list` if empty)."]
+[Prepend the Environment Context Block to each agent prompt]
 
 Use Task tool with subagent_type="rptc:research-agent" (launch all 3 in parallel):
 
@@ -410,9 +403,9 @@ Note: For bare repos, "Current branch" is not meaningful (no working tree at con
 
 **If "New worktree" selected:**
 
-1. **Compute worktree path** using topology detected in Phase 1:
+1. **Compute worktree path** using topology detected in Step 0.1.2:
    ```bash
-   # REPO_TOPOLOGY and REPO_ROOT already set from Phase 1 detection
+   # REPO_TOPOLOGY and REPO_ROOT already set from Step 0.1.2
    if [ "$REPO_TOPOLOGY" = "bare" ]; then
      WORKTREE_PATH="${REPO_ROOT}/<branch-name>"
    elif [ "$REPO_TOPOLOGY" = "worktrees-dir" ]; then
@@ -447,7 +440,7 @@ Note: For bare repos, "Current branch" is not meaningful (no working tree at con
    ```
 
 5. **Set worktree active flag**: Remember that `WORKTREE_PATH` is set. ALL agent delegation
-   prompts in Phases 2-4 MUST include the Worktree Context Block (defined below).
+   prompts in Phases 2-4 MUST include the worktree lines in the Environment Context Block (defined below).
 
 **If "Use existing worktree" selected (bare repo only):**
 
@@ -468,23 +461,27 @@ Note: For bare repos, "Current branch" is not meaningful (no working tree at con
    Verified: working directory is inside worktree.
    All subsequent work proceeds here.
    ```
-5. **Set worktree active flag**: Remember that `WORKTREE_PATH` is set. ALL agent delegation prompts in Phases 2-4 MUST include the Worktree Context Block (defined below).
+5. **Set worktree active flag**: Remember that `WORKTREE_PATH` is set. ALL agent delegation prompts in Phases 2-4 MUST include the worktree lines in the Environment Context Block (defined below).
 
 **If "Current branch" selected:** `WORKTREE_PATH` is not set. Continue to Phase 2.
 
-#### Worktree Context Block
+#### Environment Context Block
 
-When `WORKTREE_PATH` is set, prepend this block to EVERY agent prompt in Phases 2-4 (architect, tdd, code-review, security, docs):
+Prepend this block to EVERY agent prompt in Phases 2-4 (architect, tdd, code-review, security, docs). It carries topology, Serena activation, and worktree info so sub-agents can orient themselves without guessing.
 
 ```
-WORKTREE: This project is checked out in a git worktree.
-Working directory: <WORKTREE_PATH>
-You MUST cd to this path before doing ANY work:
-  cd "<WORKTREE_PATH>"
-All file paths are relative to this worktree root, NOT the original repo.
+ENVIRONMENT:
+Repo topology: <REPO_TOPOLOGY>
+Repo root: <REPO_ROOT>
+Serena project: <SERENA_PROJECT_NAME>
+  → Call activate_project("<SERENA_PROJECT_NAME>") before using any Serena tools.
+[If WORKTREE_PATH is set, include these lines:]
+Worktree: <WORKTREE_PATH>
+  → cd "<WORKTREE_PATH>" before doing ANY work.
+  → All file paths are relative to this worktree root, NOT the original repo.
 ```
 
-When `WORKTREE_PATH` is NOT set, omit this block entirely.
+`<SERENA_PROJECT_NAME>` is the registered name from the main context's successful `activate_project` call in Step 0.1.3. If Serena was unavailable in the main context, omit the Serena lines.
 
 `TaskUpdate(Phase 1, status: "completed")`
 
@@ -515,7 +512,7 @@ When `WORKTREE_PATH` is NOT set, omit this block entirely.
 ```
 Use Task tool with subagent_type="rptc:architect-agent" (launch all 3 in parallel):
 
-[If WORKTREE_PATH is set, prepend the Worktree Context Block to each agent prompt]
+[Prepend the Environment Context Block to each agent prompt]
 
 Agent 1: "Design implementation for [feature]. Perspective: Minimal. Provide: files to modify, component design, data flow, build sequence. [If code task: include test strategy]"
 
@@ -721,7 +718,7 @@ Combines related steps into fewer tdd-agent calls, reducing overhead while maint
 ```
 Use Task tool with subagent_type="rptc:tdd-agent":
 
-[If WORKTREE_PATH is set, prepend the Worktree Context Block]
+[Prepend the Environment Context Block]
 
 ## Context
 - Feature: [description]
@@ -866,7 +863,7 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
    Use Task tool with subagent_type="rptc:code-review-agent":
    ⚠️ WRONG agents: "feature-dev:code-reviewer", "code-review:code-review" — DO NOT USE
 
-   [If WORKTREE_PATH is set, prepend the Worktree Context Block]
+   [Prepend the Environment Context Block]
 
    prompt: "Review code quality for these files: [list files].
    Focus: complexity, KISS/YAGNI violations, dead code, readability.
@@ -877,7 +874,7 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
    ```
    Use Task tool with subagent_type="rptc:security-agent":
 
-   [If WORKTREE_PATH is set, prepend the Worktree Context Block]
+   [Prepend the Environment Context Block]
 
    prompt: "Security review for these files: [list files].
    Focus: input validation, auth checks, injection vulnerabilities, data exposure.
@@ -888,7 +885,7 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
    ```
    Use Task tool with subagent_type="rptc:docs-agent":
 
-   [If WORKTREE_PATH is set, prepend the Worktree Context Block]
+   [Prepend the Environment Context Block]
 
    prompt: "Review documentation impact for these files: [list files].
    Focus: README updates, API doc changes, inline comment accuracy, breaking changes.
@@ -974,9 +971,7 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
 ```
 IMPORTANT: Use "rptc:research-agent", NOT "Explore"
 
-[If REPO_TOPOLOGY="bare", prepend to each agent prompt:
-"BARE REPO: This is a bare repo container. Source files live in worktree subdirectories,
-not the container root. Explore from: <PRIMARY_SOURCE> (or run `git worktree list` if empty)."]
+[Prepend the Environment Context Block to each agent prompt]
 
 Launch 3 Task tools in parallel with subagent_type="rptc:research-agent":
 
@@ -997,7 +992,7 @@ prompt: "Research [topic]. Mode: [A=codebase|B=web|C=hybrid]. Return: findings w
 ```
 Use Task tool with subagent_type="rptc:architect-agent" (launch all 3 in parallel):
 
-[If WORKTREE_PATH is set, prepend the Worktree Context Block]
+[Prepend the Environment Context Block]
 
 Agent 1: "Design implementation for [feature]. Perspective: Minimal. ..."
 Agent 2: "Design implementation for [feature]. Perspective: Clean. ..."
@@ -1011,7 +1006,7 @@ After all complete: MUST ask user to choose via AskUserQuestion (skip only for t
 ```
 Use Task tool with subagent_type="rptc:tdd-agent":
 
-[If WORKTREE_PATH is set, prepend the Worktree Context Block]
+[Prepend the Environment Context Block]
 
 ## Context
 - Feature: [description]
@@ -1046,7 +1041,7 @@ Then next step.
 - `automatic`: Select based on file types/keywords (default if no CLAUDE.md)
 - `minimal`: code-review always launches; others when strongly indicated
 
-**[If WORKTREE_PATH is set, prepend the Worktree Context Block to each agent prompt]**
+**[Prepend the Environment Context Block to each agent prompt]**
 
 **Agents (use these exact `subagent_type` values):**
 1. `rptc:code-review-agent`: Code quality, complexity, KISS/YAGNI
