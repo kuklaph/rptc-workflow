@@ -23,12 +23,13 @@ rptc-workflow/                      # ${CLAUDE_PLUGIN_ROOT}
 │   ├── plugin.json                 # Plugin metadata & version
 │   └── marketplace.json            # Marketplace listing
 │
-├── commands/                       # Flat structure (8 commands)
+├── commands/                       # Flat structure (9 commands)
 │   ├── commit.md                   # /rptc:commit
 │   ├── config.md                   # /rptc:config
 │   ├── feat.md                     # /rptc:feat (PRIMARY)
 │   ├── fix.md                      # /rptc:fix
 │   ├── research.md                 # /rptc:research
+│   ├── structure.md                # /rptc:structure
 │   ├── sync-prod-to-tests.md       # /rptc:sync-prod-to-tests
 │   ├── verify.md                   # /rptc:verify (standalone verification)
 │   └── verify-loop.md              # /rptc:verify-loop (convergence loop)
@@ -55,7 +56,7 @@ rptc-workflow/                      # ${CLAUDE_PLUGIN_ROOT}
 │   ├── testing-guide.md
 │   └── todowrite-guide.md
 │
-├── skills/                         # Skills (16 skills)
+├── skills/                         # Skills (17 skills)
 │   ├── agent-teams/
 │   ├── architect-methodology/
 │   ├── brainstorming/
@@ -66,6 +67,7 @@ rptc-workflow/                      # ${CLAUDE_PLUGIN_ROOT}
 │   ├── html-report-generator/
 │   ├── research-methodology/
 │   ├── security-methodology/
+│   ├── structure-methodology/
 │   ├── tdd-agent-methodology/
 │   ├── tdd-methodology/
 │   ├── test-fixer-methodology/
@@ -123,7 +125,7 @@ rptc-workflow/
 
 - Claude clones repo to plugin directory
 - This becomes `${CLAUDE_PLUGIN_ROOT}`
-- All 8 commands registered and available
+- All 9 commands registered and available
 - Agents available for delegation
 - SOPs available for agent reference
 
@@ -211,6 +213,7 @@ Phase 5: Complete
 | `/rptc:commit [pr]` | Verify and ship | After completing implementation |
 | `/rptc:verify [path]` | Run verification agents on demand | After any code change |
 | `/rptc:verify-loop [path]` | Run verification in a convergence loop until 0 findings | After implementation, when you want a fully clean result |
+| `/rptc:structure` | Codebase structure analysis and refactoring | When restructuring or analyzing project layout |
 | `/rptc:config` | Configure RPTC in project CLAUDE.md | First-time setup, after plugin updates |
 | `/rptc:sync-prod-to-tests "[dir]"` | Test maintenance | When tests drift from production |
 
@@ -404,7 +407,7 @@ Pre-commit hook automatically blocks commits with version mismatch.
 | Before | After |
 |--------|-------|
 | Separate `/rptc:plan` + `/rptc:tdd` | Unified `/rptc:feat` |
-| 16 commands | 8 commands |
+| 16 commands | 9 commands |
 | `.rptc/` workspace required | Not needed |
 | `.claude/settings.json` config | Not needed |
 | SOP fallback chain (3 levels) | Plugin SOPs only |
@@ -433,10 +436,10 @@ Pre-commit hook automatically blocks commits with version mismatch.
 
 **Plugin provides:**
 
-- 8 commands (2 primary, 6 supporting)
+- 9 commands (2 primary, 7 supporting)
 - 8 specialist agents
 - 10 SOPs
-- 16 skills (6 user-facing + 10 agent methodology)
+- 17 skills (6 user-facing + 11 agent methodology)
 
 **User provides:**
 

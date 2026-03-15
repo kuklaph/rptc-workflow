@@ -251,6 +251,20 @@ For documentation, config, and non-code changes:
 
 **Note:** `/rptc:feat` and `/rptc:fix` will suggest running `/rptc:config` if no RPTC configuration is found in your project.
 
+### `/rptc:structure`
+
+**Purpose**: Codebase structure analysis and refactoring.
+
+**When to use:**
+- Analyzing or restructuring project layout
+- Evaluating codebase organization patterns
+- Planning structural refactoring
+
+**How it works:**
+1. Analyzes current project structure
+2. Identifies structural patterns and issues
+3. Recommends improvements based on structure-methodology
+
 ### `/rptc:sync-prod-to-tests "[directory]"`
 
 **Purpose**: Sync tests to production code.
@@ -522,6 +536,7 @@ Preloaded into agents via `skills:` frontmatter at session start. Most are not i
 | `tool-guide` | All agents | Serena MCP, Memory, Context7 |
 | `architect-methodology` | architect-agent | 6-phase planning, constraints, output template |
 | `code-review-methodology` | code-review-agent | 4-tier review framework, over-engineering checklist, behavioral testing checklist, assertion quality checklist |
+| `structure-methodology` | architect-agent, code-review-agent | Codebase structure analysis, refactoring patterns, project layout guidance |
 | `docs-methodology` | docs-agent | 8-step workflow, CLAUDE.md Update Policy, anti-patterns (incl. Stuffing CLAUDE.md), special cases |
 | `research-methodology` | research-agent | 3 research modes, mode selection logic |
 | `security-methodology` | security-agent | Finding categories, OWASP Top 10, confidence scoring |

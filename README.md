@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 3.9.5
+**Version**: 3.10.0
 **Status**: Beta
 **License**: MIT
 
@@ -66,6 +66,7 @@ All phases unified in one command: `/rptc:feat`
 | `/rptc:commit [pr]` | Verify and ship | After completing implementation |
 | `/rptc:verify [path]` | Run quality verification agents on demand | After any code change, independent verification |
 | `/rptc:verify-loop [path]` | Run verification in a loop until 0 findings | After implementation, when you want a fully clean result |
+| `/rptc:structure [path]` | Analyze and improve codebase structure for AI-ready development | Codebase restructuring, AI-readiness audits |
 | `/rptc:sync-prod-to-tests "[dir]"` | Sync tests to production code with auto-fix | Test maintenance |
 
 ---
@@ -276,6 +277,7 @@ Preloaded into agents via `skills:` frontmatter at session start. Most are not i
 | `tool-guide` | All agents | Serena MCP, Memory, Context7 |
 | `architect-methodology` | architect-agent | 6-phase planning, constraints, output template |
 | `code-review-methodology` | code-review-agent | 4-tier review framework, over-engineering checklist, behavioral testing checklist, assertion quality checklist |
+| `structure-methodology` | architect-agent, code-review-agent | Codebase structure analysis and design guidance (deep module principles) |
 | `docs-methodology` | docs-agent | 8-step workflow, CLAUDE.md Update Policy, anti-patterns (incl. Stuffing CLAUDE.md), special cases |
 | `research-methodology` | research-agent | 3 research modes, mode selection logic |
 | `security-methodology` | security-agent | Finding categories, OWASP Top 10, confidence scoring |
@@ -302,6 +304,7 @@ rptc-workflow/
 │   ├── config.md                # /rptc:config (sync config with version)
 │   ├── verify.md                # /rptc:verify (standalone verification)
 │   ├── verify-loop.md           # /rptc:verify-loop (convergence loop)
+│   ├── structure.md              # /rptc:structure
 │   └── sync-prod-to-tests.md    # /rptc:sync-prod-to-tests
 ├── agents/                      # 8 specialist agents
 │   ├── research-agent.md
@@ -314,7 +317,7 @@ rptc-workflow/
 │   └── test-fixer-agent.md
 ├── sop/                         # 10 SOPs
 ├── templates/                   # Templates for artifacts
-├── skills/                      # 16 skills
+├── skills/                      # 17 skills
 │   ├── agent-teams/
 │   ├── architect-methodology/
 │   ├── brainstorming/
@@ -329,6 +332,7 @@ rptc-workflow/
 │   ├── tdd-methodology/
 │   ├── test-fixer-methodology/
 │   ├── test-sync-methodology/
+│   ├── structure-methodology/
 │   ├── tool-guide/
 │   └── writing-clearly-and-concisely/
 └── docs/                        # Documentation

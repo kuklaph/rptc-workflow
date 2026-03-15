@@ -6,6 +6,7 @@ skills:
   - rptc:core-principles
   - rptc:tool-guide
   - rptc:code-review-methodology
+  - rptc:structure-methodology
 color: yellow
 model: inherit
 ---

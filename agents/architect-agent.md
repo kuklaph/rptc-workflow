@@ -6,6 +6,7 @@ skills:
   - rptc:core-principles
   - rptc:tool-guide
   - rptc:architect-methodology
+  - rptc:structure-methodology
 color: blue
 model: inherit
 ---

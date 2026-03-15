@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.10.0] - 2026-03-15
+
+### Added
+
+- **`/rptc:structure` command**: Analyze codebase structure, identify organizational problems, and generate prioritized restructuring plans. Uses 3 parallel research agents (module mapping, dependency analysis, progressive disclosure audit) to produce a scored assessment (1-5) with concrete restructuring actions that feed into `/rptc:feat`
+- **`structure-methodology` skill**: Codebase structure analysis and design guidance based on deep module principles (Ousterhout's *A Philosophy of Software Design*). Two modes — Assessment (analyze module depth, interface quality, progressive disclosure, testability) and Design Guidance (plan module boundaries, interface-first design). Includes inline behavior guardrail for preventive mode when loaded by agents
+
+### Changed
+
+- **architect-agent**: Now loads `rptc:structure-methodology` skill for structural awareness during planning
+- **code-review-agent**: Now loads `rptc:structure-methodology` skill for shallow module web detection during review
+- **`/rptc:feat` and `/rptc:fix`**: Load `rptc:structure-methodology` as 6th mandatory skill — new features are designed with good module boundaries incrementally
+
+---
+
+
 ## [3.9.5] - 2026-03-14
 
 ### Changed

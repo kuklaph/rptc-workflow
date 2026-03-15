@@ -11,9 +11,9 @@ Complete feature development: Discovery → Architecture → Implementation → 
 
 **Before ANY other action, establish RPTC workflow context.**
 
-### 0.1 Load Required Skills (ALL FIVE MANDATORY)
+### 0.1 Load Required Skills (ALL SIX MANDATORY)
 
-Load ALL five skills below. Each `Skill()` call is MANDATORY — do not skip any.
+Load ALL six skills below. Each `Skill()` call is MANDATORY — do not skip any.
 
 ```
 Skill(skill: "rptc:tool-guide")
@@ -21,9 +21,10 @@ Skill(skill: "rptc:brainstorming")
 Skill(skill: "rptc:writing-clearly-and-concisely")
 Skill(skill: "rptc:tdd-methodology")
 Skill(skill: "rptc:agent-teams")
+Skill(skill: "rptc:structure-methodology")
 ```
 
-After loading, confirm all five loaded. If ANY skill fails to load, STOP and report the failure.
+After loading, confirm all six loaded. If ANY skill fails to load, STOP and report the failure.
 
 ### 0.1.1 Conditional Skills (Load When Applicable)
 
