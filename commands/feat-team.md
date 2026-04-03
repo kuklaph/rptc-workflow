@@ -196,6 +196,9 @@ Message the Team Lead with your findings:
 Also message "architect" directly with the same findings so they can begin planning.
 
 Mark your Phase 1 task as completed.
+
+## After Phase 1: On-Call Resource
+Stay available after discovery completes. Teammates may message you with research questions during implementation — codebase lookups, pattern investigations, web research for best practices. Investigate and respond directly to the requesting agent.
 ```
 
 ### 2.2 Architect Agent
@@ -250,6 +253,7 @@ Once the Team Lead confirms the plan is approved:
 
 ## Communication
 - You can message: "researcher", "implementer", "reviewer", and Team Lead
+- If you need codebase or web research during your work, message "researcher" with your question rather than investigating yourself
 - Message the Team Lead for any decisions requiring PM input
 - NEVER modify code files — you are read-only
 
@@ -333,6 +337,7 @@ Continue to the next plan step.
 
 ## Communication Rules
 - Message "architect" and "reviewer" after EVERY step completion
+- If you need codebase or web research during your work, message "researcher" with your question rather than investigating yourself
 - Message the Team Lead if you hit a blocker or need a PM decision
 - If feedback from architect and reviewer conflict, message the Team Lead to arbitrate
 - NEVER skip the feedback wait — the whole point of this team is cross-agent review
@@ -415,6 +420,7 @@ Only report findings with confidence >= 80%. Below 80% = ignore.
 
 ## Communication
 - Primary: Message "implementer" with review feedback after each step
+- If you need codebase or web research during your work, message "researcher" with your question rather than investigating yourself
 - Also message the Team Lead if you find critical security issues or architectural problems
 - Message "architect" if you notice plan-related concerns (they are the primary plan guardian)
 - NEVER modify code files — you are strictly read-only and report-only
