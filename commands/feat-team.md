@@ -1,6 +1,6 @@
 ---
 description: Team-based feature development with parallel research, planning, implementation, and review agents
-allowed-tools: Bash(git *), Bash(npm *), Bash(npx *), Bash(bunx *), Bash(pnpm *), Bash(yarn *), Bash(bun *), Bash(cargo *), Bash(go *), Bash(pytest *), Bash(python -m pytest *), Bash(make *), Bash(dotnet *), Read, Write, Edit, Glob, Grep, LS, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion, TeamCreate, SendMessage
+allowed-tools: Bash(git *), Bash(npm *), Bash(npx *), Bash(bunx *), Bash(pnpm *), Bash(yarn *), Bash(bun *), Bash(cargo *), Bash(go *), Bash(pytest *), Bash(python -m pytest *), Bash(make *), Bash(dotnet *), Read, Write, Edit, Glob, Grep, LS, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion, EnterPlanMode, ExitPlanMode, TeamCreate, SendMessage
 ---
 
 # /rptc:feat-team
@@ -229,8 +229,8 @@ Wait for the "researcher" agent to message you with codebase findings. Then:
 1. Study the research findings
 2. Design ONE pragmatic implementation plan following your architect-methodology
 3. Include: approach rationale, implementation steps (ordered), files to create/modify, test strategy per step
-4. Message the Team Lead with the complete plan for user approval
-5. **WAIT** — do not proceed until the Team Lead messages you with approval
+4. Message the Team Lead with the complete plan — the Team Lead will present it to the user via plan mode for review
+5. **WAIT** — do not proceed until the Team Lead messages you with approval (the user may request changes, in which case the Team Lead will relay their feedback)
 
 ## Phase 3: Plan Guardianship (after approval)
 Once the Team Lead confirms the plan is approved:
@@ -475,25 +475,26 @@ The Architect begins planning after receiving research findings. Wait for the Ar
 
 When the Architect sends the plan:
 
-1. **Present to user** for approval:
+1. **Enter plan mode** and write the Architect's plan to the plan file:
+   ```
+   EnterPlanMode()
+   ```
+   Write the plan content the Architect provided into the plan. Include: approach rationale, implementation steps (ordered), files to create/modify, and test strategy per step.
 
-```
-AskUserQuestion:
-question: "The Architect has proposed an implementation plan. Review and approve?"
-header: "Implementation Plan"
-options:
-  - label: "Approve plan"
-    description: "Proceed to implementation with this plan"
-  - label: "Request changes"
-    description: "Send feedback to Architect for revision"
-```
+2. **Exit plan mode** so the user can review in the native plan UI:
+   ```
+   ExitPlanMode()
+   ```
+   The user now sees the full plan and can approve, edit inline, or reject.
 
-2. **If approved**: Message all three remaining agents:
+3. **If user approves the plan**: Message all three remaining agents:
    - Message "architect": "Plan approved. Transition to plan guardian mode. Monitor implementation for plan adherence."
-   - Message "implementer": "Plan approved. Begin implementation. Here is the plan: [paste plan or reference plan location]"
-   - Message "reviewer": "Plan approved. Here is the plan for reference: [paste plan or reference]. Begin monitoring when implementer starts."
+   - Message "implementer": "Plan approved. Begin implementation. Here is the plan: [paste plan or reference plan file location]"
+   - Message "reviewer": "Plan approved. Here is the plan for reference: [paste plan or reference plan file location]. Begin monitoring when implementer starts."
 
-3. **If changes requested**: Ask user what to change, then message "architect" with the feedback. Wait for revised plan. Repeat approval flow.
+4. **If user edits the plan**: The edited plan is the new approved version. Send the updated plan to all three agents as above.
+
+5. **If user rejects the plan**: Read the user's feedback, then message "architect" with the feedback for revision. Wait for the revised plan. Re-enter plan mode and repeat from step 1.
 
 `TaskUpdate(Phase 2, status: "completed")`
 
