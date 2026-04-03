@@ -23,10 +23,11 @@ rptc-workflow/                      # ${CLAUDE_PLUGIN_ROOT}
 │   ├── plugin.json                 # Plugin metadata & version
 │   └── marketplace.json            # Marketplace listing
 │
-├── commands/                       # Flat structure (9 commands)
+├── commands/                       # Flat structure (10 commands)
 │   ├── commit.md                   # /rptc:commit
 │   ├── config.md                   # /rptc:config
 │   ├── feat.md                     # /rptc:feat (PRIMARY)
+│   ├── feat-team.md                # /rptc:feat-team (team-based feat)
 │   ├── fix.md                      # /rptc:fix
 │   ├── research.md                 # /rptc:research
 │   ├── structure.md                # /rptc:structure
@@ -34,11 +35,12 @@ rptc-workflow/                      # ${CLAUDE_PLUGIN_ROOT}
 │   ├── verify.md                   # /rptc:verify (standalone verification)
 │   └── verify-loop.md              # /rptc:verify-loop (convergence loop)
 │
-├── agents/                         # Specialist agents (8 agents)
+├── agents/                         # Specialist agents (9 agents)
 │   ├── docs-agent.md               # Documentation sync
 │   ├── code-review-agent.md        # Code review
 │   ├── architect-agent.md          # Implementation planning
-│   ├── research-agent.md          # Research and exploration
+│   ├── research-agent.md           # Research and exploration
+│   ├── review-agent.md             # Unified review (code+security+docs) for teams
 │   ├── security-agent.md           # Security review
 │   ├── tdd-agent.md                # TDD execution
 │   ├── test-fixer-agent.md         # Test repair
@@ -125,7 +127,7 @@ rptc-workflow/
 
 - Claude clones repo to plugin directory
 - This becomes `${CLAUDE_PLUGIN_ROOT}`
-- All 9 commands registered and available
+- All 10 commands registered and available
 - Agents available for delegation
 - SOPs available for agent reference
 
@@ -213,6 +215,7 @@ Phase 5: Complete
 | `/rptc:commit [pr]` | Verify and ship | After completing implementation |
 | `/rptc:verify [path]` | Run verification agents on demand | After any code change |
 | `/rptc:verify-loop [path]` | Run verification in a convergence loop until 0 findings | After implementation, when you want a fully clean result |
+| `/rptc:feat-team "description"` | Team-based feature development with 4 persistent agents | Complex features needing continuous review |
 | `/rptc:structure` | Codebase structure analysis and refactoring | When restructuring or analyzing project layout |
 | `/rptc:config` | Configure RPTC in project CLAUDE.md | First-time setup, after plugin updates |
 | `/rptc:sync-prod-to-tests "[dir]"` | Test maintenance | When tests drift from production |
@@ -249,6 +252,7 @@ Use Task tool with subagent_type="rptc:[agent-name]":
 | `rptc:code-review-agent` | Phase 4 | Code review, KISS/YAGNI | **Report-only** |
 | `rptc:security-agent` | Phase 4 | Security review, OWASP compliance | **Report-only** |
 | `rptc:docs-agent` | Phase 4 | Documentation impact review | **Report-only** |
+| `rptc:review-agent` | `/feat-team` | Unified review (code+security+docs) with real-time feedback | **Report-only** |
 | `rptc:test-sync-agent` | `/sync-prod-to-tests` | Analyze test-production relationships | Analysis |
 | `rptc:test-fixer-agent` | `/sync-prod-to-tests` | Auto-repair test files | Active |
 
@@ -318,6 +322,36 @@ RPTC maximizes efficiency through parallelization:
            ▼
     Main Context Fixes
 ```
+
+### The `/rptc:feat-team` Command (Team-Based)
+
+An alternative to `/rptc:feat` that uses persistent agents with real-time messaging:
+
+```text
+/rptc:feat-team "description"
+    ↓
+Step 0: Initialize (topology, Serena, branch strategy)
+    ↓
+Step 1: Create Team (4 agents spawned in parallel)
+    → researcher, architect, implementer, reviewer
+    ↓
+Step 2: Discovery
+    → researcher explores → messages architect
+    ↓
+Step 3: Architecture
+    → architect plans → Team Lead gets user approval
+    ↓
+Step 4: Implementation + Review (parallel feedback loop)
+    → implementer: TDD per step
+    → architect: plan adherence check after each step
+    → reviewer: quality/security/docs check after each step
+    → implementer addresses all feedback before next step
+    ↓
+Step 5: Complete
+    → Collect reports → Summary → /rptc:commit
+```
+
+**Key difference from `/rptc:feat`:** Verification is continuous (every step), not post-hoc (Phase 4 only). All agents stay alive for the entire session, communicating via team messages.
 
 ---
 
@@ -436,8 +470,8 @@ Pre-commit hook automatically blocks commits with version mismatch.
 
 **Plugin provides:**
 
-- 9 commands (2 primary, 7 supporting)
-- 8 specialist agents
+- 10 commands (3 primary, 7 supporting)
+- 9 specialist agents
 - 10 SOPs
 - 17 skills (6 user-facing + 11 agent methodology)
 

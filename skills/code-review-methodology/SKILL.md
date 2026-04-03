@@ -15,7 +15,7 @@ Code review execution patterns for the RPTC code-review agent. **Report-only** �
 
 **Signal Intent**:
 - Prefix minor polish suggestions with "**Nit:**" (Tier 4)
-- All findings are actionable — nits included for completeness
+- All findings are actionable and must be addressed — nits are not optional
 
 ---
 

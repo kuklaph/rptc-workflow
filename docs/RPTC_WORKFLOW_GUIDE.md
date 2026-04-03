@@ -15,7 +15,7 @@
 /rptc:feat "your feature description"
 ```
 
-That's it! The unified `/rptc:feat` command handles everything.
+That's it! The unified `/rptc:feat` command handles everything. For complex features needing continuous review during implementation, use `/rptc:feat-team` instead.
 
 ---
 
@@ -251,6 +251,28 @@ For documentation, config, and non-code changes:
 
 **Note:** `/rptc:feat` and `/rptc:fix` will suggest running `/rptc:config` if no RPTC configuration is found in your project.
 
+### `/rptc:feat-team "description"`
+
+**Purpose**: Team-based feature development with 4 persistent agents.
+
+**When to use:**
+- Complex features that benefit from continuous review during implementation
+- When you want the architect to monitor plan adherence in real-time
+- When you want code quality, security, and docs feedback after every implementation step (not just at the end)
+
+**How it works:**
+1. Creates a team with 4 persistent agents: researcher, architect, implementer (TDD), reviewer
+2. Researcher explores the codebase and messages findings to the architect
+3. Architect creates an implementation plan; Team Lead presents it to you for approval
+4. After approval, the implementer executes each step using TDD
+5. After every step, both the architect (plan adherence) and reviewer (quality/security/docs) review the changes and send feedback
+6. The implementer addresses all feedback — including nits — before proceeding to the next step
+7. Team Lead collects final reports and presents a summary
+
+**Agents used:** `rptc:research-agent` + `rptc:architect-agent` + `rptc:tdd-agent` + `rptc:review-agent` (all persistent, communicating via messages)
+
+**Key difference from `/rptc:feat`:** In `/rptc:feat`, verification happens once at the end (Phase 4). In `/rptc:feat-team`, verification happens continuously during implementation — every step is reviewed before the next one begins.
+
 ### `/rptc:structure`
 
 **Purpose**: Codebase structure analysis and refactoring.
@@ -417,6 +439,20 @@ Main context receives findings via TaskCreate/TaskUpdate and handles all fixes w
 - Confidence-based routing
 - Multi-document consistency
 
+### Review Agent (`rptc:review-agent`)
+
+**Purpose**: Unified quality reviewer combining code review, security, and documentation checks
+
+**When used:** `/rptc:feat-team` (runs continuously alongside TDD agent)
+
+**Capabilities:**
+- All three review domains in a single pass per file (code quality, security, docs)
+- Real-time team messaging — sends consolidated findings to the TDD agent after each step
+- Categorized urgency: blocking (fix before next step), warning (fix before completion), nit (fix before next step)
+- Confidence threshold ≥80% (same as individual review agents)
+
+**Mode**: Report-only — sends findings via team messages, never modifies code
+
 ---
 
 ## Best Practices
@@ -535,11 +571,11 @@ Preloaded into agents via `skills:` frontmatter at session start. Most are not i
 | `core-principles` | All agents | Surgical Coding, Simplicity, Pattern Reuse |
 | `tool-guide` | All agents | Serena MCP, Memory, Context7 |
 | `architect-methodology` | architect-agent | 6-phase planning, constraints, output template |
-| `code-review-methodology` | code-review-agent | 4-tier review framework, over-engineering checklist, behavioral testing checklist, assertion quality checklist |
-| `structure-methodology` | architect-agent, code-review-agent | Codebase structure analysis, refactoring patterns, project layout guidance |
-| `docs-methodology` | docs-agent | 8-step workflow, CLAUDE.md Update Policy, anti-patterns (incl. Stuffing CLAUDE.md), special cases |
+| `code-review-methodology` | code-review-agent, review-agent | 4-tier review framework, over-engineering checklist, behavioral testing checklist, assertion quality checklist |
+| `structure-methodology` | architect-agent, code-review-agent, review-agent | Codebase structure analysis, refactoring patterns, project layout guidance |
+| `docs-methodology` | docs-agent, review-agent | 8-step workflow, CLAUDE.md Update Policy, anti-patterns (incl. Stuffing CLAUDE.md), special cases |
 | `research-methodology` | research-agent | 3 research modes, mode selection logic |
-| `security-methodology` | security-agent | Finding categories, OWASP Top 10, confidence scoring |
+| `security-methodology` | security-agent, review-agent | Finding categories, OWASP Top 10, confidence scoring |
 | `tdd-agent-methodology` | tdd-agent | Batch execution, RED-GREEN-REFACTOR-VERIFY cycle |
 | `test-fixer-methodology` | test-fixer-agent | Approval-aware execution, 5 fix scenarios |
 | `test-sync-methodology` | test-sync-agent | 5-phase analysis, classification decision tree |

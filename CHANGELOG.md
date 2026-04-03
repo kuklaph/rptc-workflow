@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.11.0] - 2026-04-03
+
+### Added
+
+- **`/rptc:feat-team` command**: Team-based feature development with 4 persistent agents (researcher, architect, implementer, reviewer) communicating via real-time messaging. Unlike `/rptc:feat` which runs agents sequentially, `feat-team` keeps all agents alive so they cross-check and provide feedback throughout implementation. Architect monitors plan adherence after every step; reviewer checks code quality, security, and docs after every step; implementer addresses all feedback before proceeding
+- **`review-agent`**: Unified quality reviewer combining code-review, security, and documentation methodologies in a single agent. Loads 6 skills (`core-principles`, `tool-guide`, `code-review-methodology`, `security-methodology`, `docs-methodology`, `structure-methodology`). Designed for team workflows where real-time consolidated feedback is sent directly to the implementation agent
+
+### Changed
+
+- **`code-review-methodology` skill**: Nits enforcement changed from "included for completeness" to "nits are not optional" — all reported findings must be addressed, regardless of tier
+- **Documentation**: Updated README, PLUGIN_ARCHITECTURE, RPTC_WORKFLOW_GUIDE, CONTRIBUTING, and CLAUDE.md to reflect new command (10 total), new agent (9 total), and updated skills consumer tables
+
+---
+
 ## [3.10.0] - 2026-03-15
 
 ### Added

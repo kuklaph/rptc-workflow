@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 3.10.0
+**Version**: 3.11.0
 **Status**: Beta
 **License**: MIT
 
@@ -55,6 +55,7 @@ All phases unified in one command: `/rptc:feat`
 | Command | Purpose | When to Use |
 |---------|---------|-------------|
 | `/rptc:feat "description"` | **Complete feature development**: Discovery → Architecture → Implementation → Quality Verification | New features, enhancements, refactoring |
+| `/rptc:feat-team "description"` | **Team-based feature development**: 4 persistent agents with real-time cross-agent feedback | Complex features needing continuous review during implementation |
 | `/rptc:fix "bug description"` | **Systematic bug fixing**: Reproduction → Root Cause → Fix → Verify | Bug triaging and fixing |
 
 ### Supporting Commands
@@ -175,6 +176,18 @@ All phases unified in one command: `/rptc:feat`
 /rptc:commit pr
 ```
 
+### Pattern 5: Team-Based Feature (Continuous Review)
+
+```bash
+# Complex feature with real-time architect + review feedback during implementation
+/rptc:feat-team "add user authentication with OAuth2 and role-based access control"
+# → 4 agents collaborate: researcher, architect, implementer, reviewer
+# → Architect monitors plan adherence, reviewer checks quality/security/docs after every step
+# → Implementation agent addresses feedback before proceeding
+
+/rptc:commit pr
+```
+
 ---
 
 ## Specialist Agents
@@ -235,6 +248,13 @@ When you approve delegation, specialized AI agents provide expert analysis:
 **When**: `/rptc:sync-prod-to-tests` command (fix phase)
 **Provides**: Update, add, create, and assertion fix scenarios
 
+### Review Agent
+
+**Purpose**: Unified quality reviewer combining code review, security, and documentation checks
+**When**: `/rptc:feat-team` (runs continuously alongside TDD agent during implementation)
+**Provides**: Real-time consolidated feedback across all three quality domains per implementation step
+**Architecture**: Report-only with team messaging — sends findings directly to TDD agent after each step
+
 ---
 
 ## Available SOPs
@@ -276,11 +296,11 @@ Preloaded into agents via `skills:` frontmatter at session start. Most are not i
 | `core-principles` | All agents | Surgical Coding, Simplicity, Pattern Reuse |
 | `tool-guide` | All agents | Serena MCP, Memory, Context7 |
 | `architect-methodology` | architect-agent | 6-phase planning, constraints, output template |
-| `code-review-methodology` | code-review-agent | 4-tier review framework, over-engineering checklist, behavioral testing checklist, assertion quality checklist |
-| `structure-methodology` | architect-agent, code-review-agent | Codebase structure analysis and design guidance (deep module principles) |
-| `docs-methodology` | docs-agent | 8-step workflow, CLAUDE.md Update Policy, anti-patterns (incl. Stuffing CLAUDE.md), special cases |
+| `code-review-methodology` | code-review-agent, review-agent | 4-tier review framework, over-engineering checklist, behavioral testing checklist, assertion quality checklist |
+| `structure-methodology` | architect-agent, code-review-agent, review-agent | Codebase structure analysis and design guidance (deep module principles) |
+| `docs-methodology` | docs-agent, review-agent | 8-step workflow, CLAUDE.md Update Policy, anti-patterns (incl. Stuffing CLAUDE.md), special cases |
 | `research-methodology` | research-agent | 3 research modes, mode selection logic |
-| `security-methodology` | security-agent | Finding categories, OWASP Top 10, confidence scoring |
+| `security-methodology` | security-agent, review-agent | Finding categories, OWASP Top 10, confidence scoring |
 | `tdd-agent-methodology` | tdd-agent | Batch execution, RED-GREEN-REFACTOR-VERIFY cycle |
 | `test-fixer-methodology` | test-fixer-agent | Approval-aware execution, 5 fix scenarios |
 | `test-sync-methodology` | test-sync-agent | 5-phase analysis, classification decision tree |
@@ -299,17 +319,19 @@ rptc-workflow/
 ├── commands/                    # All commands (flat structure)
 │   ├── commit.md                # /rptc:commit
 │   ├── feat.md                  # /rptc:feat (PRIMARY)
+│   ├── feat-team.md             # /rptc:feat-team (team-based feat)
 │   ├── fix.md                   # /rptc:fix
 │   ├── research.md              # /rptc:research
 │   ├── config.md                # /rptc:config (sync config with version)
 │   ├── verify.md                # /rptc:verify (standalone verification)
 │   ├── verify-loop.md           # /rptc:verify-loop (convergence loop)
-│   ├── structure.md              # /rptc:structure
-│   └── sync-prod-to-tests.md    # /rptc:sync-prod-to-tests
-├── agents/                      # 8 specialist agents
+│   ├── structure.md             # /rptc:structure
+│   └── sync-prod-to-tests.md   # /rptc:sync-prod-to-tests
+├── agents/                      # 9 specialist agents
 │   ├── research-agent.md
 │   ├── architect-agent.md
 │   ├── code-review-agent.md
+│   ├── review-agent.md          # Unified review (code+security+docs) for teams
 │   ├── security-agent.md
 │   ├── docs-agent.md
 │   ├── tdd-agent.md
@@ -387,6 +409,7 @@ Coverage targets: happy paths, edge cases, error conditions, integration.
 | Small Feature | `/rptc:feat "add X"` |
 | Medium Feature | `/rptc:feat "implement X"` |
 | Large Feature | `/rptc:feat "build X"` (auto-batching handles size) |
+| Complex Feature (continuous review) | `/rptc:feat-team "build X"` (real-time feedback loop) |
 | Unfamiliar Code | `/rptc:research "X"` first, then `/rptc:feat` |
 
 ### TDD Best Practices

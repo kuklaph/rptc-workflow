@@ -92,17 +92,18 @@ Before suggesting a feature:
 ```text
 rptc-workflow/
 ├── .claude-plugin/        # Plugin metadata
-├── commands/              # Slash command definitions (flat structure, 9 commands)
+├── commands/              # Slash command definitions (flat structure, 10 commands)
 │   ├── commit.md         # /rptc:commit
 │   ├── config.md         # /rptc:config
 │   ├── feat.md           # /rptc:feat (PRIMARY)
+│   ├── feat-team.md      # /rptc:feat-team (team-based feat)
 │   ├── fix.md            # /rptc:fix
 │   ├── research.md       # /rptc:research
 │   ├── sync-prod-to-tests.md  # /rptc:sync-prod-to-tests
-│   ├── structure.md       # /rptc:structure
+│   ├── structure.md      # /rptc:structure
 │   ├── verify.md         # /rptc:verify
 │   └── verify-loop.md    # /rptc:verify-loop
-├── agents/                # Specialist agent definitions (8 agents)
+├── agents/                # Specialist agent definitions (9 agents)
 ├── sop/                   # Standard Operating Procedures (10 SOPs)
 ├── templates/             # Templates for artifacts
 ├── skills/                # Skills (17 skills)
@@ -128,6 +129,7 @@ Before submitting a PR, test the following:
 **Core Commands:**
 
 - [ ] `/rptc:feat "test feature"` completes all 5 phases (Discovery → Architecture → TDD → Quality → Complete)
+- [ ] `/rptc:feat-team "test feature"` spawns 4 agents and completes team workflow (Discovery → Architecture → Implementation+Review → Complete)
 - [ ] `/rptc:fix "test bug"` completes all 5 phases (Reproduction → RCA → Fix → Verification → Complete)
 - [ ] `/rptc:research "test topic"` performs discovery with exploration agents
 - [ ] `/rptc:commit` verifies and creates commits
@@ -142,7 +144,7 @@ Before submitting a PR, test the following:
 - [ ] Branch Strategy prompt appears after Phase 1 and offers worktree option
 - [ ] Phase 2 (Architecture) presents 3 planning perspectives
 - [ ] Phase 3 (TDD) uses smart batching for implementation
-- [ ] Phase 4 (Quality Verification) runs code-review, security, and docs agents in parallel (report-only)
+- [ ] Phase 4 (Quality Verification) runs code-review, security, and docs agents in parallel (report-only). Note: `/rptc:feat-team` uses `review-agent` instead (unified, real-time feedback)
 - [ ] Plans are stored in Claude's native plan mode (`~/.claude/plans/`)
 
 ### Test on Multiple Platforms
