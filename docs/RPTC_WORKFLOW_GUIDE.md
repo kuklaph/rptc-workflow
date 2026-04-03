@@ -267,7 +267,8 @@ For documentation, config, and non-code changes:
 4. After approval, the implementer executes each step using TDD
 5. After every step, both the architect (plan adherence) and reviewer (quality/security/docs) review the changes and send feedback
 6. The implementer addresses all feedback — including nits — before proceeding to the next step
-7. Team Lead collects final reports and presents a summary
+7. After all steps complete, the architect and reviewer collaborate on a final holistic review of all changes together, catching cross-cutting issues that per-step reviews miss
+8. The implementer addresses any final findings, then Team Lead collects reports and presents a summary
 
 **Agents used:** `rptc:research-agent` + `rptc:architect-agent` + `rptc:tdd-agent` + `rptc:review-agent` (all persistent, communicating via messages)
 

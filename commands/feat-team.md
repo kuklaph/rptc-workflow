@@ -127,11 +127,13 @@ Create tasks for the team workflow. Dependencies enforce sequencing where needed
 TaskCreate("Phase 1: Discovery", description: "Research agent explores codebase and reports findings")
 TaskCreate("Phase 2: Architecture", description: "Architect agent creates implementation plan")
 TaskCreate("Phase 3: Implementation", description: "TDD agent implements with Architect + Review monitoring")
-TaskCreate("Phase 4: Wrap-up", description: "Team Lead collects reports, presents summary")
+TaskCreate("Phase 4: Final Review", description: "Architect + Review collaborate on holistic review of all changes")
+TaskCreate("Phase 5: Wrap-up", description: "Team Lead collects reports, presents summary")
 
 TaskUpdate(Phase 2, addBlockedBy: [Phase 1])
 TaskUpdate(Phase 3, addBlockedBy: [Phase 2])
 TaskUpdate(Phase 4, addBlockedBy: [Phase 3])
+TaskUpdate(Phase 5, addBlockedBy: [Phase 4])
 ```
 
 ### 1.3 Build Environment Context Block
@@ -257,6 +259,13 @@ Message the Team Lead with a final plan adherence report:
 - Steps with drift (addressed): [count]
 - Steps with drift (unresolved): [count]
 - Overall plan adherence: [percentage]
+
+## Final Holistic Review (after implementation)
+The Team Lead will message you to perform a final holistic review. This is different from your per-step checks — review ALL changes as a unified body of work:
+- Did the full plan get realized? Any gaps?
+- Do all components integrate correctly?
+- Any scope creep or architectural inconsistency across the whole?
+Share your findings with "reviewer" for cross-checking, then report to the Team Lead.
 ```
 
 ### 2.3 TDD Agent
@@ -425,6 +434,13 @@ After the final step is reviewed, message the Team Lead with a comprehensive rep
 - Findings addressed by implementer: [count]
 - Unresolved findings: [list with details]
 - Overall quality assessment: [PASS / PASS WITH CONCERNS / NEEDS ATTENTION]
+
+## Final Holistic Review (after implementation)
+The Team Lead will message you to perform a final holistic review. This is different from your per-step checks — review ALL changes as a unified body of work:
+- Cross-file consistency, naming coherence, duplication across new files
+- Auth and data flow through all new components end-to-end
+- All public APIs documented, existing docs still accurate
+Share your findings with "architect" for cross-checking, then report to the Team Lead.
 ```
 
 ---
@@ -513,15 +529,89 @@ options:
 
 ---
 
-## Step 4: Complete
+## Step 4: Final Holistic Review
 
 `TaskUpdate(Phase 4, status: "in_progress")`
 
-### 4.1 Collect Reports
+**Goal**: Architect and Review collaborate on a comprehensive review of ALL changes together, catching cross-cutting issues that step-by-step reviews miss.
+
+The step-by-step reviews during implementation catch per-step issues. This final pass looks at the complete picture: does everything fit together? Did the full plan get realized? Are there cross-file concerns that only emerge when viewing all changes at once?
+
+### 4.1 Trigger Final Review
+
+Message both agents to begin their holistic review:
+
+```
+SendMessage(to: "architect", message:
+  "Implementation is complete. Perform a final holistic review of ALL changes together.
+
+  Review the full set of modified files as a whole — not step-by-step, but as a unified body of work.
+
+  Check:
+  - Did the implementation fully realize the plan? Any gaps or missing pieces?
+  - Do all components integrate correctly? Are there orphan code paths or dead ends?
+  - Is the overall architecture consistent with the plan's intent?
+  - Any scope creep that wasn't caught in per-step reviews?
+  - Does the final result match the original feature requirements?
+
+  Share your findings with 'reviewer' so you can cross-check.
+  Then message the Team Lead with your final holistic assessment."
+)
+
+SendMessage(to: "reviewer", message:
+  "Implementation is complete. Perform a final holistic review of ALL changes together.
+
+  Review the full set of modified files as a whole — not step-by-step, but as a unified body of work.
+
+  Check across all three domains:
+  - **Code quality**: Cross-file consistency, naming coherence, unnecessary duplication across new files, overall complexity
+  - **Security**: Auth flow completeness, data flow through all new components, trust boundary crossings
+  - **Documentation**: Do all public APIs have docs? Do existing docs still match? Breaking changes documented?
+
+  Share your findings with 'architect' so you can cross-check.
+  Then message the Team Lead with your final holistic assessment."
+)
+```
+
+### 4.2 Wait for Cross-Check
+
+Both agents review all changes and share findings with each other. Wait for both to send their final holistic assessments to you.
+
+**If findings emerge**:
+- Blocking issues → message "implementer" with the consolidated list, wait for fixes, then re-trigger 4.1
+- Warnings/nits → message "implementer" with the list, wait for fixes
+- No findings → proceed
+
+### 4.3 User Acknowledgment
+
+Present the holistic review results:
+
+```
+AskUserQuestion:
+question: "Final holistic review complete. [N] additional findings addressed. Proceed to wrap-up?"
+header: "Final Review Gate"
+options:
+  - label: "Proceed to wrap-up"
+    description: "All holistic findings addressed, ready to finalize"
+  - label: "Request another pass"
+    description: "Ask architect and reviewer to check again"
+```
+
+If "Request another pass" → re-trigger 4.1.
+
+`TaskUpdate(Phase 4, status: "completed")`
+
+---
+
+## Step 5: Complete
+
+`TaskUpdate(Phase 5, status: "in_progress")`
+
+### 5.1 Collect Reports
 
 Gather final reports from all agents. If any agent hasn't sent a completion report, message them requesting one.
 
-### 4.2 Present Summary to User
+### 5.2 Present Summary to User
 
 ```markdown
 ## feat-team Complete
@@ -544,6 +634,10 @@ Gather final reports from all agents. If any agent hasn't sent a completion repo
 - Documentation findings: [count addressed / count total]
 - Overall: [PASS / PASS WITH CONCERNS]
 
+### Final Holistic Review
+- Cross-cutting findings caught: [count]
+- All addressed: [YES/NO]
+
 ### RPTC Compliance
 - Test-First followed: [YES/NO]
 - FILE LOCKOUT respected: [YES/NO]
@@ -552,7 +646,7 @@ Gather final reports from all agents. If any agent hasn't sent a completion repo
 ### Ready for: `/rptc:commit`
 ```
 
-### 4.3 Shutdown Team
+### 5.3 Shutdown Team
 
 Send shutdown messages to all agents:
 
@@ -563,7 +657,7 @@ SendMessage(to: "implementer", message: { type: "shutdown_request" })
 SendMessage(to: "reviewer", message: { type: "shutdown_request" })
 ```
 
-`TaskUpdate(Phase 4, status: "completed")`
+`TaskUpdate(Phase 5, status: "completed")`
 
 ---
 
@@ -583,5 +677,6 @@ SendMessage(to: "reviewer", message: { type: "shutdown_request" })
 1. **Persistent agents**: All 4 agents stay alive for the entire session — this enables real-time feedback
 2. **TDD is sole code owner**: Only the TDD agent writes code. Architect and Review are read-only
 3. **Feedback before progress**: TDD waits for Architect + Review feedback after every step
-4. **Team Lead intermediates**: User never communicates directly with agents — Team Lead handles all PM interactions
-5. **Three-way verification**: Every implementation step is checked by the implementer (tests), the Architect (plan adherence), and the Review (quality/security/docs)
+4. **Final holistic review**: After all steps, Architect and Review collaborate on a cross-cutting review of all changes together
+5. **Team Lead intermediates**: User never communicates directly with agents — Team Lead handles all PM interactions
+6. **Three-way verification**: Every implementation step is checked by the implementer (tests), the Architect (plan adherence), and the Review (quality/security/docs)

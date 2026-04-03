@@ -184,6 +184,7 @@ All phases unified in one command: `/rptc:feat`
 # → 4 agents collaborate: researcher, architect, implementer, reviewer
 # → Architect monitors plan adherence, reviewer checks quality/security/docs after every step
 # → Implementation agent addresses feedback before proceeding
+# → Final holistic review catches cross-cutting issues across all changes
 
 /rptc:commit pr
 ```

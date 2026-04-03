@@ -347,7 +347,12 @@ Step 4: Implementation + Review (parallel feedback loop)
     → reviewer: quality/security/docs check after each step
     → implementer addresses all feedback before next step
     ↓
-Step 5: Complete
+Step 5: Final Holistic Review
+    → architect + reviewer: cross-cutting review of ALL changes together
+    → catches integration issues, gaps, cross-file concerns
+    → implementer addresses any final findings
+    ↓
+Step 6: Complete
     → Collect reports → Summary → /rptc:commit
 ```
 
