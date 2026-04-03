@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.11.1] - 2026-04-03
+
+### Added
+
+- **Final holistic review phase** in `/rptc:feat-team`: After all implementation steps complete, the architect and reviewer collaborate on a cross-cutting review of ALL changes together, catching integration issues, gaps, and cross-file concerns that per-step reviews miss
+
+---
+
 ## [3.11.0] - 2026-04-03
 
 ### Added
