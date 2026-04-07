@@ -31,10 +31,10 @@ After loading, confirm all six loaded. If ANY skill fails to load, STOP and repo
 **Frontend work** — If the bug involves HTML, CSS, UI components, web pages, or frontend interfaces:
 
 ```
-Skill(skill: "frontend-design:frontend-design")
+Skill(skill: "rptc:frontend-design")
 ```
 
-> This is an external plugin skill (Anthropic's `frontend-design` plugin) that provides creative direction and distinctive aesthetics. If unavailable, skip silently — the RPTC `frontend-guidelines.md` SOP (loaded via the SOP Reference Chain) still applies for engineering standards. Both are complementary: the SOP ensures correctness (accessibility, performance, responsive), the skill ensures distinction (bold aesthetics, memorable design). Do NOT error or warn the user if the plugin is missing.
+> Provides creative direction and distinctive aesthetics. Complements the RPTC `frontend-guidelines.md` SOP (loaded via the SOP Reference Chain): the SOP ensures correctness (accessibility, performance, responsive), the skill ensures distinction (bold aesthetics, memorable design).
 
 > **IMPORTANT**: If the project already has an established design system, style guide, or visual aesthetic, the skill's creative direction MUST work within those constraints. Research existing styles first (CSS variables, component library, brand guidelines) and preserve them — do not introduce a conflicting aesthetic when fixing bugs. The skill adds polish and intentionality, not a new identity.
 
@@ -270,7 +270,7 @@ Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` �
 **Method**: Surgical coding (search 3 similar patterns first), context discovery (check existing tests), strict RED-GREEN-REFACTOR cycle. For bug fixes: write a test that reproduces the bug FIRST (RED), then fix (GREEN).
 **Timing**: Main context applies this when handling fix directly. Sub-agent `rptc:tdd-agent` has equivalent guidance built in.
 
-**`frontend-design:frontend-design`** *(conditional)* - Distinctive, production-grade frontend interfaces:
+**`rptc:frontend-design`** *(conditional)* - Distinctive, production-grade frontend interfaces:
 
 | When | Apply To |
 |------|----------|

@@ -44,9 +44,8 @@ After loading, confirm all loaded. If ANY skill fails to load, STOP and report.
 
 **Frontend work** — If the task involves HTML, CSS, UI components:
 ```
-Skill(skill: "frontend-design:frontend-design")
+Skill(skill: "rptc:frontend-design")
 ```
-Skip silently if unavailable.
 
 ### 0.1.2 Detect Repo Topology (MANDATORY)
 

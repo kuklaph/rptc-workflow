@@ -106,7 +106,7 @@ rptc-workflow/
 ├── agents/                # Specialist agent definitions (9 agents)
 ├── sop/                   # Standard Operating Procedures (10 SOPs)
 ├── templates/             # Templates for artifacts
-├── skills/                # Skills (17 skills)
+├── skills/                # Skills (18 skills)
 └── docs/                  # Documentation
 ```
 

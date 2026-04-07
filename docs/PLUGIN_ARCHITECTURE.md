@@ -58,7 +58,7 @@ rptc-workflow/                      # ${CLAUDE_PLUGIN_ROOT}
 │   ├── testing-guide.md
 │   └── todowrite-guide.md
 │
-├── skills/                         # Skills (17 skills)
+├── skills/                         # Skills (18 skills)
 │   ├── agent-teams/
 │   ├── architect-methodology/
 │   ├── brainstorming/
@@ -66,6 +66,7 @@ rptc-workflow/                      # ${CLAUDE_PLUGIN_ROOT}
 │   ├── core-principles/
 │   ├── discord-notify/
 │   ├── docs-methodology/
+│   ├── frontend-design/
 │   ├── html-report-generator/
 │   ├── research-methodology/
 │   ├── security-methodology/
@@ -478,7 +479,7 @@ Pre-commit hook automatically blocks commits with version mismatch.
 - 10 commands (3 primary, 7 supporting)
 - 9 specialist agents
 - 10 SOPs
-- 17 skills (6 user-facing + 11 agent methodology)
+- 18 skills (7 user-facing + 11 agent methodology)
 
 **User provides:**
 

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.12.0] - 2026-04-07
+
+### Added
+
+- **Native `frontend-design` skill**: Clean room RPTC skill replacing the external `frontend-design:frontend-design` Anthropic plugin dependency. Provides creative direction and bold aesthetics for frontend work, complementing the `frontend-guidelines.md` SOP (engineering standards) with aesthetic intent. Commands now load `rptc:frontend-design` instead of the external plugin.
+
+---
+
 ## [3.11.3] - 2026-04-03
 
 ### Added

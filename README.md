@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 3.11.3
+**Version**: 3.12.0
 **Status**: Beta
 **License**: MIT
 
@@ -284,6 +284,7 @@ Standard Operating Procedures provide guidance for agents:
 | `agent-teams` | Parallel execution via Agent Teams for batch/multi-feature work |
 | `brainstorming` | Structured dialogue for requirement clarification before planning |
 | `discord-notify` | Send Discord notifications on task completion |
+| `frontend-design` | Distinctive, production-grade frontend aesthetics (complements `frontend-guidelines.md` SOP) |
 | `html-report-generator` | Convert markdown research to professional HTML reports |
 | `tdd-methodology` | TDD guidance in main context (alternative to sub-agent) |
 | `writing-clearly-and-concisely` | Apply Strunk's Elements of Style to prose |
@@ -340,7 +341,7 @@ rptc-workflow/
 │   └── test-fixer-agent.md
 ├── sop/                         # 10 SOPs
 ├── templates/                   # Templates for artifacts
-├── skills/                      # 17 skills
+├── skills/                      # 18 skills
 │   ├── agent-teams/
 │   ├── architect-methodology/
 │   ├── brainstorming/
@@ -348,6 +349,7 @@ rptc-workflow/
 │   ├── core-principles/
 │   ├── discord-notify/
 │   ├── docs-methodology/
+│   ├── frontend-design/
 │   ├── html-report-generator/
 │   ├── research-methodology/
 │   ├── security-methodology/
