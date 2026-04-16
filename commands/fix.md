@@ -11,20 +11,21 @@ Systematic bug fixing: Reproduction → Root Cause Analysis → Fix → Verifica
 
 **Before ANY other action, establish RPTC workflow context.**
 
-### 0.1 Load Required Skills (ALL SIX MANDATORY)
+### 0.1 Load Required Skills (ALL FIVE MANDATORY)
 
-Load ALL six skills below. Each `Skill()` call is MANDATORY — do not skip any.
+Load ALL five skills below. Each `Skill()` call is MANDATORY — do not skip any.
 
 ```
 Skill(skill: "rptc:tool-guide")
 Skill(skill: "rptc:brainstorming")
 Skill(skill: "rptc:writing-clearly-and-concisely")
 Skill(skill: "rptc:tdd-methodology")
-Skill(skill: "rptc:agent-teams")
 Skill(skill: "rptc:structure-methodology")
 ```
 
-After loading, confirm all six loaded. If ANY skill fails to load, STOP and report the failure. The `rptc:agent-teams` skill is infrastructure — it must load even when teams mode may not activate.
+After loading, confirm all five loaded. If ANY skill fails to load, STOP and report the failure.
+
+> **Note**: For team-based bug fixing with 4 persistent collaborating agents, use `/rptc:fix-team` instead. For batch work across multiple independent bugs, invoke the `rptc:agent-teams` skill directly.
 
 ### 0.1.1 Conditional Skills (Load When Applicable)
 
@@ -279,16 +280,6 @@ Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` �
 **Method**: Maintain design quality when fixing frontend bugs — preserve aesthetic intent, typography, color themes, and motion patterns.
 **Timing**: Load in Step 0.1.1 only when the bug involves frontend code. Additive creative layer on top of `frontend-guidelines.md` SOP (which always applies for engineering standards).
 
-**`rptc:agent-teams`** - Parallel execution via Agent Teams (MANDATORY LOAD):
-
-| When | Apply To |
-|------|----------|
-| Step 0 (always loaded) | Infrastructure — required for Teams Analysis after Phase 1 |
-| Phase 1 (after triage) | Batch bug fixes, parallel independent fixes, user-requested teams |
-
-**Method**: Analyzes work for teams suitability, determines autonomy level (A/B/C), builds spawn prompts with RPTC enforcement.
-**Timing**: ALWAYS loaded in Step 0. Runs Teams Analysis at end of Phase 1. Routes to teams mode or continues standard RPTC. Must be loaded even if teams mode does not activate — the analysis itself requires it.
-
 ---
 
 ## Phase 1: Reproduction & Triage
@@ -352,18 +343,6 @@ Return: Affected files/functions, related code with same pattern, potential regr
    - Failure point: file:line
    - Affected code paths
    - Severity classification
-
-### Teams Analysis
-
-Run the `agent-teams` skill's Teams Analysis. It evaluates three signals:
-1. Multiple independent work streams detected
-2. Cross-agent debate would improve outcomes
-3. User explicitly requested teams
-
-**If teams mode activates**: The skill takes over orchestration. Do NOT continue
-to Phase 2 — the skill handles the remaining workflow.
-
-**If teams mode does NOT activate**: Continue to Branch Strategy, then Phase 2.
 
 ### Branch Strategy
 

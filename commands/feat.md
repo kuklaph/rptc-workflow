@@ -11,20 +11,21 @@ Complete feature development: Discovery → Architecture → Implementation → 
 
 **Before ANY other action, establish RPTC workflow context.**
 
-### 0.1 Load Required Skills (ALL SIX MANDATORY)
+### 0.1 Load Required Skills (ALL FIVE MANDATORY)
 
-Load ALL six skills below. Each `Skill()` call is MANDATORY — do not skip any.
+Load ALL five skills below. Each `Skill()` call is MANDATORY — do not skip any.
 
 ```
 Skill(skill: "rptc:tool-guide")
 Skill(skill: "rptc:brainstorming")
 Skill(skill: "rptc:writing-clearly-and-concisely")
 Skill(skill: "rptc:tdd-methodology")
-Skill(skill: "rptc:agent-teams")
 Skill(skill: "rptc:structure-methodology")
 ```
 
-After loading, confirm all six loaded. If ANY skill fails to load, STOP and report the failure.
+After loading, confirm all five loaded. If ANY skill fails to load, STOP and report the failure.
+
+> **Note**: For team-based workflows with 4 persistent collaborating agents, use `/rptc:feat-team` instead. For batch work across multiple independent features, invoke the `rptc:agent-teams` skill directly.
 
 ### 0.1.1 Conditional Skills (Load When Applicable)
 
@@ -279,16 +280,6 @@ Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` �
 **Method**: Bold aesthetic direction, distinctive typography, cohesive color themes, purposeful motion/animation. Avoids generic AI aesthetics.
 **Timing**: Load in Step 0.1.1 only when the task involves frontend work. Additive creative layer on top of `frontend-guidelines.md` SOP (which always applies for engineering standards).
 
-**`rptc:agent-teams`** - Parallel execution via Agent Teams (MANDATORY LOAD):
-
-| When | Apply To |
-|------|----------|
-| Step 0 (always loaded) | Infrastructure — required for Teams Analysis after Phase 1 |
-| Phase 1 (after discovery) | Batch features, parallel fixes, user-requested teams |
-
-**Method**: Analyzes work for teams suitability, determines autonomy level (A/B/C), builds spawn prompts with RPTC enforcement.
-**Timing**: ALWAYS loaded in Step 0. Runs Teams Analysis at end of Phase 1. Routes to teams mode or continues standard RPTC. Must be loaded even if teams mode does not activate — the analysis itself requires it.
-
 ---
 
 ## Phase 1: Discovery
@@ -338,18 +329,6 @@ Return: external dependencies, internal dependencies, API boundaries."
 6. **If hybrid research needed** (codebase + best practices), use `rptc:research-agent` with Mode C
 7. **If unclear about requirements**, ask user for clarification
 8. **Summarize findings**: Key patterns, files to modify, dependencies, gap analysis (if hybrid)
-
-### Teams Analysis
-
-Run the `agent-teams` skill's Teams Analysis. It evaluates three signals:
-1. Multiple independent work streams detected
-2. Cross-agent debate would improve outcomes
-3. User explicitly requested teams
-
-**If teams mode activates**: The skill takes over orchestration. Do NOT continue
-to Phase 2 — the skill handles the remaining workflow.
-
-**If teams mode does NOT activate**: Continue to Branch Strategy, then Phase 2.
 
 ### Branch Strategy
 

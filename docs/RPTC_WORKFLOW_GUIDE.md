@@ -15,7 +15,7 @@
 /rptc:feat "your feature description"
 ```
 
-That's it! The unified `/rptc:feat` command handles everything. For complex features needing continuous review during implementation, use `/rptc:feat-team` instead.
+That's it! The unified `/rptc:feat` command handles everything. For complex features needing continuous review during implementation, use `/rptc:feat-team` instead. For complex bugs where the root cause is unclear, use `/rptc:fix-team` for team-based bug fixing.
 
 ---
 
@@ -47,8 +47,6 @@ The `/rptc:feat` command is RPTC's primary interface. It combines what used to b
     ↓
 Phase 1: Discovery (codebase exploration)
     ↓
-Teams Analysis (single task → Branch Strategy, multiple → Agent Teams)
-    ↓
 Branch Strategy (current branch or new git worktree)
     ↓
 Phase 2: Architecture (you select approach)
@@ -77,7 +75,7 @@ Phase 5: Complete (summary)
 
 **Agents used:** `rptc:research-agent` with code-explorer methodology
 
-**After Discovery:** The `agent-teams` skill runs Teams Analysis. If multiple independent work streams are detected (or the user requested teams), the skill takes over orchestration with parallel Agent Teams. Otherwise, the workflow continues to Branch Strategy (current branch or new worktree), then Phase 2.
+**After Discovery:** The workflow continues to Branch Strategy (current branch or new worktree), then Phase 2. If you have multiple independent features or want real-time team-based feedback, use `/rptc:feat-team` directly, or invoke the `rptc:agent-teams` skill for batch work across multiple independent streams.
 
 ### Phase 2: Architecture
 
@@ -274,6 +272,30 @@ For documentation, config, and non-code changes:
 
 **Key difference from `/rptc:feat`:** In `/rptc:feat`, verification happens once at the end (Phase 4). In `/rptc:feat-team`, verification happens continuously during implementation — every step is reviewed before the next one begins.
 
+### `/rptc:fix-team "bug description"`
+
+**Purpose**: Team-based bug fixing with 4 persistent agents, adapted for root cause analysis and regression testing.
+
+**When to use:**
+- Complex bugs where the root cause is unclear
+- Bugs that may cross file/module boundaries
+- Bugs where symptom treatment is a real risk (and you want an architect continuously challenging the fix)
+- When you want regression coverage verified alongside the fix
+
+**How it works:**
+1. Creates a team with 4 persistent agents: researcher, architect, implementer (TDD), reviewer
+2. Researcher reproduces the bug, maps the failure path, and assesses impact; messages findings to the architect
+3. Architect applies 5 Whys methodology to identify the root cause and designs a minimal fix with regression test strategy; Team Lead presents plan to you for approval
+4. After approval, the implementer writes a regression test FIRST that reproduces the bug (must fail against the broken code), then applies the minimal fix
+5. After every step, the architect checks for symptom treatment (guards against shallow fixes) and the reviewer checks code quality, security, docs, AND regression coverage
+6. The implementer addresses all feedback before proceeding
+7. After the fix is complete, the architect and reviewer collaborate on a final regression review: did we address the root cause? Are related code paths also covered? Does the regression test suite prevent this class of bug?
+8. The implementer addresses any final findings, then Team Lead collects reports and presents a summary
+
+**Agents used:** `rptc:research-agent` + `rptc:architect-agent` + `rptc:tdd-agent` + `rptc:review-agent` (all persistent, communicating via messages)
+
+**Key difference from `/rptc:fix`:** Sequential `/rptc:fix` applies the fix and then verifies once. `/rptc:fix-team` adds continuous root cause guardianship — the architect challenges every step to ensure the fix addresses the cause rather than just the symptom, and the reviewer tracks regression coverage alongside quality.
+
 ### `/rptc:structure`
 
 **Purpose**: Codebase structure analysis and refactoring.
@@ -444,7 +466,7 @@ Main context receives findings via TaskCreate/TaskUpdate and handles all fixes w
 
 **Purpose**: Unified quality reviewer combining code review, security, and documentation checks
 
-**When used:** `/rptc:feat-team` (runs continuously alongside TDD agent)
+**When used:** `/rptc:feat-team` and `/rptc:fix-team` (runs continuously alongside TDD agent)
 
 **Capabilities:**
 - All three review domains in a single pass per file (code quality, security, docs)
@@ -559,6 +581,7 @@ You can ask for modifications:
 | `agent-teams` | Parallel execution via Agent Teams for batch/multi-feature work |
 | `brainstorming` | Structured dialogue for requirement clarification before planning |
 | `discord-notify` | Send Discord notifications on task completion |
+| `frontend-design` | Distinctive, production-grade frontend aesthetics (complements `frontend-guidelines.md` SOP) |
 | `html-report-generator` | Convert markdown research to professional HTML reports |
 | `tdd-methodology` | TDD guidance in main context (alternative to sub-agent) |
 | `writing-clearly-and-concisely` | Apply Strunk's Elements of Style to prose |

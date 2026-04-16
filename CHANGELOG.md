@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.13.0] - 2026-04-15
+
+### Added
+
+- **`/rptc:fix-team` command**: Team-based bug fixing with 4 persistent agents (researcher, architect, implementer, reviewer) communicating via real-time messaging. Mirrors `/rptc:feat-team` but adapted for bug triage: Phase 1 focuses on reproduction and impact, Phase 2 applies 5 Whys for root cause analysis, implementer writes a regression test FIRST (must fail against broken code) before applying the minimal fix, reviewer tracks regression coverage alongside quality/security/docs, and the final holistic review verifies root cause coverage and related code paths
+
+### Changed
+
+- **`/rptc:feat` command**: Removed `rptc:agent-teams` skill load and "Teams Analysis" phase — the sequential sub-agent workflow no longer auto-routes to batch teams mode. Users who need team-based workflows invoke `/rptc:feat-team` directly; batch work across multiple independent features invokes the `rptc:agent-teams` skill explicitly
+- **`/rptc:fix` command**: Same removal as `/rptc:feat` — sequential workflow no longer auto-routes to teams. Complex team-based bug fixing now uses the dedicated `/rptc:fix-team` command
+- **Skill count in `/rptc:feat` and `/rptc:fix`**: Reduced from six mandatory skills to five (removed `rptc:agent-teams`)
+- **Documentation**: Updated README, CLAUDE.md command tables and workflow diagrams for the new command (11 total) and clarified the split between sequential commands and dedicated team commands
+
+### Rationale
+
+With dedicated `/rptc:feat-team` and `/rptc:fix-team` commands in place, embedding batch team analysis inside the sequential commands was redundant. Splitting the workflows makes the intent explicit at invocation time: sequential commands stay lean for straightforward work, while team commands carry the full persistent-agent orchestration. The `rptc:agent-teams` skill remains available for multi-feature batch scenarios when invoked directly.
+
+---
+
 ## [3.12.0] - 2026-04-07
 
 ### Added

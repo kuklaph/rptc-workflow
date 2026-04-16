@@ -1,6 +1,6 @@
 ---
 name: agent-teams
-description: Agent Teams execution mode for RPTC. Load when /rptc:feat or /rptc:fix receives multiple tasks, a batch of work, or when the user mentions "team," "parallel," "sprint," or "batch." Orchestrates Agent Teams creation with full RPTC discipline. Also load when the user explicitly asks to use Agent Teams for any development task.
+description: Agent Teams execution mode for RPTC. Invoke explicitly when coordinating multiple independent work streams across parallel agent sessions — batch features, parallel bug fixes, or sprint items that don't share files. Orchestrates team creation with RPTC-compliant spawn prompts, file ownership boundaries, approval flow, and completion integration. For team-based single-feature or single-bug workflows, prefer `/rptc:feat-team` or `/rptc:fix-team` — this skill targets multi-stream batch work.
 ---
 
 # RPTC Agent Teams Mode
@@ -16,30 +16,33 @@ automatically loads the project's CLAUDE.md, MCP servers, and `.claude/skills/`.
 
 ## Where This Fits in RPTC
 
-**Compatibility**: RPTC v2.33.2+. This skill relies on test-first enforcement
-gates (FILE LOCKOUT, RED GATE, exit block verification) introduced in v2.33.2.
-Spawn prompts embed these enforcement mechanisms so teammates follow them even
-when running outside the full plugin context.
+**Compatibility**:
+- RPTC v2.33.2+ for spawn-prompt enforcement gates (FILE LOCKOUT, RED GATE, exit block verification) — spawn prompts embed these mechanisms so teammates follow them even when running outside the full plugin context.
+- RPTC v3.13.0+ for the decoupled invocation model. This skill is no longer auto-loaded by `/rptc:feat` or `/rptc:fix`. Users who want team-based single-feature or single-bug workflows invoke `/rptc:feat-team` or `/rptc:fix-team` directly. This skill targets multi-stream batch work (multiple independent features or fixes processed in parallel) and is invoked explicitly by the main agent.
 
-This skill activates during **Phase 1 (Discovery)** of `/rptc:feat` or
-`/rptc:fix`, after understanding the scope of work. It introduces a routing
-decision before Phase 2:
+### Two entry paths for team-based work in RPTC
+
+| Path | Invocation | Use When |
+|------|------------|----------|
+| **Single feature, persistent team** | `/rptc:feat-team "<feature>"` | One complex feature benefiting from continuous cross-agent feedback (architect + reviewer monitor every step). Does NOT use this skill. |
+| **Single bug, persistent team** | `/rptc:fix-team "<bug>"` | One complex bug where root cause is unclear (architect applies 5 Whys, reviewer tracks regression coverage). Does NOT use this skill. |
+| **Multiple independent streams, parallel batch** | Invoke this skill directly (Skill tool or main agent judgment) | User describes multiple distinct features/fixes that don't share files and each justifies its own session (>10 min work). |
+
+When this skill activates, the main agent becomes the Team Lead. It manages
+teammates who each run their own RPTC phases at the appropriate autonomy level,
+instead of running each stream sequentially through standard RPTC itself.
 
 ```
-Step 0: Initialization (load skills including this one)
-Phase 1: Discovery → TEAMS ANALYSIS ← (this skill)
-  ├─ Single-task, no teams benefit → Continue standard RPTC (Phases 2-5)
-  └─ Teams benefit detected → TEAMS MODE (this skill orchestrates)
-       ├─ Create team with RPTC-compliant spawn prompts
-       ├─ Assign tasks with file ownership boundaries
-       ├─ Teammates execute their RPTC flows
-       ├─ Team Lead coordinates approvals + integration
-       └─ Team Lead runs final verification → Phase 5
+User invokes skill (explicit or via main agent judgment on multi-stream work)
+    ↓
+TEAMS ANALYSIS (this skill) — verify the work actually benefits from teams
+    ├─ Confirms: multiple independent streams, each substantial
+    └─ Creates team with RPTC-compliant spawn prompts
+         ├─ Assigns tasks with file ownership boundaries
+         ├─ Teammates execute their RPTC flows
+         ├─ Team Lead coordinates approvals + integration
+         └─ Team Lead runs final verification
 ```
-
-When teams mode activates, the Team Lead (main session) becomes the orchestrator.
-It does not run its own Phase 2-4 — instead it manages teammates who each run
-their own RPTC phases at the appropriate autonomy level.
 
 ---
 
@@ -50,11 +53,11 @@ their own RPTC phases at the appropriate autonomy level.
    prompt from a Team Lead, you received your task via inbox, or your task
    description mentions file ownership boundaries.)
 2. If YES → **STOP**. Do NOT run Teams Analysis. Do NOT spawn teammates. Do NOT
-   create agent teams. Proceed directly to Phase 2. You are a teammate — only
+   create agent teams. Proceed directly to your assigned work. You are a teammate — only
    the Team Lead creates teams.
 3. If NO → Continue with Teams Analysis below.
 
-Run this analysis after Phase 1 Discovery completes. Evaluate three signals:
+Run this analysis when this skill is invoked, before creating any team. Evaluate three signals:
 
 ### Signal 1: Multiple Independent Work Streams
 
@@ -94,13 +97,14 @@ levels, but don't override their intent.
 
 | Signals | Route |
 |---------|-------|
-| No signals → | Standard RPTC (stop here, continue Phases 2-5 normally) |
+| No signals → | Stop here — the task doesn't meet teams criteria. Inform the user and suggest a standard command (`/rptc:feat`, `/rptc:fix`, `/rptc:feat-team`, or `/rptc:fix-team`) based on scope. |
 | Signal 1 (multiple independent streams) → | Teams mode, continue below |
 | Signal 2 only (debate for single task) → | Teams mode with debate pattern (see reference) |
 | Signal 3 (user requested) → | Teams mode, continue below |
 
-If routing to standard RPTC, this skill has no further role. The rest of this
-document covers teams mode orchestration.
+If the analysis shows teams mode isn't appropriate, report the reason to the
+user and stop. The rest of this document covers teams mode orchestration when
+the analysis routes to teams.
 
 ---
 

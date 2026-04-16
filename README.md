@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 3.12.0
+**Version**: 3.13.0
 **Status**: Beta
 **License**: MIT
 
@@ -57,6 +57,7 @@ All phases unified in one command: `/rptc:feat`
 | `/rptc:feat "description"` | **Complete feature development**: Discovery → Architecture → Implementation → Quality Verification | New features, enhancements, refactoring |
 | `/rptc:feat-team "description"` | **Team-based feature development**: 4 persistent agents with real-time cross-agent feedback | Complex features needing continuous review during implementation |
 | `/rptc:fix "bug description"` | **Systematic bug fixing**: Reproduction → Root Cause → Fix → Verify | Bug triaging and fixing |
+| `/rptc:fix-team "bug description"` | **Team-based bug fixing**: 4 persistent agents with root cause guardianship and regression focus | Complex bugs, unclear root cause, cross-cutting regressions |
 
 ### Supporting Commands
 
@@ -169,9 +170,12 @@ All phases unified in one command: `/rptc:feat`
 ### Pattern 4: Parallel Features (Agent Teams)
 
 ```bash
-# Multiple independent features in parallel
-/rptc:feat "add user auth, build notification system, create admin dashboard"
-# → Teams analysis detects 3 independent streams → parallel teammates
+# Multiple independent features in parallel — invoke the agent-teams skill directly
+# (applies to multi-stream batch work; for a single complex feature, use /rptc:feat-team)
+# Ask Claude to "use the agent-teams skill to coordinate these in parallel":
+#   "add user auth, build notification system, create admin dashboard"
+# → agent-teams skill creates parallel teammates with file ownership boundaries
+# → Team Lead (main session) coordinates approvals and integration
 
 /rptc:commit pr
 ```
@@ -252,7 +256,7 @@ When you approve delegation, specialized AI agents provide expert analysis:
 ### Review Agent
 
 **Purpose**: Unified quality reviewer combining code review, security, and documentation checks
-**When**: `/rptc:feat-team` (runs continuously alongside TDD agent during implementation)
+**When**: `/rptc:feat-team` and `/rptc:fix-team` (runs continuously alongside TDD agent during implementation/fix)
 **Provides**: Real-time consolidated feedback across all three quality domains per implementation step
 **Architecture**: Report-only with team messaging — sends findings directly to TDD agent after each step
 
@@ -323,6 +327,7 @@ rptc-workflow/
 │   ├── feat.md                  # /rptc:feat (PRIMARY)
 │   ├── feat-team.md             # /rptc:feat-team (team-based feat)
 │   ├── fix.md                   # /rptc:fix
+│   ├── fix-team.md              # /rptc:fix-team (team-based fix)
 │   ├── research.md              # /rptc:research
 │   ├── config.md                # /rptc:config (sync config with version)
 │   ├── verify.md                # /rptc:verify (standalone verification)
@@ -409,6 +414,7 @@ Coverage targets: happy paths, edge cases, error conditions, integration.
 | Scenario | Approach |
 |----------|----------|
 | Bug Fix | `/rptc:fix "bug description"` |
+| Complex Bug (root cause unclear) | `/rptc:fix-team "bug description"` (real-time feedback loop with root cause guardianship) |
 | Small Feature | `/rptc:feat "add X"` |
 | Medium Feature | `/rptc:feat "implement X"` |
 | Large Feature | `/rptc:feat "build X"` (auto-batching handles size) |

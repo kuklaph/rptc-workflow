@@ -23,12 +23,13 @@ rptc-workflow/                      # ${CLAUDE_PLUGIN_ROOT}
 │   ├── plugin.json                 # Plugin metadata & version
 │   └── marketplace.json            # Marketplace listing
 │
-├── commands/                       # Flat structure (10 commands)
+├── commands/                       # Flat structure (11 commands)
 │   ├── commit.md                   # /rptc:commit
 │   ├── config.md                   # /rptc:config
 │   ├── feat.md                     # /rptc:feat (PRIMARY)
 │   ├── feat-team.md                # /rptc:feat-team (team-based feat)
 │   ├── fix.md                      # /rptc:fix
+│   ├── fix-team.md                 # /rptc:fix-team (team-based fix)
 │   ├── research.md                 # /rptc:research
 │   ├── structure.md                # /rptc:structure
 │   ├── sync-prod-to-tests.md       # /rptc:sync-prod-to-tests
@@ -128,7 +129,7 @@ rptc-workflow/
 
 - Claude clones repo to plugin directory
 - This becomes `${CLAUDE_PLUGIN_ROOT}`
-- All 10 commands registered and available
+- All 11 commands registered and available
 - Agents available for delegation
 - SOPs available for agent reference
 
@@ -181,10 +182,6 @@ Phase 1: Discovery
     → Launches 2-3 parallel exploration agents
     → Uses rptc:research-agent with code-explorer methodology
     ↓
-Teams Analysis
-    → Single task: continue to Branch Strategy
-    → Multiple independent tasks: Agent Teams mode (skill orchestrates)
-    ↓
 Branch Strategy
     → Current branch or new git worktree
     ↓
@@ -217,6 +214,7 @@ Phase 5: Complete
 | `/rptc:verify [path]` | Run verification agents on demand | After any code change |
 | `/rptc:verify-loop [path]` | Run verification in a convergence loop until 0 findings | After implementation, when you want a fully clean result |
 | `/rptc:feat-team "description"` | Team-based feature development with 4 persistent agents | Complex features needing continuous review |
+| `/rptc:fix-team "bug description"` | Team-based bug fixing with 4 persistent agents, root cause guardianship, regression focus | Complex bugs, unclear root cause, cross-cutting regressions |
 | `/rptc:structure` | Codebase structure analysis and refactoring | When restructuring or analyzing project layout |
 | `/rptc:config` | Configure RPTC in project CLAUDE.md | First-time setup, after plugin updates |
 | `/rptc:sync-prod-to-tests "[dir]"` | Test maintenance | When tests drift from production |
@@ -253,7 +251,7 @@ Use Task tool with subagent_type="rptc:[agent-name]":
 | `rptc:code-review-agent` | Phase 4 | Code review, KISS/YAGNI | **Report-only** |
 | `rptc:security-agent` | Phase 4 | Security review, OWASP compliance | **Report-only** |
 | `rptc:docs-agent` | Phase 4 | Documentation impact review | **Report-only** |
-| `rptc:review-agent` | `/feat-team` | Unified review (code+security+docs) with real-time feedback | **Report-only** |
+| `rptc:review-agent` | `/feat-team`, `/fix-team` | Unified review (code+security+docs) with real-time feedback | **Report-only** |
 | `rptc:test-sync-agent` | `/sync-prod-to-tests` | Analyze test-production relationships | Analysis |
 | `rptc:test-fixer-agent` | `/sync-prod-to-tests` | Auto-repair test files | Active |
 
@@ -359,6 +357,41 @@ Step 6: Complete
 
 **Key difference from `/rptc:feat`:** Verification is continuous (every step), not post-hoc (Phase 4 only). All agents stay alive for the entire session, communicating via team messages.
 
+### The `/rptc:fix-team` Command (Team-Based Bug Fixing)
+
+Parallels `/rptc:feat-team` but adapted for bug fixing — root cause focus, 5 Whys methodology, regression-test-first:
+
+```text
+/rptc:fix-team "bug description"
+    ↓
+Step 0: Initialize (topology, Serena, branch strategy)
+    ↓
+Step 1: Create Team (4 agents spawned in parallel)
+    → researcher, architect, implementer, reviewer
+    ↓
+Step 2: Reproduction & Triage
+    → researcher reproduces bug, maps failure path, messages architect
+    ↓
+Step 3: Root Cause Analysis
+    → architect applies 5 Whys → designs minimal fix → Team Lead gets user approval
+    ↓
+Step 4: Fix + Review (parallel feedback loop)
+    → implementer: regression test FIRST (must fail against broken code), then surgical fix
+    → architect: root cause guardianship (flags symptom treatment)
+    → reviewer: quality/security/docs/regression coverage check after each step
+    → implementer addresses all feedback before next step
+    ↓
+Step 5: Final Regression Review
+    → architect + reviewer verify root cause addressed, related paths covered
+    → regression test suite adequately prevents this class of bug
+    → implementer addresses any final findings
+    ↓
+Step 6: Complete
+    → Collect reports → Summary → /rptc:commit
+```
+
+**Key difference from `/rptc:fix`:** Same continuous verification as `feat-team`, plus Architect continuously challenges whether the fix addresses the root cause rather than just the symptom.
+
 ---
 
 ## Report-Only Verification System
@@ -444,10 +477,10 @@ Pre-commit hook automatically blocks commits with version mismatch.
 
 ### What Changed in v2.8.0+
 
-| Before | After |
+| Before (pre-v2.8.0) | After (v2.8.0+) |
 |--------|-------|
 | Separate `/rptc:plan` + `/rptc:tdd` | Unified `/rptc:feat` |
-| 16 commands | 9 commands |
+| 16 commands | 9 commands at v2.8.0 (grown to 11 as of v3.13.0) |
 | `.rptc/` workspace required | Not needed |
 | `.claude/settings.json` config | Not needed |
 | SOP fallback chain (3 levels) | Plugin SOPs only |
@@ -476,7 +509,7 @@ Pre-commit hook automatically blocks commits with version mismatch.
 
 **Plugin provides:**
 
-- 10 commands (3 primary, 7 supporting)
+- 11 commands (4 primary, 7 supporting)
 - 9 specialist agents
 - 10 SOPs
 - 18 skills (7 user-facing + 11 agent methodology)

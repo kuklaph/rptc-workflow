@@ -92,12 +92,13 @@ Before suggesting a feature:
 ```text
 rptc-workflow/
 ├── .claude-plugin/        # Plugin metadata
-├── commands/              # Slash command definitions (flat structure, 10 commands)
+├── commands/              # Slash command definitions (flat structure, 11 commands)
 │   ├── commit.md         # /rptc:commit
 │   ├── config.md         # /rptc:config
 │   ├── feat.md           # /rptc:feat (PRIMARY)
 │   ├── feat-team.md      # /rptc:feat-team (team-based feat)
 │   ├── fix.md            # /rptc:fix
+│   ├── fix-team.md       # /rptc:fix-team (team-based fix)
 │   ├── research.md       # /rptc:research
 │   ├── sync-prod-to-tests.md  # /rptc:sync-prod-to-tests
 │   ├── structure.md      # /rptc:structure
