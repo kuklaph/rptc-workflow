@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 3.13.0
+**Version**: 3.14.0
 **Status**: Beta
 **License**: MIT
 

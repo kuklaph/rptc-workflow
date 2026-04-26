@@ -473,28 +473,6 @@ Pre-commit hook automatically blocks commits with version mismatch.
 
 ---
 
-## Migration from v1.x/v2.x
-
-### What Changed in v2.8.0+
-
-| Before (pre-v2.8.0) | After (v2.8.0+) |
-|--------|-------|
-| Separate `/rptc:plan` + `/rptc:tdd` | Unified `/rptc:feat` |
-| 16 commands | 9 commands at v2.8.0 (grown to 11 as of v3.13.0) |
-| `.rptc/` workspace required | Not needed |
-| `.claude/settings.json` config | Not needed |
-| SOP fallback chain (3 levels) | Plugin SOPs only |
-| Helper commands (6+) | Merged into `/rptc:feat` |
-
-### Migration Steps
-
-1. No action required for new features
-2. Existing `.rptc/` directories can be deleted
-3. Old plans can be referenced by path if needed
-4. Plans now stored in `~/.claude/plans/`
-
----
-
 ## Summary
 
 **RPTC Architecture Principles:**

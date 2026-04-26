@@ -520,31 +520,6 @@ const value = mockData; // XXX: replace with real API
 - **Exclude:** CLI entry points (files with `if __name__ == "__main__"`)
 - **Exclude:** Logging setup (if using `print` for bootstrap before logging configured)
 
-**Examples Caught:**
-```python
-# ❌ Blocked by pattern (in application code)
-def process_user(user):
-    print(f"Processing user: {user.id}")  # Debug statement
-    return user.save()
-
-# ❌ Blocked by pattern
-def calculate_total(items):
-    print("Items:", items)  # Debug output
-    return sum(item.price for item in items)
-
-# ✅ Allowed (production logging)
-import logging
-logger = logging.getLogger(__name__)
-
-def process_user(user):
-    logger.info("Processing user", extra={"user_id": user.id})
-    return user.save()
-
-# ✅ Allowed (CLI script with proper check)
-if __name__ == "__main__":
-    print("Processing complete")  # CLI output, not debug code
-```
-
 **Pattern Set 2: Debugger Statements**
 
 ```regex
@@ -552,38 +527,11 @@ if __name__ == "__main__":
 ^\s*(pdb\.set_trace\(\)|breakpoint\(\)|import\s+pdb|from\s+pdb\s+import)
 ```
 
-**Examples Caught:**
-```python
-# ❌ Blocked by pattern
-import pdb; pdb.set_trace()
-
-def complex_logic(data):
-    breakpoint()  # ❌ Python 3.7+ debugger
-    return process(data)
-
-# ✅ Allowed (no debugger statements)
-def complex_logic(data):
-    return process(data)
-```
-
 **Pattern Set 3: Temporary Markers**
 
 ```regex
 # Regex pattern (Python comments)
 ^\s*#\s*(TODO|FIXME|XXX|HACK|BUG|NOTE:.*temp)
-```
-
-**Examples Caught:**
-```python
-# ❌ Blocked by pattern
-# TODO: add input validation
-def save_user(user_data):
-    # FIXME: temporary implementation
-    return user_data
-
-# ✅ Allowed (descriptive comments)
-# Implements the OAuth 2.0 authorization flow
-# See https://tools.ietf.org/html/rfc6749 for specification
 ```
 
 #### Go Detection
@@ -601,56 +549,12 @@ log\.(Print|Println|Printf)\s*\(.*(?:debug|DEBUG|Debug)
 - **Exclude:** Test files (`*_test.go`)
 - **Allow:** Structured logging via `log/slog` or `logrus`
 
-**Examples Caught:**
-```go
-// ❌ Blocked by pattern (in library code)
-func ProcessOrder(order Order) error {
-    fmt.Println("Processing order:", order.ID) // Debug output
-    return order.Save()
-}
-
-// ❌ Blocked by pattern
-func CalculateTotal(items []Item) float64 {
-    log.Println("DEBUG: items count:", len(items)) // Debug log
-    return sumPrices(items)
-}
-
-// ✅ Allowed (structured logging)
-import "log/slog"
-
-func ProcessOrder(order Order) error {
-    slog.Info("Processing order", "order_id", order.ID)
-    return order.Save()
-}
-
-// ✅ Allowed (CLI main package)
-package main
-
-func main() {
-    fmt.Println("Processing complete") // CLI output, not debug
-}
-```
-
 **Pattern Set 2: Temporary Markers**
 
 ```regex
 # Regex pattern (Go comments)
 ^\s*\/\/\s*(TODO|FIXME|XXX|HACK|BUG|NOTE:.*temp)
 ^\s*\/\*\s*(TODO|FIXME|XXX|HACK)
-```
-
-**Examples Caught:**
-```go
-// ❌ Blocked by pattern
-// TODO: implement error handling
-func SaveUser(user User) error {
-    /* FIXME: temporary workaround */
-    return nil // XXX: placeholder
-}
-
-// ✅ Allowed (descriptive comments)
-// CalculateDiscount computes the discount based on user tier.
-// See pricing documentation for tier definitions.
 ```
 
 #### Generic Patterns (All Languages)

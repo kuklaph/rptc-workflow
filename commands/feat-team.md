@@ -619,38 +619,7 @@ Gather final reports from all agents. If any agent hasn't sent a completion repo
 
 ### 5.2 Present Summary to User
 
-```markdown
-## feat-team Complete
-
-### Feature: [description]
-
-### Implementation Summary
-- Files created/modified: [list]
-- Tests added: [count]
-- All tests passing: [YES/NO]
-
-### Plan Adherence (Architect)
-- Steps completed as planned: [X/Y]
-- Drift detected and corrected: [count]
-- Overall adherence: [percentage]
-
-### Quality Assessment (Review)
-- Code quality findings: [count addressed / count total]
-- Security findings: [count addressed / count total]
-- Documentation findings: [count addressed / count total]
-- Overall: [PASS / PASS WITH CONCERNS]
-
-### Final Holistic Review
-- Cross-cutting findings caught: [count]
-- All addressed: [YES/NO]
-
-### RPTC Compliance
-- Test-First followed: [YES/NO]
-- FILE LOCKOUT respected: [YES/NO]
-- Patterns reused: [count]
-
-### Ready for: `/rptc:commit`
-```
+Output 2-3 sentences: feature, files changed, plan adherence, quality status. End with "Ready for `/rptc:commit`."
 
 ### 5.3 Shutdown Team
 

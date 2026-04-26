@@ -315,17 +315,3 @@ Return structured findings:
 }
 ```
 
----
-
-## Final Checklist
-
-Before returning findings:
-- [ ] All Tier 1 issues identified? (these are blockers)
-- [ ] Integration completeness checked? (new exports have production callers)
-- [ ] Behavioral testing checklist applied? (internal mocking, interaction verification)
-- [ ] Assertion quality checklist applied? (zero-assertion, truthiness-only, mock-only)
-- [ ] False positive guidance applied?
-- [ ] Confidence >=80 for all reported issues?
-- [ ] Nits included as Tier 4 findings?
-- [ ] Context-needed items flagged appropriately?
-- [ ] Overall assessment: Is this change net positive?

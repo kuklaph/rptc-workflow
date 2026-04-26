@@ -92,16 +92,6 @@ You are executing the **RPTC (Research → Plan → TDD → Commit)** workflow.
 - Test-first development (tests define behavior)
 - Quality gates before shipping (no shortcuts)
 
-**Non-Negotiable Directives:**
-
-| Directive | Meaning | Verification |
-|-----------|---------|--------------|
-| **Surgical Coding** | Find 3 similar patterns before creating new code | Search codebase first |
-| **KISS/YAGNI** | Simplest solution; no abstractions until 3+ use cases | Rule of Three |
-| **Test-First** | Write tests BEFORE implementation, ALWAYS | RED phase before GREEN |
-| **Pattern Alignment** | Match existing codebase conventions | Study before implementing |
-| **User Authority** | User is PM; approves all major decisions | Ask when uncertain |
-
 **SOP Reference Chain (with Precedence):**
 
 | Topic | Check First (User) | Fallback (RPTC) |
@@ -931,108 +921,9 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
 
 `TaskUpdate(Phase 5, status: "in_progress")`
 
-**Goal**: Summarize what was built.
+Mark remaining tasks complete. Output 1-2 sentences: what changed, ready for `/rptc:commit`.
 
-**Actions**:
-
-1. **Mark all remaining tasks complete**
-2. **Summary output**:
-   - Files created/modified
-   - Tests added
-   - Key implementation decisions
-   - Any remaining todos or known issues
-
----
-
-## Agent Delegation Reference
-
-### Research Agents with Code-Explorer Methodology (Phase 1)
-
-```
-IMPORTANT: Use "rptc:research-agent", NOT "Explore"
-
-[Prepend the Environment Context Block to each agent prompt]
-
-Launch 3 Task tools in parallel with subagent_type="rptc:research-agent":
-
-Agent 1 (Feature Discovery): "Find similar features for [topic]. Entry points, core files, boundaries."
-Agent 2 (Architecture Analysis): "Analyze architecture for [topic]. Layers, patterns, cross-cutting concerns."
-Agent 3 (Code Flow Tracing): "Map integration points for [topic]. Call chains, data flow, dependencies."
-```
-
-### Research Agent (Phase 1 - Web/Hybrid)
-
-```
-Use Task tool with subagent_type="rptc:research-agent":
-prompt: "Research [topic]. Mode: [A=codebase|B=web|C=hybrid]. Return: findings with confidence."
-```
-
-### Planner Agent (Phase 2)
-
-```
-Use Task tool with subagent_type="rptc:architect-agent" (launch all 3 in parallel):
-
-[Prepend the Environment Context Block]
-
-Agent 1: "Design implementation for [feature]. Perspective: Minimal. ..."
-Agent 2: "Design implementation for [feature]. Perspective: Clean. ..."
-Agent 3: "Design implementation for [feature]. Perspective: Pragmatic. ..."
-
-After all complete: MUST ask user to choose via AskUserQuestion (skip only for trivial single-file changes).
-```
-
-### TDD Executor Agent (Phase 3 - Batch Mode)
-
-```
-Use Task tool with subagent_type="rptc:tdd-agent":
-
-[Prepend the Environment Context Block]
-
-## Context
-- Feature: [description]
-- Batch: Steps [N, N+1, ...] - [summary]
-
-## Steps in This Batch
-### Step N: [name]
-- Files: [list], Tests: [count], Complexity: [simple|medium|complex]
-
-### Step N+1: [name]
-- Files: [list], Tests: [count], Complexity: [simple|medium|complex]
-
-## TDD Cycle
-For each step in order:
-1. RED: Write ALL tests. FILE LOCKOUT — only test files. Output RED GATE CHECK.
-2. GREEN: Minimal code to pass (NOW edit production files).
-3. REFACTOR: Improve while green.
-Then next step.
-```
-
-### Verification Agents (Phase 4) - Semantic Selection
-
-**AGENT NAMESPACE LOCKOUT:**
-- ✅ CORRECT: `subagent_type="rptc:code-review-agent"`
-- ❌ WRONG: `subagent_type="feature-dev:code-reviewer"` — different plugin, not RPTC
-- ❌ WRONG: `subagent_type="code-review:code-review"` — different plugin, not RPTC
-
-**Mode**: Report-only. Agents report findings; main context handles fixes via TaskCreate/TaskUpdate.
-
-**Selection based on `verification-agent-mode` in project CLAUDE.md:**
-- `all`: Launch all 3 agents
-- `automatic`: Select based on file types/keywords (default if no CLAUDE.md)
-- `minimal`: code-review always launches; others when strongly indicated
-
-**[Prepend the Environment Context Block to each agent prompt]**
-
-**Agents (use these exact `subagent_type` values):**
-1. `rptc:code-review-agent`: Code quality, complexity, KISS/YAGNI
-2. `rptc:security-agent`: Input validation, auth, injection, data exposure
-3. `rptc:docs-agent`: README, API docs, inline comments, breaking changes
-
-**Quick reference for `automatic` mode:**
-- Source code changed → code-review
-- Auth/api/security paths OR security keywords → security
-- Doc files OR export keywords → docs
-- Test files only → code-review only
+`TaskUpdate(Phase 5, status: "completed")`
 
 ---
 
@@ -1045,19 +936,6 @@ Then next step.
 5. **Auto-fix by default**: Fix Tier 2-4 issues automatically; ask only for Tier 1 or major changes
 6. **Confidence filtering**: Only surface issues ≥80 confidence
 7. **Goal+Actions format**: Trust agents to handle details
-
----
-
-## Differences from Legacy Commands
-
-| Aspect          | Legacy (/plan + /tdd) | /feat            |
-| --------------- | --------------------- | ---------------- |
-| Commands        | 2 separate            | 1 unified        |
-| Config loading  | 80 lines              | 0                |
-| Plan formats    | 5 modes               | Native only      |
-| Approval gates  | 4+                    | 1 (ExitPlanMode) |
-| Quality verification | Sequential            | Parallel         |
-| Lines of code   | 1800+                 | ~200             |
 
 ---
 

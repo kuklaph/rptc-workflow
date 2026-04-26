@@ -403,24 +403,6 @@ Go to step 1 (Iteration Header).
 
 ---
 
-## Agent Delegation Reference
-
-### Verification Agents
-
-**AGENT NAMESPACE LOCKOUT:**
-- ✅ CORRECT: `subagent_type="rptc:code-review-agent"`
-- ❌ WRONG: `subagent_type="feature-dev:code-reviewer"` — different plugin, not RPTC
-- ❌ WRONG: `subagent_type="code-review:code-review"` — different plugin, not RPTC
-
-**Mode**: Report-only. Agents report findings; main context handles fixes.
-
-**Agents (use these exact `subagent_type` values):**
-1. `rptc:code-review-agent`: Code quality, complexity, KISS/YAGNI
-2. `rptc:security-agent`: Input validation, auth, injection, data exposure
-3. `rptc:docs-agent`: README, API docs, inline comments, breaking changes
-
----
-
 ## Important Notes
 
 1. **Scope and agents fixed at start**: Determined in Phases 1-2 and never re-asked

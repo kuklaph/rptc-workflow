@@ -660,99 +660,10 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 
 **Scenario**: Validate user registration endpoint
 
-**Before (AI Default - 60 lines with custom validation framework):**
-```typescript
-// Custom validation framework for single API endpoint
-abstract class ValidationRule<T> {
-  abstract validate(value: T): ValidationResult;
-}
+**AI default** (~60 lines): custom `ValidationRule` abstract class, `EmailValidationRule` + `StringLengthValidationRule` subclasses, `ValidationChain` builder.
+**Surgical** (~12 lines): Zod schema — `z.object({ email: z.string().email().min(5).max(100), ... })` + `safeParse()` in the route handler. **~80% less code.**
 
-class ValidationResult {
-  constructor(public isValid: boolean, public errors: string[]) {}
-}
-
-class EmailValidationRule extends ValidationRule<string> {
-  validate(value: string): ValidationResult {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return new ValidationResult(
-      emailRegex.test(value),
-      emailRegex.test(value) ? [] : ['Invalid email format']
-    );
-  }
-}
-
-class StringLengthValidationRule extends ValidationRule<string> {
-  constructor(private min: number, private max: number) { super(); }
-
-  validate(value: string): ValidationResult {
-    const isValid = value.length >= this.min && value.length <= this.max;
-    return new ValidationResult(
-      isValid,
-      isValid ? [] : [`Length must be between ${this.min} and ${this.max}`]
-    );
-  }
-}
-
-class ValidationChain<T> {
-  private rules: ValidationRule<T>[] = [];
-
-  addRule(rule: ValidationRule<T>): this {
-    this.rules.push(rule);
-    return this;
-  }
-
-  validate(value: T): ValidationResult {
-    const errors: string[] = [];
-    for (const rule of this.rules) {
-      const result = rule.validate(value);
-      if (!result.isValid) {
-        errors.push(...result.errors);
-      }
-    }
-    return new ValidationResult(errors.length === 0, errors);
-  }
-}
-
-// Usage in route
-const emailChain = new ValidationChain<string>()
-  .addRule(new EmailValidationRule())
-  .addRule(new StringLengthValidationRule(5, 100));
-
-const result = emailChain.validate(req.body.email);
-if (!result.isValid) {
-  return res.status(400).json({ errors: result.errors });
-}
-```
-
-**After (Using Zod - 12 lines):**
-```typescript
-// Use battle-tested validation library (already in dependencies)
-import { z } from 'zod';
-
-const userSchema = z.object({
-  email: z.string().email().min(5).max(100),
-  password: z.string().min(8).max(128),
-  name: z.string().min(1).max(50)
-});
-
-// Validation in route handler
-const result = userSchema.safeParse(req.body);
-if (!result.success) {
-  return res.status(400).json({ errors: result.error.errors });
-}
-```
-
-**Why Better**:
-- **80% less code** (60 → 12 lines)
-- **Battle-tested library** (Zod used by millions, custom framework untested)
-- **Better error messages** (Zod provides detailed path-based errors)
-- **TypeScript inference** (automatic type safety from schema)
-- **Easier to extend** (adding fields is one line, not new validation classes)
-
-**Red Flags Eliminated**:
-- ✅ Custom framework instead of library (Reuse Check failure)
-- ✅ Abstract base classes for simple validation
-- ✅ Builder pattern (ValidationChain) for straightforward logic
+**Pattern: see Example 1.** Distinct savings here: battle-tested library beats custom framework (Reuse Check failure), TypeScript inference comes free with the schema, adding fields is one line — not a new validation class.
 
 ---
 
@@ -760,130 +671,10 @@ if (!result.success) {
 
 **Scenario**: In-memory user state for small app
 
-**Before (AI Default - 120+ lines with custom event bus):**
-```typescript
-// Full event-driven architecture for simple CRUD state
-interface Event {
-  type: string;
-  payload: any;
-  timestamp: Date;
-}
+**AI default** (~120+ lines): full event-driven architecture with `EventBus`, `EventHandler` interface, event history, `USER_CREATED`/`UPDATED`/`DELETED` event types, handler registration, and event publishing.
+**Surgical** (~25 lines): simple `UserStore` class with `Map<string, User>` + `create`/`update`/`delete`/`get`/`list` methods. **~79% less code.**
 
-interface EventHandler {
-  handle(event: Event): void;
-}
-
-class EventBus {
-  private handlers: Map<string, EventHandler[]> = new Map();
-  private eventHistory: Event[] = [];
-
-  subscribe(eventType: string, handler: EventHandler): void {
-    if (!this.handlers.has(eventType)) {
-      this.handlers.set(eventType, []);
-    }
-    this.handlers.get(eventType)!.push(handler);
-  }
-
-  publish(event: Event): void {
-    this.eventHistory.push(event);
-    const handlers = this.handlers.get(event.type) || [];
-    handlers.forEach(handler => handler.handle(event));
-  }
-
-  getHistory(): Event[] {
-    return [...this.eventHistory];
-  }
-}
-
-class UserStateHandler implements EventHandler {
-  private state: Map<string, User> = new Map();
-
-  handle(event: Event): void {
-    switch (event.type) {
-      case 'USER_CREATED':
-        this.state.set(event.payload.id, event.payload);
-        break;
-      case 'USER_UPDATED':
-        this.state.set(event.payload.id, event.payload);
-        break;
-      case 'USER_DELETED':
-        this.state.delete(event.payload.id);
-        break;
-    }
-  }
-
-  getUser(id: string): User | undefined {
-    return this.state.get(id);
-  }
-
-  getAllUsers(): User[] {
-    return Array.from(this.state.values());
-  }
-}
-
-// Usage (requires event bus setup, handler registration, event publishing)
-const eventBus = new EventBus();
-const userHandler = new UserStateHandler();
-eventBus.subscribe('USER_CREATED', userHandler);
-eventBus.subscribe('USER_UPDATED', userHandler);
-eventBus.subscribe('USER_DELETED', userHandler);
-
-// Creating a user requires publishing event
-eventBus.publish({
-  type: 'USER_CREATED',
-  payload: { id: '1', name: 'John' },
-  timestamp: new Date()
-});
-
-// ... (80+ more lines of event sourcing boilerplate)
-```
-
-**After (Simple Class - 25 lines):**
-```typescript
-// Simple in-memory state management (add persistence when needed)
-class UserStore {
-  private users: Map<string, User> = new Map();
-
-  create(user: User): void {
-    this.users.set(user.id, user);
-  }
-
-  update(id: string, updates: Partial<User>): void {
-    const user = this.users.get(id);
-    if (!user) throw new Error('User not found');
-    this.users.set(id, { ...user, ...updates });
-  }
-
-  delete(id: string): void {
-    this.users.delete(id);
-  }
-
-  get(id: string): User | undefined {
-    return this.users.get(id);
-  }
-
-  list(): User[] {
-    return Array.from(this.users.values());
-  }
-}
-
-// Usage (straightforward CRUD operations)
-const userStore = new UserStore();
-userStore.create({ id: '1', name: 'John' });
-```
-
-**Why Better**:
-- **79% less code** (120 → 25 lines)
-- **No event sourcing overhead** (add when you actually need audit trail)
-- **Direct method calls** (create/update/delete obvious)
-- **Easy to add persistence** (swap Map for database when needed)
-- **Testable without mocking event bus**
-
-**Red Flags Eliminated**:
-- ✅ Event-driven architecture for CRUD operations
-- ✅ Custom event bus for non-distributed system
-- ✅ 3+ layers of indirection (eventBus → handler → state)
-- ✅ Over-engineering for speculative "future needs"
+**Pattern: see Example 1.** Distinct savings here: no event-sourcing overhead, direct method calls, testable without mocking an event bus, easy to add persistence later (swap Map for database).
 
 **When to Use Event-Driven (Valid Override)**:
 - Audit trail required by regulation (financial transactions)
@@ -891,7 +682,7 @@ userStore.create({ id: '1', name: 'John' });
 - Real-time notifications to multiple systems
 - Event replay needed for debugging
 
-For simple state management, start simple. Add events when you have concrete requirement.
+For simple state management, start simple. Add events when you have a concrete requirement.
 
 ---
 
@@ -969,28 +760,6 @@ Track these metrics before/after applying principles:
 ---
 
 ## References
-
-### Research Documents
-
-- **Phase 1 Research**: AI Over-Engineering Findings
-  - 60-80% code volume reduction with simplicity directives
-  - Factory pattern overuse (single variant implementations)
-  - Abstract class proliferation without justification
-
-- **Phase 2 Research**: Security Blind Spots
-  - 322% more vulnerabilities without security checklists
-  - Missing input validation at API boundaries
-  - String concatenation in SQL queries
-
-- **Phase 3 Research**: Prompting Strategy Effectiveness
-  - Extended thinking modes improve architectural decisions
-  - "Junior developer" audience constraint reduces complexity
-  - Surgical coding approach prevents code duplication
-
-- **Phase 4 Research**: Best Practice Integration
-  - Pre-generation checklists reduce revision cycles by 75%
-  - Red flag detection prevents 90% of over-engineering
-  - RPTC workflow phases enforce quality gates automatically
 
 ### RPTC Standard Operating Procedures
 

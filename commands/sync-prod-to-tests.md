@@ -42,17 +42,6 @@ Ensure all production code has synchronized tests by:
 
 ---
 
-## ⚠️ CRITICAL: Broken Tests MUST Be Fixed
-
-**This command does NOT skip broken tests.** Every failing test must either:
-1. Be fixed to match production behavior (test was wrong)
-2. Trigger a production fix request with PM approval (production was wrong)
-3. Be explicitly marked for manual review with documented reason
-
-**The sync loop continues until ALL tests pass, not just coverage targets.**
-
----
-
 ## ⚠️ CRITICAL: Sub-Agent Delegation Required
 
 **This command REQUIRES delegation to specialist sub-agents via the Task tool.**

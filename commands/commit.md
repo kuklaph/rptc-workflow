@@ -258,14 +258,3 @@ Remove secrets and use environment variables.
 4. **PR optional**: Only create if explicitly requested
 5. **Fast feedback**: Fail fast on blockers
 
----
-
-## Differences from Legacy
-
-| Aspect | Legacy | New |
-|--------|--------|-----|
-| Config loading | 80 lines | 0 |
-| Discord notification | 40 lines inline | 0 (use hooks) |
-| SOP loading | 30 lines | 0 |
-| Verbose examples | 200+ lines | Minimal |
-| Lines of code | 770 | ~150 |

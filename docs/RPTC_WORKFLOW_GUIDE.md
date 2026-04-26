@@ -541,24 +541,6 @@ You can ask for modifications:
 
 ---
 
-## Migration from Older Versions
-
-### From v1.x/v2.x to v2.8.0+
-
-**What changed:**
-- Separate `/rptc:plan` + `/rptc:tdd` → Unified `/rptc:feat`
-- Helper commands (6+) → Merged into `/rptc:feat` workflow
-- `.rptc/` workspace → Not needed (uses native plan mode)
-- `.claude/settings.json` config → Not needed (sensible defaults)
-- SOP fallback chain → Plugin defaults only
-
-**Migration steps:**
-1. No action required for new features
-2. Existing `.rptc/` directories can be deleted
-3. Old plans can be referenced by path if needed
-
----
-
 ## Reference
 
 ### Available SOPs

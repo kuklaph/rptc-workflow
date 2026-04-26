@@ -321,79 +321,17 @@ dotnet format
 
 ### 5.1 AI Over-Engineering Detection (Phase 1 Integration)
 
-**5 Anti-Patterns to Eliminate** (from architecture-patterns.md):
+The 5 anti-patterns are canonical in `architecture-patterns.md`. Apply Rule of Three to each:
 
-#### Anti-Pattern 1: Abstract Base Classes for Single Implementation
+| Anti-Pattern | Detect | Decision |
+|---|---|---|
+| Abstract base for single implementation | `rg "abstract class\|interface" --type ts` | <3 implementations → concrete class; ≥3 → keep |
+| Factory/Builder for simple instantiation | `rg "Factory\|Builder" --type py` | Simple constructor → direct; complex (5+ params/conditional) → keep factory |
+| Middleware for direct operations | `rg "middleware\|pipeline" --type js` | <5 operations → direct calls; ≥5 + dynamic composition → keep middleware |
+| Event-driven for tightly coupled code | `rg "eventBus\|EventEmitter" --type java` | Tight coupling (same module) → method calls; loose (cross-module/async) → keep events |
+| Interface with single implementation | `rg "interface I[A-Z]" --type cs` | Single → concrete class; ≥2 → keep interface |
 
-**Detect:**
-```bash
-# Find abstractions with single implementation
-rg "abstract class|interface" --type ts | while read line; do
-  # Manual check: Does this have 2+ implementations?
-done
-```
-
-**Decision:**
-- <3 implementations → Inline abstraction, use concrete class
-- ≥3 implementations → Keep abstraction (Rule of Three)
-
-**Test after removal ✅**
-
-#### Anti-Pattern 2: Factory/Builder for Simple Instantiation
-
-**Detect:**
-```bash
-rg "Factory|Builder" --type py
-# Check: Is constructor complex enough to justify factory?
-```
-
-**Decision:**
-- Simple constructor → Direct instantiation
-- Complex initialization (5+ params, conditional logic) → Keep factory
-
-**Test after removal ✅**
-
-#### Anti-Pattern 3: Middleware for Direct Operations
-
-**Detect:**
-```bash
-rg "middleware|pipeline" --type js
-# Check: Are there 5+ operations needing composition?
-```
-
-**Decision:**
-- <5 operations → Direct function calls
-- ≥5 operations + dynamic composition → Keep middleware
-
-**Test after removal ✅**
-
-#### Anti-Pattern 4: Event-Driven for Tightly Coupled Code
-
-**Detect:**
-```bash
-rg "eventBus|EventEmitter" --type java
-# Check: Are components loosely coupled?
-```
-
-**Decision:**
-- Tight coupling (same module) → Direct method calls
-- Loose coupling (cross-module, async) → Keep events
-
-**Test after removal ✅**
-
-#### Anti-Pattern 5: Interfaces with Single Implementation
-
-**Detect:**
-```bash
-rg "interface I[A-Z]" --type cs
-# Check: Does interface have 2+ implementations?
-```
-
-**Decision:**
-- Single implementation → Concrete class
-- 2+ implementations → Keep interface
-
-**Test after removal ✅**
+**Test after each removal ✅**
 
 ### 5.2 YAGNI Violations (Speculative Features)
 

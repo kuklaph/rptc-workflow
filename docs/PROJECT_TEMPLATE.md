@@ -19,7 +19,7 @@
 [build command]    # Production build
 [test command]     # Run all tests
 
-# RPTC Workflow (v2.8.0+)
+# RPTC Workflow
 /rptc:feat "feature description"     # Complete feature: Discovery → Plan → TDD → Verification
 /rptc:research "topic"               # Standalone research (optional)
 /rptc:verify [path]                  # Run quality verification agents on demand
@@ -148,147 +148,7 @@ When `/rptc:feat` presents 3 planning approaches, consider:
 
 ## AI Coding Assistant Guidelines
 
-**Purpose**: Guardrails for working with AI coding assistants to ensure generated code follows RPTC quality standards.
-
-**Philosophy**: AI assistants are powerful tools but have systematic blind spots. These guidelines help you:
-1. **Steer AI toward simplicity** via prompting strategy
-2. **Prevent over-engineering** via pre-generation checklist
-3. **Catch problematic output** via red flag detection
-
-**When to Use These Guidelines:**
-- ALWAYS before requesting AI code generation
-- ALWAYS when reviewing AI-generated code before accepting
-- ALWAYS when AI proposes architectural decisions
-
----
-
-### Prompting Strategy (Evidence-Based Techniques)
-
-#### 1. Extended Reasoning ("Think Harder")
-
-**Technique:** Ask AI to use extended thinking modes before generating code
-
-**Example Prompts:**
-- "Use ultrathink mode to analyze this requirement"
-- "Think step-by-step about the simplest solution"
-- "What are 3 different approaches, ranked by simplicity?"
-
-**Why It Works:** Extended reasoning reduces impulsive complexity. Research shows 40% fewer unnecessary abstractions when AI "thinks aloud" first.
-
----
-
-#### 2. Simplicity Directive ("SIMPLEST Possible")
-
-**Technique:** Explicitly constrain AI to minimal solutions
-
-**Example Prompts:**
-- "Write the SIMPLEST possible solution—no abstractions unless 3+ use cases exist"
-- "Implement this in the fewest files possible"
-- "Prefer duplication over premature abstraction"
-- "Follow YAGNI (You Aren't Gonna Need It) strictly"
-
-**Why It Works:** AI models default to "textbook" solutions with layers of abstraction. Explicit simplicity constraints override this bias.
-
----
-
-#### 3. Context Injection ("Examine Existing Code")
-
-**Technique:** Direct AI to study existing patterns before generating new code
-
-**Example Prompts:**
-- "First examine how authentication is handled in existing endpoints, then add auth to this new endpoint"
-- "Read the existing user service before creating new user functionality"
-- "What patterns exist for error handling in this codebase?"
-
-**Why It Works:** AI generates generic "framework demo" code when lacking context. Examining existing code first ensures consistency and reuse.
-
----
-
-#### 4. Audience Constraint ("Junior Developer Understanding")
-
-**Technique:** Constrain AI to generate code understandable by less experienced developers
-
-**Example Prompts:**
-- "Write this so a junior developer can understand and maintain it"
-- "Avoid clever tricks—optimize for readability, not brevity"
-- "Explain complex logic with clear variable names, not comments"
-
-**Why It Works:** AI often generates "clever" code with advanced language features. Junior developer constraint prioritizes clarity.
-
----
-
-### Pre-Generation Checklist
-
-Before accepting AI-generated code, verify:
-
-#### Simplicity Validation
-- [ ] Could this be done in fewer files? (Threshold: >3 files for feature = ask to consolidate)
-- [ ] Could this be done with less indirection? (Threshold: >2 layers = justify each)
-- [ ] Does this use the simplest possible data structures?
-- [ ] Are all variables/functions clearly named without comments?
-
-#### Reuse Validation
-- [ ] Does this reuse existing code instead of duplicating?
-- [ ] Does this follow existing patterns in the codebase?
-- [ ] Does this use existing libraries/frameworks instead of reinventing?
-- [ ] Does this integrate with existing error handling patterns?
-
-#### Abstraction Justification
-- [ ] Are abstractions justified by 3+ actual (not hypothetical) use cases?
-- [ ] Do interfaces have multiple implementations RIGHT NOW?
-- [ ] Are generics necessary, or could concrete types work?
-- [ ] Do design patterns solve actual problems, or add ceremony?
-
-#### Understandability Validation
-- [ ] Would a junior developer understand this in 5 minutes?
-- [ ] Is the code explicit rather than clever?
-- [ ] Are dependencies obvious, not hidden via DI magic?
-
----
-
-### Red Flags (Reject AI Output Immediately)
-
-#### Complexity Red Flags
-
-- **More than 3 layers of indirection** between request and data
-- **Manager/Provider/Handler class name proliferation** (doing similar work)
-- **Interfaces with single implementations**
-- **Factory patterns for objects with <3 variants**
-
-#### Security Red Flags (SAFETY-CRITICAL)
-
-- **Missing authentication checks** on new endpoints
-- **Missing input validation/sanitization**
-- **SQL queries using string concatenation**
-- **Hardcoded credentials or API keys** in code
-
-#### Over-Engineering Red Flags
-
-- **More than 5 files created** for single feature
-- **Generic/reusable components** with only 1 current use case
-- **Dependency injection frameworks** for <10 classes
-- **Configuration files** with <5 settings
-
-#### Testing Red Flags
-
-- **Tests that mock everything** except the function under test
-- **Tests with >5 setup lines** per assertion
-- **Comments explaining obvious code** (over-commenting)
-- **TODOs or FIXMEs** in production code
-
----
-
-### When to Override These Guidelines
-
-Override when justified (and document rationale):
-
-**Performance-Critical Code:** Abstraction layers enable critical optimization
-
-**Security-Critical Code:** Additional validation layers prevent vulnerabilities
-
-**Third-Party Integration:** Framework/library requires specific patterns
-
-**Team Consensus:** Architectural Decision Record documents pattern decision
+See `docs/AI_CODING_BEST_PRACTICES.md` for guardrails, prompting strategy, pre-generation checklist, red flags, and override conditions.
 
 ---
 
@@ -366,15 +226,6 @@ docs/research/
 - No secrets in code
 - Authentication/authorization validated
 - Security agent review for sensitive features
-
-## Important Reminders
-
-- **You are the decision maker** - Select planning approach, approve plans
-- **One command for features** - `/rptc:feat` handles the workflow
-- **TDD for code tasks** - Tests first for source file changes
-- **Direct execution for non-code** - Docs and config skip TDD
-- **Report-only quality gates** - Agents report, you decide what to fix
-- **Native plan mode** - Plans in `~/.claude/plans/`, no `.rptc/` needed
 
 ## Example Complete Workflow
 

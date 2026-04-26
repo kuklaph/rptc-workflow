@@ -92,16 +92,6 @@ You are executing the **RPTC (Research → Plan → TDD → Commit)** workflow f
 - Test-first development (regression test proves the bug)
 - Quality gates before shipping (no shortcuts)
 
-**Non-Negotiable Directives:**
-
-| Directive | Meaning | Verification |
-|-----------|---------|--------------|
-| **Surgical Coding** | Find 3 similar patterns before creating new code | Search codebase first |
-| **KISS/YAGNI** | Minimal fix; no refactoring beyond the bug | Smallest possible change |
-| **Test-First** | Write regression test BEFORE fixing | Test reproduces bug first |
-| **Pattern Alignment** | Match existing codebase conventions | Study before implementing |
-| **User Authority** | User is PM; approves all major decisions | Ask when uncertain |
-
 **SOP Reference Chain (with Precedence):**
 
 | Topic | Check First (User) | Fallback (RPTC) |
@@ -852,120 +842,9 @@ Apply MINIMAL fix to make the test pass:
 
 `TaskUpdate(Phase 5, status: "in_progress")`
 
-**Goal**: Summarize what was fixed and document for future reference.
-
-**Actions**:
-
-1. **Mark all remaining tasks complete**
-
-2. **Summary output**:
-
-```markdown
-## Bug Fix Summary
-
-### Bug
-[Original description]
-
-### Root Cause
-[5 Whys result - the fundamental cause]
-
-### Fix Applied
-- Files modified: [list]
-- Change summary: [brief description]
-
-### Regression Prevention
-- Test added: [test file:test name]
-- Test verifies: [what the test checks]
-
-### Verification
-- [ ] Regression test passes
-- [ ] Related tests pass
-- [ ] Affected tests pass
-- [ ] Verification findings addressed
-
-### Notes
-[Any follow-up items, related issues to watch, or technical debt flagged]
-```
-
-3. **Suggest next steps**:
-   - Ready for `/rptc:commit`
-   - Or: Additional issues identified that need separate fixes
+Mark remaining tasks complete. Output 1-2 sentences: root cause, fix, regression test added. Ready for `/rptc:commit`.
 
 `TaskUpdate(Phase 5, status: "completed")`
-
----
-
-## Agent Delegation Reference
-
-### Investigation Agents (Phase 1)
-
-```
-[Prepend the Environment Context Block to each agent prompt]
-
-Launch 2-3 Task tools in parallel with subagent_type="rptc:research-agent":
-
-Agent 1: "Investigate bug [description]. Reproduce and verify failure point."
-Agent 2: "Trace code flow for [bug]. Entry point → error → symptom."
-Agent 3: "Map impact. Affected components, similar patterns elsewhere."
-```
-
-### Fix Planning Agent (Phase 2 - Complex Bugs Only)
-
-```
-Use Task tool with subagent_type="rptc:architect-agent":
-
-[Prepend the Environment Context Block]
-
-## Bug Context
-[Description, symptom, root cause, failure point]
-
-## Your Task
-Design minimal fix. Perspective: Surgical.
-Provide: Fix steps (1-3 max), files, test strategy, risk assessment.
-```
-
-### TDD Fix Agent (Phase 3)
-
-```
-Use Task tool with subagent_type="rptc:tdd-agent":
-
-[Prepend the Environment Context Block]
-
-## Bug Fix Context
-[Bug, root cause, fix location, approach]
-
-## TDD Bug Fix Cycle
-RED: Write test that reproduces bug (must fail with same symptom).
-  FILE LOCKOUT: Only test files during RED. No production file edits.
-  Output RED GATE CHECK before proceeding to GREEN.
-GREEN: Apply minimal fix (NOW edit production files, surgical, no scope creep)
-VERIFY: Run affected tests, check for regressions
-```
-
-### Verification Agents (Phase 4) - Semantic Selection
-
-**AGENT NAMESPACE LOCKOUT:**
-- ✅ CORRECT: `subagent_type="rptc:code-review-agent"`
-- ❌ WRONG: `subagent_type="feature-dev:code-reviewer"` — different plugin, not RPTC
-- ❌ WRONG: `subagent_type="code-review:code-review"` — different plugin, not RPTC
-
-**Selection based on `verification-agent-mode` in project CLAUDE.md:**
-- `all`: Launch all 3 agents
-- `automatic`: Select based on file types/keywords (default if no CLAUDE.md)
-- `minimal`: code-review always launches; others when strongly indicated
-
-**[Prepend the Environment Context Block to each agent prompt]**
-
-**Agents (use these exact `subagent_type` values):**
-1. `rptc:code-review-agent`: Root cause fix? Minimal? Regression risk?
-2. `rptc:security-agent`: Security invariants maintained? New vulnerabilities?
-3. `rptc:docs-agent`: Behavior changes need doc updates?
-
-**Quick reference for `automatic` mode:**
-- Source code changed → code-review
-- Auth/api paths OR security keywords → security
-- Doc files OR behavior changes → docs
-- Test files only → code-review only
 
 ---
 

@@ -7,16 +7,9 @@ allowed-tools: Bash(git *), Bash(npm *), Bash(npx *), Bash(bunx *), Bash(pnpm *)
 
 Team-based bug fixing: 4 persistent agents (Research, Architect, TDD, Review) collaborating via real-time messaging. Unlike `/rptc:fix` which runs agents sequentially as sub-agents, `fix-team` keeps all agents alive so they communicate, cross-check, and provide feedback throughout the bug triage and fix.
 
-## When to Use fix-team vs fix
+## When to Use
 
-| Criteria | `/rptc:fix` (standard) | `/rptc:fix-team` (this) |
-|----------|-----------------------|------------------------|
-| Bug complexity | Any size | Medium-to-complex bugs |
-| Agent lifecycle | Sequential (spawn, complete, discard) | Persistent (alive for entire session) |
-| Feedback | Post-hoc verification (Phase 4) | Real-time during fix |
-| Root cause scrutiny | Checked once | Architect challenges assumptions continuously |
-| Cost | Lower ($0.50-$2.00) | Higher ($3.00-$10.00) |
-| Best for | Straightforward bugs, known root cause | Complex bugs, unclear root cause, cross-cutting regressions |
+See `/rptc:feat-team` for the team-vs-standard tradeoff — same criteria apply for fix-team vs fix.
 
 ---
 
@@ -647,45 +640,7 @@ Gather final reports from all agents. If any agent hasn't sent a completion repo
 
 ### 5.2 Present Summary to User
 
-```markdown
-## fix-team Complete
-
-### Bug: [description]
-
-### Root Cause (from 5 Whys)
-[root cause summary]
-
-### Fix Summary
-- Files modified: [list]
-- Regression tests added: [count]
-- All tests passing: [YES/NO]
-- Existing tests unaffected: [YES/NO]
-
-### Fix Adherence (Architect)
-- Steps completed as planned: [X/Y]
-- Root cause fully addressed: [YES/PARTIAL/NO]
-- Symptom treatment detected: [count with resolution]
-- Overall adherence: [percentage]
-
-### Quality Assessment (Review)
-- Code quality findings: [count addressed / count total]
-- Security findings: [count addressed / count total]
-- Documentation findings: [count addressed / count total]
-- Regression coverage: [COMPLETE/PARTIAL/INADEQUATE]
-- Overall: [PASS / PASS WITH CONCERNS]
-
-### Final Holistic Review
-- Cross-cutting findings caught: [count]
-- Related code paths verified: [count]
-- All addressed: [YES/NO]
-
-### RPTC Compliance
-- Test-First followed: [YES/NO]
-- FILE LOCKOUT respected: [YES/NO]
-- Surgical fix (no scope creep): [YES/NO]
-
-### Ready for: `/rptc:commit`
-```
+Output 2-3 sentences: bug, root cause, fix, regression coverage, quality status. End with "Ready for `/rptc:commit`."
 
 ### 5.3 Shutdown Team
 

@@ -164,18 +164,6 @@ Generate comprehensive plan following the output template. See `references/outpu
 
 ---
 
-## Planning Context
-
-You will receive:
-
-- **Feature Description**: What to build
-- **Research Findings**: If applicable
-- **Tech Stack**: Confirmed technologies
-- **Initial Scaffold**: From PM collaboration
-- **PM Clarifications**: User input
-
----
-
 ## Context Management Strategy
 
 **Token Budget Target:** <15K tokens for plan output
@@ -238,19 +226,3 @@ For detailed templates and examples:
 - `${CLAUDE_PLUGIN_ROOT}/templates/plan-overview.md` - Plan overview format
 - `${CLAUDE_PLUGIN_ROOT}/templates/plan-step.md` - Step detail format
 
----
-
-## Final Pre-Completion Checklist
-
-- [ ] Context loaded (SOPs referenced, project context checked)
-- [ ] Test strategy complete (happy path, edge cases, errors)
-- [ ] Implementation steps detailed (each has tests-first section)
-- [ ] Checkbox format used for all tasks
-- [ ] Dependencies identified
-- [ ] Risks assessed with mitigations
-- [ ] Acceptance criteria defined
-- [ ] File map provided
-- [ ] Assumptions documented
-- [ ] Self-critique completed (score ≥ 4.0)
-- [ ] Token budget met (<15K tokens)
-- [ ] Template followed exactly

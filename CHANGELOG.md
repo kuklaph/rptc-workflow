@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.14.0] - 2026-04-25
+
+### Changed
+
+- **Brevity initiative across the plugin and global CLAUDE.md** — comprehensive token reduction (~22,800 static tokens) across commands, agents, skills, SOPs, docs, and templates while preserving all directive force and behavioral semantics. Verified by 3 docs-agent audit swarms with zero regressions.
+- **9 agents got an `Output Style` section** enforcing TALE-style adaptive token budgets ("length proportional to task complexity") with explicit carve-outs for math/multi-step reasoning and code generation, plus a forbid on JSON-mode for reasoning-heavy outputs (per Tam arXiv:2408.02442). Compounds across every per-agent invocation.
+- **A7+A8 inline directive and SOP tables removed** from `/rptc:feat`, `/rptc:fix`, and all 9 agent files after a skill-load gating test verified that `core-principles` loads deterministically via the frontmatter `skills:` field. The directive content is now sourced solely from the loaded skill.
+- **Cross-surface deduplication**: project `CLAUDE.md` plugin-structure tree and 4 workflow diagrams now point to `docs/PLUGIN_ARCHITECTURE.md`; `docs/PROJECT_TEMPLATE.md` AI-Coding Guidelines section now points to `docs/AI_CODING_BEST_PRACTICES.md`. Net: ~7,800 token reduction on cross-surface duplicates.
+- **Tier B SOP compressions**: `languages-and-style.md` lost the duplicate Language-Specific Anti-Pattern Examples section; `git-and-deployment.md` lost duplicate "Examples Caught" code blocks from Python/Go subsections (regex patterns and Context-Aware Exclusions retained); `post-tdd-refactoring.md` 5-anti-pattern detection collapsed into a table referencing `architecture-patterns.md`; `testing-guide.md` lost the redundant Anti-Patterns section duplicating the canonical Blind Spots section.
+- **`docs/AI_CODING_BEST_PRACTICES.md` Examples 2/3 stubbed**: kept Example 1 as the canonical worked example; replaced Examples 2 and 3 with brief AI-default-vs-surgical descriptions plus their unique insights (Zod recommendation; event-driven valid override conditions). Token-count callouts (~80% less code, ~79% less code) preserved.
+
+### Removed
+
+- **Authoring artifacts**: `flexible-testing-guide.md` Status checkboxes + Appendix Version History; `templates/ai-sop-enhancement-pattern.md` dead Steps 2-7 workflow block; `skills/architect-methodology` Final Pre-Completion Checklist + Planning Context preamble; `skills/code-review-methodology` Final Checklist; `skills/html-report-generator` version footer + Example Usage; `sop/todowrite-guide.md` test scaffold; `docs/PLUGIN_ARCHITECTURE.md` and `docs/RPTC_WORKFLOW_GUIDE.md` historical Migration v1/v2 sections.
+- **Command appendices**: `commands/feat.md` and `commands/fix.md` Agent Delegation Reference appendices (already provided inline in earlier phases); `commands/feat.md` Differences from Legacy Commands; `commands/research.md` and `commands/commit.md` Differences from Legacy tables; `commands/verify.md` and `commands/verify-loop.md` Agent Delegation Reference appendices; `commands/fix-team.md` duplicated team-vs-standard table replaced with one-liner pointing to `/rptc:feat-team`; `commands/sync-prod-to-tests.md` Broken Tests CRITICAL preamble.
+
+### Preserved
+
+- All RFC 2119 modal verbs (MUST, MUST NOT, SHALL, SHALL NOT, SHOULD, SHOULD NOT, MAY, RECOMMENDED, REQUIRED) and user-chosen modals (NEVER, ALWAYS, MANDATORY, NON-NEGOTIABLE) verbatim.
+- All RPTC normative phrases (BLOCKING GATE — RED Phase Verification, FILE LOCKOUT RULE, AGENT NAMESPACE LOCKOUT, Step 0.6 Plan Continuation Detection) intact.
+- `skills/core-principles/SKILL.md` body untouched (D7 perimeter — must-preserve list verified by audits).
+- All Karpathy-derived behavioral principles in the user's global `~/.claude/CLAUDE.md` (one regression detected during execution and restored mid-session).
+
+### Rationale
+
+Brevity research (Curse of Instructions p^n decay per Harada arXiv:2509.21051; lost-in-the-middle attention starvation per Liu arXiv:2307.03172 + Hsieh arXiv:2406.16008; reasoning-token noise) shows that duplicated rule restatements and ceremonial scaffolds hurt per-load instruction adherence. The skill-load mechanism (frontmatter `skills:` field) was empirically verified to load `core-principles` into spawned agents, making the inline directive and SOP tables in agent files redundant. Cross-surface duplication of architecture and workflow content was eliminated in favor of cross-references. The Phase 2 Output Style additions implement TALE adaptive budgeting for outputs (Han arXiv:2412.18547) — the highest-leverage intervention because it compounds across every future invocation regardless of which slice loaded.
+
+---
+
 ## [3.13.0] - 2026-04-15
 
 ### Added

@@ -22,24 +22,6 @@ Security review. **REPORT ONLY** — does not make changes. Main context handles
 
 You are invoked during **Phase 4: Quality Verification** to verify security.
 
-### RPTC Directives (MUST FOLLOW)
-
-| Directive | Your Responsibility |
-|-----------|---------------------|
-| **Security First** | Identify vulnerabilities per OWASP Top 10 |
-| **Pattern Alignment** | Flag security patterns that deviate from codebase norms |
-| **Confidence Threshold** | Only report findings with confidence >= 80 |
-| **Report Only** | Document issues; do not attempt fixes |
-
-### SOPs to Reference (with Precedence)
-
-**Precedence Rule**: Check project `sop/` or `~/.claude/global/` first for matching topics. Use RPTC SOPs as fallback.
-
-| Topic | RPTC Fallback |
-|-------|---------------|
-| Security | `${CLAUDE_PLUGIN_ROOT}/sop/security-and-performance.md` |
-| Architecture | `${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md` |
-
 ### Exit Verification
 
 At the END of your response, include:
@@ -63,6 +45,14 @@ You may run as either a **sub-agent** (spawned via Task tool from `/rptc:feat` o
 |------|-----------|------------|
 | `TaskCreate/TaskUpdate/TaskList/TaskGet` | ✅ Internal progress tracking | ✅ Shared team task coordination |
 | `SendMessage` | ❌ Do NOT call — unavailable in this context | ✅ Use for Team Lead and peer communication |
+
+---
+
+## Output Style
+
+Length proportional to task complexity. Skip preambles and recap summaries. In structured outputs: reasoning before answer.
+
+**Full length on**: math/multi-step reasoning, code generation. **No JSON-mode** for reasoning-heavy tasks.
 
 ---
 

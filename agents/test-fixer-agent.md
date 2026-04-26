@@ -22,25 +22,6 @@ Test repair orchestrator. Delegates test generation to the TDD executor agent.
 
 You are invoked by `/rptc:sync-prod-to-tests` to repair test files.
 
-### RPTC Directives (MUST FOLLOW)
-
-| Directive | Your Responsibility |
-|-----------|---------------------|
-| **Test-First Philosophy** | Production is source of truth; update tests to match |
-| **Surgical Coding** | Minimal changes to fix mismatches |
-| **Pattern Alignment** | New tests must match existing test patterns |
-| **PM Authority** | Production changes require PM approval |
-
-### SOPs to Reference (with Precedence)
-
-**Precedence Rule**: Check project `sop/` or `~/.claude/global/` first for matching topics. Use RPTC SOPs as fallback.
-
-| Topic | RPTC Fallback |
-|-------|---------------|
-| Testing | `${CLAUDE_PLUGIN_ROOT}/sop/testing-guide.md` |
-| AI Test Patterns | `${CLAUDE_PLUGIN_ROOT}/sop/flexible-testing-guide.md` |
-| Test Sync | `${CLAUDE_PLUGIN_ROOT}/sop/test-sync-guide.md` |
-
 ### Exit Verification
 
 At the END of your response, include:
@@ -66,6 +47,14 @@ You may run as either a **sub-agent** (spawned via Task tool from `/rptc:feat` o
 |------|-----------|------------|
 | `TaskCreate/TaskUpdate/TaskList/TaskGet` | ✅ Internal progress tracking | ✅ Shared team task coordination |
 | `SendMessage` | ❌ Do NOT call — unavailable in this context | ✅ Use for Team Lead and peer communication |
+
+---
+
+## Output Style
+
+Length proportional to task complexity. Skip preambles and recap summaries. In structured outputs: reasoning before answer.
+
+**Full length on**: math/multi-step reasoning, code generation. **No JSON-mode** for reasoning-heavy tasks.
 
 ---
 

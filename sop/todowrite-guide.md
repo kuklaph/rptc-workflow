@@ -459,43 +459,6 @@ Original: "Write tests for Step 1"
 
 ## Testing and Validation
 
-### Manual Workflow Testing
-
-**Test 1: Complete RPTC Workflow**
-
-1. Run `/rptc:research "test topic"`
-   - Verify 6-item TodoWrite list created
-   - Progress through all phases
-   - Verify state updates correctly
-   - Confirm all tasks "completed" at end
-
-2. Run `/rptc:feat "test feature"`
-   - Verify 5-phase workflow uses TaskCreate/TaskUpdate (not TodoWrite)
-   - This command no longer uses TodoWrite — included here for completeness
-
-4. Run `/rptc:commit pr`
-   - Verify 7-phase tracking
-   - Test blocking on test failures
-   - Verify Doc Specialist runs automatically
-   - Confirm PR creation tracked
-
-**Test 2: Compaction Survival**
-
-1. Start workflow with 10-step plan
-2. Complete 2-3 steps
-3. Take screenshot of TodoWrite list
-4. Execute `/compact`
-5. Verify TodoWrite list restored
-6. Continue workflow from last completed step
-
-**Test 3: Interruption Recovery**
-
-1. Start workflow
-2. Complete several tasks
-3. Close session (simulate crash)
-4. Restart, check TodoWrite state
-5. Resume from last completed task
-
 ### Success Criteria Checklist
 
 - [ ] All commands create correct TodoWrite lists

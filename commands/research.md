@@ -214,26 +214,6 @@ mkdir -p docs/research
 
 ---
 
-## Agent Delegation Reference
-
-### Parallel Research Agents (Codebase)
-```
-IMPORTANT: Use "rptc:research-agent", NOT "Explore"
-
-Launch 3 Task tools simultaneously with subagent_type="rptc:research-agent":
-- Agent 1: Similar features / existing patterns (Mode A, Phase 1)
-- Agent 2: Architecture and abstractions (Mode A, Phase 3)
-- Agent 3: Integration points / dependencies (Mode A, Phase 2)
-```
-
-### Research Agent (Web)
-```
-Use Task tool with subagent_type="rptc:research-agent":
-prompt: "Research [topic] for [context]. Return: findings with confidence, recommendations, sources."
-```
-
----
-
 ## Key Principles
 
 1. **Parallel exploration**: Always use 2-3 agents for codebase research
@@ -242,14 +222,3 @@ prompt: "Research [topic] for [context]. Return: findings with confidence, recom
 4. **Save on request**: Only create files if user explicitly asks
 5. **Trust agents**: Don't over-specify in delegation prompts
 
----
-
-## Differences from Legacy
-
-| Aspect | Legacy | New |
-|--------|--------|-----|
-| Config loading | 80 lines | 0 |
-| Mandatory menus | 7+ questions | Ask when unclear |
-| Exploration | Sequential | 2-3 parallel agents |
-| Output | File by default | Inline by default |
-| Lines of code | 1200+ | ~150 |
