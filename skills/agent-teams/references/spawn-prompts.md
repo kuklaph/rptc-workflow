@@ -312,7 +312,6 @@ Use RPTC plugin SOPs as fallback:
 
 ## Environment Context (always provided)
 ENVIRONMENT:
-Repo topology: <REPO_TOPOLOGY>
 Repo root: <REPO_ROOT>
 Serena project: <SERENA_PROJECT_NAME>
   → Call activate_project("<SERENA_PROJECT_NAME>") before using any Serena tools.

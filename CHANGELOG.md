@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.15.0] - 2026-04-30
+
+### Removed
+
+- **Repo topology detection** (`REPO_TOPOLOGY`, `PRIMARY_SOURCE`, bare-repo / worktrees-dir special cases) from `/rptc:feat`, `/rptc:fix`, `/rptc:feat-team`, `/rptc:fix-team`, the `agent-teams` skill, the `PLUGIN_ARCHITECTURE.md` workflow diagrams, and the README "bare repo setup" FAQ. Step 0.1.2 ("Detect Repo Topology") is gone; Serena activation moves up to Step 0.1.2.
+- **Topology-aware worktree path computation** — new worktrees now always land in a sibling `<repo>.worktrees/<branch-name>` directory next to the repo (e.g., repo at `~/projects/myapp` → worktrees at `~/projects/myapp.worktrees/feature/add-auth`). Branch Strategy presents two options always: "Current branch" or "New worktree".
+- **Environment Context Block `Repo topology` line** — removed from all 4 commands and the `agent-teams` spawn-prompts reference. Sub-agents now receive `Repo root`, `Serena project`, and (when active) `Worktree`.
+
+### Why
+
+Topology detection introduced inconsistent behavior across sessions and added noise (Glob on `.bare`, Read on `.git`, conditional bash blocks). The standard-repo path was already the working default; collapsing to one path simplifies the command surface without losing functionality for the common case.
+
+### Breaking Changes / Migration
+
+Two scenarios change behavior in this release:
+
+1. **Worktree location moved.** Previously, new worktrees landed at `<repo-root>/.worktrees/<branch-name>` (inside the repo, with `.worktrees/` auto-added to `.gitignore`). They now land at `<repo-parent>/<repo-name>.worktrees/<branch-name>` (sibling of the repo). Existing worktrees in the old location continue to work — `git worktree` tracks them by registration, not by path — but any *new* worktree created via `/rptc:feat` or `/rptc:fix` will appear next to your repo, not inside it. If you depended on the in-repo location (CI scripts, IDE bookmarks, automation), update those references or move the existing checkouts manually with `git worktree move`.
+2. **Bare-repo container roots no longer auto-detected.** If you previously opened Claude at a `git clone --bare` container root with a `.git` file pointing to `.bare/`, `/rptc:feat` and `/rptc:fix` now assume a standard repo and will run `git rev-parse --show-toplevel` against the container root (which fails). Open Claude at one of the checked-out worktree directories instead. The "Use existing worktree" Branch Strategy option (bare-only) is gone.
+
+---
+
 ## [3.14.0] - 2026-04-25
 
 ### Changed

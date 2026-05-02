@@ -40,34 +40,14 @@ After loading, confirm all loaded. If ANY skill fails to load, STOP and report.
 Skill(skill: "rptc:frontend-design")
 ```
 
-### 0.1.2 Detect Repo Topology (MANDATORY)
-
-Run these checks in parallel:
-
-1. `Glob(pattern: ".bare")` — bare repo candidate
-2. `Read(".git")` — if readable as file, confirms bare repo or worktree
-3. `Bash("git rev-parse --show-toplevel")` — repo root
-4. `Glob(pattern: ".worktrees")` — worktrees-dir topology
-
-Determine topology:
-
-| `.bare/` exists | `.git` is a file | `.worktrees/` exists | Result |
-|:---------------:|:----------------:|:--------------------:|--------|
-| Yes | Yes | — | `REPO_TOPOLOGY="bare"`, `REPO_ROOT` = cwd |
-| No | — | Yes | `REPO_TOPOLOGY="worktrees-dir"`, `REPO_ROOT` = `git rev-parse --show-toplevel` |
-| No | — | No | `REPO_TOPOLOGY="standard"`, `REPO_ROOT` = `git rev-parse --show-toplevel` |
-
-For bare repos: `Bash("git worktree list")` to set `PRIMARY_SOURCE`.
-
-Store `REPO_TOPOLOGY`, `REPO_ROOT`, `PRIMARY_SOURCE` for the session.
-
-### 0.1.3 Activate Serena MCP (MANDATORY)
+### 0.1.2 Get Repo Root + Activate Serena MCP (MANDATORY)
 
 ```
+Bash("git rev-parse --show-toplevel")  → store as REPO_ROOT
 ToolSearch(query: "serena")
 ```
 
-Activate Serena project using topology from 0.1.2. Skip silently if unavailable.
+Activate Serena project. Skip silently if unavailable.
 
 ### 0.2 Task Classification
 
@@ -96,7 +76,7 @@ options:
     description: "Work directly on current branch"
 ```
 
-If new worktree selected, create using topology-aware path computation (see `/rptc:fix` Branch Strategy for full logic). Store `WORKTREE_PATH`.
+If new worktree selected, place it at `$(dirname "$REPO_ROOT")/$(basename "$REPO_ROOT").worktrees/<branch-name>` — a sibling `<repo>.worktrees/` directory next to the repo (see `/rptc:fix` Branch Strategy for `git worktree add` and verification details). Store `WORKTREE_PATH`.
 
 ---
 
@@ -134,7 +114,6 @@ Construct this block once — it goes into every agent spawn prompt:
 
 ```
 ENVIRONMENT:
-Repo topology: <REPO_TOPOLOGY>
 Repo root: <REPO_ROOT>
 Serena project: <SERENA_PROJECT_NAME>
   → Call activate_project("<SERENA_PROJECT_NAME>") before using any Serena tools.

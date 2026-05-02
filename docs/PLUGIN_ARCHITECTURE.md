@@ -329,7 +329,7 @@ An alternative to `/rptc:feat` that uses persistent agents with real-time messag
 ```text
 /rptc:feat-team "description"
     ↓
-Step 0: Initialize (topology, Serena, branch strategy)
+Step 0: Initialize (Serena, branch strategy)
     ↓
 Step 1: Create Team (4 agents spawned in parallel)
     → researcher, architect, implementer, reviewer
@@ -364,7 +364,7 @@ Parallels `/rptc:feat-team` but adapted for bug fixing — root cause focus, 5 W
 ```text
 /rptc:fix-team "bug description"
     ↓
-Step 0: Initialize (topology, Serena, branch strategy)
+Step 0: Initialize (Serena, branch strategy)
     ↓
 Step 1: Create Team (4 agents spawned in parallel)
     → researcher, architect, implementer, reviewer

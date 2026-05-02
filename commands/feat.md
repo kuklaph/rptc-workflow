@@ -39,34 +39,7 @@ Skill(skill: "rptc:frontend-design")
 
 > **IMPORTANT**: If the project already has an established design system, style guide, or visual aesthetic, the skill's creative direction MUST work within those constraints. Research existing styles first (CSS variables, component library, brand guidelines) and extend them — do not override with a conflicting aesthetic. The skill adds polish and intentionality, not a new identity.
 
-### 0.1.2 Detect Repo Topology (MANDATORY)
-
-Detect the Git repository type **before** activating Serena or running any git commands that assume a working tree. Uses native tools and simple `git` commands only — no compound bash blocks.
-
-**Run these checks in parallel:**
-
-1. **Check for bare repo container**: `Glob(pattern: ".bare")` — if matches exist, bare repo candidate
-2. **Check if `.git` is a file** (not a directory): `Read(".git")` — if readable as a file, confirms bare repo or worktree checkout
-3. **Get repo root**: `Bash("git rev-parse --show-toplevel")` — auto-allowed by frontmatter; may fail at bare repo container root (expected)
-4. **Check for `.worktrees/` directory**: `Glob(pattern: ".worktrees")` — if matches exist, worktrees-dir topology
-
-**Determine topology from results:**
-
-| `.bare/` exists | `.git` is a file | `.worktrees/` exists | Result |
-|:---------------:|:----------------:|:--------------------:|--------|
-| Yes | Yes | — | `REPO_TOPOLOGY="bare"`, `REPO_ROOT` = current working directory |
-| No | — | Yes | `REPO_TOPOLOGY="worktrees-dir"`, `REPO_ROOT` = `git rev-parse --show-toplevel` |
-| No | — | No | `REPO_TOPOLOGY="standard"`, `REPO_ROOT` = `git rev-parse --show-toplevel` |
-
-**For bare repos only** — get the primary worktree source:
-```
-Bash("git worktree list")
-```
-Parse the second line (first checked-out worktree) to set `PRIMARY_SOURCE`. If only one line (bare root, no worktrees), `PRIMARY_SOURCE` is empty.
-
-**For all topologies**: Store `REPO_TOPOLOGY`, `REPO_ROOT`, and `PRIMARY_SOURCE` — reference them throughout this session.
-
-### 0.1.3 Activate Serena MCP (MANDATORY)
+### 0.1.2 Activate Serena MCP (MANDATORY)
 
 Serena tools are **deferred** in the main context — they require explicit loading before they can be called.
 
@@ -79,8 +52,6 @@ ToolSearch(query: "serena")
 Once loaded, Serena tools appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*`. This activates both read tools (`find_symbol`, `get_symbols_overview`, `search_for_pattern`, etc.) and edit tools (`replace_symbol_body`, `insert_after_symbol`, etc.). Use them throughout this workflow — refer to the Tool Prioritization section for the full map of Serena vs. native tools.
 
 If Serena is unavailable (not installed), skip silently and fall back to native Grep and Glob.
-
-**Serena project activation** can now use `REPO_TOPOLOGY` from Step 0.1.2 to determine the correct activation path (e.g., bare repo container root vs. standard project root).
 
 ### 0.2 RPTC Workflow Understanding (INTERNALIZE)
 
@@ -152,8 +123,8 @@ Check if the feature description argument contains **"Plan is approved"**:
 
 **If YES** — this is a post-plan-approval re-entry (context was cleared after plan approval):
 
-1. Step 0 initialization is already complete (skills loaded, Serena active, tasks created, **topology detected in Step 0.1.2**)
-2. **Verify environment**: `REPO_TOPOLOGY`, `REPO_ROOT`, and `PRIMARY_SOURCE` are already set from Step 0.1.2.
+1. Step 0 initialization is already complete (skills loaded, Serena active, tasks created)
+2. **Verify environment**: re-derive `REPO_ROOT` from `git rev-parse --show-toplevel`.
    Check if currently inside a worktree: compare `git rev-parse --show-toplevel` against `git worktree list`. If in a worktree, set `WORKTREE_PATH` accordingly.
 3. Mark Phases 1 and 2 complete:
    ```
@@ -229,7 +200,7 @@ Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` �
 | Step 0 (always loaded) | Infrastructure — activates Serena for code navigation throughout |
 | All phases | Serena read ops (`find_symbol`, `search_for_pattern`) |
 
-**Method**: ToolSearch activates Serena at session start (Step 0.1.2); then prefer `find_symbol`, `get_symbols_overview`, `search_for_pattern` over native Grep/Glob for all code navigation.
+**Method**: ToolSearch activates Serena at session start (Step 0.1.2 Activate Serena); then prefer `find_symbol`, `get_symbols_overview`, `search_for_pattern` over native Grep/Glob for all code navigation.
 **Timing**: Loaded first in Step 0. Applies across all phases wherever code navigation or symbol search is needed.
 
 **`brainstorming`** - Structured dialogue for requirement clarification:
@@ -287,7 +258,7 @@ Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` �
    - If NOT found: Suggest user run `/rptc:config` for best experience
    - If found but outdated: Suggest user run `/rptc:config` to sync with current plugin version
 
-1. **Repo topology** — already detected in Step 0.1.2. `REPO_TOPOLOGY`, `REPO_ROOT`, and `PRIMARY_SOURCE` are available. No re-detection needed.
+1. **Get repo root**: `Bash("git rev-parse --show-toplevel")` → store as `REPO_ROOT` for use in worktree path computation and the Environment Context Block.
 
 2. **Classify task type** (see Task Classification above)
 3. **Create initial todo list** with phases based on task type:
@@ -332,9 +303,7 @@ Put your recommended option first and append "(Recommended)" to its label.
 
 **Before asking**, prepare the option labels:
 
-1. **Get current branch name** (topology-aware):
-   - Standard/worktrees-dir: `git branch --show-current` → e.g. `main`
-   - Bare repo: `git symbolic-ref --short HEAD 2>/dev/null || echo "main"` → e.g. `main`
+1. **Get current branch name**: `git branch --show-current` → e.g. `main`
 2. **Generate worktree branch name** from the feature description:
    - Lowercase, replace spaces with hyphens, strip special characters
    - Prefix with `feature/`
@@ -351,43 +320,28 @@ options:
     description: "<description>"
 ```
 
-Example — standard repo, small single-file change on a feature branch:
+Example — small single-file change on a feature branch:
 ```
   - label: "Current branch [feature/auth] (Recommended)"
   - label: "New worktree [feature/add-user-auth]"
 ```
 
-Example — standard repo, large multi-file feature on main:
+Example — large multi-file feature on main:
 ```
   - label: "New worktree [feature/add-user-auth] (Recommended)"
   - label: "Current branch [main]"
 ```
 
-Example — bare repo (opened at container root), with an existing worktree at `/home/user/project/main`:
-```
-  - label: "New worktree [feature/add-user-auth] (Recommended)"
-  - label: "Use existing worktree [/home/user/project/main]"
-```
-
-Note: For bare repos, "Current branch" is not meaningful (no working tree at container root). Replace that option with "Use existing worktree [<PRIMARY_SOURCE>]" (resolved to an absolute path). If `PRIMARY_SOURCE` is empty (no worktrees checked out yet), omit the "Use existing worktree" option entirely — only offer "New worktree".
-
 **If "New worktree" selected:**
 
-1. **Compute worktree path** using topology detected in Step 0.1.2:
+1. **Compute worktree path** (sibling `<repo>.worktrees/` directory, branch as subpath):
    ```bash
-   # REPO_TOPOLOGY and REPO_ROOT already set from Step 0.1.2
-   if [ "$REPO_TOPOLOGY" = "bare" ]; then
-     WORKTREE_PATH="${REPO_ROOT}/<branch-name>"
-   elif [ "$REPO_TOPOLOGY" = "worktrees-dir" ]; then
-     WORKTREE_PATH="${REPO_ROOT}/.worktrees/<branch-name>"
-   else
-     # Standard repo: ensure .worktrees/ exists and is gitignored
-     mkdir -p "${REPO_ROOT}/.worktrees"
-     grep -qxF '.worktrees/' "${REPO_ROOT}/.gitignore" 2>/dev/null \
-       || echo '.worktrees/' >> "${REPO_ROOT}/.gitignore"
-     WORKTREE_PATH="${REPO_ROOT}/.worktrees/<branch-name>"
-   fi
+   # REPO_ROOT already set from Phase 1 Action 1
+   REPO_PARENT="$(dirname "$REPO_ROOT")"
+   REPO_NAME="$(basename "$REPO_ROOT")"
+   WORKTREE_PATH="${REPO_PARENT}/${REPO_NAME}.worktrees/<branch-name>"
    ```
+   Example: repo at `/home/user/projects/myapp`, branch `feature/add-auth` → worktree at `/home/user/projects/myapp.worktrees/feature/add-auth`. `git worktree add` creates the nested directory structure automatically.
    Store `WORKTREE_PATH` — you will reference it throughout this session.
 
 2. **Create worktree** using the absolute path:
@@ -412,36 +366,14 @@ Note: For bare repos, "Current branch" is not meaningful (no working tree at con
 5. **Set worktree active flag**: Remember that `WORKTREE_PATH` is set. ALL agent delegation
    prompts in Phases 2-4 MUST include the worktree lines in the Environment Context Block (defined below).
 
-**If "Use existing worktree" selected (bare repo only):**
-
-1. Set `WORKTREE_PATH = PRIMARY_SOURCE`.
-2. **Activate and verify**:
-   ```bash
-   cd "$WORKTREE_PATH" && git rev-parse --show-toplevel
-   ```
-   The output MUST match `WORKTREE_PATH`. If it does not, STOP and fix before continuing.
-3. **Retrieve branch name** for this worktree (used in subsequent agent delegation prompts):
-   ```bash
-   git branch --show-current
-   ```
-4. **Confirm to user**:
-   ```
-   Activated existing worktree at <WORKTREE_PATH>
-   Branch: <branch-name>
-   Verified: working directory is inside worktree.
-   All subsequent work proceeds here.
-   ```
-5. **Set worktree active flag**: Remember that `WORKTREE_PATH` is set. ALL agent delegation prompts in Phases 2-4 MUST include the worktree lines in the Environment Context Block (defined below).
-
 **If "Current branch" selected:** `WORKTREE_PATH` is not set. Continue to Phase 2.
 
 #### Environment Context Block
 
-Prepend this block to EVERY agent prompt in Phases 2-4 (architect, tdd, code-review, security, docs). It carries topology, Serena activation, and worktree info so sub-agents can orient themselves without guessing.
+Prepend this block to EVERY agent prompt in Phases 2-4 (architect, tdd, code-review, security, docs). It carries Serena activation and worktree info so sub-agents can orient themselves without guessing.
 
 ```
 ENVIRONMENT:
-Repo topology: <REPO_TOPOLOGY>
 Repo root: <REPO_ROOT>
 Serena project: <SERENA_PROJECT_NAME>
   → Call activate_project("<SERENA_PROJECT_NAME>") before using any Serena tools.
@@ -451,7 +383,7 @@ Worktree: <WORKTREE_PATH>
   → All file paths are relative to this worktree root, NOT the original repo.
 ```
 
-`<SERENA_PROJECT_NAME>` is the registered name from the main context's successful `activate_project` call in Step 0.1.3. If Serena was unavailable in the main context, omit the Serena lines.
+`<SERENA_PROJECT_NAME>` is the registered name from the main context's successful `activate_project` call in Step 0.1.2. If Serena was unavailable in the main context, omit the Serena lines.
 
 `TaskUpdate(Phase 1, status: "completed")`
 
