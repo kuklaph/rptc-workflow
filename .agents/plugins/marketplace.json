@@ -1,0 +1,20 @@
+{
+  "name": "rptc-workflow",
+  "interface": {
+    "displayName": "RPTC Workflow"
+  },
+  "plugins": [
+    {
+      "name": "rptc",
+      "source": {
+        "source": "local",
+        "path": "./plugins/rptc"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

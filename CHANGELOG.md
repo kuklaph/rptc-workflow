@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.16.0] - 2026-05-05
+
+### Added
+
+- **Codex plugin support** with `plugins/rptc/.codex-plugin/plugin.json` and the `rptc-workflow` skill as the Codex-native adapter for RPTC chat intents.
+- **Codex role-definition references** under `plugins/rptc/agents/` for approved `spawn_agent` delegation, while keeping Codex execution in the main session by default.
+- **Codex marketplace entry** at `.agents/plugins/marketplace.json`, pointing at the canonical `plugins/rptc` package.
+
+### Changed
+
+- **Canonical package layout** now lives under `plugins/rptc/`, with Claude-specific slash commands and agents moved under `plugins/rptc/claude/`.
+- **Claude marketplace source** now points to `./plugins/rptc`, preserving the Claude plugin install surface while sharing one package with Codex.
+- **Shared docs, SOPs, templates, and skills** now distinguish Claude slash-command behavior from Codex `rptc-workflow` chat intents, `update_plan` tracking, and explicit-approval subagent delegation.
+- **Contributor guidance** now includes Codex adapter validation alongside Claude slash-command testing.
+
+### Notes
+
+- Codex does not expose RPTC as custom slash commands. Use chat intents such as `Use RPTC to implement "..."`.
+- Codex plugin manifests expose skills only; plugin-local Markdown agents are packaged role-definition references, not top-level Codex plugin agents.
+- Root `hooks/` were not changed in this release.
+
+---
+
 ## [3.15.0] - 2026-04-30
 
 ### Removed

@@ -1,0 +1,35 @@
+{
+  "name": "rptc",
+  "version": "3.16.0",
+  "description": "Research -> Plan -> TDD -> Commit workflow with PM collaboration. Systematic development with quality gates, test-driven implementation, and intelligent documentation management.",
+  "author": {
+    "name": "kuklaph",
+    "email": "30103848+kuklaph@users.noreply.github.com"
+  },
+  "keywords": [
+    "workflow",
+    "tdd",
+    "research",
+    "planning",
+    "quality-gates",
+    "documentation",
+    "pm-collaboration",
+    "test-driven-development",
+    "multi-agent"
+  ],
+  "license": "MIT",
+  "repository": "https://github.com/kuklaph/rptc-workflow",
+  "homepage": "https://github.com/kuklaph/rptc-workflow#readme",
+  "commands": "./claude/commands/",
+  "agents": [
+    "./claude/agents/architect-agent.md",
+    "./claude/agents/code-review-agent.md",
+    "./claude/agents/docs-agent.md",
+    "./claude/agents/research-agent.md",
+    "./claude/agents/review-agent.md",
+    "./claude/agents/security-agent.md",
+    "./claude/agents/tdd-agent.md",
+    "./claude/agents/test-fixer-agent.md",
+    "./claude/agents/test-sync-agent.md"
+  ]
+}

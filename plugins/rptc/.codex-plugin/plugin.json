@@ -1,0 +1,42 @@
+{
+  "name": "rptc",
+  "version": "3.16.0",
+  "description": "Research -> Plan -> TDD -> Commit workflow with quality gates, test-driven implementation, and documentation review.",
+  "author": {
+    "name": "kuklaph",
+    "email": "30103848+kuklaph@users.noreply.github.com",
+    "url": "https://github.com/kuklaph"
+  },
+  "homepage": "https://github.com/kuklaph/rptc-workflow#readme",
+  "repository": "https://github.com/kuklaph/rptc-workflow",
+  "license": "MIT",
+  "keywords": [
+    "workflow",
+    "tdd",
+    "research",
+    "planning",
+    "quality-gates",
+    "documentation",
+    "test-driven-development",
+    "multi-agent"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "RPTC Workflow",
+    "shortDescription": "Research, plan, implement with TDD, verify, and ship.",
+    "longDescription": "RPTC packages a provider-agnostic Research -> Plan -> TDD -> Commit workflow for Codex. It includes reusable workflow skills, methodology references, SOPs, and verification guidance for feature work, bug fixes, research, structure reviews, and commit preparation.",
+    "developerName": "kuklaph",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/kuklaph/rptc-workflow",
+    "brandColor": "#2563EB",
+    "defaultPrompt": [
+      "Use RPTC to implement this feature.",
+      "Use RPTC to fix this bug.",
+      "Run an RPTC verification pass."
+    ]
+  }
+}
