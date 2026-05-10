@@ -35,15 +35,11 @@ infinite recursion.**
 
 ## Execute the Complete RPTC Workflow
 
-Execute the RPTC feature intent for this provider:
-- Claude: run `/rptc:feat "[feature description]"`.
-- Codex: follow the `rptc:rptc-workflow` feature workflow in this session; do not assume custom slash commands are available.
-
-Workflow phases:
+Run `/rptc:feat "[feature description]"` to execute the full workflow:
 - Phase 1: Discovery (explore codebase for relevant patterns)
 - Phase 2: Architecture (design implementation approach)
 - Phase 3: Implementation (TDD with smart batching)
-- Phase 4: Quality Verification (report-only verification roles; parallel only when provider policy and user approval allow)
+- Phase 4: Quality Verification (parallel verification agents)
 - Phase 5: Complete (summary)
 
 [RPTC DIRECTIVES BLOCK — paste from § 4 below]
@@ -55,9 +51,8 @@ You own ONLY these files and directories:
 - [specific/file.ext]
 
 Do NOT create, modify, or delete files outside your ownership boundary.
-If you discover a need to modify files you don't own, notify the Team Lead
-through the provider coordination channel explaining what you need changed and
-why. Do not attempt the change.
+If you discover a need to modify files you don't own, message the Team Lead
+via inbox explaining what you need changed and why. Do not attempt the change.
 
 ## Shared Files Protocol
 These files are shared across teammates and owned by [Team Lead / specific teammate]:
@@ -77,7 +72,7 @@ The owner will integrate after all teammates complete.
 - Quality findings <80%: Ignore (below RPTC threshold).
 
 ## If You Get Stuck
-Notify the Team Lead through the provider coordination channel with:
+Message the Team Lead via inbox with:
 - What you're trying to do
 - What's blocking you
 - Your best guess at a path forward
@@ -99,12 +94,8 @@ infinite recursion.**
 
 ## Execute the Complete RPTC Fix Workflow
 
-Execute the RPTC fix intent for this provider:
-- Claude: run `/rptc:fix "[bug description]"`.
-- Codex: follow the `rptc:rptc-workflow` fix workflow in this session; do not assume custom slash commands are available.
-
-Workflow phases:
-- Phase 1: Reproduction & Triage (research roles; parallel only when provider policy and user approval allow)
+Run `/rptc:fix "[bug description]"` to execute the systematic fix flow:
+- Phase 1: Reproduction & Triage (parallel research agents)
 - Phase 2: Root Cause Analysis (5 Whys methodology)
 - Phase 3: Fix Application (regression test first, then fix)
 - Phase 4: Verification (verification agents with regression focus)
@@ -139,7 +130,7 @@ ownership, message the Team Lead immediately.
 ## 2. Level B: Implementation Only
 
 Use when the Team Lead ran Discovery + Architecture centrally and is assigning
-specific plan steps to teammates for provider-approved TDD execution.
+specific plan steps to teammates for parallel TDD execution.
 
 ```
 You are a teammate executing specific implementation steps from an approved plan.
@@ -168,8 +159,9 @@ Step [N+1]: [name]
 ## Execution Instructions
 
 Load the TDD methodology skill and follow it strictly:
-- Claude: invoke/load the `rptc:tdd-methodology` skill with the available skill mechanism.
-- Codex: apply the available `rptc:tdd-methodology` skill instructions in the session.
+```
+Skill(skill: "rptc:tdd-methodology")
+```
 
 For each assigned step, in order:
 1. **Surgical Coding**: Search for 3 similar patterns in the codebase first
@@ -226,14 +218,14 @@ You are investigating a specific hypothesis about a bug.
 - Document your confidence level (high/medium/low) with evidence
 
 ## Collaboration
-- Report evidence that relates to another teammate's theory to the Team Lead;
-  the Team Lead routes it through the provider coordination channel if one exists
-- If you find definitive proof for or against your hypothesis, notify the Team
-  Lead immediately
+- Message other hypothesis teammates via inbox if you find evidence that
+  relates to their theory (supports or contradicts)
+- If you find definitive proof for or against your hypothesis, message
+  the Team Lead immediately
 - If evidence points to a different cause entirely, document it
 
 ## Output
-Report to the Team Lead with:
+Message the Team Lead with:
 - Hypothesis: [restate]
 - Verdict: Confirmed / Refuted / Inconclusive
 - Evidence: [key findings with file:line references]
@@ -259,13 +251,13 @@ You are a specialist reviewer challenging the implementation from a specific ang
 - Only report findings with confidence ≥80%
 
 ## Collaboration
-- Review coordination messages from other reviewers
+- Read inbox messages from other reviewers
 - If another reviewer's finding relates to yours, respond with your perspective
 - Actively disagree when you see it differently — debate improves outcomes
 - After exchange, note whether you changed your assessment
 
 ## Output
-Report to the Team Lead with findings in this format:
+Message the Team Lead with findings in this format:
 1. [severity] [confidence%] — [file:line] — [description] — [suggested fix]
 Append: Areas of agreement/disagreement with other reviewers.
 ```
@@ -311,12 +303,12 @@ you cannot mark your task complete — fix the violation first.
 - All tests must pass before marking complete
 
 ## SOP Precedence
-Check project `sop/`, provider global SOPs, or provider context files first for topic-specific guidance.
+Check project `sop/` or `~/.claude/global/` first for topic-specific guidance.
 Use RPTC plugin SOPs as fallback:
-- Testing: plugin `sop/testing-guide.md`
-- Architecture: plugin `sop/architecture-patterns.md`
-- Security: plugin `sop/security-and-performance.md`
-- Refactoring: plugin `sop/post-tdd-refactoring.md`
+- Testing: `${CLAUDE_PLUGIN_ROOT}/sop/testing-guide.md`
+- Architecture: `${CLAUDE_PLUGIN_ROOT}/sop/architecture-patterns.md`
+- Security: `${CLAUDE_PLUGIN_ROOT}/sop/security-and-performance.md`
+- Refactoring: `${CLAUDE_PLUGIN_ROOT}/sop/post-tdd-refactoring.md`
 
 ## Environment Context (always provided)
 ENVIRONMENT:
@@ -338,8 +330,8 @@ Paste this into every spawn prompt. Ensures consistent completion reporting.
 ```
 ## When You're Done
 
-Report completion to the Team Lead. The Team Lead updates the provider tracker
-(Codex: `update_plan`) and records this summary:
+Update the shared task list marking your tasks as completed, then message the
+Team Lead with this summary:
 
 ### Completion Report
 **Task**: [what you were assigned]

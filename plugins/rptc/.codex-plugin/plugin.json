@@ -1,6 +1,6 @@
 {
   "name": "rptc",
-  "version": "3.16.0",
+  "version": "3.16.1",
   "description": "Research -> Plan -> TDD -> Commit workflow with quality gates, test-driven implementation, and documentation review.",
   "author": {
     "name": "kuklaph",
@@ -20,11 +20,11 @@
     "test-driven-development",
     "multi-agent"
   ],
-  "skills": "./skills/",
+  "skills": "./codex/skills/",
   "interface": {
     "displayName": "RPTC Workflow",
     "shortDescription": "Research, plan, implement with TDD, verify, and ship.",
-    "longDescription": "RPTC packages a provider-agnostic Research -> Plan -> TDD -> Commit workflow for Codex. It includes reusable workflow skills, methodology references, SOPs, and verification guidance for feature work, bug fixes, research, structure reviews, and commit preparation.",
+    "longDescription": "RPTC packages a Codex adapter for the original Research -> Plan -> TDD -> Commit workflow. Codex skills are exposed from ./codex/skills/. Custom RPTC agents are packaged in ./codex/agents/ and installed with the rptc-init skill, which copies them to .codex/agents/ or the user's Codex agents directory.",
     "developerName": "kuklaph",
     "category": "Productivity",
     "capabilities": [

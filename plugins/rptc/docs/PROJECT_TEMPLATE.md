@@ -28,20 +28,16 @@
 /rptc:sync-prod-to-tests "[dir]"     # Sync tests to production code
 ```
 
-Claude exposes these as slash commands. In Codex, invoke the same intents in
-chat through the `rptc-workflow` skill, for example: `Use RPTC to implement
-"feature description"` or `Run an RPTC verification pass`.
-
 ## RPTC Workflow Philosophy
 
-**You are the PROJECT MANAGER. Claude or Codex is your collaborative partner.**
+**You are the PROJECT MANAGER. The AI assistant is your collaborative partner.**
 
-The RPTC feature workflow handles the complete flow (Claude: `/rptc:feat`; Codex: feature chat intent through `rptc-workflow`):
+The unified `/rptc:feat` command handles the complete workflow:
 
 **DISCOVERY** → Codebase exploration and pattern analysis
 **ARCHITECTURE** → User-selected planning approach (Minimal/Clean/Pragmatic)
 **TDD** → Test-driven implementation with smart batching
-**QUALITY VERIFICATION** → Code Review, Security, and Documentation checks
+**QUALITY VERIFICATION** → Parallel Code Review, Security, and Documentation agents
 **COMPLETE** → Summary and documentation
 
 ### Your Role as PM
@@ -57,7 +53,7 @@ The RPTC feature workflow handles the complete flow (Claude: `/rptc:feat`; Codex
 - Codebase exploration and pattern discovery
 - Present 3 planning perspectives for your selection
 - Execute strict TDD cycles
-- Run quality verification; Claude may use command-defined agent behavior, while Codex delegates or parallelizes only when provider policy and explicit user approval allow it
+- Run parallel quality verification
 - Summarize work completed
 
 ## The `/rptc:feat` Workflow
@@ -66,7 +62,7 @@ The RPTC feature workflow handles the complete flow (Claude: `/rptc:feat`; Codex
 
 **Purpose**: Understand what to build and existing patterns.
 
-- Explores codebase patterns; Claude may use command-defined agents, while Codex delegates or parallelizes only when provider policy and explicit user approval allow it
+- Launches 2-3 parallel exploration agents
 - Analyzes existing code patterns
 - Identifies files to modify and dependencies
 - Optional web research for unfamiliar topics
@@ -76,13 +72,13 @@ The RPTC feature workflow handles the complete flow (Claude: `/rptc:feat`; Codex
 
 **Purpose**: Design the implementation approach with user approval.
 
-- Enters provider planning context
-- Presents 3 planning perspectives:
+- Enters the provider planning mode
+- Launches 3 plan agents with different perspectives:
   - **Minimal**: Smallest change, reuses existing code, fast delivery
   - **Clean**: Maintainability-focused, elegant abstractions, long-term value
   - **Pragmatic**: Balanced approach, good enough without over-engineering
 - **You select which approach** fits your needs
-- Plan saved or tracked in provider-native form (Claude: `~/.claude/plans/`; Codex: `update_plan`/chat approval unless a file is requested)
+- Plan saved to the active RPTC plan location for the current provider
 
 ### Phase 3: Implementation
 
@@ -95,7 +91,7 @@ The RPTC feature workflow handles the complete flow (Claude: `/rptc:feat`; Codex
 **Route B - Code Tasks** (TDD with Smart Batching):
 - Groups related steps into batches for efficiency
 - For each step: RED → GREEN → REFACTOR
-- Claude may execute independent batches according to command-defined agent behavior; Codex delegates or parallelizes only when provider policy and explicit user approval allow it
+- Parallel execution of independent batches
 - ~40% token reduction vs. sequential execution
 
 ### Phase 4: Quality Verification
@@ -105,8 +101,8 @@ The RPTC feature workflow handles the complete flow (Claude: `/rptc:feat`; Codex
 - **Code Review Agent**: Complexity, KISS/YAGNI violations, dead code
 - **Security Agent**: Input validation, auth checks, injection vulnerabilities
 - **Documentation Agent**: README updates, API doc changes
-- All three report findings only; Claude may use command-defined agent behavior, while Codex delegates or parallelizes only when provider policy and explicit user approval allow it
-- Main context handles fixes via provider task tracking
+- All three run in parallel, **report findings only**
+- Main context handles fixes via provider task tracker
 
 ### Phase 5: Complete
 
@@ -115,7 +111,7 @@ The RPTC feature workflow handles the complete flow (Claude: `/rptc:feat`; Codex
 - Files created/modified
 - Tests added
 - Key implementation decisions
-- Ready for the active provider's RPTC commit workflow (Claude: `/rptc:commit`; Codex: commit chat intent)
+- Ready for `/rptc:commit`
 
 ## Core Principles
 
@@ -125,7 +121,7 @@ The RPTC feature workflow handles the complete flow (Claude: `/rptc:feat`; Codex
 
 1. **Write tests FIRST** - For all code changes
 2. **RED → GREEN → REFACTOR** - The sacred cycle
-3. **Iterate on failures through provider task tracking** - Codex stays in the main context unless delegation is explicitly approved
+3. **Auto-iteration on failures** - Agent fixes until passing
 4. **Never commit broken tests** - Quality gate enforced
 
 **When handling code changes directly** (not via `/rptc:feat`):
@@ -147,7 +143,7 @@ When `/rptc:feat` presents 3 planning approaches, consider:
 - **Code Review Gate**: Catches over-engineering, enforces KISS/YAGNI
 - **Security Gate**: Prevents vulnerabilities before they ship
 - **Documentation Gate**: Ensures docs stay in sync with code
-- All three report findings; Claude may use command-defined agent behavior, while Codex delegates or parallelizes only when provider policy and explicit user approval allow it
+- All three run in parallel for speed
 - **Report-only mode**: Agents report findings, main context handles fixes
 
 ## AI Coding Assistant Guidelines
@@ -159,46 +155,44 @@ See `docs/AI_CODING_BEST_PRACTICES.md` for guardrails, prompting strategy, pre-g
 ## Workflow Decision Tree
 
 ```text
-Claude slash syntax is shown below. In Codex, invoke the same RPTC intent in chat.
-
 Any feature work?
-  └─ Claude: /rptc:feat "description"; Codex: RPTC feature chat intent
-     → Workflow handles discovery, planning, TDD, and verification
+  └─ /rptc:feat "description"
+     → Agent handles complexity automatically
      → You select planning approach
      → TDD implementation
      → Quality verification
-     → Ready for the active provider's RPTC commit workflow
+     → Ready for /rptc:commit
 
 Need standalone research first?
-  └─ Claude: /rptc:research "topic"; Codex: RPTC research chat intent
-     → Then provider feature workflow when ready
+  └─ /rptc:research "topic"
+     → Then /rptc:feat when ready
 
 Tests out of sync?
-  └─ Claude: /rptc:sync-prod-to-tests "src/"; Codex: RPTC test-sync chat intent
+  └─ /rptc:sync-prod-to-tests "src/"
 
 Want a fully clean result after fixes?
-  └─ Claude: /rptc:verify-loop [path]; Codex: RPTC verify-loop chat intent
+  └─ /rptc:verify-loop [path]
      → Loops until 0 findings, stagnation, or max iterations
-     → Then provider commit workflow
+     → Then /rptc:commit [pr]
 
 Ready to ship?
-  └─ Claude: /rptc:commit [pr]; Codex: RPTC commit chat intent
+  └─ /rptc:commit [pr]
 ```
 
 ## Project Structure
 
 ### Your Project (No Setup Required)
 
-RPTC uses the provider's native planning mechanism. No special directories needed.
+RPTC uses the provider planning mode. No special directories needed.
 
 ```text
 your-project/
 ├── docs/research/               # Optional: saved research documents
-├── CLAUDE.md or AGENTS.md       # Optional: provider project context
+├── CLAUDE.md or AGENTS.md       # Optional: project context (recommended)
 └── [your project files]
 ```
 
-**Plans are stored in**: Claude uses `~/.claude/plans/`; Codex tracks plans in-session with `update_plan` unless a project plan file is requested.
+**Plans are stored in**: the active RPTC plan location for the current provider
 
 ### Optional: Research Documents
 
@@ -236,7 +230,7 @@ docs/research/
 ## Example Complete Workflow
 
 ```bash
-# Claude: start feature development
+# 1. Start feature development
 > /rptc:feat "add user authentication with OAuth2"
 
 # Phase 1: Discovery
@@ -252,26 +246,21 @@ docs/research/
 # Phase 3: TDD Implementation
 [Smart batching groups related steps]
 [RED → GREEN → REFACTOR per step]
-[Progress shown via provider task tracking]
+[Progress shown via todos]
 
 # Phase 4: Quality Verification
-[Code Review, Security, and Documentation roles report findings; Claude may use command-defined agent behavior; Codex delegates or parallelizes only when provider policy and explicit user approval allow it]
+[Code Review, Security, and Documentation agents run in parallel]
 [You review findings, approve fixes]
 
 # Phase 5: Complete
 [Summary: 8 files modified, 47 tests added]
 
-# Claude: ship it
+# 2. Ship it
 > /rptc:commit pr
 [Tests pass, coverage verified]
 [PR created]
 ```
 
-```text
-Codex: Use RPTC to implement "add user authentication with OAuth2".
-Codex: Use RPTC commit with PR preparation.
-```
-
 ---
 
-**Remember**: The RPTC feature workflow puts YOU in control while handling the complexity of research, planning, TDD, and quality verification.
+**Remember**: The unified `/rptc:feat` command puts YOU in control while handling the complexity of research, planning, TDD, and quality verification.

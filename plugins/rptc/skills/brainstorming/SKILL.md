@@ -7,7 +7,7 @@ description: Use during planning phases to explore user intent, requirements, an
 
 ## Overview
 
-Transform ideas into fully formed designs through natural collaborative dialogue. Use the structured question mechanism available in the current provider.
+Transform ideas into fully formed designs through natural collaborative dialogue. Use the **AskUserQuestion tool** for structured interaction.
 
 Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, present the design in small sections (200-300 words), validating each section before proceeding.
 
@@ -15,19 +15,15 @@ Start by understanding the current project context, then ask questions one at a 
 
 Use this skill in planning phases:
 
-- RPTC feature workflow Phase 2 (Claude: `/rptc:feat`; Codex: `rptc-workflow` feature intent) - when requirements need clarification
-- RPTC fix workflow Phase 2 (Claude: `/rptc:fix`; Codex: `rptc-workflow` fix intent) - when fix approach needs exploration
+- `/rptc:feat` Phase 2 (Architecture) - when requirements need clarification
+- `/rptc:fix` Phase 2 (Root Cause) - when fix approach needs exploration
 - `architect-agent` - when designing implementation approach
 
 ## The Process
 
-### First: Enter Planning Context
+### First: Enter Plan Mode
 
-**Before brainstorming begins**, enter the provider's planning context. Brainstorming is a planning activity, so use the current session's planning primitive before collaborative design work.
-
-Provider mapping:
-- Claude: `EnterPlanMode`
-- Codex: concise plan in chat plus `update_plan` when task tracking is useful
+**Before brainstorming begins**, enter plan mode using the `EnterPlanMode` tool. Brainstorming is a planning activity—plan mode provides the appropriate context for collaborative design work.
 
 ---
 
@@ -35,11 +31,11 @@ Provider mapping:
 
 **Actions**:
 - Check current project context (files, docs, recent changes)
-- Ask questions one at a time using the provider's structured question primitive
+- Ask questions one at a time using **AskUserQuestion**
 - Prefer multiple choice options when possible
 - Focus on: purpose, constraints, success criteria
 
-**Structured Question Format**:
+**AskUserQuestion Format**:
 ```
 Question: "What is the primary goal of this feature?"
 Header: "Goal"
@@ -53,7 +49,7 @@ Options:
 ```
 
 **Rules**:
-- Only ONE question per prompt/question call
+- Only ONE question per AskUserQuestion call
 - If a topic needs more exploration, ask follow-up questions sequentially
 - Never overwhelm with multiple questions at once
 
@@ -64,7 +60,7 @@ Options:
 - Lead with your recommended option and explain why
 - Present options conversationally
 
-**Structured Question Format**:
+**AskUserQuestion Format**:
 ```
 Question: "Which approach fits your needs?"
 Header: "Approach"
@@ -100,17 +96,13 @@ Options:
 ## After the Design
 
 **Documentation**:
-- Write validated design to the provider planning context
+- Write validated design to plan file
 - Reference `writing-clearly-and-concisely` skill for prose quality
-- Get user approval on the final design using the current provider's approval primitive
-
-Provider mapping:
-- Claude: `ExitPlanMode`
-- Codex: concise approval request in chat; use `update_plan` to track accepted steps
+- Use `ExitPlanMode` to get user approval on the final design
 
 **Transition**:
-- For the RPTC feature workflow: Proceed to Phase 3 (TDD Implementation)
-- For the RPTC fix workflow: Proceed to Phase 3 (Fix Application)
+- For `/rptc:feat`: Proceed to Phase 3 (TDD Implementation)
+- For `/rptc:fix`: Proceed to Phase 3 (Fix Application)
 - For `architect-agent`: Return design to main context
 
 ## Key Principles
@@ -128,10 +120,10 @@ Provider mapping:
 
 | Action | Tool |
 |--------|------|
-| Enter planning context | Claude: EnterPlanMode; Codex: chat plan + update_plan |
-| Ask clarifying questions | Provider question primitive, one at a time |
-| Present approach options | Provider question primitive with 2-4 options |
-| Validate design sections | Provider question primitive (yes/changes/back) |
+| Enter planning context | EnterPlanMode (first step) |
+| Ask clarifying questions | AskUserQuestion (one at a time) |
+| Present approach options | AskUserQuestion with 2-4 options |
+| Validate design sections | AskUserQuestion (yes/changes/back) |
 | Explore codebase | Serena MCP or native tools |
-| Document design | Claude plan record; Codex chat plan + `update_plan` unless a project plan file is requested |
-| Complete planning | Claude: ExitPlanMode; Codex: chat approval + update_plan |
+| Document design | Write to plan file |
+| Complete planning | ExitPlanMode (when design is ready) |

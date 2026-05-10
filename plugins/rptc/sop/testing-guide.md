@@ -6,9 +6,7 @@
 **Created**: 2024-01-15
 **Last Updated**: 2026-02-22
 
-**Applies To**: RPTC feature workflow (Claude: `/rptc:feat`; Codex: `rptc-workflow` feature intent), Claude tdd-agent / architect-agent, Codex main-session TDD and architect roles unless explicit `spawn_agent` approval exists
-
-> Provider note: `/rptc:*` references in this guide are Claude slash-command names. In Codex, invoke the same workflow intent through the `rptc-workflow` skill.
+**Applies To**: `/rptc:feat` (code tasks only), tdd-agent, architect-agent
 
 ---
 
@@ -365,7 +363,7 @@ npm test  # No coverage measurement
 
 ### When This Applies
 
-This section guides the TDD executor role (Claude tdd-agent; Codex main-session TDD role unless explicit `spawn_agent` approval exists) in selecting the appropriate test framework based on the code being tested. It prevents using unit test runners (Bun/Jest) for browser-dependent code that requires Playwright.
+This section guides tdd-agent in selecting the appropriate test framework based on the code being tested. It prevents using unit test runners (Bun/Jest) for browser-dependent code that requires Playwright.
 
 ### Code Context Detection
 
@@ -406,7 +404,7 @@ When `browser-dependent` code is detected but Playwright is not installed:
 
 ### Project Configuration (Optional)
 
-Projects can specify default frameworks in provider project instructions (`CLAUDE.md`, `AGENTS.md`, or equivalent):
+Projects can specify default frameworks in the project instruction file (`CLAUDE.md`, `AGENTS.md`, or provider equivalent):
 
 ```markdown
 ## RPTC Test Framework Configuration
@@ -769,7 +767,7 @@ Traditional TDD assumes deterministic outputs: `same_input → same_output`. Thi
 - Complete decision tree for choosing flexible vs exact assertions
 - Implementation details for all four patterns with language-specific examples
 - Safety mechanisms preventing abuse and quality erosion
-- Integration with RPTC TDD workflow (Claude `/rptc:feat`; Codex `rptc-workflow` feature intent)
+- Integration with RPTC TDD workflow (`/rptc:feat`)
 
 **Key Principle**: Flexible assertions are a **precision tool** for inherent non-determinism, not a quality compromise. Security, compliance, and contracts ALWAYS require exact assertions.
 

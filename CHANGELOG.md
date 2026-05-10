@@ -7,28 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [3.16.0] - 2026-05-05
+## [3.16.1] - 2026-05-10
 
 ### Added
 
-- **Codex plugin support** with `plugins/rptc/.codex-plugin/plugin.json` and the `rptc-workflow` skill as the Codex-native adapter for RPTC chat intents.
-- **Codex role-definition references** under `plugins/rptc/agents/` for approved `spawn_agent` delegation, while keeping Codex execution in the main session by default.
-- **Codex marketplace entry** at `.agents/plugins/marketplace.json`, pointing at the canonical `plugins/rptc` package.
+- Codex plugin metadata and packaged Codex skill layout for the RPTC workflow.
+- Codex agent TOML artifacts with `rptc:`-scoped agent names and an `rptc-init` skill for copying packaged agents into the Codex agents directory.
+- Codex command-equivalent skills for the sequential RPTC workflows, omitting Claude-only peer-agent team commands.
 
-### Changed
+### Fixed
 
-- **Canonical package layout** now lives under `plugins/rptc/`, with Claude-specific slash commands and agents moved under `plugins/rptc/claude/`.
-- **Claude marketplace source** now points to `./plugins/rptc`, preserving the Claude plugin install surface while sharing one package with Codex.
-- **Shared docs, SOPs, templates, and skills** now distinguish Claude slash-command behavior from Codex `rptc-workflow` chat intents, `update_plan` tracking, and explicit-approval subagent delegation.
-- **Contributor guidance** now includes Codex adapter validation alongside Claude slash-command testing.
-
-### Notes
-
-- Codex does not expose RPTC as custom slash commands. Use chat intents such as `Use RPTC to implement "..."`.
-- Codex plugin manifests expose skills only; plugin-local Markdown agents are packaged role-definition references, not top-level Codex plugin agents.
-- Root `hooks/` were not changed in this release.
+- Claude plugin manifest paths now validate with provider-specific `claude/commands` and explicit agent entries.
+- Version sync and verification scripts now cover all seven release version locations, including the root README.
+- Shared SOP and template content is provider-neutral while Claude-specific TodoWrite guidance lives under the Claude package tree.
 
 ---
+
 
 ## [3.15.0] - 2026-04-30
 

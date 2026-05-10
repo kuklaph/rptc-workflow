@@ -29,12 +29,9 @@ Re-invoke the originating RPTC command to restore full context:
 - Features: `/rptc:feat Plan is approved, continue to implementation`
 - Bug fixes: `/rptc:fix Plan is approved, continue to implementation`
 
-In Codex, use the same intent in chat instead of a custom slash command, for
-example: `Use RPTC to continue the approved feature plan into implementation`.
-
 This handles all re-initialization automatically: skill loading, Serena activation, task tracking, and routing to Phase 3.
 
-**Do not manually load skills or rebuild tasks** — the Claude command or Codex chat intent handles everything.
+**Do not manually load skills or rebuild tasks** — the command handles everything.
 
 ---
 
@@ -413,10 +410,10 @@ Request full replan if:
 **After Plan Complete:**
 
 1. **For Developer:** Continue with TDD implementation phase
-2. **Quality Gates:** Code Review Agent + Security Agent (report-only; parallel only when provider policy and user approval allow it)
+2. **Quality Gates:** Code Review Agent + Security Agent (parallel execution)
 3. **Completion:** Verify all acceptance criteria met
 
-**Next:** Continue through the active provider's RPTC feature workflow after plan approval
+**Next:** TDD implementation begins automatically in `/rptc:feat` workflow
 
 ---
 

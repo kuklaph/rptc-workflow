@@ -1,31 +1,31 @@
 ---
 name: agent-teams
-description: Parallel agent execution mode for RPTC. Invoke explicitly when coordinating multiple independent work streams across parallel agent sessions — batch features, parallel bug fixes, or sprint items that don't share files. Orchestrates provider-available team or subagent creation with RPTC-compliant spawn prompts, file ownership boundaries, approval flow, and completion integration. For team-based single-feature or single-bug workflows, prefer `/rptc:feat-team` or `/rptc:fix-team` in Claude; in Codex, use this only when the user explicitly asks for delegation or parallel agents.
+description: Agent Teams execution mode for RPTC. Invoke explicitly when coordinating multiple independent work streams across parallel agent sessions — batch features, parallel bug fixes, or sprint items that don't share files. Orchestrates team creation with RPTC-compliant spawn prompts, file ownership boundaries, approval flow, and completion integration. For team-based single-feature or single-bug workflows, prefer `/rptc:feat-team` or `/rptc:fix-team` — this skill targets multi-stream batch work.
 ---
 
 # RPTC Agent Teams Mode
 
-This skill adds parallel agent execution as a first-class path in RPTC. When a task
+This skill adds Agent Teams as a first-class execution path in RPTC. When a task
 (or set of tasks) benefits from parallel independent sessions, this skill handles
-provider-available team or subagent creation, RPTC-compliant spawn prompts, file
-ownership, approval flow, and completion integration.
+team creation, RPTC-compliant spawn prompts, file ownership, approval flow, and
+completion integration.
 
-Provider capabilities differ:
-- Claude: Agent Teams are independent Claude Code sessions coordinating via a shared task list and peer-to-peer inbox messaging. Each teammate gets its own context window and project Claude configuration.
-- Codex: use `spawn_agent` only when the user explicitly asks for delegation or parallel agent work and the tool is available. Otherwise execute in the main session. Codex subagents do not provide Claude Team inbox semantics; coordinate from the main session and close agents with the available lifecycle tool when finished.
+Agent Teams are independent Claude Code sessions coordinating via a shared task
+list and peer-to-peer inbox messaging. Each teammate gets its own context window,
+automatically loads the project's CLAUDE.md, MCP servers, and `.claude/skills/`.
 
 ## Where This Fits in RPTC
 
 **Compatibility**:
 - RPTC v2.33.2+ for spawn-prompt enforcement gates (FILE LOCKOUT, RED GATE, exit block verification) — spawn prompts embed these mechanisms so teammates follow them even when running outside the full plugin context.
-- RPTC v3.13.0+ for the decoupled invocation model. This skill is no longer auto-loaded by the standard feature/fix workflow. Users who want team-based single-feature or single-bug workflows use the active provider's team workflow intent (Claude: `/rptc:feat-team` or `/rptc:fix-team`; Codex: `rptc-workflow` chat intent with explicit delegation approval). This skill targets multi-stream batch work (multiple independent features or fixes processed in parallel) and is invoked explicitly by the main agent.
+- RPTC v3.13.0+ for the decoupled invocation model. This skill is no longer auto-loaded by `/rptc:feat` or `/rptc:fix`. Users who want team-based single-feature or single-bug workflows invoke `/rptc:feat-team` or `/rptc:fix-team` directly. This skill targets multi-stream batch work (multiple independent features or fixes processed in parallel) and is invoked explicitly by the main agent.
 
 ### Two entry paths for team-based work in RPTC
 
 | Path | Invocation | Use When |
 |------|------------|----------|
-| **Single feature, persistent team** | Provider team feature intent (Claude: `/rptc:feat-team "<feature>"`; Codex: `rptc-workflow` chat intent with delegation approval) | One complex feature benefiting from continuous cross-agent feedback (architect + reviewer monitor every step). Does NOT use this skill directly. |
-| **Single bug, persistent team** | Provider team fix intent (Claude: `/rptc:fix-team "<bug>"`; Codex: `rptc-workflow` chat intent with delegation approval) | One complex bug where root cause is unclear (architect applies 5 Whys, reviewer tracks regression coverage). Does NOT use this skill directly. |
+| **Single feature, persistent team** | `/rptc:feat-team "<feature>"` | One complex feature benefiting from continuous cross-agent feedback (architect + reviewer monitor every step). Does NOT use this skill. |
+| **Single bug, persistent team** | `/rptc:fix-team "<bug>"` | One complex bug where root cause is unclear (architect applies 5 Whys, reviewer tracks regression coverage). Does NOT use this skill. |
 | **Multiple independent streams, parallel batch** | Invoke this skill directly (Skill tool or main agent judgment) | User describes multiple distinct features/fixes that don't share files and each justifies its own session (>10 min work). |
 
 When this skill activates, the main agent becomes the Team Lead. It manages
@@ -50,8 +50,8 @@ TEAMS ANALYSIS (this skill) — verify the work actually benefits from teams
 
 **Recursion Guard (MANDATORY)**:
 1. Check: Were you spawned as a teammate? (Your initial context includes a spawn
-   prompt from a Team Lead, you received your task via the provider coordination
-   channel, or your task description mentions file ownership boundaries.)
+   prompt from a Team Lead, you received your task via inbox, or your task
+   description mentions file ownership boundaries.)
 2. If YES → **STOP**. Do NOT run Teams Analysis. Do NOT spawn teammates. Do NOT
    create agent teams. Proceed directly to your assigned work. You are a teammate — only
    the Team Lead creates teams.
@@ -97,7 +97,7 @@ levels, but don't override their intent.
 
 | Signals | Route |
 |---------|-------|
-| No signals → | Stop here — the task doesn't meet teams criteria. Inform the user and suggest the standard RPTC workflow for the active provider (Claude slash command such as `/rptc:feat` or `/rptc:fix`; Codex chat intent through `rptc:rptc-workflow`) based on scope. |
+| No signals → | Stop here — the task doesn't meet teams criteria. Inform the user and suggest a standard command (`/rptc:feat`, `/rptc:fix`, `/rptc:feat-team`, or `/rptc:fix-team`) based on scope. |
 | Signal 1 (multiple independent streams) → | Teams mode, continue below |
 | Signal 2 only (debate for single task) → | Teams mode with debate pattern (see reference) |
 | Signal 3 (user requested) → | Teams mode, continue below |
@@ -130,7 +130,7 @@ low-confidence findings (80-89%) in their completion message for PM review.
 
 **When**: Tasks relate to the same feature area but implementation is
 parallelizable. The Team Lead should run Discovery and Architecture centrally
-(to ensure a coherent plan), then spawn teammates for provider-approved TDD execution
+(to ensure a coherent plan), then spawn teammates for parallel TDD execution
 of independent plan steps.
 
 Team Lead runs: Phase 1 (Discovery) + Phase 2 (Architecture) → user approves plan
@@ -155,7 +155,7 @@ specific debate prompts instead of (or in addition to) standard Phase 4 agents.
 |----------|-------|-----------|
 | 3 independent features | A | Fully separate streams |
 | 5 independent bug fixes | A | Each fix is self-contained |
-| Complex feature, 6+ plan steps, parallelizable | B | Coherent plan, provider-approved parallel execution |
+| Complex feature, 6+ plan steps, parallelizable | B | Coherent plan, parallel execution |
 | Cross-layer feature (FE + BE + DB) with shared API contract | B | Need unified architecture, separate impl |
 | Mystery bug, 3 theories | C | Debate pattern |
 | Security-focused deep review of completed work | C | Specialist review |
@@ -164,12 +164,12 @@ specific debate prompts instead of (or in addition to) standard Phase 4 agents.
 
 ## Team Creation Procedure
 
-After determining the autonomy level, create the team or provider-equivalent subagents.
+After determining the autonomy level, create the team.
 
 ### Step 1: Define File Ownership
 
 Before spawning any teammate, map out which files/directories each will own.
-This is non-negotiable — parallel agents have no file locking. Last write wins.
+This is non-negotiable — Agent Teams have no file locking. Last write wins.
 
 Read `references/team-lifecycle.md` § File Ownership for strategies and
 enforcement patterns.
@@ -196,7 +196,7 @@ Every spawn prompt includes:
 6. **Completion protocol**: What to report and how to signal done
 7. **Environment context** (always): Serena project name, repo root, and worktree path (if active)
 
-### Step 3: Create the Team or Subagents
+### Step 3: Create the Team
 
 Ask the user for confirmation before creating the team. Present:
 - Number of teammates and their assignments
@@ -204,22 +204,20 @@ Ask the user for confirmation before creating the team. Present:
 - File ownership map
 - Estimated cost impact (each teammate ≈ 5x tokens vs. a subagent)
 
-Provider mapping:
-- Claude: use natural language to request team creation:
+Use natural language to request team creation:
 ```
 Create an agent team called "[project]-[scope]" with [N] teammates:
 - [teammate-1-name]: [assignment summary]
 - [teammate-2-name]: [assignment summary]
 ```
-- Codex: use `spawn_agent` only after explicit user authorization for delegation/parallel agents and only when the tool is available. Otherwise keep the work in the main session. Assign disjoint ownership, tell workers they are not alone in the codebase, and do not rely on peer-to-peer inbox messaging.
 
 ### Step 4: Monitor and Coordinate
 
-While teammates or subagents work:
-- Track progress via the provider's task tracking primitive
-- Watch for provider-available messages or completion reports
-- If a teammate or subagent gets stuck or goes off-track, send corrective input using the provider's available mechanism
-- If teammates need to coordinate on shared boundaries, mediate from the main session
+While teammates work:
+- Track progress via the shared task list
+- Watch for inbox messages (especially low-confidence findings that need PM input)
+- If a teammate gets stuck or goes off-track, send corrective messages via inbox
+- If teammates need to coordinate on shared boundaries, mediate via inbox
 
 ### Step 5: Integration and Verification
 
@@ -254,7 +252,7 @@ Here's how this skill handles them:
 |------|-------------------|
 | Low/medium-confidence findings (80-89%) | Teammate includes in completion message → Team Lead collects all → presents batch to user |
 | Architectural concerns or scope questions | Teammate messages Team Lead → Lead escalates to user |
-| Blocked/stuck teammates | Team Lead detects via provider tracker or completion reports, escalates to user |
+| Blocked/stuck teammates | Team Lead detects via task list, escalates to user |
 
 The user never receives approval requests directly from teammates. The Team Lead
 is always the intermediary, keeping the PM experience organized.

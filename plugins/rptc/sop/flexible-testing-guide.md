@@ -4,9 +4,7 @@
 
 **Version**: 2.0.0 (Phase 5 Enhancement - Flexible Assertions)
 **Created**: 2025-01-25
-**Applies To**: RPTC feature workflow TDD phase (Claude: `/rptc:feat`; Codex: `rptc-workflow` feature intent), Claude architect-agent / Codex architect role, AI code review workflows
-
-> Provider note: `/rptc:*` references in this guide are Claude slash-command names. In Codex, invoke the same workflow intent through the `rptc-workflow` skill.
+**Applies To**: `/rptc:feat` workflow (TDD phase), architect-agent, AI code review workflows
 
 **Dependencies**:
 - `testing-guide.md` (foundational TDD principles)
@@ -65,7 +63,6 @@ def test_generate_user_summary():
 # Exact string matching rejects valid variation.
 # Developer wastes time investigating a "false positive" failure.
 ```
-
 ### The Tension: Rigor vs. Brittleness
 
 **Need for Rigor**: Tests must catch regressions, bugs, and quality degradation. Permissive tests provide false confidence.
@@ -722,7 +719,7 @@ for section in ["Introduction", "Methods", "Results"]:
 
 #### Integration with RPTC Workflow
 
-When planning in the feature workflow (Claude: `/rptc:feat` Phase 2; Codex: `rptc-workflow` feature intent with `update_plan`):
+When planning in `/rptc:feat` (Phase 2: Architecture):
 ```markdown
 ## Test Strategy for AI Comment Generation
 
@@ -732,7 +729,7 @@ When planning in the feature workflow (Claude: `/rptc:feat` Phase 2; Codex: `rpt
 **Baseline**: Exact test validates function signature presence in comment
 ```
 
-When implementing in the feature workflow (Claude: `/rptc:feat` Phase 3; Codex: `rptc-workflow` feature intent):
+When implementing in `/rptc:feat` (Phase 3: TDD):
 ```python
 def test_ai_comment_exact_baseline():
     """Baseline: Comment must reference function name."""
@@ -1343,7 +1340,7 @@ def test_password_hashing_algorithm():
 
 #### Integration with RPTC Workflow
 
-When planning in the feature workflow (Claude: `/rptc:feat` Phase 2; Codex: `rptc-workflow` feature intent with `update_plan`):
+When planning in `/rptc:feat` (Phase 2: Architecture):
 ```markdown
 ## Test Strategy for AI-Generated Data Processor
 
@@ -1360,7 +1357,7 @@ When planning in the feature workflow (Claude: `/rptc:feat` Phase 2; Codex: `rpt
 **Baseline**: Exact test for core transformation logic with known input/output
 ```
 
-When implementing in the feature workflow (Claude: `/rptc:feat` Phase 3; Codex: `rptc-workflow` feature intent):
+When implementing in `/rptc:feat` (Phase 3: TDD):
 ```python
 def test_data_processor_exact_baseline():
     """Baseline: Known input produces known output."""
@@ -1865,7 +1862,7 @@ def test_security_decision_exact():
 
 #### Integration with RPTC Workflow
 
-When planning in the feature workflow (Claude: `/rptc:feat` Phase 2; Codex: `rptc-workflow` feature intent with `update_plan`):
+When planning in `/rptc:feat` (Phase 2: Architecture):
 ```markdown
 ## Test Strategy for AI Code Documentation
 
@@ -1876,7 +1873,7 @@ When planning in the feature workflow (Claude: `/rptc:feat` Phase 2; Codex: `rpt
 **Baseline**: Exact test validates factual claims (metrics, numbers) separately
 ```
 
-When implementing in the feature workflow (Claude: `/rptc:feat` Phase 3; Codex: `rptc-workflow` feature intent):
+When implementing in `/rptc:feat` (Phase 3: TDD):
 ```python
 def test_documentation_facts_exact():
     """Baseline: Factual claims must be exact."""
@@ -2385,7 +2382,7 @@ def test_output():
 
 #### Integration with RPTC Workflow
 
-When planning in the feature workflow (Claude: `/rptc:feat` Phase 2; Codex: `rptc-workflow` feature intent with `update_plan`):
+When planning in `/rptc:feat` (Phase 2: Architecture):
 ```markdown
 ## Test Strategy for AI Tag Generation
 
@@ -2396,7 +2393,7 @@ When planning in the feature workflow (Claude: `/rptc:feat` Phase 2; Codex: `rpt
 **Baseline**: Exact test validates tag count and no duplicates
 ```
 
-When implementing in the feature workflow (Claude: `/rptc:feat` Phase 3; Codex: `rptc-workflow` feature intent):
+When implementing in `/rptc:feat` (Phase 3: TDD):
 ```python
 def test_tag_generation_exact_baseline():
     """Baseline: Tag count and uniqueness exact."""
@@ -3271,7 +3268,7 @@ proptest! {
 
 This section documents how flexible assertions integrate seamlessly with RPTC's Research → Plan → TDD → Commit workflow.
 
-### 5.1 Planning Phase Integration (Claude `/rptc:feat` Phase 2; Codex feature chat intent)
+### 5.1 Planning Phase Integration (`/rptc:feat` Phase 2)
 
 When creating implementation plans that involve AI-generated outputs or non-deterministic code, specify the testing strategy upfront.
 
@@ -3297,9 +3294,7 @@ During planning, flag features requiring flexible assertions if they involve:
 
 #### Plan Documentation Template
 
-Add to the provider planning context. Claude uses `~/.claude/plans/feature-name.md`;
-Codex uses `update_plan` and chat approval unless the user asks for a project
-plan file.
+Add to the active RPTC plan file:
 
 ```markdown
 ## Test Strategy
@@ -3364,7 +3359,7 @@ plan file.
 
 ---
 
-### 5.2 TDD Phase Integration (Claude `/rptc:feat` Phase 3; Codex feature chat intent)
+### 5.2 TDD Phase Integration (`/rptc:feat` Phase 3)
 
 Flexible assertions follow the standard RED-GREEN-REFACTOR cycle with additional documentation requirements.
 
@@ -3383,7 +3378,7 @@ def test_feature_with_flexible_assertion():
     - Failure Action: [What to do if test becomes flaky]
       Example: "Review prompt stability, check if similarity drops below 0.80"
 
-    Plan Reference: approved chat plan / update_plan item, or project plan file#test-strategy when explicitly requested
+    Plan Reference: active RPTC plan#test-strategy
     """
     # Arrange
     input_data = create_test_input()
@@ -3453,11 +3448,11 @@ pytest -v --tb=short test_flexible_assertions.py
 
 ### 5.3 Quality Gate Integration
 
-RPTC's code review and security methodologies provide specialized guidance on flexible assertions. Claude may use command-defined review agents; Codex performs review in the main context unless explicit delegation approval exists.
+RPTC's code review and security agents provide specialized guidance on flexible assertions.
 
 #### Code Review Checklist
 
-When reviewing code with flexible assertions, the code review role checks:
+When reviewing code with flexible assertions, the Code Review Agent checks:
 
 - [ ] **Is flexibility justified?**
   - Could prompt engineering eliminate variation? (If yes, improve prompt first)
@@ -3489,7 +3484,7 @@ When reviewing code with flexible assertions, the code review role checks:
 
 #### Security Review Checklist
 
-When reviewing code with flexible assertions, the security role verifies:
+When reviewing code with flexible assertions, the Security Agent verifies:
 
 - [ ] **No security-critical flexible assertions**
   - Authentication logic: Exact assertions only
@@ -3518,14 +3513,14 @@ When reviewing code with flexible assertions, the security role verifies:
 
 ---
 
-### 5.4 Commit Phase Documentation (Claude `/rptc:commit`; Codex commit chat intent)
+### 5.4 Commit Phase Documentation (`/rptc:commit`)
 
 Before committing code with flexible assertions, ensure documentation completeness.
 
 #### Pre-Commit Checklist
 
 - [ ] **Plan documentation updated**
-  - Approved chat plan / update_plan item describes flexible assertion strategy; use a project plan file only when explicitly requested
+  - Active RPTC plan file describes flexible assertion strategy
   - Rationale for flexibility documented in plan
   - Threshold selection explained
 
@@ -3541,7 +3536,7 @@ Before committing code with flexible assertions, ensure documentation completene
 
 - [ ] **Code review artifacts prepared**
   - Flexible assertions highlighted in PR description
-  - Code review and security findings addressed
+  - Efficiency and security review completed
   - Test output showing threshold margins included
 
 #### Commit Message Template
@@ -3562,7 +3557,7 @@ Rationale for flexibility:
 - Security review: ✅ Not security-critical
 - Efficiency review: ✅ Flexibility justified, threshold appropriate
 
-Plan reference: approved chat plan / update_plan item, or project plan file#test-strategy when explicitly requested
+Plan reference: active RPTC plan#test-strategy
 ```
 
 ---
@@ -3574,12 +3569,12 @@ Plan reference: approved chat plan / update_plan item, or project plan file#test
 │ RPTC WORKFLOW WITH FLEXIBLE ASSERTIONS                          │
 └─────────────────────────────────────────────────────────────────┘
 
-Feature workflow (Claude /rptc:feat; Codex feature chat intent) - Phase 1: Discovery
+/rptc:feat (Phase 1: Discovery)
   ↓
   Identify AI/non-deterministic components
   Document variation characteristics
   ↓
-Feature workflow - Phase 2: Architecture
+/rptc:feat (Phase 2: Architecture)
   ↓
   Specify flexible assertion needs in plan
   ├─ Variation type identified
@@ -3588,7 +3583,7 @@ Feature workflow - Phase 2: Architecture
   ├─ Safety checks completed
   └─ Baseline exact tests planned
   ↓
-Feature workflow - Phase 3: TDD
+/rptc:feat (Phase 3: TDD)
   ↓
   RED: Write flexible test with rationale
   │    └─ Includes: why, pattern, threshold, baseline ref, failure action
@@ -3612,7 +3607,7 @@ Feature workflow - Phase 3: TDD
      ├─ Compliance requirements exact?
      └─ Error handling strict?
   ↓
-Commit workflow (Claude /rptc:commit; Codex commit chat intent)
+/rptc:commit
   ↓
   Documentation complete:
   ├─ Plan updated with strategy
@@ -3628,10 +3623,10 @@ Commit workflow (Claude /rptc:commit; Codex commit chat intent)
 ### 5.6 RPTC Command References
 
 **See Also**:
-- **`/rptc:feat`** (`claude/commands/feat.md`; Codex: `rptc-workflow` skill) - Unified workflow: Discovery → Plan → TDD → Verification
-- **`/rptc:commit`** (`claude/commands/commit.md`; Codex: `rptc-workflow` skill) - Documentation verification before commit
-- **Code Review Agent** (`claude/agents/code-review-agent.md` and `agents/code-review-agent.md`) - Quality review of flexible assertions
-- **Security Agent** (`claude/agents/security-agent.md` and `agents/security-agent.md`) - Security validation of test strategies
+- **`/rptc:feat`** (`commands/feat.md`) - Unified workflow: Discovery → Plan → TDD → Verification
+- **`/rptc:commit`** (`commands/commit.md`) - Documentation verification before commit
+- **Code Review Agent** (`agents/code-review-agent.md`) - Quality review of flexible assertions
+- **Security Agent** (`agents/security-agent.md`) - Security validation of test strategies
 
 **SOPs**:
 - **`testing-guide.md`** - Foundational TDD principles, test coverage requirements
@@ -4240,7 +4235,7 @@ Quick reference table for choosing the right flexible assertion pattern:
 
 Use this checklist when adding flexible assertions to your RPTC workflow:
 
-#### Planning Phase (Claude `/rptc:feat` Phase 2; Codex feature chat intent)
+#### Planning Phase (`/rptc:feat` Phase 2)
 
 - [ ] **Identify** non-deterministic outputs in feature requirements
 - [ ] **Document** variation type (semantic, behavioral, reasoning, multiple paths)
@@ -4248,9 +4243,9 @@ Use this checklist when adding flexible assertions to your RPTC workflow:
 - [ ] **Define** explicit threshold/acceptance criteria
 - [ ] **Complete** safety check (not security/compliance/contract-critical)
 - [ ] **Plan** at least one baseline exact test for critical path
-- [ ] **Add** flexible assertion note to the approved chat plan / `update_plan` item, or to a project plan file when explicitly requested
+- [ ] **Add** flexible assertion section to the active RPTC plan file
 
-#### TDD Phase (Claude `/rptc:feat` Phase 3; Codex feature chat intent)
+#### TDD Phase (`/rptc:feat` Phase 3)
 
 - [ ] **RED**: Write flexible test with complete rationale docstring
   - [ ] Include "why" (reason for flexibility)
@@ -4279,7 +4274,7 @@ Use this checklist when adding flexible assertions to your RPTC workflow:
   - [ ] Compliance requirements exact
   - [ ] Error handling strict where needed
 
-#### Commit Phase (Claude `/rptc:commit`; Codex commit chat intent)
+#### Commit Phase (`/rptc:commit`)
 
 - [ ] **Plan** updated with flexible assertion strategy
 - [ ] **Tests** include rationale in docstrings

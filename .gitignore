@@ -4,8 +4,8 @@ legacy
 PLUGIN_CONVERSION_STATUS.md
 .claude
 CLAUDE.md
+AGENTS.md
 README-Old.md
-/scripts/
 .version-backup-*/
 .rptc
 .serena

@@ -2,16 +2,9 @@
 
 Quick reference for common notification scenarios.
 
-## Using Environment Variable or Settings.json (Recommended)
+## Using Settings.json (Recommended)
 
-Provider-neutral option:
-
-```bash
-export DISCORD_WEBHOOK="https://discord.com/api/webhooks/..."
-WEBHOOK_URL="$DISCORD_WEBHOOK"
-```
-
-If `./.claude/settings.json` or `./.codex/settings.json` contains your webhook URL:
+If `/home/claude/settings.json` contains your webhook URL:
 
 ```json
 {
@@ -21,8 +14,7 @@ If `./.claude/settings.json` or `./.codex/settings.json` contains your webhook U
 
 Read it in bash commands:
 ```bash
-SETTINGS_FILE="./.codex/settings.json"  # Claude: ./.claude/settings.json
-WEBHOOK_URL=$(grep -o '"discord_webhook_url"[[:space:]]*:[[:space:]]*"[^"]*"' "$SETTINGS_FILE" | cut -d'"' -f4)
+WEBHOOK_URL=$(grep -o '"discord_webhook_url"[[:space:]]*:[[:space:]]*"[^"]*"' /home/claude/settings.json | cut -d'"' -f4)
 ```
 
 Then use `$WEBHOOK_URL` in all commands below.
@@ -43,7 +35,7 @@ curl -X POST "$WEBHOOK_URL" \
 curl -X POST "WEBHOOK_URL" \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "RPTC",
+    "username": "Claude",
     "embeds": [{
       "description": "Your message here",
       "color": 3447003,
@@ -57,25 +49,25 @@ curl -X POST "WEBHOOK_URL" \
 ### Task Completed (Green)
 
 ```bash
-curl -X POST "$WEBHOOK_URL" -H "Content-Type: application/json" -d '{"username":"RPTC","embeds":[{"description":"✅ Task completed successfully","color":65280,"timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"'"}]}'
+curl -X POST "$WEBHOOK_URL" -H "Content-Type: application/json" -d '{"username":"Claude","embeds":[{"description":"✅ Task completed successfully","color":65280,"timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"'"}]}'
 ```
 
 ### Task Failed (Red)
 
 ```bash
-curl -X POST "$WEBHOOK_URL" -H "Content-Type: application/json" -d '{"username":"RPTC","embeds":[{"description":"❌ Task failed","color":16711680,"timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"'"}]}'
+curl -X POST "$WEBHOOK_URL" -H "Content-Type: application/json" -d '{"username":"Claude","embeds":[{"description":"❌ Task failed","color":16711680,"timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"'"}]}'
 ```
 
 ### Processing Complete (Blue)
 
 ```bash
-curl -X POST "$WEBHOOK_URL" -H "Content-Type: application/json" -d '{"username":"RPTC","embeds":[{"description":"🔄 Processing complete","color":3447003,"timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"'"}]}'
+curl -X POST "$WEBHOOK_URL" -H "Content-Type: application/json" -d '{"username":"Claude","embeds":[{"description":"🔄 Processing complete","color":3447003,"timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"'"}]}'
 ```
 
 ### Warning (Yellow)
 
 ```bash
-curl -X POST "$WEBHOOK_URL" -H "Content-Type: application/json" -d '{"username":"RPTC","embeds":[{"description":"⚠️ Warning: Check results","color":16776960,"timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"'"}]}'
+curl -X POST "$WEBHOOK_URL" -H "Content-Type: application/json" -d '{"username":"Claude","embeds":[{"description":"⚠️ Warning: Check results","color":16776960,"timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"'"}]}'
 ```
 
 ## Color Reference
@@ -95,7 +87,7 @@ STATUS="completed"
 DETAILS="Processed 15 files"
 
 curl -X POST "$WEBHOOK_URL" -H "Content-Type: application/json" -d '{
-  "username": "RPTC",
+  "username": "Claude",
   "embeds": [{
     "title": "'"$TASK"'",
     "description": "Status: '"$STATUS"'\n'"$DETAILS"'",
@@ -109,7 +101,7 @@ curl -X POST "$WEBHOOK_URL" -H "Content-Type: application/json" -d '{
 
 ```bash
 curl -X POST "$WEBHOOK_URL" -H "Content-Type: application/json" -d '{
-  "username": "RPTC",
+  "username": "Claude",
   "embeds": [{
     "title": "Task Summary",
     "description": "Operation completed",
@@ -130,7 +122,7 @@ Use `\n` for line breaks:
 
 ```bash
 curl -X POST "$WEBHOOK_URL" -H "Content-Type: application/json" -d '{
-  "username": "RPTC",
+  "username": "Claude",
   "embeds": [{
     "description": "✅ Build completed\n\n**Summary:**\n- Tests passed: 45/45\n- Build time: 3m 12s\n- Branch: main",
     "color": 65280,
@@ -169,22 +161,20 @@ curl -X POST "$WEBHOOK_URL" ...
 
 ## Configuration Patterns
 
-### Recommended: Environment Variable or Settings.json
+### Recommended: Settings.json
 
-For provider-neutral use, prefer `DISCORD_WEBHOOK`. For provider-local settings, use `./.claude/settings.json` in Claude or `./.codex/settings.json` in Codex:
+Store webhook URL in `/home/claude/settings.json`:
 
 ```bash
-# Create settings file (Codex shown; Claude uses ./.claude/settings.json)
-SETTINGS_DIR="./.codex"
-mkdir -p "$SETTINGS_DIR"
-cat > "$SETTINGS_DIR/settings.json" << 'EOF'
+# Create settings file
+cat > /home/claude/settings.json << 'EOF'
 {
   "discord_webhook_url": "https://discord.com/api/webhooks/..."
 }
 EOF
 
 # Read and use
-WEBHOOK_URL=$(grep -o '"discord_webhook_url"[[:space:]]*:[[:space:]]*"[^"]*"' "$SETTINGS_DIR/settings.json" | cut -d'"' -f4)
+WEBHOOK_URL=$(grep -o '"discord_webhook_url"[[:space:]]*:[[:space:]]*"[^"]*"' /home/claude/settings.json | cut -d'"' -f4)
 curl -X POST "$WEBHOOK_URL" -H "Content-Type: application/json" \
   -d '{"content": "Message"}'
 ```

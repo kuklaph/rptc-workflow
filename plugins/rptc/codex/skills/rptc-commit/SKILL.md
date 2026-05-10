@@ -1,0 +1,120 @@
+---
+name: rptc-commit
+description: Verify and ship with quality gates. Use when the user asks for /rptc:commit or the equivalent RPTC Codex workflow intent.
+---
+
+# /rptc:commit
+
+Verify quality gates and ship. Final step in the workflow.
+
+**Arguments**:
+- None: `/rptc:commit` - Commit only
+- With PR: `/rptc:commit pr` - Commit and create pull request
+
+## Skills Usage Guide
+
+**`writing-clearly-and-concisely`** - Apply Strunk's Elements of Style to commit prose:
+
+| When | Apply To |
+|------|----------|
+| Phase 3 | Commit message subject and body |
+| Phase 4 | PR title and description |
+
+**Key rules**: Active voice, positive form, definite language, omit needless words.
+
+## Phase 2: Review Changes
+
+**Goal**: Understand what's being committed.
+
+**Actions**:
+1. **Check git status**:
+   ```bash
+   git status
+   git diff --stat
+   ```
+
+2. **Review staged changes**:
+   ```bash
+   git diff --cached
+   ```
+
+3. **Verify no sensitive files**:
+   - No `.env` files
+   - No credentials or secrets
+   - No debug code (console.log, debugger)
+
+## Phase 4: Optional PR Creation
+
+**Goal**: Create pull request if requested.
+
+**Trigger**: User ran `/rptc:commit pr`
+
+**Actions**:
+1. **Push to remote**:
+   ```bash
+   git push -u origin HEAD
+   ```
+
+2. **Create PR**:
+   ```bash
+   gh pr create --title "<type>: <description>" --body "$(cat <<'EOF'
+   ## Summary
+   <what this PR does>
+
+   ## Changes
+   - <change 1>
+   - <change 2>
+
+   ## Testing
+   - [ ] Tests pass
+   - [ ] Coverage maintained
+
+   ## Notes
+   <any additional context>
+   EOF
+   )"
+   ```
+
+3. **Return PR URL** to user.
+
+## Error Handling
+
+### Tests Fail
+```
+❌ Tests failed. Cannot commit.
+
+Failing tests:
+- [test name]: [error]
+
+Fix the failing tests before committing.
+```
+
+### Coverage Below Target
+```
+⚠️ Coverage at X% (target: 80%)
+
+Consider adding tests for:
+- [uncovered file/function]
+
+Proceeding with commit (coverage is a warning, not blocker).
+```
+
+### Secrets Detected
+```
+❌ Potential secrets detected. Cannot commit.
+
+Files:
+- [file with secret]
+
+Remove secrets and use environment variables.
+```
+
+---
+
+## Key Principles
+
+1. **Tests must pass**: Never commit failing tests
+2. **No secrets**: Block if credentials detected
+3. **Conventional commits**: Standardized format
+4. **PR optional**: Only create if explicitly requested
+5. **Fast feedback**: Fail fast on blockers

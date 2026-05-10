@@ -1,11 +1,11 @@
 ---
 name: tdd-methodology
-description: TDD execution methodology for main context. Provides surgical coding approach, context discovery, and strict RED-GREEN-REFACTOR enforcement. Loaded by Claude /rptc:feat or /rptc:fix, and by Codex rptc-workflow, for main context code changes.
+description: TDD execution methodology for main context. Provides surgical coding approach, context discovery, and strict RED-GREEN-REFACTOR enforcement. Loaded by /rptc:feat and /rptc:fix for main context code changes.
 ---
 
 # TDD Methodology Skill
 
-**When to use**: This skill is loaded by Claude `/rptc:feat`/`/rptc:fix` or by the Codex `rptc-workflow` adapter for main context code changes. Apply its methodology whenever writing or modifying code directly (not delegating to `rptc:tdd-agent`). This ensures the same quality standards apply whether work is done by a sub-agent or main context.
+**When to use**: This skill is loaded by `/rptc:feat` and `/rptc:fix` for main context code changes. Apply its methodology whenever writing or modifying code directly (not delegating to `rptc:tdd-agent`). This ensures the same quality standards apply whether work is done by a sub-agent or main context.
 
 ---
 
@@ -72,8 +72,8 @@ description: TDD execution methodology for main context. Provides surgical codin
 
 **MUST consult** relevant SOPs:
 
-1. User/project provider instructions (for example `CLAUDE.md`, `AGENTS.md`, or project rules)
-2. Plugin SOPs from the installed package (Claude: `${CLAUDE_PLUGIN_ROOT}/sop/[name].md`; Codex: plugin `sop/` files when available, otherwise repository `plugins/rptc/sop/`)
+1. User: `~/.claude/global/sop/[name].md` (user overrides)
+2. Plugin: `${CLAUDE_PLUGIN_ROOT}/sop/[name].md` (defaults)
 
 ### Required SOPs to Reference
 
@@ -133,8 +133,8 @@ description: TDD execution methodology for main context. Provides surgical codin
 When working in main context, constraints may come from:
 - User instructions in the conversation
 - Plan files (if referenced)
-- Provider/project configuration (`.claude/settings.json`, `AGENTS.md`, or equivalent)
-- Project guidelines (`CLAUDE.md`, `AGENTS.md`, or project rules)
+- Project configuration (`.claude/settings.json`)
+- CLAUDE.md project guidelines
 
 ### What Are Implementation Constraints?
 
@@ -294,7 +294,7 @@ VERIFY → Run affected tests, check coverage, no regressions
    - Include tests that import or reference changed modules
    - All affected tests must pass
    - If any existing tests fail, fix before proceeding
-   - Run ONLY affected tests — do NOT run the full test suite (full suite runs are reserved for the active provider's RPTC commit workflow)
+   - Run ONLY affected tests — do NOT run the full test suite (full suite runs are reserved for `/rptc:commit`)
 
 2. **Check test coverage**:
    - Overall coverage >= 80% (or project target)

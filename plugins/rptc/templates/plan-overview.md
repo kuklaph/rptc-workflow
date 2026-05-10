@@ -2,8 +2,6 @@
 
 ## Status Tracking
 
-Codex MUST track active workflow steps with `update_plan`; markdown checkboxes are artifact status only. Claude may use native plan and task tracking.
-
 - [x] Planned
 - [ ] In Progress (TDD Phase)
 - [ ] Code Review
@@ -31,17 +29,14 @@ Codex MUST track active workflow steps with `update_plan`; markdown checkboxes a
 
 **Run before any implementation step.** After plan approval, context may be cleared.
 
-Re-invoke the originating RPTC command to restore full context:
+Re-invoke the originating RPTC workflow to restore full context:
 
 - Features: `/rptc:feat Plan is approved, continue to implementation`
 - Bug fixes: `/rptc:fix Plan is approved, continue to implementation`
 
-In Codex, use the same intent in chat instead of a custom slash command, for
-example: `Use RPTC to continue the approved feature plan into implementation`.
-
 This handles all re-initialization automatically: skill loading, Serena activation, task tracking, and routing to Phase 3.
 
-**Do not manually load skills or rebuild tasks** — the Claude command or Codex chat intent handles everything.
+**Do not manually load skills or rebuild tasks** — the workflow invocation handles everything.
 
 ---
 
@@ -237,7 +232,7 @@ This handles all re-initialization automatically: skill loading, Serena activati
 
 **During Implementation:**
 
-1. **Small Adjustments:** Update plan inline, update provider-native task tracking, and note in "Deviations" section below
+1. **Small Adjustments:** Update plan inline, note in "Deviations" section below
 2. **Major Changes:** Request plan modification before continuing
 3. **Blockers:** Document in "Implementation Notes" section below
 
@@ -270,10 +265,10 @@ This handles all re-initialization automatically: skill loading, Serena activati
 
 1. **For PM:** Review and approve plan
 2. **For Developer:** Continue with TDD implementation phase
-3. **Quality Gates:** Code Review + Security checks (report-only; delegated or parallel execution only when provider policy and user approval allow it)
+3. **Quality Gates:** Code Review Agent → Security Agent (parallel execution after TDD)
 4. **Completion:** Verify all acceptance criteria met
 
-**Next:** Continue through the active provider's RPTC feature workflow after plan approval
+**Next:** TDD implementation begins automatically after plan approval
 
 ---
 

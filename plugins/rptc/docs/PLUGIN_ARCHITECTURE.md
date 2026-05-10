@@ -6,83 +6,82 @@
 
 ## Plugin Distribution
 
-RPTC is provider-agnostic at the workflow/methodology layer and provider-specific only at the manifest/adapter layer.
-
-The installable package is `plugins/rptc`. It is self-contained and includes both provider manifests:
-
-- `plugins/rptc/.claude-plugin/plugin.json`
-- `plugins/rptc/.codex-plugin/plugin.json`
-- `plugins/rptc/agents/`
-- `plugins/rptc/claude/commands/`
-- `plugins/rptc/claude/agents/`
-- `plugins/rptc/skills/`
-- `plugins/rptc/sop/`
-- `plugins/rptc/templates/`
-- `plugins/rptc/docs/`
-
-`plugins/rptc` is the editable source and install package. There is no generated copy and no sync step.
-
-### Claude Distribution
-
-When users install the Claude plugin:
+When users install the plugin:
 
 ```bash
 /plugin marketplace add https://github.com/kuklaph/rptc-workflow
 /plugin install rptc
 ```
 
-Claude's marketplace entry points to `./plugins/rptc`, so users receive that package in Claude's plugin cache. User scope is the default install scope, so the plugin is available across projects.
+They receive the entire repository cloned to their Claude plugin directory.
 
-### Codex Distribution
-
-Codex uses the same package under `plugins/rptc`:
+### Plugin Structure
 
 ```text
-.agents/plugins/marketplace.json
-plugins/rptc/.claude-plugin/plugin.json
-plugins/rptc/.codex-plugin/plugin.json
-plugins/rptc/agents/
-plugins/rptc/skills/
-plugins/rptc/sop/
-plugins/rptc/templates/
-```
-
-The Codex marketplace entry points to `./plugins/rptc`. The package keeps Claude-only files under `claude/` and provides Codex role-definition references under the plugin root `agents/`. The `rptc-workflow` skill is the Codex-native entrypoint and maps Claude slash-command intents to Codex-native primitives such as `update_plan`, direct user questions, available skill loading, and `spawn_agent` only when the user explicitly permits delegation.
-
-For global Codex use, place the same package shape at the Codex home level:
-
-```text
-~/.agents/plugins/marketplace.json
-~/.codex/plugins/rptc/.codex-plugin/plugin.json
-```
-
-Point the personal marketplace source path at `./.codex/plugins/rptc`, relative to the marketplace root. In this repository, the Codex marketplace source remains `./plugins/rptc`.
-
-### Repository Structure
-
-```text
-rptc-workflow/
+rptc-workflow/                      # the RPTC plugin root
 ├── .claude-plugin/
-│   └── marketplace.json            # Claude marketplace listing, source ./plugins/rptc
+│   └── plugin.json                 # Claude metadata; commands path and explicit agent file list
+├── .codex-plugin/
+│   └── plugin.json                 # Codex metadata; skills path points to ./codex/skills
 │
-├── .agents/plugins/
-│   └── marketplace.json            # Codex marketplace listing, source ./plugins/rptc
+├── claude/                         # Claude adapter
+│   ├── commands/                   # Claude slash commands
+│   ├── agents/                     # Claude specialist agents
+│   └── sop/
+│       └── todowrite-guide.md      # Claude-specific TodoWrite SOP
 │
-├── plugins/rptc/                   # Shared install package for Claude and Codex
-│   ├── .claude-plugin/plugin.json  # Claude plugin metadata
-│   ├── .codex-plugin/plugin.json   # Codex plugin metadata
-│   ├── claude/                     # Claude-only plugin surfaces
-│   │   ├── commands/               # Claude slash commands
-│   │   └── agents/                 # Claude specialist agents
-│   ├── agents/                     # Codex role-definition references
-│   ├── skills/                     # Shared skills, including Codex adapter
-│   ├── sop/                        # SOPs
-│   ├── templates/                  # Templates
-│   ├── docs/                       # Documentation
-│   ├── README.md
-│   └── LICENSE
+├── codex/                          # Codex adapter
+│   ├── skills/                     # Codex skills and command-equivalent skills
+│   ├── agents/                     # Packaged agent TOMLs, installed by rptc-init
+│   └── sop/
+│       └── update-plan-guide.md    # Codex-specific task tracking SOP
 │
-├── README.md                       # Repository overview
+├── sop/                            # Shared Standard Operating Procedures (9 SOPs)
+│   ├── architecture-patterns.md
+│   ├── flexible-testing-guide.md
+│   ├── frontend-guidelines.md
+│   ├── git-and-deployment.md
+│   ├── languages-and-style.md
+│   ├── post-tdd-refactoring.md
+│   ├── security-and-performance.md
+│   ├── test-sync-guide.md
+│   └── testing-guide.md
+│
+├── skills/                         # Skills (18 skills)
+│   ├── agent-teams/
+│   ├── architect-methodology/
+│   ├── brainstorming/
+│   ├── code-review-methodology/
+│   ├── core-principles/
+│   ├── discord-notify/
+│   ├── docs-methodology/
+│   ├── frontend-design/
+│   ├── html-report-generator/
+│   ├── research-methodology/
+│   ├── security-methodology/
+│   ├── structure-methodology/
+│   ├── tdd-agent-methodology/
+│   ├── tdd-methodology/
+│   ├── test-fixer-methodology/
+│   ├── test-sync-methodology/
+│   ├── tool-guide/
+│   └── writing-clearly-and-concisely/
+│
+├── templates/                      # Document templates
+│   ├── ai-sop-enhancement-pattern.md
+│   ├── plan-overview.md
+│   ├── plan-step.md
+│   ├── research-codebase.md
+│   ├── research-hybrid.md
+│   └── research-web.md
+│
+├── docs/                           # Documentation
+│   ├── PLUGIN_ARCHITECTURE.md      # This file
+│   ├── PROJECT_TEMPLATE.md         # User project template
+│   ├── RPTC_WORKFLOW_GUIDE.md      # Complete workflow guide
+│   └── AI_CODING_BEST_PRACTICES.md # AI coding guidelines
+│
+├── README.md                       # Main documentation
 ├── CONTRIBUTING.md                 # Contribution guidelines
 ├── CHANGELOG.md                    # Version history
 └── LICENSE                         # MIT License
@@ -105,7 +104,7 @@ rptc-workflow/
 
 ---
 
-## Claude Installation Flow
+## Installation Flow
 
 ### Step 1: User Installs Plugin
 
@@ -117,55 +116,27 @@ rptc-workflow/
 **What happens:**
 
 - Claude clones repo to plugin directory
-- Claude installs `plugins/rptc` into its plugin cache
-- That package becomes `${CLAUDE_PLUGIN_ROOT}`
-- All 11 commands registered from `claude/commands`
-- Claude agents available for delegation from `claude/agents`
+- This becomes `the RPTC plugin root`
+- All 11 commands registered and available
+- Agents available for delegation
 - SOPs available for agent reference
-
-## Codex Installation Flow
-
-Codex uses the same package through the Codex marketplace entry:
-
-```text
-.agents/plugins/marketplace.json
-plugins/rptc/.codex-plugin/plugin.json
-plugins/rptc/skills/
-plugins/rptc/agents/
-```
-
-**What happens:**
-
-- Codex reads `.agents/plugins/marketplace.json`
-- The marketplace points to `./plugins/rptc`
-- Codex loads `.codex-plugin/plugin.json`
-- The `rptc-workflow` skill becomes the Codex-native entrypoint
-- `plugins/rptc/agents/` stays packaged as role-definition references for approved delegation, not as a top-level Codex plugin manifest surface
 
 ### Step 2: User Starts Building
 
-Claude slash command:
-
 ```bash
 /rptc:feat "add user authentication"
-```
-
-Codex chat intent:
-
-```text
-Use RPTC to implement "add user authentication".
 ```
 
 **What happens:**
 
 - `/rptc:feat` handles entire workflow
 - Phase 1: Discovery (codebase exploration)
-- Phase 2: Architecture (provider planning context: Claude `~/.claude/plans/`; Codex `update_plan`/chat approval)
+- Phase 2: Architecture (plan creation in the active RPTC plan location for the current provider)
 - Phase 3: TDD Implementation
 - Phase 4: Quality Verification
 - Phase 5: Complete
 
-**No workspace initialization required.** RPTC uses the provider's native planning mechanism.
+**No workspace initialization required.** RPTC uses the provider planning mode.
 
 ---
 
@@ -176,13 +147,13 @@ RPTC requires almost nothing in user projects:
 ```text
 user-project/
 ├── docs/research/               # Optional: saved research documents
-├── CLAUDE.md or AGENTS.md       # Optional: provider project context
+├── CLAUDE.md or AGENTS.md       # Optional: project context (recommended)
 └── [your project files]
 ```
 
-**Plans are stored in:** Claude uses `~/.claude/plans/`; Codex tracks plans in-session with `update_plan` unless the user asks for a project plan file.
+**Plans are stored in:** the active RPTC plan location for the current provider.
 
-**No `.rptc/` directory needed.** No provider settings file is required.
+**No `.rptc/` directory needed.** No provider settings file is required for normal use.
 
 ---
 
@@ -196,33 +167,30 @@ The primary command handles the complete workflow:
 /rptc:feat "description"
     ↓
 Phase 1: Discovery
-    → Explores codebase; Claude may launch 2-3 parallel exploration agents
-    → Codex stays in main context unless explicit parallel-agent approval exists
+    → Launches 2-3 parallel exploration agents
     → Uses rptc:research-agent with code-explorer methodology
     ↓
 Branch Strategy
     → Current branch or new git worktree
     ↓
 Phase 2: Architecture
-    → Enters provider planning context
-    → Produces 3 planning perspectives (Minimal, Clean, Pragmatic)
-    → Claude may parallelize via agents; Codex stays in main context unless approved
+    → Enters the provider planning mode
+    → Launches 3 parallel plan agents (Minimal, Clean, Pragmatic)
     → User selects approach
-    → Plan tracked in provider-native form
+    → Plan written to the active RPTC plan location for the current provider
     ↓
 Phase 3: Implementation
     → Route A (non-code): Main context executes directly
     → Route B (code): TDD with smart batching via rptc:tdd-agent
     ↓
 Phase 4: Quality Verification (Report-Only)
-    → Run code-review + security + docs roles
-    → Claude may use command-defined agents; Codex delegates or parallelizes only with provider policy and explicit user approval
+    → Parallel: code-review-agent + security-agent + docs-agent
     → Agents report findings only (no auto-fix)
-    → Main context handles fixes via provider task tracking
+    → Main context handles fixes via provider task tracker
     ↓
 Phase 5: Complete
     → Summary of changes
-    → Ready for the active provider's RPTC commit workflow
+    → Ready for /rptc:commit
 ```
 
 ### Supporting Commands
@@ -233,19 +201,17 @@ Phase 5: Complete
 | `/rptc:commit [pr]` | Verify and ship | After completing implementation |
 | `/rptc:verify [path]` | Run verification agents on demand | After any code change |
 | `/rptc:verify-loop [path]` | Run verification in a convergence loop until 0 findings | After implementation, when you want a fully clean result |
-| `/rptc:feat-team "description"` | Team-based feature development with 4 persistent roles | Complex features needing continuous review |
-| `/rptc:fix-team "bug description"` | Team-based bug fixing with 4 persistent roles, root cause guardianship, regression focus | Complex bugs, unclear root cause, cross-cutting regressions |
+| `/rptc:feat-team "description"` | Claude-only team-based feature development with 4 persistent agents | Complex features needing continuous review |
+| `/rptc:fix-team "bug description"` | Claude-only team-based bug fixing with 4 persistent agents, root cause guardianship, regression focus | Complex bugs, unclear root cause, cross-cutting regressions |
 | `/rptc:structure` | Codebase structure analysis and refactoring | When restructuring or analyzing project layout |
-| `/rptc:config` | Configure RPTC in provider project context (`CLAUDE.md`/`AGENTS.md`) | First-time setup, after plugin updates |
+| `/rptc:config` | Configure RPTC in project instruction file (`CLAUDE.md` or `AGENTS.md`) | First-time setup, after plugin updates |
 | `/rptc:sync-prod-to-tests "[dir]"` | Test maintenance | When tests drift from production |
 
 ---
 
 ## Agent Delegation Pattern
 
-Claude commands delegate to specialist agents using the Task tool and the Markdown agents in `claude/agents`. Codex uses the `rptc-workflow` skill mapping plus role-definition references in `agents/`; it may use `spawn_agent` only when the user explicitly permits delegation.
-
-Claude Task prompt shape:
+Commands delegate to specialist agents using the Task tool:
 
 ```markdown
 Use Task tool with subagent_type="rptc:[agent-name]":
@@ -257,13 +223,11 @@ Use Task tool with subagent_type="rptc:[agent-name]":
 [Specific work for this agent]
 
 ## SOPs to Reference
-- ${CLAUDE_PLUGIN_ROOT}/sop/[relevant-sop].md
+- the RPTC plugin root/sop/[relevant-sop].md
 
 ## Output Required
 [Expected deliverable format]
 ```
-
-Codex delegation uses the same role names conceptually, but prompts should go through Codex `spawn_agent` only after explicit delegation approval and include the role, task, file ownership boundaries, and expected output. Codex standalone custom agents outside a plugin are TOML files in `.codex/agents` or `~/.codex/agents`; this package keeps plugin-local Markdown role-definition references so Claude and Codex can share one install package without duplicating the whole workflow.
 
 ### Agent Responsibilities
 
@@ -275,18 +239,15 @@ Codex delegation uses the same role names conceptually, but prompts should go th
 | `rptc:code-review-agent` | Phase 4 | Code review, KISS/YAGNI | **Report-only** |
 | `rptc:security-agent` | Phase 4 | Security review, OWASP compliance | **Report-only** |
 | `rptc:docs-agent` | Phase 4 | Documentation impact review | **Report-only** |
-| `rptc:review-agent` | `/feat-team`, `/fix-team` | Unified review (code+security+docs) with real-time feedback | **Report-only** |
-| `rptc:test-sync-agent` | `/rptc:sync-prod-to-tests` / Codex sync intent | Analyze test-production relationships | Analysis |
-| `rptc:test-fixer-agent` | `/rptc:sync-prod-to-tests` / Codex sync intent | Repair test files through the active provider workflow | Active |
+| `rptc:review-agent` | Claude `/feat-team`, `/fix-team` | Unified review (code+security+docs) with real-time feedback | **Report-only** |
+| `rptc:test-sync-agent` | `/sync-prod-to-tests` | Analyze test-production relationships | Analysis |
+| `rptc:test-fixer-agent` | `/sync-prod-to-tests` | Auto-repair test files | Active |
 
 ---
 
-## Provider-Aware Execution Architecture
+## Parallel Execution Architecture
 
-RPTC maximizes efficiency where the provider and approval policy allow
-parallelization. Claude command workflows can delegate to specialist agents.
-Codex runs the workflow in the main context by default and uses `spawn_agent`
-only after explicit delegation or parallel-agent approval.
+RPTC maximizes efficiency through parallelization:
 
 ### Phase 1: Discovery
 
@@ -298,7 +259,7 @@ only after explicit delegation or parallel-agent approval.
     ┌─────┴─────┐
     ▼           ▼
 ┌───────┐   ┌───────┐
-│Role 1 │   │Role 2 │   (parallel agents in Claude; main context in Codex unless approved)
+│Agent 1│   │Agent 2│   (2-3 parallel exploration agents)
 │Feature│   │Arch   │
 │Disco- │   │Analy- │
 │very   │   │sis    │
@@ -319,7 +280,7 @@ only after explicit delegation or parallel-agent approval.
     ┌─────┼─────┐
     ▼     ▼     ▼
 ┌─────┐ ┌─────┐ ┌─────┐
-│Mini-│ │Clean│ │Prag-│  (3 perspectives; parallel agents only when approved)
+│Mini-│ │Clean│ │Prag-│  (3 parallel plan agents)
 │mal  │ │     │ │matic│
 └──┬──┘ └──┬──┘ └──┬──┘
    │       │       │
@@ -338,32 +299,31 @@ only after explicit delegation or parallel-agent approval.
     ┌─────┼─────┐
     ▼     ▼     ▼
 ┌─────┐ ┌─────┐ ┌─────┐
-│Code │ │Secu-│ │Docs │  (Claude may parallelize)
-│Revw │ │rity │ │Agent│  (Codex requires approval)
+│Code │ │Secu-│ │Docs │  (All 3 run in parallel)
+│Revw │ │rity │ │Agent│  (REPORT-ONLY)
 └──┬──┘ └──┬──┘ └──┬──┘
    │       │       │
    └───────┼───────┘
            ▼
-    Findings → Provider Task Tracking
+    Findings → provider task tracker
            ▼
     Main Context Fixes
 ```
 
-### The `/rptc:feat-team` Command (Team-Based)
+### The `/rptc:feat-team` Command (Claude Only)
 
-An alternative to `/rptc:feat` that uses persistent roles and provider-supported coordination:
+An alternative to `/rptc:feat` in Claude that uses persistent agents with real-time messaging. Codex does not ship this command; use `/rptc:feat` with parent-orchestrated `spawn_agent` delegation instead:
 
 ```text
 /rptc:feat-team "description"
     ↓
 Step 0: Initialize (Serena, branch strategy)
     ↓
-Step 1: Create or coordinate team roles
+Step 1: Create Team (4 agents spawned in parallel)
     → researcher, architect, implementer, reviewer
-    → Claude may spawn persistent agents; Codex requires explicit delegation approval
     ↓
 Step 2: Discovery
-    → researcher explores → passes findings to architect role
+    → researcher explores → messages architect
     ↓
 Step 3: Architecture
     → architect plans → Team Lead gets user approval
@@ -383,23 +343,22 @@ Step 6: Complete
     → Collect reports → Summary → /rptc:commit
 ```
 
-**Key difference from `/rptc:feat`:** Verification is continuous (every step), not post-hoc (Phase 4 only). Claude agents may stay alive for the entire session; Codex coordinates through the parent session and subagent completion reports when delegation is explicitly approved.
+**Key difference from `/rptc:feat`:** Verification is continuous (every step), not post-hoc (Phase 4 only). All agents stay alive for the entire session, communicating via team messages.
 
-### The `/rptc:fix-team` Command (Team-Based Bug Fixing)
+### The `/rptc:fix-team` Command (Claude Only)
 
-Parallels `/rptc:feat-team` but adapted for bug fixing — root cause focus, 5 Whys methodology, regression-test-first:
+Parallels `/rptc:feat-team` in Claude but adapted for bug fixing — root cause focus, 5 Whys methodology, regression-test-first. Codex uses `/rptc:fix` with parent-orchestrated `spawn_agent` delegation instead:
 
 ```text
 /rptc:fix-team "bug description"
     ↓
 Step 0: Initialize (Serena, branch strategy)
     ↓
-Step 1: Create or coordinate team roles
+Step 1: Create Team (4 agents spawned in parallel)
     → researcher, architect, implementer, reviewer
-    → Claude may spawn persistent agents; Codex requires explicit delegation approval
     ↓
 Step 2: Reproduction & Triage
-    → researcher reproduces bug, maps failure path, passes findings to architect role
+    → researcher reproduces bug, maps failure path, messages architect
     ↓
 Step 3: Root Cause Analysis
     → architect applies 5 Whys → designs minimal fix → Team Lead gets user approval
@@ -436,7 +395,7 @@ Quality verification agents (code-review, security, docs) operate in **report-on
 **Principles:**
 
 - Agents DO NOT edit, write, or auto-fix anything
-- All findings returned to main context via provider task tracking
+- All findings returned to main context via provider task tracker
 - Main context handles fixes with user approval as needed
 - User decides which findings to address
 
@@ -455,7 +414,7 @@ Related implementation steps are grouped for efficiency:
 ### Benefits
 
 - ~40% token reduction vs. sequential execution
-- Claude command-defined parallel execution of independent batches; Codex delegation or parallel execution only with provider policy and explicit user approval
+- Parallel execution of independent batches
 - Maintains strict TDD discipline per step
 
 ### Example
@@ -485,16 +444,20 @@ Batching result:
 
 All must stay synchronized:
 
-1. `plugins/rptc/.claude-plugin/plugin.json` → `"version"`
-2. `plugins/rptc/.codex-plugin/plugin.json` → `"version"`
-3. `.claude-plugin/marketplace.json` → `metadata.version`
-4. `.claude-plugin/marketplace.json` → `plugins[0].version`
-5. `plugins/rptc/README.md` → `**Version**: X.Y.Z`
-6. `CHANGELOG.md` → `## [X.Y.Z]`
+1. `.claude-plugin/plugin.json` → `"version"`
+2. Repository root `.claude-plugin/marketplace.json` → `metadata.version`
+3. Repository root `.claude-plugin/marketplace.json` → `plugins[0].version`
+4. `README.md` → `**Version**: X.Y.Z`
+5. `CHANGELOG.md` → `## [X.Y.Z]`
 
 ### Update Process
 
-Update each version location in the same change. There is no package sync step because `plugins/rptc` is canonical.
+```bash
+# One command updates all locations
+./scripts/sync-version.sh X.Y.Z
+```
+
+Pre-commit hook automatically blocks commits with version mismatch.
 
 ---
 
@@ -502,20 +465,20 @@ Update each version location in the same change. There is no package sync step b
 
 **RPTC Architecture Principles:**
 
-1. **Provider-native feature entrypoint**: Claude uses `/rptc:feat`; Codex uses the `rptc-workflow` feature chat intent
+1. **One command for features**: `/rptc:feat` handles everything
 2. **Task-appropriate workflow**: TDD for code, direct execution for non-code
-3. **Provider-aware execution**: Claude may use command-defined concurrent agents; Codex delegates or parallelizes only with provider policy and explicit user approval
-4. **Native planning**: Use Claude's plan mode or Codex `update_plan`/chat approval
+3. **Parallel execution**: Maximize efficiency through concurrent agents
+4. **Native plan mode**: Use the provider planning flow (the active RPTC plan location for the current provider)
 5. **Minimal footprint**: No workspace directories or configuration required
 6. **User as PM**: You select approach, approve plans, review findings
 7. **Report-only quality gates**: Agents report, main context fixes
 
 **Plugin provides:**
 
-- 11 Claude slash commands (4 primary, 7 supporting)
-- 9 Claude specialist agents and 9 Codex role-definition references for approved delegation
+- 11 commands (4 primary, 7 supporting)
+- 9 specialist agents
 - 10 SOPs
-- 19 skills (8 user-facing + 11 agent methodology)
+- 18 skills (7 user-facing + 11 agent methodology)
 
 **User provides:**
 

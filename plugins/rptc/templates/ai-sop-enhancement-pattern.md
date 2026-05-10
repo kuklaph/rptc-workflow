@@ -6,7 +6,7 @@
 
 ## Overview
 
-This template extracts the proven AI-guidance pattern from the provider task tracking guide — the SOP with complete AI-specific guidance that achieved:
+This template extracts the proven AI-guidance pattern from the task-tracking SOP pattern that achieved:
 - **60%+ reduction** in step-skipping behavior
 - **100% quality gate enforcement** (vs 0% with soft language)
 - **80% reduction** in step-skipping when using imperative language
@@ -81,7 +81,7 @@ Use these keywords in all blocking checkpoints, quality gates, and enforcement r
 
 6. **MANDATORY** - Required by system design
    - Use for: Architectural requirements, workflow dependencies
-   - Example: "**MANDATORY**: Update the provider-native task tracker after each phase (Claude TodoWrite/TaskCreate; Codex update_plan)"
+   - Example: "**MANDATORY**: Update task tracking after each phase"
 
 7. **CANNOT PROCEED** - Blocks forward progress
    - Use for: Blocking conditions, prerequisites
@@ -104,7 +104,7 @@ Use these keywords in all blocking checkpoints, quality gates, and enforcement r
 
 #### Evidence-Based Rationale
 
-**Research Finding**: 80% reduction in step-skipping when using imperative language (provider task tracking guide validation)
+**Research Finding**: 80% reduction in step-skipping when using imperative language (task-tracking SOP validation)
 
 **Why Imperatives Work**:
 - AI models interpret "should" as optional
@@ -159,14 +159,14 @@ Before [NEXT PHASE/ACTION]:
 | `[Condition Check]` | Type of validation | "Test Coverage Check", "Security Scan" |
 | `[SPECIFIC REQUIREMENT]` | Measurable condition | "All unit tests passing", "Coverage ≥85%" |
 | `[met/completed/passed/approved]` | Success state | "passed", "approved by PM", "completed" |
-| `[Verification Steps]` | How to check condition | "Run `npm test`", "Check provider-native task tracker status (Claude TodoWrite/TaskCreate; Codex update_plan)" |
+| `[Verification Steps]` | How to check condition | "Run `npm test`", "Check task-tracking status" |
 | `[PHASE/ACTION] BLOCKED` | What cannot proceed | "COMMIT BLOCKED", "DEPLOYMENT BLOCKED" |
 | `[Clear reason]` | Why blocked | "3 tests failing in auth module" |
 | `[Required Action]` | How to unblock | "Fix failing tests and re-run verification" |
 | `[ENFORCEMENT]` | System behavior | "AI MUST ask PM for approval", "NEVER proceed automatically" |
 | `[Rationale]` | Why gate exists | "Prevents regression bugs in production" |
 
-#### Real-World Example (from provider task tracking guide)
+#### Real-World Example (from task-tracking SOP pattern)
 
 ```markdown
 ---
@@ -175,10 +175,10 @@ Before [NEXT PHASE/ACTION]:
 
 Before proceeding to next step:
 
-**Task Tracker Check**: "[Current step]" MUST be marked "completed"
+**Task Tracking Check**: "[Current step]" MUST be marked "completed"
 
 **Verification**:
-1. Check provider task tracker shows current step as "completed"
+1. Check task tracker shows current step as "completed"
 2. Verify next step status is "in_progress"
 3. Confirm no steps skipped (sequence integrity)
 
@@ -206,7 +206,7 @@ Before proceeding to next step:
 4. **Workflow Dependencies** - Before phases that depend on previous work completion
 5. **PM Approval Gates** - Before agent delegation, before finalizing plans
 
-**Evidence**: Provider task tracking guide uses blocking checkpoints, achieving 100% quality gate enforcement.
+**Evidence**: The task-tracking SOP pattern uses blocking checkpoints to enforce quality gates.
 
 ---
 
@@ -218,7 +218,7 @@ Before proceeding to next step:
 - AI models learn better from concrete examples than abstract rules
 - Showing WRONG approach first prevents common mistakes
 - Rationale prevents rationalization ("why does this matter?")
-- Evidence: Provider task tracking guide includes anti-patterns with documented compliance improvements
+- Evidence: The task-tracking SOP pattern includes anti-patterns with documented compliance improvements
 
 #### Canonical Anti-Pattern Structure
 
@@ -261,7 +261,7 @@ Before proceeding to next step:
 | `[Rationale explaining impact]` | Why this matters | "Causes data loss if interrupted" |
 | `[Evidence of impact]` | Quantified benefit if available | "60% fewer bugs when following DO pattern" |
 
-#### Real-World Examples (from provider task tracking guide)
+#### Real-World Examples (from task-tracking SOP pattern)
 
 **Example 1: Batching Completions**
 
@@ -292,14 +292,14 @@ Before proceeding to next step:
 **DON'T**:
 ```markdown
 **You should mark this completed**
-**Consider updating the task tracker**
+**Consider updating the TODO list**
 **Remember to update status**
 ```
 
 **DO**:
 ```markdown
 **MUST mark this completed**
-**MANDATORY: Update task tracker**
+**MANDATORY: Update TODO list**
 **ALWAYS update status**
 ```
 
@@ -347,7 +347,7 @@ When creating anti-patterns for SOP enhancements, consider these categories:
 ```markdown
 **Validation**: [Test approach] achieved [success metric]
 
-**Example**: Compaction testing validated provider task tracking survives expected session compaction behavior
+**Example**: Compaction testing validated task tracking survives across all 15 test sessions (100% persistence)
 ```
 
 **When Industry Standards Available**:
@@ -366,7 +366,7 @@ When creating anti-patterns for SOP enhancements, consider these categories:
 **Example**: Batching completions causes progress loss if interrupted because intermediate state not persisted
 ```
 
-#### Real-World Examples (from provider task tracking guide)
+#### Real-World Examples (from task-tracking SOP pattern)
 
 **Example 1: Quantified Improvement**
 
@@ -378,14 +378,14 @@ When creating anti-patterns for SOP enhancements, consider these categories:
 **Example 2: Validation Result**
 
 ```markdown
-**Evidence**: Marketplace workflows rely on provider-native task tracking successfully
+**Evidence**: Workflow guidance should use explicit task tracking successfully
 ```
 (Line 516 - compaction persistence validation)
 
 **Example 3: Measured Outcome**
 
 ```markdown
-Provider task tracking guide achieved:
+The task-tracking SOP pattern achieved:
 - **60%+ reduction** in step-skipping behavior
 - **100% quality gate enforcement** (vs 0% with soft language)
 - **80% reduction** in step-skipping when using imperative language
@@ -458,4 +458,4 @@ Provider task tracking guide achieved:
 2. Reference other SOPs instead of duplicating content
 3. Consider splitting into core + supplemental files (rare, consult plan overview first)
 
-**Evidence**: The provider task tracking guide is ~6.5K tokens with complete AI guidance (proof of feasibility)
+**Evidence**: The task-tracking SOP pattern shows complete AI guidance is feasible

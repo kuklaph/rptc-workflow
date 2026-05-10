@@ -174,4 +174,4 @@ The difference: specific colors with warmth, a signature border accent, layered 
 
 Push creative boundaries. Extraordinary interfaces come from committing fully to a vision and executing it without hedging. Don't default to safe choices — the whole point of this skill is to produce work that feels genuinely designed, not generated.
 
-**SOP Reference**: plugin `sop/frontend-guidelines.md` — accessibility (WCAG 2.1 AA), responsive breakpoints, performance metrics, component patterns, form design, error handling, loading states. These engineering standards apply to all frontend work regardless of aesthetic direction.
+**SOP Reference**: `${CLAUDE_PLUGIN_ROOT}/sop/frontend-guidelines.md` — accessibility (WCAG 2.1 AA), responsive breakpoints, performance metrics, component patterns, form design, error handling, loading states. These engineering standards apply to all frontend work regardless of aesthetic direction.

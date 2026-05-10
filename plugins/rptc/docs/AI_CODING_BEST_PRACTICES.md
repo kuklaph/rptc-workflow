@@ -114,9 +114,9 @@ Your codebase needs **simplicity** (solve today's problem), **specific patterns*
 
 ## Prompting Strategy for Quality Code
 
-### Use Provider Reasoning Controls
+### Use Extended Thinking Modes
 
-Claude Code offers named thinking levels; Codex users should choose the appropriate reasoning effort or planning mode available in the active Codex surface:
+Claude Code offers three thinking levels—use them strategically:
 
 | Mode | Token Budget | Best For | Example Task |
 |------|--------------|----------|--------------|
@@ -488,11 +488,7 @@ class RegionalEncryptionFactory {
 
 **Example Research Task:**
 ```plaintext
-Claude:
 /rptc:research "How does our codebase currently handle API authentication?"
-
-Codex:
-Use RPTC to research how our codebase currently handles API authentication.
 
 Expected output:
 - Lists existing auth middleware

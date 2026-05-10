@@ -1,11 +1,11 @@
 ---
 name: architect-methodology
-description: Planning methodology for the RPTC architect role. Covers provider-appropriate planning delegation, implementation constraints generation (5 categories), 6-phase planning methodology (context analysis, test strategy, implementation steps, dependencies/risk, self-critique, output), context management strategy, quality standards, best practices, and anti-patterns. Produces TDD-ready implementation plans.
+description: Planning methodology for the RPTC architect-agent. Covers incremental sub-agent delegation, implementation constraints generation (5 categories), 6-phase planning methodology (context analysis, test strategy, implementation steps, dependencies/risk, self-critique, output), context management strategy, quality standards, best practices, and anti-patterns. Produces TDD-ready implementation plans.
 ---
 
 # Architect Methodology
 
-Planning methodology for the RPTC architect role. Produces comprehensive, TDD-ready implementation plans.
+Planning methodology for the RPTC architect-agent. Produces comprehensive, TDD-ready implementation plans.
 
 ---
 
@@ -19,27 +19,21 @@ Create a comprehensive, TDD-ready implementation plan that guides developers thr
 
 ## Operating Mode
 
-**Directory Format Only (v2.0.0+)**: Uses incremental planning roles; delegate them only when the active provider supports delegation and the user approves it.
+**Directory Format Only (v2.0.0+)**: Uses incremental sub-agent delegation for all features.
 
-### Incremental Planning
+### Incremental Sub-Agent Delegation
 
-The planning workflow may use specialized roles. Claude can delegate these to
-sub-agents. Codex should keep planning in the main context unless the user
-explicitly approves delegation or parallel agents.
+The plan command delegates to specialized sub-agents:
 
-- **Overview Generator Role**: Creates overview.md (test strategy, acceptance criteria, risks)
-- **Step Generator Roles**: Create individual step-NN.md files (one role per step)
-- **Cohesiveness Reviewer Role**: Validates all files work together
+- **Overview Generator Sub-Agent**: Creates overview.md (test strategy, acceptance criteria, risks)
+- **Step Generator Sub-Agents**: Create individual step-NN.md files (one sub-agent per step)
+- **Cohesiveness Reviewer Sub-Agent**: Validates all files work together
 
 **Output**: Directory structure with multiple files
 
-- Plan file in the provider's planning location
-- Steps tracked with the provider's task tracking primitive during TDD execution
+- `~/.claude/plans/[feature-slug].md` - Native plan file (Claude's plan mode)
+- Steps tracked via TaskCreate/TaskUpdate during TDD execution
 - Files saved immediately as generated (not at end)
-
-Provider mapping:
-- Claude: `~/.claude/plans/[feature-slug].md` and `TaskCreate`/`TaskUpdate`
-- Codex: plan summary in chat or project plan file when requested, tracked with `update_plan`
 
 **Advantages**:
 
@@ -94,12 +88,8 @@ Generate constraints in overview.md. Keep concise (100-200 lines max).
 
 Load and analyze all relevant context:
 
-1. **Standard Operating Procedures** - Consult plugin SOPs:
+1. **Standard Operating Procedures** - Consult `${CLAUDE_PLUGIN_ROOT}/sop/[name].md`:
    - `architecture-patterns.md`, `testing-guide.md`, `languages-and-style.md`, `security-and-performance.md`
-
-   Provider mapping:
-   - Claude: `${CLAUDE_PLUGIN_ROOT}/sop/[name].md`
-   - Codex: installed plugin `sop/` files when available, otherwise the repository `plugins/rptc/sop/` fallback
 
 2. **Project Overrides** - Check `.context/` directory for project-specific requirements
 
@@ -192,13 +182,13 @@ Generate comprehensive plan following the output template. See `references/outpu
 
 Your plan is successful when:
 
-- **Step 0 Present**: Plan begins with Step 0: RPTC Re-initialization (re-invokes the originating provider workflow: Claude `/rptc:feat` or `/rptc:fix`; Codex matching `rptc-workflow` chat intent) — always, regardless of plan complexity
+- **Step 0 Present**: Plan begins with Step 0: RPTC Re-initialization (re-invokes originating `/rptc:feat` or `/rptc:fix` command) — always, regardless of plan complexity
 - **TDD-Ready**: Tests designed before implementation steps (100% of steps)
 - **Comprehensive**: All acceptance criteria addressed, risks identified, dependencies mapped
 - **Actionable**: Every step has clear instructions, no ambiguous "implement X" directives
 - **Checkbox Format**: All tasks use `- [ ]` for tracking
 - **Self-Validated**: Passed self-critique with score ≥ 4.0/5.0
-- **Cohesiveness Validated**: Claude sub-agent review confirms coherence when used; Codex performs main-context cohesiveness review unless explicit delegation approval exists
+- **Cohesiveness Validated**: Sub-agent review confirms coherence
 - **Token-Efficient**: Plan output <15K tokens
 
 ---
@@ -230,9 +220,9 @@ Your plan is successful when:
 
 ## Reference Documents
 
-For detailed templates and examples, read these files from the installed plugin package:
+For detailed templates and examples:
 
-- `skills/architect-methodology/references/output-template.md` - Complete plan output template with all sections
-- `templates/plan-overview.md` - Plan overview format
-- `templates/plan-step.md` - Step detail format
+- `${CLAUDE_PLUGIN_ROOT}/skills/architect-methodology/references/output-template.md` - Complete plan output template with all sections
+- `${CLAUDE_PLUGIN_ROOT}/templates/plan-overview.md` - Plan overview format
+- `${CLAUDE_PLUGIN_ROOT}/templates/plan-step.md` - Step detail format
 

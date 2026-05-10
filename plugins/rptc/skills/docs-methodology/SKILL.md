@@ -1,6 +1,6 @@
 ---
 name: docs-methodology
-description: Documentation review methodology for the RPTC docs-agent. Covers diff-driven impact analysis, documentation discovery and tiering (3 tiers), context gathering, confidence scoring (>=80 threshold), multi-document consistency checking, AI context file policy (minimal context file discipline), anti-patterns (including context-file stuffing), special cases (breaking changes, version-specific docs, generated files, localization, visual assets), performance standards, and structured output format. Report-only mode.
+description: Documentation review methodology for the RPTC docs-agent. Covers diff-driven impact analysis, documentation discovery and tiering (3 tiers), context gathering, confidence scoring (>=80 threshold), multi-document consistency checking, CLAUDE.md Update Policy (minimal context file discipline), anti-patterns (including Stuffing CLAUDE.md), special cases (breaking changes, version-specific docs, generated files, localization, visual assets), performance standards, and structured output format. Report-only mode.
 ---
 
 # Documentation Review Methodology
@@ -23,7 +23,7 @@ Documentation contains hard-won wisdom: edge cases, troubleshooting tips, histor
 
 ## Mode: Report Only
 
-This agent ONLY reports findings. It does NOT edit files, write changes, or auto-update documentation. All findings are returned to main context, which handles fixes with the provider's task tracking primitive.
+This agent ONLY reports findings. It does NOT edit files, write changes, or auto-update documentation. All findings are returned to main context which handles fixes via TaskCreate/TaskUpdate.
 
 ---
 
@@ -60,7 +60,7 @@ Discover all documentation that references changed code using targeted search.
 #### Tier 2: Medium Priority (Report with Context)
 
 - `README.md` usage examples
-- AI context files (`CLAUDE.md`, `AGENTS.md`, project rules) — only for non-discoverable content (commands, recurring AI mistakes). See AI Context File Policy.
+- `CLAUDE.md` — only for non-discoverable content (commands, recurring AI mistakes). See CLAUDE.md Update Policy.
 - `.context/**/*.md` project-specific context
 - `docs/guides/**/*.md` tutorials and guides
 - `CONTRIBUTING.md` workflows
@@ -129,7 +129,7 @@ Return structured JSON findings:
 A single code change often affects multiple documents. Check for consistency across:
 
 - `README.md` (quick start examples)
-- AI context files (`CLAUDE.md`, `AGENTS.md`, project rules; apply AI Context File Policy before flagging)
+- `CLAUDE.md` (apply CLAUDE.md Update Policy before flagging)
 - `.context/*.md` (project-specific context)
 - `docs/` folder (detailed guides)
 - API reference docs
@@ -147,23 +147,23 @@ Generate detailed report with:
 
 ---
 
-## AI Context File Policy
+## CLAUDE.md Update Policy
 
-`CLAUDE.md`, `AGENTS.md`, and equivalent provider context files are minimal context files, not documentation targets. Over-populated context files
+`CLAUDE.md` is a minimal context file, not a documentation target. Over-populated context files
 reduce AI task completion performance and increase costs — they distract agents with irrelevant
 detail and become stale faster than code.
 
-**Flag AI context files only for:**
+**Flag `CLAUDE.md` only for:**
 - Project commands the AI cannot discover by reading the codebase (e.g., `Always use pnpm`, custom scripts)
 - Corrections for recurring, consistent AI mistakes specific to this project
 
-**Do NOT flag AI context files for:**
+**Do NOT flag `CLAUDE.md` for:**
 - Architecture overviews or folder structure — the AI reads these dynamically
 - Tech stack or dependency changes — the AI checks `package.json` or equivalent directly
 - "What not to use" constraints — mentioning a technology injects it into context, biasing the AI toward it
 - Workflow diagrams or command overviews — discoverable from plugin or project docs
 
-**The test:** Would the AI find this by reading the codebase or its config files? If yes, skip the context file.
+**The test:** Would the AI find this by reading the codebase or its config files? If yes, skip `CLAUDE.md`.
 
 **Diagnostic exception:** When a code change creates a non-obvious pattern that consistently confuses agents
 (surprising conventions, counterintuitive behavior), flag it as a candidate CLAUDE.md note. The maintainer
@@ -173,11 +173,11 @@ decides whether to add it. Frame it as: "If you encounter X in this project, it 
 
 ## Anti-Patterns to Avoid
 
-### Stuffing AI Context Files with Architecture
-Flagging `CLAUDE.md`, `AGENTS.md`, or equivalent context files for architecture changes, folder structure updates, or tech stack notes bloats the
+### Stuffing CLAUDE.md with Architecture
+Flagging `CLAUDE.md` for architecture changes, folder structure updates, or tech stack notes bloats the
 context window and creates stale docs that actively mislead future sessions. Report architectural doc updates
-to `docs/architecture/` or `CONTRIBUTING.md`. Apply the AI Context File Policy above before reporting
-any context-file finding.
+to `docs/architecture/` or `CONTRIBUTING.md`. Apply the CLAUDE.md Update Policy above before reporting
+any `CLAUDE.md` finding.
 
 ### Over-Aggressive Rewrites
 Update only specific outdated content, not entire sections.

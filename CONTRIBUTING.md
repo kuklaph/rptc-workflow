@@ -27,13 +27,12 @@ Be respectful, constructive, and professional in all interactions.
 
 ### Prerequisites
 
-- Claude Code CLI (v2.0.0 or higher) for Claude adapter testing
-- Codex with plugin support for Codex adapter testing
+- Claude Code CLI (v2.0.0 or higher)
 - Git
 - Basic understanding of:
-  - Markdown (for commands, agents, skills, and documentation)
+  - Markdown (for commands, agents, and documentation)
   - Test-Driven Development (TDD)
-  - Claude Code and Codex plugin architecture
+  - Claude Code plugin architecture
 
 ### Installation for Development
 
@@ -42,29 +41,12 @@ Be respectful, constructive, and professional in all interactions.
 git clone https://github.com/kuklaph/rptc-workflow
 cd rptc-workflow
 
-# Claude: install as local plugin for testing
-claude plugin marketplace add .
-claude plugin install rptc
+# Install as local plugin for testing
+claude plugin install .
 
-# Claude: test in a separate project
+# Test in a separate project
 mkdir test-project && cd test-project
 /rptc:feat "test feature"
-```
-
-For Codex development testing, verify the package surfaces instead of Claude
-slash commands:
-
-```text
-.agents\plugins\marketplace.json
-plugins\rptc\.codex-plugin\plugin.json
-plugins\rptc\skills\
-```
-
-Then test the Codex adapter with chat intents such as:
-
-```text
-Use RPTC to implement "test feature".
-Run an RPTC verification pass.
 ```
 
 ---
@@ -109,25 +91,30 @@ Before suggesting a feature:
 
 ```text
 rptc-workflow/
-├── .claude-plugin/                # Claude marketplace listing
-├── .agents/plugins/               # Codex marketplace listing
-└── plugins/rptc/                  # Canonical install package
-    ├── .claude-plugin/plugin.json # Claude plugin metadata
-    ├── .codex-plugin/plugin.json  # Codex plugin metadata
-    ├── claude/
-    │   ├── commands/              # Claude slash commands (11 commands)
-    │   └── agents/                # Claude specialist agents (9 agents)
-    ├── sop/                       # Standard Operating Procedures (10 SOPs)
-    ├── templates/                 # Templates for artifacts
-    ├── skills/                    # Skills (19 skills)
-    └── docs/                      # Documentation
+├── .claude-plugin/        # Plugin metadata
+├── commands/              # Slash command definitions (flat structure, 11 commands)
+│   ├── commit.md         # /rptc:commit
+│   ├── config.md         # /rptc:config
+│   ├── feat.md           # /rptc:feat (PRIMARY)
+│   ├── feat-team.md      # /rptc:feat-team (team-based feat)
+│   ├── fix.md            # /rptc:fix
+│   ├── fix-team.md       # /rptc:fix-team (team-based fix)
+│   ├── research.md       # /rptc:research
+│   ├── sync-prod-to-tests.md  # /rptc:sync-prod-to-tests
+│   ├── structure.md      # /rptc:structure
+│   ├── verify.md         # /rptc:verify
+│   └── verify-loop.md    # /rptc:verify-loop
+├── agents/                # Specialist agent definitions (9 agents)
+├── sop/                   # Standard Operating Procedures (10 SOPs)
+├── templates/             # Templates for artifacts
+├── skills/                # Skills (18 skills)
+└── docs/                  # Documentation
 ```
 
 ### Key Files
 
-- **`plugins\rptc\.claude-plugin\plugin.json`**: Claude plugin metadata and component paths
-- **`plugins\rptc\.codex-plugin\plugin.json`**: Codex plugin metadata
-- **Marketplace files**: Root `.claude-plugin\marketplace.json` and `.agents\plugins\marketplace.json`
+- **`plugin.json`**: Plugin metadata and configuration
+- **`marketplace.json`**: Marketplace listing information
 - **Command files** (`.md`): Command prompt definitions
 - **Agent files** (`.md`): Specialized agent definitions
 - **SOP files** (`.md`): Standard operating procedures
@@ -140,7 +127,7 @@ rptc-workflow/
 
 Before submitting a PR, test the following:
 
-**Claude Slash-Command Checklist:**
+**Core Commands:**
 
 - [ ] `/rptc:feat "test feature"` completes all 5 phases (Discovery → Architecture → TDD → Quality → Complete)
 - [ ] `/rptc:feat-team "test feature"` spawns 4 agents and completes team workflow (Discovery → Architecture → Implementation+Review → Complete)
@@ -152,15 +139,6 @@ Before submitting a PR, test the following:
 - [ ] `/rptc:verify-loop` runs agents in a convergence loop, exits cleanly
 - [ ] `/rptc:sync-prod-to-tests "src/"` analyzes and syncs tests
 
-**Codex Skill/Chat-Intent Checklist:**
-
-- [ ] `rptc-workflow` is available from the Codex plugin skills
-- [ ] `Use RPTC to implement "test feature"` runs the feature workflow through chat intent
-- [ ] `Run an RPTC verification pass` runs report-only quality checks
-- [ ] Codex uses `update_plan` for active workflow tracking
-- [ ] Codex runs in the main session by default
-- [ ] Codex uses delegation only after explicit user approval and only when subagent tools are available
-
 **Workflow Verification:**
 
 - [ ] Phase 1 (Discovery) launches parallel exploration agents
@@ -168,7 +146,7 @@ Before submitting a PR, test the following:
 - [ ] Phase 2 (Architecture) presents 3 planning perspectives
 - [ ] Phase 3 (TDD) uses smart batching for implementation
 - [ ] Phase 4 (Quality Verification) runs code-review, security, and docs agents in parallel (report-only). Note: `/rptc:feat-team` uses `review-agent` instead (unified, real-time feedback)
-- [ ] Plans use the provider's planning mechanism (Claude: `~/.claude/plans/`; Codex: `update_plan`/chat approval unless a project plan file is requested)
+- [ ] Plans are stored in Claude's native plan mode (`~/.claude/plans/`)
 
 ### Test on Multiple Platforms
 
@@ -182,7 +160,7 @@ If possible, test on:
 
 ## Documentation Standards
 
-### Claude Command Documentation
+### Command Documentation
 
 All command files must include:
 
@@ -214,7 +192,7 @@ Edge cases, limitations, or warnings
 How failures are handled
 ```
 
-### Claude Agent Documentation
+### Agent Documentation
 
 Agent files are thin shells — skills are loaded via frontmatter (`skills:` field), not manual Read calls. All agent files must include:
 
@@ -242,35 +220,6 @@ model: inherit
 ## Operating Methodology
 
 [Brief reinforcement pointing to preloaded skills]
-```
-
-### Skill Documentation
-
-Shared and Codex-facing skills must include:
-
-```markdown
----
-name: skill-name
-description: Trigger description with provider mapping where needed.
----
-
-# Skill Name
-
-## When to Use
-
-Clear trigger conditions.
-
-## Provider Mapping
-
-Claude behavior and Codex behavior where they differ.
-
-## Workflow
-
-Steps, required approvals, and task tracking.
-
-## References
-
-SOPs, templates, and methodology files used by the skill.
 ```
 
 ### Code Comments
@@ -323,7 +272,7 @@ How was this tested? Include:
 - [ ] Documentation updated
 - [ ] No breaking changes (or documented if unavoidable)
 - [ ] Follows style guidelines
-- [ ] Plugin SOPs load correctly (from `plugins\rptc\sop\` directory)
+- [ ] Plugin SOPs load correctly (from `sop/` directory)
 ```
 
 ### Commit Message Format
@@ -435,7 +384,7 @@ for true parallel execution instead of sequential.
 
 - **Issues**: https://github.com/kuklaph/rptc-workflow/issues
 - **Discussions**: https://github.com/kuklaph/rptc-workflow/discussions
-- **Documentation**: See `plugins\rptc\docs\RPTC_WORKFLOW_GUIDE.md`
+- **Documentation**: See `docs/RPTC_WORKFLOW_GUIDE.md`
 
 ---
 

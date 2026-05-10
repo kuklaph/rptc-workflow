@@ -75,8 +75,8 @@ index exports, shared configs, migration sequences.
 
 ### Option A: Designate a Single Owner
 
-One teammate (or the Team Lead) owns the shared file. Other teammates report
-their needed changes through the provider coordination channel.
+One teammate (or the Team Lead) owns the shared file. Other teammates message
+their needed changes via inbox.
 
 ```
 Shared files owned by Team Lead:
@@ -105,7 +105,7 @@ Team Lead merges both into: src/routes/index.ts
 ```
 
 This is more explicit but creates cleanup work. Use when additions are complex
-enough that a coordination message would not capture them well.
+enough that inbox messages wouldn't capture them well.
 
 ### Option C: Sequential Access
 
@@ -117,16 +117,14 @@ Task 1: "Implement user model" (teammate-A) → modifies src/models/user.ts
 Task 2: "Add profile fields to user model" (teammate-B, depends on Task 1)
 ```
 
-When provider task dependencies are available, dependency tracking auto-unblocks Task 2 when Task 1 completes. Otherwise, the Team Lead sequences dependent work manually.
+The task list's dependency tracking auto-unblocks Task 2 when Task 1 completes.
 
 ---
 
-## 3. Quality Gates
+## 3. Hook-Based Quality Gates
 
-Claude Agent Teams support hook events for programmatic enforcement. These run
-automatically in Claude Team sessions. Codex does not provide Claude Team hook
-semantics; enforce equivalent gates through spawn prompts, parent-session
-verification, test runs, and completion reports.
+Agent Teams support two hook events for programmatic enforcement. These run
+automatically — no teammate cooperation required.
 
 ### TeammateIdle Hook
 
@@ -153,7 +151,7 @@ Use for:
 
 ### Example Hook: RPTC Quality Gate
 
-For Claude Agent Teams, place this in `.claude/hooks/` at the project level so teammates inherit it.
+Place in `.claude/hooks/` at the project level. All teammates inherit it.
 
 ```javascript
 // .claude/hooks/rptc-team-quality-gate.mjs
@@ -231,7 +229,7 @@ While teammates work, the Team Lead monitors progress and intervenes when needed
 ### What to Watch
 
 - **Task list**: Check for tasks stuck in `in_progress` for too long
-- **Coordination messages**: Teammates report when blocked, when they find
+- **Inbox messages**: Teammates message when blocked, when they find
   cross-cutting concerns, or when they have low-confidence findings
 - **Teammate output**: In in-process mode (Shift+Up/Down), scan teammate
   activity for signs of going off track
@@ -240,13 +238,13 @@ While teammates work, the Team Lead monitors progress and intervenes when needed
 
 | Signal | Action |
 |--------|--------|
-| Teammate working on wrong files | Send provider coordination message redirecting to correct scope |
+| Teammate working on wrong files | Send inbox message redirecting to correct scope |
 | Teammate stuck on test failures >10 min | Send hint or adjust assignment |
 | Teammate discovers plan needs changing | Escalate to user for plan amendment |
 | Two teammates messaging about same issue | Mediate — clarify ownership or adjust scope |
 | Teammate idle but tasks remain | Check task list, reassign if needed |
 
-### Delegate Mode (Claude)
+### Delegate Mode
 
 Activate with `Shift+Tab`. Locks the Team Lead into pure orchestration — can
 only spawn teammates, manage tasks, send/receive messages, and shut down
@@ -256,10 +254,6 @@ Use when: 3+ active teammates and you want to prevent the lead from getting
 pulled into implementation work. Skip when the lead also needs to do integration
 or handle shared files.
 
-In Codex, orchestration stays in the main session. Spawn subagents only when the
-user explicitly asks for delegation or parallel agents, then steer them with
-`send_input`, collect results with `wait_agent`, and close completed threads.
-
 ---
 
 ## 5. Integration After Completion
@@ -268,7 +262,7 @@ After all teammates mark their tasks complete:
 
 ### Step 1: Collect Completion Reports
 
-Gather all completion reports from the provider coordination channel. Each should include:
+Gather all completion messages from teammate inboxes. Each should include:
 files changed, tests added, coverage, findings needing PM review, concerns.
 
 ### Step 2: Integrate Shared Files
@@ -319,7 +313,7 @@ Generate a unified summary covering all teammates' work:
 - Total tests added
 - Key implementation decisions from each teammate
 - Any remaining items or known issues
-- Ready for the active provider's RPTC commit workflow
+- Ready for `/rptc:commit`
 
 ---
 
@@ -327,25 +321,23 @@ Generate a unified summary covering all teammates' work:
 
 After integration and Phase 5:
 
-1. **Shut down all teammates** — Claude teammates should be stopped; Codex
-   subagent threads should be closed with the available lifecycle tool when one exists
+1. **Shut down all teammates** — idle teammates accumulate token cost
 2. **Delete temp files** from shared file protocol (`_teammate-*` files)
-3. **Clean up provider tracker** — verify all tasks marked complete; in Codex, the Team Lead updates `update_plan`
+3. **Clean up task list** — verify all tasks marked complete
 4. **Remove any hooks** that were team-specific (if you added temporary ones)
 
 ---
 
 ## 7. Cost Awareness
 
-Agent Teams are significantly more expensive than RPTC's standard single-session
-or scoped subagent model because each teammate maintains its own full context
-window.
+Agent Teams are significantly more expensive than RPTC's standard subagent model
+because each teammate maintains its own full context window.
 
 ### Rough Comparisons
 
 | Mode | Typical Cost per Feature |
 |------|------------------------|
-| Standard RPTC (`/rptc:feat`, single session or scoped subagents) | $0.50 – $2.00 |
+| Standard RPTC (`/rptc:feat`, subagents) | $0.50 – $2.00 |
 | Agent Teams, 2 teammates (Level A) | $2.00 – $6.00 |
 | Agent Teams, 3 teammates (Level A) | $3.00 – $10.00 |
 | Agent Teams, 5 teammates (Level A) | $5.00 – $20.00+ |

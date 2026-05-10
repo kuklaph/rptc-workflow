@@ -185,9 +185,9 @@ Determine mode from topic keywords:
 
 For detailed output format templates, reference:
 
-- plugin `templates/research-codebase.md` - Mode A output format
-- plugin `templates/research-web.md` - Mode B output format
-- plugin `templates/research-hybrid.md` - Mode C output format
+- `${CLAUDE_PLUGIN_ROOT}/templates/research-codebase.md` - Mode A output format
+- `${CLAUDE_PLUGIN_ROOT}/templates/research-web.md` - Mode B output format
+- `${CLAUDE_PLUGIN_ROOT}/templates/research-hybrid.md` - Mode C output format
 
 ---
 

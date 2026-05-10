@@ -1,7 +1,7 @@
 {
   "name": "rptc",
-  "version": "3.16.0",
-  "description": "Research -> Plan -> TDD -> Commit workflow with PM collaboration. Systematic development with quality gates, test-driven implementation, and intelligent documentation management.",
+  "version": "3.16.1",
+  "description": "Research → Plan → TDD → Commit workflow with PM collaboration. Systematic development with quality gates, test-driven implementation, and intelligent documentation management.",
   "author": {
     "name": "kuklaph",
     "email": "30103848+kuklaph@users.noreply.github.com"

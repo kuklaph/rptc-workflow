@@ -6,7 +6,7 @@
 **Created**: 2024-01-15
 **Last Updated**: 2025-01-21
 
-**Applies To**: RPTC workflows (Claude: `/rptc:feat`, `/rptc:research`, `/rptc:commit`, `/rptc:sync-prod-to-tests`; Codex: matching `rptc-workflow` intents), code review/security roles, and implementation roles/sub-agents; Codex sub-agents only run through explicit user-approved `spawn_agent`
+**Applies To**: `/rptc:feat` (unified workflow), `/rptc:research`, `/rptc:commit`, `/rptc:sync-prod-to-tests`, Code Review Agent, Security Agent, all implementation sub-agents
 
 ---
 
@@ -1315,12 +1315,8 @@ def test_security_breach_response():
 
 **For comprehensive development guidance, reference these SOPs:**
 
-1. Provider project/global guidance (`CLAUDE.md`, `AGENTS.md`, or provider-specific global SOPs) - user defaults
-2. Installed plugin `sop/[name].md` - plugin defaults
-
-Claude may expose plugin SOPs through `${CLAUDE_PLUGIN_ROOT}/sop/[name].md`.
-Codex resolves plugin SOPs from the installed plugin `sop/` directory when
-available, or from `plugins/rptc/sop/` while developing this package.
+1. User global SOP defaults, when configured by the provider
+2. RPTC plugin root `sop/[name].md` - Plugin defaults
 
 **Cross-SOP Integration:**
 

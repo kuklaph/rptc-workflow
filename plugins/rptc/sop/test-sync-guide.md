@@ -555,7 +555,7 @@ Overall Coverage = Σ(Directory Coverage * File Count) / Total Files
 
 ## Convergence Criteria
 
-The test-sync workflow intent runs iteratively until convergence (Claude: `/rptc:sync-prod-to-tests`; Codex: `rptc-workflow` sync intent):
+The sync-prod-to-tests command runs iteratively until convergence:
 
 ```
 CONVERGED = TRUE when ALL of:

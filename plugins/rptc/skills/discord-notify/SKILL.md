@@ -33,9 +33,9 @@ Automatically send notifications in these scenarios:
 
 ## Configuration
 
-### Option 1: Provider Settings File or Environment Variable
+### Option 1: Settings File (Recommended)
 
-Set `DISCORD_WEBHOOK` for the current shell, or create a provider-local settings file with your webhook URL:
+Create `./.claude/settings.json` with your webhook URL:
 
 ```json
 {
@@ -43,27 +43,26 @@ Set `DISCORD_WEBHOOK` for the current shell, or create a provider-local settings
 }
 ```
 
-Supported settings locations are `./.claude/settings.json`, `./.codex/settings.json`, `$HOME/.claude/settings.json`, and `$HOME/.codex/settings.json`. A template is available at `assets/settings.json.template`.
+Once configured, Claude can send notifications without needing the webhook URL each time. A template is available at `assets/settings.json.template`.
 
 ### Option 2: Provide Webhook URL Per Task
 
-Give the assistant the webhook URL for each task that needs notification. This works across providers.
+Give Claude the webhook URL for each task that needs notification.
 
 ## Quick Start
 
-### Method 1: Environment Variable or Settings File
+### Method 1: Settings File (After Configuration)
 
 ```bash
-# Use a provider-neutral environment variable
-export DISCORD_WEBHOOK="https://discord.com/api/webhooks/..."
-WEBHOOK_URL="$DISCORD_WEBHOOK"
+# Read webhook from settings.json and send notification
+WEBHOOK_URL=$(grep -o '"discord_webhook_url"[[:space:]]*:[[:space:]]*"[^"]*"' ./.claude/settings.json | cut -d'"' -f4)
 
 curl -X POST "$WEBHOOK_URL" \
   -H "Content-Type: application/json" \
-  -d '{"username":"RPTC","embeds":[{"description":"✅ Task completed","color":65280,"timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"'"}]}'
+  -d '{"username":"Claude","embeds":[{"description":"✅ Task completed","color":65280,"timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"'"}]}'
 ```
 
-Or use the bash script, which reads `DISCORD_WEBHOOK` or provider settings automatically:
+Or use the bash script (reads from settings.json automatically):
 ```bash
 bash scripts/notify.sh "Task completed"
 ```
@@ -74,7 +73,7 @@ bash scripts/notify.sh "Task completed"
 # Provide webhook URL directly
 curl -X POST "https://discord.com/api/webhooks/..." \
   -H "Content-Type: application/json" \
-  -d '{"username":"RPTC","embeds":[{"description":"✅ Task completed","color":65280,"timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"'"}]}'
+  -d '{"username":"Claude","embeds":[{"description":"✅ Task completed","color":65280,"timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"'"}]}'
 ```
 
 Or with bash script:
@@ -87,13 +86,13 @@ bash scripts/notify.sh "https://discord.com/api/webhooks/..." "Task completed"
 ### Task Completed Successfully
 
 ```bash
-curl -X POST "$WEBHOOK_URL" -H "Content-Type: application/json" -d '{"username":"RPTC","embeds":[{"description":"✅ Task completed successfully","color":65280,"timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"'"}]}'
+curl -X POST "$WEBHOOK_URL" -H "Content-Type: application/json" -d '{"username":"Claude","embeds":[{"description":"✅ Task completed successfully","color":65280,"timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"'"}]}'
 ```
 
 ### Task Failed
 
 ```bash
-curl -X POST "$WEBHOOK_URL" -H "Content-Type: application/json" -d '{"username":"RPTC","embeds":[{"description":"❌ Task failed: [reason]","color":16711680,"timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"'"}]}'
+curl -X POST "$WEBHOOK_URL" -H "Content-Type: application/json" -d '{"username":"Claude","embeds":[{"description":"❌ Task failed: [reason]","color":16711680,"timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"'"}]}'
 ```
 
 ### Processing Complete with Details
@@ -101,7 +100,7 @@ curl -X POST "$WEBHOOK_URL" -H "Content-Type: application/json" -d '{"username":
 ```bash
 DETAILS="Processed 15 files in 2m 30s"
 curl -X POST "$WEBHOOK_URL" -H "Content-Type: application/json" -d '{
-  "username":"RPTC",
+  "username":"Claude",
   "embeds":[{
     "description":"🔄 Processing complete\n\n'"$DETAILS"'",
     "color":3447003,
@@ -113,7 +112,7 @@ curl -X POST "$WEBHOOK_URL" -H "Content-Type: application/json" -d '{
 ### Warning or Partial Success
 
 ```bash
-curl -X POST "$WEBHOOK_URL" -H "Content-Type: application/json" -d '{"username":"RPTC","embeds":[{"description":"⚠️ Task completed with warnings\n\n[details]","color":16776960,"timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"'"}]}'
+curl -X POST "$WEBHOOK_URL" -H "Content-Type: application/json" -d '{"username":"Claude","embeds":[{"description":"⚠️ Task completed with warnings\n\n[details]","color":16776960,"timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"'"}]}'
 ```
 
 ## Usage Workflow
@@ -140,7 +139,7 @@ done
 
 # 2. Send notification
 curl -X POST "$WEBHOOK_URL" -H "Content-Type: application/json" -d '{
-  "username":"RPTC",
+  "username":"Claude",
   "embeds":[{
     "title":"PDF Conversion Complete",
     "description":"✅ Converted 20 PDFs to images\n\nAll files are ready in /outputs",
@@ -166,29 +165,25 @@ The user needs to:
 2. Create a new webhook or copy existing webhook URL
 3. The URL looks like: `https://discord.com/api/webhooks/123456/AbCdEf...`
 
-### Step 2: Configure Settings (Recommended)
+### Step 2: Configure Settings File (Recommended)
 
-Use an environment variable for provider-neutral sessions:
+Create `./.claude/settings.json`:
 
 ```bash
-export DISCORD_WEBHOOK="https://discord.com/api/webhooks/YOUR_ACTUAL_URL_HERE"
-```
-
-Or create `./.claude/settings.json` for Claude or `./.codex/settings.json` for Codex:
-
-```json
+cat > ./.claude/settings.json << 'EOF'
 {
   "discord_webhook_url": "https://discord.com/api/webhooks/YOUR_ACTUAL_URL_HERE"
 }
+EOF
 ```
 
 Or copy and edit the template:
 ```bash
-cp assets/settings.json.template ./.codex/settings.json
-# Then edit the provider settings file with actual webhook URL
+cp assets/settings.json.template ./.claude/settings.json
+# Then edit ./.claude/settings.json with actual webhook URL
 ```
 
-Once configured, the assistant can send notifications without needing the URL repeatedly.
+Once configured, Claude can send notifications without needing the URL repeatedly.
 
 ### Alternative: Provide URL Per Task
 
@@ -197,10 +192,10 @@ Skip settings.json and provide webhook URL for each task that needs notification
 ## Best Practices
 
 ### Security
-- Prefer `DISCORD_WEBHOOK` or a provider-local settings file (`./.claude/settings.json` or `./.codex/settings.json`)
+- Store webhook URL in `./.claude/settings.json` for convenience
 - Don't log webhook URLs in outputs
 - URLs are sensitive and should be treated as secrets
-- Provider settings are local to that environment and should not be committed
+- Settings.json is local to Claude's environment and not shared
 
 ### Message Quality
 - Use clear, actionable messages
@@ -246,7 +241,7 @@ Quick test to verify webhook works:
 ```bash
 curl -X POST "YOUR_WEBHOOK_URL" \
   -H "Content-Type: application/json" \
-  -d '{"content":"Test from RPTC"}'
+  -d '{"content":"Test from Claude"}'
 ```
 
 If successful, message appears immediately in Discord.

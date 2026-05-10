@@ -59,15 +59,11 @@ Capture current state for comparison:
 ### 1.3 Review Context
 
 **SOPs to Load:**
-1. Plugin SOP: `sop/languages-and-style.md`
-2. Plugin SOP: `sop/architecture-patterns.md`
-
-Provider path mapping: Claude may resolve these through `${CLAUDE_PLUGIN_ROOT}`.
-Codex resolves them from the installed plugin `sop/` directory when available,
-or from `plugins/rptc/sop/` while developing this package.
+1. RPTC plugin root `sop/languages-and-style.md`
+2. RPTC plugin root `sop/architecture-patterns.md`
 
 **Project Context (if exists):**
-- Provider project instructions (`CLAUDE.md`, `AGENTS.md`, or equivalent)
+- Project instruction file (`CLAUDE.md`, `AGENTS.md`, or provider equivalent)
 - Implementation plan (if referenced)
 
 **Surgical Coding Approach (Phase 1):**

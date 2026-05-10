@@ -1224,7 +1224,7 @@ PR approved and merged
 
 **Configuration:**
 
-If a project already uses provider-local settings, this optional RPTC configuration can live in `.claude/settings.json` for Claude or `.codex/settings.json` for Codex:
+Add to the provider configuration file used by the active runtime:
 ```json
 {
   "rptc": {

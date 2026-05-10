@@ -11,14 +11,14 @@ Detailed code examples for each fix scenario. Referenced from the main SKILL.md.
 ### Steps
 
 1. **Read production code** to understand current behavior:
-   ```text
-   Read the production file with the active provider's file-read tool.
+   ```bash
+   Read(file_path="$PROD_FILE")
    # Extract: function names, parameters, return types, logic flow
    ```
 
 2. **Read existing test file:**
-   ```text
-   Read the test file with the active provider's file-read tool.
+   ```bash
+   Read(file_path="$TEST_FILE")
    # Identify: test blocks, descriptions, assertions
    ```
 
@@ -28,9 +28,12 @@ Detailed code examples for each fix scenario. Referenced from the main SKILL.md.
    - Outdated assertions -> Update to match current behavior
 
 4. **Apply targeted edits:**
-   ```text
-   Edit the test file with the active provider's file-edit tool
-   (Claude: Edit/MultiEdit; Codex: apply_patch or available edit tool).
+   ```bash
+   Edit(
+     file_path="$TEST_FILE",
+     old_string="it('works correctly'",
+     new_string="it('returns 401 when token is expired'"
+   )
    ```
 
 5. **Preserve existing structure:** Keep passing tests unchanged, maintain test organization, preserve setup/teardown hooks.
@@ -67,10 +70,9 @@ describe('login', () => {
 
 2. **Read production code** for uncovered sections.
 
-3. **Generate new tests** through the provider-approved TDD path. Delegate only when provider policy and user approval allow; otherwise execute in the main context:
+3. **Delegate new test generation** to TDD executor agent:
    ```markdown
-   Claude: use the Task tool with subagent_type="rptc:tdd-agent".
-   Codex: use spawn_agent only when the user explicitly permits delegation and the tool is available; otherwise execute in the main session.
+   Use the Task tool with subagent_type="rptc:tdd-agent":
 
    ## Context
    Production file: [path]
@@ -141,9 +143,12 @@ describe('validateEmail', () => {
 3. **Read production code** to understand correct behavior.
 
 4. **Update assertions to match production:**
-   ```text
-   Edit the assertion with the active provider's file-edit tool
-   (Claude: Edit/MultiEdit; Codex: apply_patch or available edit tool).
+   ```bash
+   Edit(
+     file_path="$TEST_FILE",
+     old_string="expect(calculateTax(100)).toBe(7)",
+     new_string="expect(calculateTax(100)).toBe(8)  // 8% tax rate"
+   )
    ```
 
 5. **Verify fix by re-running test.**
@@ -180,10 +185,9 @@ it('applies 10% silver tier discount', () => {
 
 3. **Detect test framework and conventions** from existing tests.
 
-4. **Generate complete tests** through the provider-approved TDD path. Delegate only when provider policy and user approval allow; otherwise execute in the main context:
+4. **Delegate complete test generation** to TDD executor:
    ```markdown
-   Claude: use the Task tool with subagent_type="rptc:tdd-agent".
-   Codex: use spawn_agent only when the user explicitly permits delegation and the tool is available; otherwise execute in the main session.
+   Use the Task tool with subagent_type="rptc:tdd-agent":
 
    ## Context
    Production file: [path]
@@ -262,9 +266,12 @@ describe('formatDate', () => {
 2. **Read production code** to understand current state.
 
 3. **Apply the recommended production fix:**
-   ```text
-   Edit the production file with the active provider's file-edit tool
-   (Claude: Edit/MultiEdit; Codex: apply_patch or available edit tool).
+   ```bash
+   Edit(
+     file_path="$PROD_FILE",
+     old_string="[current production code]",
+     new_string="[fixed production code from recommendedFix.productionChanges]"
+   )
    ```
 
 4. **Verify tests now pass.**
@@ -332,4 +339,4 @@ mcp__serena__find_symbol(
 
 **Benefits:** Precise symbol-level edits, maintains file formatting, handles complex nested structures.
 
-**Fallback:** If Serena MCP is not available, use provider-native file editing tools, such as Claude `Edit`/`MultiEdit` or Codex `apply_patch`/available edit tools.
+**Fallback:** If Serena MCP is not available, use standard Edit/MultiEdit tools.
