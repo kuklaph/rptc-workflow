@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.16.2] - 2026-05-11
+
+### Fixed
+
+- Clarified `rptc-init` installed-cache path resolution so packaged Codex agent TOMLs resolve from `<plugin-version-root>/codex/agents` instead of an accidental nested `codex/codex/agents` path.
+
+---
+
+
 ## [3.16.1] - 2026-05-10
 
 ### Added

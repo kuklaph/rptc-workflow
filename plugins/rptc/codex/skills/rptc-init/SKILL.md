@@ -21,11 +21,19 @@ When running from this repository, the source is:
 plugins/rptc/codex/agents/*.toml
 ```
 
-When running from an installed plugin cache, locate this skill's plugin root and use sibling path:
+When running from an installed plugin cache, locate the plugin version root from this skill file path:
 
 ```text
-codex/agents/*.toml
+<plugin-version-root>/codex/skills/rptc-init/SKILL.md
 ```
+
+Then use this source directory:
+
+```text
+<plugin-version-root>/codex/agents/*.toml
+```
+
+Do not treat `<plugin-version-root>/codex` as the plugin root; that would incorrectly resolve to `<plugin-version-root>/codex/codex/agents`.
 
 ## Required Files
 
