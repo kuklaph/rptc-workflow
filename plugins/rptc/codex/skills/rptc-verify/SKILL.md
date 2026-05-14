@@ -3,14 +3,65 @@ name: rptc-verify
 description: Run quality verification agents on demand. Use when the user asks for /rptc:verify or the equivalent RPTC Codex workflow intent.
 ---
 
-# /rptc:verify
-
+# RPTC Verify
 Run quality verification agents independently. Use after any code change — inside or outside the RPTC workflow.
 
 **Arguments**:
-- None: `/rptc:verify` - Verify uncommitted changes (git diff)
-- With path: `/rptc:verify "src/"` - Verify specific directory or files
-- Full app: `/rptc:verify "."` - Verify entire codebase
+- None: `rptc:rptc-verify` - Verify uncommitted changes (git diff)
+- With path: `rptc:rptc-verify "src/"` - Verify specific directory or files
+- Full app: `rptc:rptc-verify "."` - Verify entire codebase
+
+---
+
+## Step 0: RPTC Workflow Initialization (MANDATORY - CANNOT SKIP)
+
+**Before ANY other action, establish RPTC workflow context.**
+
+### 0.1 Load Required Skills
+
+```
+Use/load the `rptc:writing-clearly-and-concisely` skill.
+```
+
+**Wait for skill to load before proceeding.**
+
+### 0.2 RPTC Workflow Understanding (INTERNALIZE)
+
+You are executing **RPTC Verify** - standalone quality verification using the same agents that run during Phase 4 of `rptc:rptc-feat` and `rptc:rptc-fix`.
+
+**Core Philosophy:**
+- Verification catches issues before they ship
+- Report-only agents — findings are addressed by main context
+- Confidence filtering removes noise (≥80 only)
+- User chooses verification scope
+
+**Non-Negotiable Directives:**
+
+| Directive | Meaning |
+|-----------|---------|
+| **Quality Verification** | All agents run in report-only mode |
+| **Confidence Filtering** | Only surface findings ≥80 confidence |
+| **User Authority** | User chooses scope and agent selection |
+| **No Shortcuts** | All verification steps must complete |
+
+**SOP Reference Chain (with Precedence):**
+
+| Topic | Check First (User) | Fallback (RPTC) |
+|-------|-------------------|-----------------|
+| Architecture | Project `sop/`, `Codex global guidance` | `RPTC plugin root/sop/architecture-patterns.md` |
+| Security | Project `sop/`, `Codex global guidance` | `RPTC plugin root/sop/security-and-performance.md` |
+| Refactoring | Project `sop/`, `Codex global guidance` | `RPTC plugin root/sop/post-tdd-refactoring.md` |
+
+**Precedence Rule**: If user specifies custom SOPs (in project AGENTS.md, project `sop/` dir, or `Codex global guidance`), use those for the matching topic. RPTC SOPs are the fallback default.
+
+### 0.3 Initialization Verification
+
+Before proceeding to Phase 1, confirm:
+- Skill loaded and active
+- RPTC directives understood
+- Verification scope clear
+
+---
 
 ## Skills Usage Guide
 
@@ -22,13 +73,54 @@ Run quality verification agents independently. Use after any code change — ins
 
 **Key rules**: Active voice, positive form, definite language, omit needless words.
 
-## Custom Agent Availability
+---
 
-Before spawning verification agents, verify the required TOML agents are installed in `.codex/agents/` or the user's Codex agents directory.
+## Phase 1: Determine Scope
 
-Required based on selection: `rptc:code-review-agent`, `rptc:security-agent`, `rptc:docs-agent`.
+**Goal**: Identify which files to verify.
 
-If any selected TOML is missing, use/load `rptc-init` to copy the packaged agents, then re-check. If agents are still unavailable, run the selected review scopes in the main context and report the limitation.
+**Actions**:
+
+1. **Parse arguments**:
+   - **No arguments**: Use uncommitted changes as scope
+   - **Path argument**: Use specified path(s) as scope
+
+2. **If no arguments**, collect files from git:
+   ```bash
+   git diff --name-only
+   git diff --cached --name-only
+   ```
+   Combine staged and unstaged changes into a single file list.
+
+3. **If path argument provided**, collect files:
+   ```bash
+   # For directories: list all source files
+   # For specific files: use as-is
+   ```
+
+4. **If no changes detected and no path provided**, ask user:
+   ```json
+   {
+     "questions": [{
+       "id": "verify_scope",
+       "header": "Scope",
+       "question": "No uncommitted changes found. What would you like to verify?",
+       "options": [
+         {"label": "Specify a path (Recommended)", "description": "I'll provide a directory or file path to verify"},
+         {"label": "Full codebase", "description": "Run verification across the entire project"},
+         {"label": "Cancel", "description": "Nothing to verify right now"}
+       ]
+     }]
+   }
+   ```
+
+5. **Report scope**:
+   ```
+   Verification scope: [N] files
+   [list files or summary]
+   ```
+
+---
 
 ## Phase 2: Agent Selection
 
@@ -36,25 +128,73 @@ If any selected TOML is missing, use/load `rptc-init` to copy the packaged agent
 
 **Actions**:
 
-1. **Ask user for agent selection** via request_user_input when available, otherwise ask directly in chat:
+1. **Ask user for agent selection** via request_user_input:
 
-   ```
-   Use request_user_input when available, otherwise ask directly in chat:
-   question: "Which verification agents should run?"
-   header: "Agents"
-   options:
-     - label: "Full (Recommended)"
-       description: "All 3 agents: Code Review + Security + Documentation"
-     - label: "Code + Security"
-       description: "Code Review + Security agents (skip documentation)"
-     - label: "Docs only"
-       description: "Documentation agent only"
+   ```json
+   {
+     "questions": [{
+       "id": "verification_agents",
+       "header": "Agents",
+       "question": "Which verification agents should run?",
+       "options": [
+         {"label": "Full (Recommended)", "description": "All 3 agents: Code Review + Security + Documentation"},
+         {"label": "Code + Security", "description": "Code Review + Security agents (skip documentation)"},
+         {"label": "Docs only", "description": "Documentation agent only"}
+       ]
+     }]
+   }
    ```
 
 2. **Map selection to agent list**:
    - "Full" → `rptc:code-review-agent`, `rptc:security-agent`, `rptc:docs-agent`
    - "Code + Security" → `rptc:code-review-agent`, `rptc:security-agent`
    - "Docs only" → `rptc:docs-agent`
+
+---
+
+## Phase 3: Launch Verification Agents
+
+**Goal**: Run selected agents in parallel, report-only mode.
+
+**AGENT NAMESPACE LOCKOUT:**
+- ✅ CORRECT: `agent_type: "rptc:code-review-agent"`
+- ❌ WRONG: `agent_type: "feature-dev:code-reviewer"` — different plugin, not RPTC
+- ❌ WRONG: `agent_type: "code-review:code-review"` — different plugin, not RPTC
+- The `rptc:` prefix is required for ALL verification agents. No exceptions.
+
+**Actions**:
+
+1. **Launch selected agents in parallel** — Make spawn_agent calls for each:
+
+   **Code Review Agent** (if selected):
+   ```
+   Use spawn_agent tool with agent_type: "rptc:code-review-agent":
+   ⚠️ WRONG agents: "feature-dev:code-reviewer", "code-review:code-review" — DO NOT USE
+
+   prompt: "Review code quality for these files: [list files].
+   Focus: complexity, KISS/YAGNI violations, dead code, readability.
+   REPORT ONLY - do not make changes. Output: confidence-scored findings (≥80 only)."
+   ```
+
+   **Security Agent** (if selected):
+   ```
+   Use spawn_agent tool with agent_type: "rptc:security-agent":
+   prompt: "Security review for these files: [list files].
+   Focus: input validation, auth checks, injection vulnerabilities, data exposure.
+   REPORT ONLY - do not make changes. Output: confidence-scored findings (≥80 only)."
+   ```
+
+   **Documentation Agent** (if selected):
+   ```
+   Use spawn_agent tool with agent_type: "rptc:docs-agent":
+   prompt: "Review documentation impact for these files: [list files].
+   Focus: README updates, API doc changes, inline comment accuracy, breaking changes.
+   REPORT ONLY - do not make changes. Output: documentation updates needed (≥80 only)."
+   ```
+
+2. **Wait for all agents** to complete
+
+---
 
 ## Phase 4: Consolidate and Address Findings
 
@@ -66,12 +206,14 @@ If any selected TOML is missing, use/load `rptc-init` to copy the packaged agent
    - Categorize: bugs, security, style, structural, documentation
    - Filter to high-confidence issues only (≥80)
 
-2. **Create update_plan for ALL findings**:
-   ```
-   update_plan with status="pending":
-   - [Category] Finding 1: description (file:line)
-   - [Category] Finding 2: description (file:line)
-   ...
+2. **Create `update_plan` entries for ALL findings**:
+   ```json
+   {
+     "plan": [
+       {"step": "[Category] Finding 1: description (file:line)", "status": "pending"},
+       {"step": "[Category] Finding 2: description (file:line)", "status": "pending"}
+     ]
+   }
    ```
 
 3. **Auto-fix findings** (no user approval needed for most issues):
@@ -94,15 +236,49 @@ If any selected TOML is missing, use/load `rptc-init` to copy the packaged agent
    **Process**:
    - Work through update_plan items sequentially
    - For auto-fix items: Apply fix, mark complete
-   - For ask-first items: Use request_user_input when available, otherwise ask directly in chat with fix proposal, then apply or skip
+   - For ask-first items: Use request_user_input with fix proposal, then apply or skip
    - Mark all todos complete as addressed
+
+---
+
+## Phase 5: Summary
+
+**Goal**: Report what was verified and what was addressed.
+
+**Actions**:
+
+1. **Mark all todos complete**
+
+2. **Summary output**:
+
+```markdown
+## Verification Complete
+
+### Scope
+- Files verified: [N]
+- Agents used: [list]
+
+### Findings
+- Total findings: [N]
+- Auto-fixed: [N]
+- User-approved fixes: [N]
+- Skipped: [N]
+
+### Changes Made
+- [list files modified by fixes, if any]
+
+### Next Steps
+- [Ready for `rptc:rptc-commit`, or additional fixes needed]
+```
+
+---
 
 ## Key Principles
 
-1. **Standalone operation**: Works independently of `/rptc:feat` and `/rptc:fix`
+1. **Standalone operation**: Works independently of `rptc:rptc-feat` and `rptc:rptc-fix`
 2. **Same agents, same quality**: Uses identical verification agents as Phase 4
 3. **User controls scope**: Default to git diff, accept path overrides
-4. **Always asks agent selection**: Unlike Phase 4 (which reads `verification-agent-mode` from AGENTS.md), this command always prompts via request_user_input when available, otherwise ask directly in chat — giving users explicit control each run
+4. **Always asks agent selection**: Unlike Phase 4 (which reads `verification-agent-mode` from AGENTS.md), this skill always prompts via request_user_input — giving users explicit control each run
 5. **Auto-fix by default**: Fix Tier 2-4 issues automatically; ask only for Tier 1 or major changes
 6. **Confidence filtering**: Only surface issues ≥80 confidence
 

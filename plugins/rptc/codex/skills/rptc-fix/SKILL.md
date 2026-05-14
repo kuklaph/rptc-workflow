@@ -1,10 +1,9 @@
 ---
 name: rptc-fix
-description: Reproduction → Root Cause → Fix → Verification. Use when the user asks for /rptc:fix or the equivalent RPTC Codex workflow intent.
+description: Reproduction -> Root Cause -> Fix -> Verification. Use when the user asks for /rptc:fix or the equivalent RPTC Codex workflow intent.
 ---
 
-# /rptc:fix
-
+# RPTC Fix
 Systematic bug fixing: Reproduction → Root Cause Analysis → Fix → Verification.
 
 ## Step 0: RPTC Workflow Initialization (MANDATORY - CANNOT SKIP)
@@ -13,7 +12,7 @@ Systematic bug fixing: Reproduction → Root Cause Analysis → Fix → Verifica
 
 ### 0.1 Load Required Skills (ALL FIVE MANDATORY)
 
-Load ALL five skills below. Each listed skill is MANDATORY — do not skip any.
+Load ALL five skills below. Each skill load is MANDATORY - do not skip any.
 
 ```
 Use/load the `rptc:tool-guide` skill.
@@ -25,7 +24,7 @@ Use/load the `rptc:structure-methodology` skill.
 
 After loading, confirm all five loaded. If ANY skill fails to load, STOP and report the failure.
 
-> **Note**: Codex omits the Claude `fix-team` command because it depends on persistent team-agent messaging. For larger fixes, use this workflow with parent-orchestrated `spawn_agent` delegation where appropriate.
+> **Note**: Codex omits Claude's persistent team commands. For batch work across independent bugs, use parent-orchestrated `spawn_agent` delegation with clear ownership boundaries.
 
 ### 0.1.1 Conditional Skills (Load When Applicable)
 
@@ -43,23 +42,15 @@ Use/load the `rptc:frontend-design` skill.
 
 Serena tools are **deferred** in the main context — they require explicit loading before they can be called.
 
-Use tool discovery to activate them when available:
+Call ToolSearch now to activate them:
 
 ```
-Use tool discovery for Serena when available, then activate Serena tools.
+ToolSearch(query: "serena")
 ```
 
 Once loaded, Serena tools appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*`. This activates both read tools (`find_symbol`, `get_symbols_overview`, `search_for_pattern`, etc.) and edit tools (`replace_symbol_body`, `insert_after_symbol`, etc.). Use them throughout this workflow — refer to the Tool Prioritization section for the full map of Serena vs. native tools.
 
 If Serena is unavailable (not installed), skip silently and fall back to native Grep and Glob.
-
-### 0.1.3 Custom Agent Availability (Before Delegation)
-
-Before any `spawn_agent` call for an RPTC custom agent, verify the required TOML agents are installed in `.codex/agents/` or the user's Codex agents directory.
-
-Required for this workflow when delegation is used: `rptc:architect-agent`, `rptc:tdd-agent`, `rptc:code-review-agent`, `rptc:security-agent`, `rptc:docs-agent`.
-
-If any required TOML is missing, use/load `rptc-init` to copy the packaged agents, then re-check. If agents are still unavailable, use built-in `explorer`/`worker` agents only when they can preserve the same role boundaries; otherwise keep the work in the main context and report the limitation.
 
 ### 0.2 RPTC Workflow Understanding (INTERNALIZE)
 
@@ -75,14 +66,14 @@ You are executing the **RPTC (Research → Plan → TDD → Commit)** workflow f
 
 | Topic | Check First (User) | Fallback (RPTC) |
 |-------|-------------------|-----------------|
-| Architecture | Project `sop/`, `user/project SOPs` | `the RPTC plugin root/sop/architecture-patterns.md` |
-| Testing | Project `sop/`, `user/project SOPs` | `the RPTC plugin root/sop/testing-guide.md` |
-| Security | Project `sop/`, `user/project SOPs` | `the RPTC plugin root/sop/security-and-performance.md` |
-| Progress Tracking | Project `sop/`, `user/project SOPs` | `update_plan` with explicit ordered phase steps (see Step 0.5) |
-| Refactoring | Project `sop/`, `user/project SOPs` | `the RPTC plugin root/sop/post-tdd-refactoring.md` |
-| Frontend | Project `sop/`, `user/project SOPs` | `the RPTC plugin root/sop/frontend-guidelines.md` |
+| Architecture | Project `sop/`, `Codex global guidance` | `RPTC plugin root/sop/architecture-patterns.md` |
+| Testing | Project `sop/`, `Codex global guidance` | `RPTC plugin root/sop/testing-guide.md` |
+| Security | Project `sop/`, `Codex global guidance` | `RPTC plugin root/sop/security-and-performance.md` |
+| Progress Tracking | Project `sop/`, `Codex global guidance` | update_plan status tracking with sequential dependencies in prose (see Step 0.5) |
+| Refactoring | Project `sop/`, `Codex global guidance` | `RPTC plugin root/sop/post-tdd-refactoring.md` |
+| Frontend | Project `sop/`, `Codex global guidance` | `RPTC plugin root/sop/frontend-guidelines.md` |
 
-**Precedence Rule**: If user specifies custom SOPs (in project AGENTS.md, project `sop/` dir, or `user/project SOPs`), use those for the matching topic. RPTC SOPs are the fallback default.
+**Precedence Rule**: If user specifies custom SOPs (in project AGENTS.md, project `sop/` dir, or `Codex global guidance`), use those for the matching topic. RPTC SOPs are the fallback default.
 
 ### 0.3 Phase Structure Awareness
 
@@ -110,18 +101,21 @@ Before proceeding to Phase 1, confirm:
 
 ### 0.5 Phase Task Initialization
 
-Create the workflow phases as an ordered `update_plan` list. Codex supports `step` and `status`; enforce dependencies by sequence: do not start a phase until the previous phase is completed.
+Create the workflow phases with `update_plan`. Keep phases sequential in prose: do not start a later phase until the previous phase is complete.
 
-```
-update_plan:
-- pending: Phase 1: Reproduction & Triage — Confirm bug with reproduction steps
-- pending: Phase 2: Root Cause Analysis — 5 Whys methodology, identify fix approach
-- pending: Phase 3: Fix Application — Regression test + minimal fix via TDD
-- pending: Phase 4: Verification — Review agents verify fix quality
-- pending: Phase 5: Complete — Summarize fix for commit
+```json
+{
+  "plan": [
+    {"step": "Phase 1: Reproduction & Triage - Confirm bug with reproduction steps", "status": "pending"},
+    {"step": "Phase 2: Root Cause Analysis - 5 Whys methodology, identify fix approach", "status": "pending"},
+    {"step": "Phase 3: Fix Application - Regression test + minimal fix via TDD", "status": "pending"},
+    {"step": "Phase 4: Verification - Review agents verify fix quality", "status": "pending"},
+    {"step": "Phase 5: Complete - Summarize fix for commit", "status": "pending"}
+  ]
+}
 ```
 
-**At each phase**: Call `update_plan(status: "in_progress")` when starting, `update_plan(status: "completed")` when done.
+**At each phase**: call `update_plan` with the current phase `in_progress`, completed phases `completed`, and future phases `pending`.
 
 ### 0.6 Plan Continuation Detection
 
@@ -134,12 +128,22 @@ Check if the bug description argument contains **"Plan is approved"**:
    Check if currently inside a worktree: compare `git rev-parse --show-toplevel` against `git worktree list`. If in a worktree, set `WORKTREE_PATH` accordingly.
 3. Mark Phases 1 and 2 complete:
    ```
-   update_plan(Phase 1, status: "completed")
-   update_plan(Phase 2, status: "completed")
+   Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
+   Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
    ```
 4. **Proceed directly to Phase 3: Fix Application** — the plan is already approved and available in the plan file.
 
 **If NO** — this is a new bug report. Proceed to Phase 1.
+
+---
+
+## Arguments
+
+`rptc:rptc-fix <bug-description>`
+
+**Example**: `rptc:rptc-fix "Cart items disappear after page refresh"`
+
+---
 
 ## Bug Severity Classification
 
@@ -154,6 +158,37 @@ Check if the bug description argument contains **"Plan is approved"**:
 
 **Result**: Set `severity` for Phase 2 routing (S1-S2, S4 may skip plan mode). Phase 4 (Verification) is always required.
 
+---
+
+## Tool Prioritization
+
+**Serena MCP** (prefer over native tools — activated via ToolSearch in Step 0.1.2):
+
+Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` — use whichever is available.
+
+**Read operations** (use instead of native Grep/Glob/Read for code):
+
+| Task | Prefer Serena | Over Native |
+|------|---------------|-------------|
+| Find functions/classes | `get_symbols_overview` | Grep |
+| Locate specific code | `find_symbol` | Glob |
+| Find usages/references | `find_referencing_symbols` | Grep |
+| Regex search | `search_for_pattern` | Grep |
+| List directory | `list_dir` | LS |
+| Reflect on progress | `think_about_collected_information` | — |
+
+**Edit operations** (use instead of Edit tool for code modifications):
+
+| Task | Prefer Serena | Over Native |
+|------|---------------|-------------|
+| Replace function/method body | `replace_symbol_body` | Edit |
+| Insert code after a symbol | `insert_after_symbol` | Edit |
+| Insert code before a symbol | `insert_before_symbol` | Edit |
+| Rename a symbol everywhere | `rename_symbol` | Edit |
+| Reflect on task adherence | `think_about_task_adherence` | — |
+
+---
+
 ## Skills Usage Guide
 
 **`rptc:tool-guide`** - Tool prioritization for Serena MCP and other MCP servers (MANDATORY LOAD):
@@ -163,7 +198,7 @@ Check if the bug description argument contains **"Plan is approved"**:
 | Step 0 (always loaded) | Infrastructure — activates Serena for code navigation throughout |
 | All phases | Serena read ops (`find_symbol`, `search_for_pattern`) |
 
-**Method**: Tool discovery activates Serena at session start (Step 0.1.2 Activate Serena); then prefer `find_symbol`, `get_symbols_overview`, `search_for_pattern` over native Grep/Glob for all code navigation.
+**Method**: ToolSearch activates Serena at session start (Step 0.1.2 Activate Serena); then prefer `find_symbol`, `get_symbols_overview`, `search_for_pattern` over native Grep/Glob for all code navigation.
 **Timing**: Loaded first in Step 0. Applies across all phases wherever code navigation or symbol search is needed.
 
 **`brainstorming`** - Structured dialogue for fix approach exploration:
@@ -173,7 +208,7 @@ Check if the bug description argument contains **"Plan is approved"**:
 | Phase 2 (before architect agent) | Explore fix approaches when multiple options exist |
 | Throughout | Validate assumptions, clarify constraints |
 
-**Method**: One question at a time via request_user_input when available, otherwise ask directly in chat, multiple choice preferred, YAGNI ruthlessly.
+**Method**: One question at a time via request_user_input, multiple choice preferred, YAGNI ruthlessly.
 **Timing**: Main context uses this BEFORE delegating to architect agent.
 
 **`writing-clearly-and-concisely`** - Apply Strunk's Elements of Style to all prose:
@@ -190,7 +225,7 @@ Check if the bug description argument contains **"Plan is approved"**:
 
 | When | Apply To |
 |------|----------|
-| Phase 3 (Fix Application) | Any code written in main context (not delegated to `rptc:tdd-agent`) |
+| Phase 3 (Fix Application) | Any code written in main context (not delegated to tdd-agent) |
 
 **Method**: Surgical coding (search 3 similar patterns first), context discovery (check existing tests), strict RED-GREEN-REFACTOR cycle. For bug fixes: write a test that reproduces the bug FIRST (RED), then fix (GREEN).
 **Timing**: Main context applies this when handling fix directly. Sub-agent `rptc:tdd-agent` has equivalent guidance built in.
@@ -204,9 +239,174 @@ Check if the bug description argument contains **"Plan is approved"**:
 **Method**: Maintain design quality when fixing frontend bugs — preserve aesthetic intent, typography, color themes, and motion patterns.
 **Timing**: Load in Step 0.1.1 only when the bug involves frontend code. Additive creative layer on top of `frontend-guidelines.md` SOP (which always applies for engineering standards).
 
+---
+
+## Phase 1: Reproduction & Triage
+
+Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
+
+**Goal**: Confirm the bug exists and understand its triggering conditions.
+
+> 💡 **Tool Reminder**: Use Serena for code tracing.
+
+**Actions**:
+
+0. **Check for RPTC configuration** in project's AGENTS.md:
+   - Look for `<!-- RPTC-START` marker in local AGENTS.md
+   - If NOT found: Suggest user run `rptc:rptc-config` for best experience
+   - If found but outdated: Suggest user run `rptc:rptc-config` to sync with current plugin version
+
+1. **Get repo root**: `Bash("git rev-parse --show-toplevel")` → store as `REPO_ROOT` for use in worktree path computation and the Environment Context Block.
+
+2. **Create initial todo list** with phases:
+   - Reproduction & Triage, Root Cause Analysis, Fix Application, Verification, Complete
+
+3. **Gather bug context** from user:
+   - What is the expected behavior?
+   - What is the actual behavior?
+   - Steps to reproduce (if known)
+   - Environment details (if relevant)
+   - Error messages, stack traces, logs
+
+4. **If reproduction steps unclear**, ask user for clarification via request_user_input
+
+5. **Launch 2-3 research agents in parallel** for bug investigation (NOT the built-in Explore agent):
+
+```
+IMPORTANT: Use agent_type: "rptc:research-agent", NOT "Explore"
+
+[Prepend the Environment Context Block to each agent prompt]
+
+Use spawn_agent tool with agent_type: "rptc:research-agent" (launch all in parallel):
+
+Agent 1 prompt: "Investigate bug: [description].
+Use code-explorer methodology Phase 1 (Feature Discovery): Find where bug manifests, entry points, affected files.
+Return: Reproduction confirmed (Y/N), failure point location, error details."
+
+Agent 2 prompt: "Investigate bug: [description].
+Use code-explorer methodology Phase 2 (Code Flow Tracing): Trace execution from entry point to error.
+Return: Code path (file:line references), where behavior diverges from expected, data flow analysis."
+
+Agent 3 prompt: "Investigate bug: [description].
+Use code-explorer methodology Phase 3 (Architecture Analysis): What components are affected? Similar patterns elsewhere?
+Return: Affected files/functions, related code with same pattern, potential regression scope."
+```
+
+6. **Optional: Git bisect** for regressions:
+   - If bug worked before: "When did this break?"
+   - Use `git log` to find likely commit range
+   - Suggest bisect if >20 commits in range
+
+7. **Summarize findings**:
+   - Bug confirmed: Y/N
+   - Failure point: file:line
+   - Affected code paths
+   - Severity classification
+
+### Branch Strategy
+
+**Now that the scope is clear**, ask the user how to organize this work.
+
+**Choose recommendation based on Phase 1 findings:**
+- Recommend **New worktree** when: multi-file fix, >3 files to modify, risky changes, or unclear root cause that may require multiple attempts
+- Recommend **Current branch** when: small fix, single-file change, clear root cause, or already on a fix branch
+
+Put your recommended option first and append "(Recommended)" to its label.
+
+**Before asking**, prepare the option labels:
+
+1. **Get current branch name**: `git branch --show-current` → e.g. `main`
+2. **Generate worktree branch name** from the bug description:
+   - Lowercase, replace spaces with hyphens, strip special characters
+   - Prefix with `fix/`
+   - Example: `"Cart items disappear"` → `fix/cart-items-disappear`
+
+```json
+{
+  "questions": [{
+    "id": "branch_strategy",
+    "header": "Branch",
+    "question": "How should this fix be organized?",
+    "options": [
+      {"label": "<recommended-option> (Recommended)", "description": "<description>"},
+      {"label": "<other-option>", "description": "<description>"}
+    ]
+  }]
+}
+```
+
+Example — single-file fix with clear root cause on a fix branch:
+```
+  - label: "Current branch [fix/auth-bug] (Recommended)"
+  - label: "New worktree [fix/cart-items-disappear]"
+```
+
+Example — risky multi-file fix on main with unclear root cause:
+```
+  - label: "New worktree [fix/cart-items-disappear] (Recommended)"
+  - label: "Current branch [main]"
+```
+
+**If "New worktree" selected:**
+
+1. **Compute worktree path** (sibling `<repo>.worktrees/` directory, branch as subpath):
+   ```bash
+   # REPO_ROOT already set from Phase 1 Action 1
+   REPO_PARENT="$(dirname "$REPO_ROOT")"
+   REPO_NAME="$(basename "$REPO_ROOT")"
+   WORKTREE_PATH="${REPO_PARENT}/${REPO_NAME}.worktrees/<branch-name>"
+   ```
+   Example: repo at `/home/user/projects/myapp`, branch `fix/cart-bug` → worktree at `/home/user/projects/myapp.worktrees/fix/cart-bug`. `git worktree add` creates the nested directory structure automatically.
+   Store `WORKTREE_PATH` — you will reference it throughout this session.
+
+2. **Create worktree** using the absolute path:
+   ```bash
+   git worktree add -b <branch-name> "$WORKTREE_PATH" HEAD
+   ```
+
+3. **Activate and verify worktree** — change into the new directory and confirm it:
+   ```bash
+   cd "$WORKTREE_PATH" && git rev-parse --show-toplevel
+   ```
+   The output MUST match `WORKTREE_PATH`. If it does not, STOP and fix before continuing.
+
+4. **Confirm to user**:
+   ```
+   Worktree created and activated at <WORKTREE_PATH>
+   Branch: <branch-name>
+   Verified: working directory is inside worktree.
+   All subsequent work proceeds here.
+   ```
+
+5. **Set worktree active flag**: Remember that `WORKTREE_PATH` is set. ALL agent delegation
+   prompts in Phases 2-4 MUST include the worktree lines in the Environment Context Block (defined below).
+
+**If "Current branch" selected:** `WORKTREE_PATH` is not set. Continue to Phase 2.
+
+Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
+
+#### Environment Context Block
+
+Prepend this block to EVERY agent prompt in Phases 2-4 (architect, tdd, code-review, security, docs). It carries Serena activation and worktree info so sub-agents can orient themselves without guessing.
+
+```
+ENVIRONMENT:
+Repo root: <REPO_ROOT>
+Serena project: <SERENA_PROJECT_NAME>
+  → Call activate_project("<SERENA_PROJECT_NAME>") before using any Serena tools.
+[If WORKTREE_PATH is set, include these lines:]
+Worktree: <WORKTREE_PATH>
+  → cd "<WORKTREE_PATH>" before doing ANY work.
+  → All file paths are relative to this worktree root, NOT the original repo.
+```
+
+`<SERENA_PROJECT_NAME>` is the registered name from the main context's successful `activate_project` call in Step 0.1.2. If Serena was unavailable in the main context, omit the Serena lines.
+
+---
+
 ## Phase 2: Root Cause Analysis
 
-`update_plan(Phase 2, status: "in_progress")`
+Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
 
 **Goal**: Identify the fundamental cause and plan the fix.
 
@@ -227,17 +427,16 @@ Check if the bug description argument contains **"Plan is approved"**:
    - Document root cause inline
    - Proceed directly to Phase 3
 
-3. **For complex bugs (S1-S2, or unclear root cause)**: Enter plan mode
-   - Use Codex planning context
-   - **Clarify fix approach using `brainstorming` skill** (BEFORE `rptc:architect-agent`):
-     - Use request_user_input when available, otherwise ask directly in chat to explore fix options ONE question at a time
+3. **For complex bugs (S1-S2, or unclear root cause)**: Ask the user to switch to Plan Mode, then halt until the user confirms Plan Mode is active
+   - **Clarify fix approach using `brainstorming` skill** (BEFORE architect-agent):
+     - Use request_user_input to explore fix options ONE question at a time
      - Present 2-3 fix approaches with trade-offs
      - Clarify: acceptable scope, risk tolerance, timeline constraints
      - Skip if: fix approach is obvious from root cause analysis
-   - Launch `rptc:architect-agent` for fix planning:
+   - Launch architect-agent for fix planning:
 
 ```
-Use `spawn_agent` with the RPTC `rptc:architect-agent` role when installed:
+Use spawn_agent tool with agent_type: "rptc:architect-agent":
 
 [Prepend the Environment Context Block]
 
@@ -262,7 +461,7 @@ Constraints:
 - NO refactoring unrelated code
 - NO scope creep
 
-Plan structure: Begin with Step 0: RPTC Re-initialization — instructs re-invocation of `/rptc:fix` with "Plan is approved, continue to implementation" to restore full RPTC context.
+Plan structure: Begin with Step 0: RPTC Re-initialization — instructs re-invocation of `rptc:rptc-fix` with "Plan is approved, continue to implementation" to restore full RPTC context.
 ```
 
 4. **Review fix plan**:
@@ -270,13 +469,153 @@ Plan structure: Begin with Step 0: RPTC Re-initialization — instructs re-invoc
    - Is the fix minimal and surgical?
    - What's the regression risk?
 
-5. **If plan mode used**: Verify plan includes Step 0 (re-invocation of `/rptc:fix`), then exit with user approval in chat for user approval
+5. **If plan mode used**: Verify plan includes Step 0 (re-invocation of `rptc:rptc-fix`), then ask the user to leave Plan Mode / switch to execution mode. Halt until the user confirms the mode switch so the plan can be approved.
 
-`update_plan(Phase 2, status: "completed")`
+Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
+
+---
+
+## Phase 3: Fix Application
+
+Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
+
+**Goal**: Apply the fix using test-driven approach (regression test first).
+
+> 💡 **Tool Reminder**: Use Serena for both navigation and edits: `find_symbol` to locate code, `replace_symbol_body` / `insert_after_symbol` to apply changes (prefer over Edit tool).
+
+**CRITICAL - Test-First Ordering (NON-NEGOTIABLE)**:
+
+Whether delegating to tdd-agent OR executing in main context:
+
+1. Write the regression test that reproduces the bug BEFORE modifying ANY production code
+2. Update any existing tests BEFORE changing production code
+3. Run tests and confirm they fail BEFORE writing the fix
+4. Only after tests exist and fail may you edit production files
+
+**FILE LOCKOUT RULE**: During RED phase, you may ONLY create or modify test files (`tests/`, `__tests__/`, `*.test.*`, `*.spec.*`). Any edit to a production/source file during RED phase is a TDD violation. STOP and revert if this happens.
+
+#### Delegation Decision: Direct or Agent?
+
+| Criteria | Execute Directly (Main Context) | Delegate to tdd-agent |
+|----------|--------------------------------|----------------------|
+| Fix steps | 1 step (single root cause) | 2+ steps or multi-component |
+| Files affected | 1-2 files | 3+ files |
+| Estimated lines | <30 lines changed | 30+ lines |
+| Complexity | Clear root cause, obvious fix | Complex interactions, cascading changes |
+
+**If Direct**: Execute fix in main context using TDD methodology.
+
+```
+Use/load the `rptc:tdd-methodology` skill.
+```
+
+**Test-First Gate (Direct Execution)**: Execute in strict order.
+
+1. **Surgical Coding**: Search 3 similar patterns first
+2. **Context Discovery**: Check existing tests, framework, naming conventions
+3. **RED**: Write regression test reproducing the bug. Run it. Confirm it fails with same symptom.
+
+   **BLOCKING GATE — RED Phase Verification** (MANDATORY, cannot skip):
+
+   Before ANY production file edit, verify via output:
+   ```
+   RED GATE CHECK:
+   - Regression test written: [test file path]
+   - Test failing: confirms bug symptom "[symptom]"
+   - Production files touched: NONE
+   → PASS: Proceed to GREEN
+   ```
+   If production files were touched → STOP. Revert production changes. Complete RED first.
+
+4. **GREEN**: Apply minimal fix (NOW you may edit production files)
+5. **REFACTOR**: Clean up only if needed (keep fix surgical)
+6. **VERIFY**: Run affected tests, confirm regression test passes
+
+Then skip to step 2 (Update task status) below.
+
+**If Delegate**: Use tdd-agent (continue below).
+
+**Actions**:
+
+1. **Delegate to TDD agent** with regression emphasis:
+
+```
+Use spawn_agent tool with agent_type: "rptc:tdd-agent":
+
+[Prepend the Environment Context Block]
+
+## Bug Fix Context
+- Bug: [description]
+- Root Cause: [from Phase 2]
+- Fix Location: [file:line]
+- Fix Approach: [from Phase 2 plan or inline decision]
+
+## TDD Bug Fix Cycle
+
+### RED Phase (Critical — test files ONLY)
+Write a test that REPRODUCES the exact bug:
+- Test must fail with the SAME symptom as the bug
+- Test must use the SAME conditions that trigger the bug
+- Verify: test fails for the right reason (not compile error)
+- FILE LOCKOUT: Only test files may be created/modified during RED phase. Do NOT touch production files.
+
+Example structure:
+```
+test('should [expected behavior] when [condition]', () => {
+  // Arrange: Set up bug-triggering conditions
+  // Act: Perform the action that triggers the bug
+  // Assert: Verify correct behavior (currently fails)
+});
+```
+
+After writing tests, output RED GATE CHECK:
+```
+RED GATE CHECK:
+- Regression test written: [test file path]
+- Test failing: confirms bug symptom "[symptom]"
+- Production files touched: NONE
+→ PASS: Proceed to GREEN
+```
+If production files were touched → STOP. Revert. Complete RED first.
+
+### GREEN Phase (Surgical — NOW edit production files)
+Apply MINIMAL fix to make the test pass:
+- Change ONLY what's necessary to fix the root cause
+- Do NOT refactor nearby code
+- Do NOT "improve" unrelated code
+- Diff should be as small as possible
+
+### VERIFY Phase (Regression Check)
+- Run the new regression test (must pass)
+- Run related test files (must pass)
+- Run affected tests — files that import or reference changed modules (must pass)
+- Run ONLY affected tests — do NOT run the full test suite (full suite runs are reserved for `rptc:rptc-commit`)
+- Report any new failures
+
+## Constraints
+- Maximum 3 implementation steps
+- Keep fix surgical and minimal
+- Flag if fix suggests larger refactoring need (don't do it, just flag)
+```
+
+1b. **Verify fix compliance**: After tdd-agent returns, check the exit verification block:
+    - `Test-First Followed: YES` → continue
+    - `Test-First Followed: NO` → flag as TDD violation, ask user whether to re-run or accept
+
+2. **Update task status** as fix progresses (an `update_plan` call with the full `plan` list and updated statuses)
+
+3. **Handle failures**:
+   - If test won't reproduce bug: Return to Phase 1 for better reproduction
+   - If fix causes new failures: Analyze regression, adjust fix
+   - If fix attempt fails 3x: Ask user for guidance
+
+Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
+
+---
 
 ## Phase 4: Verification
 
-`update_plan(Phase 4, status: "in_progress")`
+Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
 
 **Goal**: Verify the fix works and didn't introduce regressions.
 
@@ -292,18 +631,20 @@ Plan structure: Begin with Step 0: RPTC Re-initialization — instructs re-invoc
 
    b. **If AGENTS.md exists**, look for `verification-agent-mode:` setting:
       - If found: Use that mode (`automatic`, `all`, or `minimal`)
-      - If not found: Ask user via request_user_input when available, otherwise ask directly in chat (one-time setup):
-        ```
-        Use request_user_input when available, otherwise ask directly in chat:
-        question: "How should verification agents be selected for this project? (saved to AGENTS.md)"
-        header: "Verification Mode"
-        options:
-          - label: "Automatic (Recommended)"
-            description: "Smart selection based on file types and change patterns"
-          - label: "All Agents"
-            description: "Always launch all 3 verification agents"
-          - label: "Minimal"
-            description: "Only launch agents when strongly indicated"
+      - If not found: Ask user via request_user_input (one-time setup):
+        ```json
+        {
+          "questions": [{
+            "id": "verification_mode",
+            "header": "Verification",
+            "question": "How should verification agents be selected for this project? (saved to AGENTS.md)",
+            "options": [
+              {"label": "Automatic (Recommended)", "description": "Smart selection based on file types and change patterns"},
+              {"label": "All Agents", "description": "Always launch all 3 verification agents"},
+              {"label": "Minimal", "description": "Only launch agents when strongly indicated"}
+            ]
+          }]
+        }
         ```
         Then append to AGENTS.md:
         ```markdown
@@ -328,8 +669,8 @@ Plan structure: Begin with Step 0: RPTC Re-initialization — instructs re-invoc
    | Docs/markdown only | ❌ | ❌ | ✅ |
 
    **Keyword detection** (scan git diff):
-   - Security keywords: `password`, `token`, `secret`, `auth`, `session`, `crypto`, `hash`, `sql`, `exec`, `eval` → include `rptc:security-agent`
-   - API keywords: `export`, `interface`, `endpoint`, `route`, `version` → include `rptc:docs-agent`
+   - Security keywords: `password`, `token`, `secret`, `auth`, `session`, `crypto`, `hash`, `sql`, `exec`, `eval` → include security-agent
+   - API keywords: `export`, `interface`, `endpoint`, `route`, `version` → include docs-agent
 
    **Default**: If uncertain, include the agent
 
@@ -341,14 +682,14 @@ Plan structure: Begin with Step 0: RPTC Re-initialization — instructs re-invoc
 3. **Launch selected verification agents**:
 
    **AGENT NAMESPACE LOCKOUT (Phase 4):**
-   - ✅ CORRECT: RPTC `rptc:code-review-agent` role
-   - ❌ WRONG: `feature-dev:code-reviewer` role — different plugin, not RPTC
-   - ❌ WRONG: `code-review:code-review` role — different plugin, not RPTC
+   - ✅ CORRECT: `agent_type: "rptc:code-review-agent"`
+   - ❌ WRONG: `agent_type: "feature-dev:code-reviewer"` — different plugin, not RPTC
+   - ❌ WRONG: `agent_type: "code-review:code-review"` — different plugin, not RPTC
    - The `rptc:` prefix is required for ALL verification agents. No exceptions.
 
    **Code Review Agent** (if selected):
    ```
-   Use `spawn_agent` with the RPTC `rptc:code-review-agent` role when installed:
+   Use spawn_agent tool with agent_type: "rptc:code-review-agent":
    ⚠️ WRONG agents: "feature-dev:code-reviewer", "code-review:code-review" — DO NOT USE
 
    [Prepend the Environment Context Block]
@@ -361,7 +702,7 @@ Plan structure: Begin with Step 0: RPTC Re-initialization — instructs re-invoc
 
    **Security Agent** (if selected):
    ```
-   Use `spawn_agent` with the RPTC `rptc:security-agent` role when installed:
+   Use spawn_agent tool with agent_type: "rptc:security-agent":
 
    [Prepend the Environment Context Block]
 
@@ -373,7 +714,7 @@ Plan structure: Begin with Step 0: RPTC Re-initialization — instructs re-invoc
 
    **Documentation Agent** (if selected):
    ```
-   Use `spawn_agent` with the RPTC `rptc:docs-agent` role when installed:
+   Use spawn_agent tool with agent_type: "rptc:docs-agent":
 
    [Prepend the Environment Context Block]
 
@@ -406,28 +747,43 @@ Plan structure: Begin with Step 0: RPTC Re-initialization — instructs re-invoc
 
    **Process**:
    - Work through finding tasks sequentially
-   - For auto-fix items: Apply fix, mark complete (`update_plan(finding, status: "completed")`)
-   - For ask-first items: Use request_user_input when available, otherwise ask directly in chat with fix proposal, then apply or skip
+   - For auto-fix items: Apply fix, mark complete (an `update_plan` call with the full `plan` list and updated statuses)
+   - For ask-first items: Use request_user_input with fix proposal, then apply or skip
    - Mark all finding tasks complete as addressed
 
 7. **User Acknowledgment**:
 
-   Present review results to the user. This is a tool-enforced gate — you MUST call request_user_input when available, otherwise ask directly in chat here.
+   Present review results to the user. This is a tool-enforced gate — you MUST call request_user_input here.
 
+   ```json
+   {
+     "questions": [{
+       "id": "verification_gate",
+       "header": "Verification",
+       "question": "Phase 4 verification complete. [N] findings addressed. Proceed to completion?",
+       "options": [
+         {"label": "Proceed to Phase 5 (Recommended)", "description": "All verification findings addressed, ready to wrap up"},
+         {"label": "Re-verify with `rptc:rptc-verify`", "description": "Run the standalone verification workflow to check current state"}
+       ]
+     }]
+   }
    ```
-   Use request_user_input when available, otherwise ask directly in chat:
-   question: "Phase 4 verification complete. [N] findings addressed. Proceed to completion?"
-   header: "Verification Gate"
-   options:
-     - label: "Proceed to Phase 5"
-       description: "All verification findings addressed, ready to wrap up"
-     - label: "Re-verify with /rptc:verify"
-       description: "Run the standalone verification command to check current state"
-   ```
 
-   If user selects "Re-verify" → invoke `/rptc:verify` (uses the standalone verify workflow with agent selection and full re-scan).
+   If user selects "Re-verify" → invoke `rptc:rptc-verify` (uses the standalone verify workflow with agent selection and full re-scan).
 
-`update_plan(Phase 4, status: "completed")`
+Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
+
+---
+
+## Phase 5: Complete
+
+Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
+
+Mark remaining tasks complete. Output 1-2 sentences: root cause, fix, regression test added. Ready for `rptc:rptc-commit`.
+
+Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
+
+---
 
 ## Key Principles
 
@@ -437,6 +793,24 @@ Plan structure: Begin with Step 0: RPTC Re-initialization — instructs re-invoc
 4. **Minimal and surgical**: Smallest possible change to fix the root cause
 5. **No scope creep**: Flag refactoring needs, don't do them in bug fix
 6. **Verify thoroughly**: Check that fix works AND didn't break related functionality
+
+---
+
+## Differences from `rptc:rptc-feat`
+
+| Aspect | `rptc:rptc-feat` | `rptc:rptc-fix` |
+|--------|------------|-----------|
+| **Goal** | Build new functionality | Fix existing behavior |
+| **Phase 1** | Discover patterns | Reproduce failure |
+| **Phase 2** | Design (3 perspectives) | Diagnose (single analysis) |
+| **Phase 3** | Multi-step TDD | Regression test + minimal fix |
+| **Phase 4** | Quality verification | Quality verification + regression focus |
+| **Test Focus** | Define NEW behavior | Prevent RECURRENCE |
+| **Scope** | Can be large | Must be minimal |
+| **Plan Mode** | Always required | Optional for simple bugs |
+| **Typical Steps** | 5-15 steps | 1-3 steps |
+
+---
 
 ## Error Handling
 

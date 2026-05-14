@@ -1,6 +1,6 @@
 {
   "name": "rptc",
-  "version": "3.16.2",
+  "version": "3.16.3",
   "description": "Research -> Plan -> TDD -> Commit workflow with quality gates, test-driven implementation, and documentation review.",
   "author": {
     "name": "kuklaph",

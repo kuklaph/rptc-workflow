@@ -3,11 +3,66 @@ name: rptc-research
 description: Interactive discovery and brainstorming with parallel exploration. Use when the user asks for /rptc:research or the equivalent RPTC Codex workflow intent.
 ---
 
-# /rptc:research
-
-Research partner for discovery and brainstorming. Use before `/rptc:feat` when you need deep understanding first.
+# RPTC Research
+Research partner for discovery and brainstorming. Use before `rptc:rptc-feat` when you need deep understanding first.
 
 **Arguments**: Topic to research (e.g., "authentication system", "payment processing")
+
+---
+
+## Step 0: RPTC Workflow Initialization (MANDATORY - CANNOT SKIP)
+
+**Before ANY other action, establish RPTC workflow context.**
+
+### 0.1 Load Required Skills
+
+```
+Use/load the `rptc:writing-clearly-and-concisely` skill.
+Use/load the `rptc:html-report-generator` skill.
+```
+
+**Wait for skills to load before proceeding.**
+
+### 0.2 RPTC Workflow Understanding (INTERNALIZE)
+
+You are executing **RPTC Research** - the discovery phase that feeds into `rptc:rptc-feat`.
+
+**Core Philosophy:**
+- Understand before building
+- Explore thoroughly before recommending
+- Document findings for future phases
+- User guides the research direction
+
+**Non-Negotiable Directives:**
+
+| Directive | Meaning |
+|-----------|---------|
+| **Thorough Exploration** | Check multiple sources, patterns, and approaches |
+| **Pattern Discovery** | Find existing patterns before proposing new ones |
+| **User Collaboration** | Validate understanding with user throughout |
+| **Clear Documentation** | Apply writing skill to all output |
+
+**SOP Reference Chain (with Precedence):**
+
+| Topic | Check First (User) | Fallback (RPTC) |
+|-------|-------------------|-----------------|
+| Architecture | Project `sop/`, `Codex global guidance` | `RPTC plugin root/sop/architecture-patterns.md` |
+
+**Precedence Rule**: If user specifies custom SOPs (in project AGENTS.md, project `sop/` dir, or `Codex global guidance`), use those for the matching topic. RPTC SOPs are the fallback default.
+
+**Output Templates:**
+- Codebase research: `RPTC plugin root/templates/research-codebase.md`
+- Web research: `RPTC plugin root/templates/research-web.md`
+- Hybrid research: `RPTC plugin root/templates/research-hybrid.md`
+
+### 0.3 Initialization Verification
+
+Before proceeding to Phase 1, confirm:
+- Skills loaded and active
+- RPTC directives understood
+- Research scope clear
+
+---
 
 ## Skills Usage Guide
 
@@ -20,9 +75,21 @@ Research partner for discovery and brainstorming. Use before `/rptc:feat` when y
 
 **Key rules**: Active voice, positive form, definite language, omit needless words.
 
-## Custom Agent Availability
+---
 
-Before spawning `rptc:research-agent`, verify its TOML is installed in `.codex/agents/` or the user's Codex agents directory. If missing, use/load `rptc-init` to copy the packaged agents, then re-check. If still unavailable, use the built-in `explorer` agent for codebase research and the main context for web research, and report the fallback.
+## Phase 1: Understand the Question
+
+**Goal**: Clarify what the user wants to learn.
+
+**Actions**:
+1. Parse the research topic
+2. Classify research type:
+   - **Codebase**: "where is", "how does our", "existing", "refactor"
+   - **Web**: "best practices", "compare", "latest", "industry standard"
+   - **Hybrid**: Contains both types of keywords
+3. If unclear, ask user to clarify scope
+
+---
 
 ## Phase 2: Discovery
 
@@ -34,9 +101,9 @@ Before spawning `rptc:research-agent`, verify its TOML is installed in `.codex/a
 1. **Launch 2-3 research agents in parallel** with different focuses (NOT the built-in Explore agent):
 
 ```
-IMPORTANT: Use RPTC `rptc:research-agent` role, NOT "Explore"
+IMPORTANT: Use agent_type: "rptc:research-agent", NOT "Explore"
 
-Use `spawn_agent` with the RPTC `rptc:research-agent` role when installed (launch all 3 in parallel):
+Use spawn_agent tool with agent_type: "rptc:research-agent" (launch all 3 in parallel):
 
 Agent 1 prompt: "Find similar features and existing patterns for [topic].
 Use code-explorer methodology Phase 1 (Feature Discovery).
@@ -60,10 +127,10 @@ Return: external dependencies, internal dependencies, API boundaries."
 ### For Web Research
 
 **Actions**:
-1. **Delegate to `rptc:research-agent`** with context:
+1. **Delegate to research-agent** with context:
 
 ```
-Use `spawn_agent` with the RPTC `rptc:research-agent` role when installed:
+Use spawn_agent tool with agent_type: "rptc:research-agent":
 
 prompt: "Research [topic] for [project tech stack].
 Questions to answer: [specific questions].
@@ -82,6 +149,21 @@ Return: findings with confidence levels, recommendations, sources."
 1. Launch codebase exploration AND web research in parallel
 2. Gap analysis: What does our code do vs. what best practices recommend?
 3. Prioritized recommendations
+
+---
+
+## Phase 3: Interactive Clarification
+
+**Goal**: Ensure understanding before synthesis.
+
+**Actions**:
+1. As findings emerge, ask clarifying questions if:
+   - Multiple valid interpretations exist
+   - Scope needs narrowing
+   - User's priorities are unclear
+2. Do NOT ask mandatory menu questions - only ask when genuinely uncertain
+
+---
 
 ## Phase 4: Present Findings
 
@@ -113,6 +195,23 @@ Return: findings with confidence levels, recommendations, sources."
 ### Next Steps
 - [What to do next]
 ```
+
+---
+
+## Phase 5: Optional - Save Research
+
+**Goal**: Persist research if user explicitly requests.
+
+**Actions** (only if user asks to save):
+1. Create research document in `docs/research/`
+2. Include date, methodology, detailed findings, references
+
+```bash
+mkdir -p docs/research
+# Write to docs/research/YYYYMMDD-topic-slug.md
+```
+
+---
 
 ## Key Principles
 

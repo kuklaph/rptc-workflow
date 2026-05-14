@@ -3,17 +3,70 @@ name: rptc-verify-loop
 description: Run quality verification agents in a loop until all report 0 findings. Use when the user asks for /rptc:verify-loop or the equivalent RPTC Codex workflow intent.
 ---
 
-# /rptc:verify-loop
-
+# RPTC Verify Loop
 Run quality verification agents repeatedly until all agents report 0 findings.
 After each iteration, auto-fix mechanical issues and optionally fix structural
 issues with user approval. Use when you want a fully clean result, not just a
 single-pass check.
 
 **Arguments**:
-- None: `/rptc:verify-loop` - Verify uncommitted changes (git diff)
-- With path: `/rptc:verify-loop "src/"` - Verify specific directory or files
-- Full app: `/rptc:verify-loop "."` - Verify entire codebase
+- None: `rptc:rptc-verify-loop` - Verify uncommitted changes (git diff)
+- With path: `rptc:rptc-verify-loop "src/"` - Verify specific directory or files
+- Full app: `rptc:rptc-verify-loop "."` - Verify entire codebase
+
+---
+
+## Step 0: RPTC Workflow Initialization (MANDATORY - CANNOT SKIP)
+
+**Before ANY other action, establish RPTC workflow context.**
+
+### 0.1 Load Required Skills
+
+```
+Use/load the `rptc:writing-clearly-and-concisely` skill.
+```
+
+**Wait for skill to load before proceeding.**
+
+### 0.2 RPTC Workflow Understanding (INTERNALIZE)
+
+You are executing **RPTC Verify Loop** — a convergence-mode variant of `rptc:rptc-verify`
+that runs the verify-fix cycle until all agents report 0 findings or a safety
+condition exits the loop.
+
+**Core Philosophy:**
+- Verification catches issues before they ship
+- Report-only agents — findings are addressed by main context
+- Confidence filtering removes noise (≥80 only)
+- Loop exits cleanly; never spins forever
+
+**Non-Negotiable Directives:**
+
+| Directive | Meaning |
+|-----------|---------|
+| **Quality Verification** | All agents run in report-only mode |
+| **Confidence Filtering** | Only surface findings ≥80 confidence |
+| **User Authority** | User must approve Tier 1 (structural) findings |
+| **Loop Safety** | Max iterations, stagnation detection, and skip tracking prevent endless loops |
+
+**SOP Reference Chain (with Precedence):**
+
+| Topic | Check First (User) | Fallback (RPTC) |
+|-------|-------------------|-----------------|
+| Architecture | Project `sop/`, `Codex global guidance` | `RPTC plugin root/sop/architecture-patterns.md` |
+| Security | Project `sop/`, `Codex global guidance` | `RPTC plugin root/sop/security-and-performance.md` |
+| Refactoring | Project `sop/`, `Codex global guidance` | `RPTC plugin root/sop/post-tdd-refactoring.md` |
+
+**Precedence Rule**: If user specifies custom SOPs (in project AGENTS.md, project `sop/` dir, or `Codex global guidance`), use those for the matching topic. RPTC SOPs are the fallback default.
+
+### 0.3 Initialization Verification
+
+Before proceeding to Phase 1, confirm:
+- Skill loaded and active
+- RPTC directives understood
+- Verification scope clear
+
+---
 
 ## Skills Usage Guide
 
@@ -25,13 +78,55 @@ single-pass check.
 
 **Key rules**: Active voice, positive form, definite language, omit needless words.
 
-## Custom Agent Availability
+---
 
-Before spawning verification agents, verify the required TOML agents are installed in `.codex/agents/` or the user's Codex agents directory.
+## Phase 1: Determine Scope
 
-Required based on selection: `rptc:code-review-agent`, `rptc:security-agent`, `rptc:docs-agent`.
+**Goal**: Identify which files to verify. This runs once — the same scope is used
+for every iteration of the loop.
 
-If any selected TOML is missing, use/load `rptc-init` to copy the packaged agents, then re-check. If agents are still unavailable, run the selected review scopes in the main context and report the limitation.
+**Actions**:
+
+1. **Parse arguments**:
+   - **No arguments**: Use uncommitted changes as scope
+   - **Path argument**: Use specified path(s) as scope
+
+2. **If no arguments**, collect files from git:
+   ```bash
+   git diff --name-only
+   git diff --cached --name-only
+   ```
+   Combine staged and unstaged changes into a single file list.
+
+3. **If path argument provided**, collect files:
+   ```bash
+   # For directories: list all source files
+   # For specific files: use as-is
+   ```
+
+4. **If no changes detected and no path provided**, ask user:
+   ```json
+   {
+     "questions": [{
+       "id": "verify_scope",
+       "header": "Scope",
+       "question": "No uncommitted changes found. What would you like to verify?",
+       "options": [
+         {"label": "Specify a path (Recommended)", "description": "I'll provide a directory or file path to verify"},
+         {"label": "Full codebase", "description": "Run verification across the entire project"},
+         {"label": "Cancel", "description": "Nothing to verify right now"}
+       ]
+     }]
+   }
+   ```
+
+5. **Report scope**:
+   ```
+   Verification scope: [N] files
+   [list files or summary]
+   ```
+
+---
 
 ## Phase 2: Agent Selection
 
@@ -39,25 +134,49 @@ If any selected TOML is missing, use/load `rptc-init` to copy the packaged agent
 
 **Actions**:
 
-1. **Ask user for agent selection** via request_user_input when available, otherwise ask directly in chat:
+1. **Ask user for agent selection** via request_user_input:
 
-   ```
-   Use request_user_input when available, otherwise ask directly in chat:
-   question: "Which verification agents should run each iteration?"
-   header: "Agents"
-   options:
-     - label: "Full (Recommended)"
-       description: "All 3 agents: Code Review + Security + Documentation"
-     - label: "Code + Security"
-       description: "Code Review + Security agents (skip documentation)"
-     - label: "Docs only"
-       description: "Documentation agent only"
+   ```json
+   {
+     "questions": [{
+       "id": "verification_agents",
+       "header": "Agents",
+       "question": "Which verification agents should run each iteration?",
+       "options": [
+         {"label": "Full (Recommended)", "description": "All 3 agents: Code Review + Security + Documentation"},
+         {"label": "Code + Security", "description": "Code Review + Security agents (skip documentation)"},
+         {"label": "Docs only", "description": "Documentation agent only"}
+       ]
+     }]
+   }
    ```
 
 2. **Map selection to agent list**:
    - "Full" → `rptc:code-review-agent`, `rptc:security-agent`, `rptc:docs-agent`
    - "Code + Security" → `rptc:code-review-agent`, `rptc:security-agent`
    - "Docs only" → `rptc:docs-agent`
+
+---
+
+## Phase 3: Convergence Loop
+
+**Goal**: Run agents and fix findings repeatedly until 0 findings remain or a
+safety condition exits the loop.
+
+### Loop State (initialize once, before the loop starts)
+
+```
+iteration              = 1
+max_iterations         = 5
+last_iteration_count   = 0    // findings count from previous iteration (for max-iterations prompt)
+findings_history       = {}   // finding_key → consecutive hit count
+                               // key = "file:line:category:brief-description"
+skipped_tier1          = []   // findings user declined to fix
+```
+
+### Loop Body (repeat until an EXIT condition)
+
+---
 
 #### 1. Iteration Header
 
@@ -68,19 +187,44 @@ Print at the start of each iteration:
 Running [agent list] on [N] files...
 ```
 
+---
+
+#### 2. Max Iterations Check
+
+If `iteration > max_iterations`, ask before launching agents:
+
+```json
+{
+  "questions": [{
+    "id": "max_iterations",
+    "header": "Max Iterations",
+    "question": "Reached [max_iterations] iterations. [last_iteration_count] finding(s) remain. Continue 5 more iterations or stop?",
+    "options": [
+      {"label": "Stop and summarize (Recommended)", "description": "Accept remaining findings as known issues"},
+      {"label": "Continue 5 more iterations", "description": "Extend the loop and keep trying"}
+    ]
+  }]
+}
+```
+
+If "Stop and summarize" → record exit reason `MAX_ITERATIONS` → **EXIT LOOP**
+If "Continue" → `max_iterations += 5`, proceed
+
+---
+
 #### 3. Launch Verification Agents (parallel)
 
 **AGENT NAMESPACE LOCKOUT:**
-- ✅ CORRECT: RPTC `rptc:code-review-agent` role
-- ❌ WRONG: `feature-dev:code-reviewer` role — different plugin, not RPTC
-- ❌ WRONG: `code-review:code-review` role — different plugin, not RPTC
+- ✅ CORRECT: `agent_type: "rptc:code-review-agent"`
+- ❌ WRONG: `agent_type: "feature-dev:code-reviewer"` — different plugin, not RPTC
+- ❌ WRONG: `agent_type: "code-review:code-review"` — different plugin, not RPTC
 - The `rptc:` prefix is required for ALL verification agents. No exceptions.
 
-Make `spawn_agent` calls for each selected agent simultaneously:
+Make spawn_agent calls for each selected agent simultaneously:
 
 **Code Review Agent** (if selected):
 ```
-Use `spawn_agent` with the RPTC `rptc:code-review-agent` role when installed:
+Use spawn_agent tool with agent_type: "rptc:code-review-agent":
 ⚠️ WRONG agents: "feature-dev:code-reviewer", "code-review:code-review" — DO NOT USE
 
 prompt: "Review code quality for these files: [list files].
@@ -90,7 +234,7 @@ REPORT ONLY - do not make changes. Output: confidence-scored findings (≥80 onl
 
 **Security Agent** (if selected):
 ```
-Use `spawn_agent` with the RPTC `rptc:security-agent` role when installed:
+Use spawn_agent tool with agent_type: "rptc:security-agent":
 prompt: "Security review for these files: [list files].
 Focus: input validation, auth checks, injection vulnerabilities, data exposure.
 REPORT ONLY - do not make changes. Output: confidence-scored findings (≥80 only)."
@@ -98,13 +242,29 @@ REPORT ONLY - do not make changes. Output: confidence-scored findings (≥80 onl
 
 **Documentation Agent** (if selected):
 ```
-Use `spawn_agent` with the RPTC `rptc:docs-agent` role when installed:
+Use spawn_agent tool with agent_type: "rptc:docs-agent":
 prompt: "Review documentation impact for these files: [list files].
 Focus: README updates, API doc changes, inline comment accuracy, breaking changes.
 REPORT ONLY - do not make changes. Output: documentation updates needed (≥80 only)."
 ```
 
 Wait for all agents to complete.
+
+---
+
+#### 4. Evaluate Findings
+
+1. Collect all findings from agents
+2. Filter to ≥80 confidence
+3. Record `raw_count` = number of findings before skipped filtering
+4. Remove any findings that match entries in `skipped_tier1` (already declined by user)
+5. Update `last_iteration_count` = number of remaining findings after filtering
+6. **Exit condition check**:
+   - If `raw_count == 0` → record exit reason `CLEAN` → **EXIT LOOP** → go to Phase 4
+   - If `last_iteration_count == 0` (all findings were pre-skipped, raw_count > 0)
+     → record exit reason `USER_SKIPPED` → **EXIT LOOP** → go to Phase 4
+
+---
 
 #### 5. Stagnation Check
 
@@ -118,16 +278,18 @@ Compare against `findings_history`:
 If any key has a consecutive hit count ≥ 2 (appeared in 2+ consecutive iterations
 without being fixed):
 
-```
-Use request_user_input when available, otherwise ask directly in chat:
-question: "Stagnation detected: [N] finding(s) keep returning after attempted fixes.
-           These may require manual intervention. Stop or keep trying?"
-header: "Stagnation"
-options:
-  - label: "Stop and summarize"
-    description: "Accept remaining findings as known issues and wrap up"
-  - label: "Keep going"
-    description: "Continue the loop — I'll handle these differently"
+```json
+{
+  "questions": [{
+    "id": "stagnation_decision",
+    "header": "Stagnation",
+    "question": "Stagnation detected: [N] finding(s) keep returning after attempted fixes. These may require manual intervention. Stop or keep trying?",
+    "options": [
+      {"label": "Stop and summarize (Recommended)", "description": "Accept remaining findings as known issues and wrap up"},
+      {"label": "Keep going", "description": "Continue the loop; I'll handle these differently"}
+    ]
+  }]
+}
 ```
 
 If "Stop and summarize" → record exit reason `STAGNATION` → **EXIT LOOP**
@@ -136,10 +298,69 @@ If "Keep going" → reset hit count to 0 for all currently stagnating keys in
 iteration; the check will only fire again if those same findings return for 2
 more consecutive iterations after the reset)
 
+---
+
+#### 6. Process Findings
+
+Work through findings sequentially. For each finding:
+
+**Auto-fix (no user approval needed — Tier 2-4):**
+Mechanical cleanup that doesn't require human judgment:
+- Nits: naming, formatting, minor style issues
+- Dead code removal
+- Missing error handling
+- Documentation updates
+- Test coverage gaps
+
+Apply fix, mark the finding resolved.
+
+**Ask user FIRST (Tier 1 — requires human judgment):**
+Structural or consequential changes; use the nature of the change as the
+criterion, not line count (ref: `RPTC plugin root/sop/post-tdd-refactoring.md`):
+- Architecture changes (layer violations, new abstractions)
+- Security vulnerabilities
+- Breaking API changes
+- Refactoring that changes structure, not just style
+- Integration issues (orphan code — wire up or remove)
+
+For each Tier 1 finding:
+```json
+{
+  "questions": [{
+    "id": "tier1_finding_decision",
+    "header": "Tier 1",
+    "question": "Tier 1 finding requires your approval: [finding description] ([file:line]). Proposed fix: [brief description]",
+    "options": [
+      {"label": "Apply fix (Recommended)", "description": "Proceed with the proposed fix"},
+      {"label": "Skip this finding", "description": "Mark as known issue and move on"},
+      {"label": "I'll fix it manually", "description": "Skip for now; I'll address it outside this loop"}
+    ]
+  }]
+}
+```
+
+If "Apply fix" → apply, mark resolved
+If "Skip this finding" → add to `skipped_tier1`, mark skipped
+If "I'll fix it manually" → add to `skipped_tier1`, mark skipped
+
+---
+
 #### 7. Post-Fix Check
 
 If ALL remaining findings are now in `skipped_tier1` (user declined every one):
 → record exit reason `USER_SKIPPED` → **EXIT LOOP**
+
+---
+
+#### 8. Advance Iteration
+
+```
+iteration++
+```
+
+Go to step 1 (Iteration Header).
+
+---
 
 ### Loop Exit Summary
 
@@ -150,10 +371,49 @@ If ALL remaining findings are now in `skipped_tier1` (user declined every one):
 | `STAGNATION` | Same findings returned 2+ consecutive iterations; user stopped |
 | `MAX_ITERATIONS` | User chose to stop at iteration limit |
 
+---
+
+## Phase 4: Summary
+
+**Goal**: Report the full loop outcome.
+
+**Actions**:
+
+1. **Apply `writing-clearly-and-concisely` skill** to the summary output
+
+2. **Output summary**:
+
+```markdown
+## Verify Loop Complete
+
+### Scope
+- Files verified: [N]
+- Agents used: [list]
+- Iterations run: [N]
+- Exit reason: [CLEAN | USER_SKIPPED | STAGNATION | MAX_ITERATIONS]
+
+### Findings (across all iterations)
+- Total findings encountered: [N]
+- Auto-fixed: [N]
+- User-approved fixes: [N]
+- Skipped by user: [N]
+
+### Changes Made
+- [list files modified by auto-fixes and approved Tier 1 fixes, if any]
+
+### Remaining Issues (if any)
+[List each skipped finding: file:line — description]
+
+### Next Steps
+[Ready for `rptc:rptc-commit`, or note remaining known issues if any were skipped]
+```
+
+---
+
 ## Important Notes
 
 1. **Scope and agents fixed at start**: Determined in Phases 1-2 and never re-asked
-2. **Same agents, same quality**: Uses identical verification agents as Phase 4 of `/rptc:feat`
+2. **Same agents, same quality**: Uses identical verification agents as Phase 4 of `rptc:rptc-feat`
 3. **Auto-fix by default**: Fix Tier 2-4 findings without interruption; ask only for Tier 1
 4. **Safety over completeness**: Stagnation detection, max iterations, and skip tracking
    guarantee the loop always exits

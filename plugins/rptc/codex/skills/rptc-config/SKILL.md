@@ -3,8 +3,7 @@ name: rptc-config
 description: Configure RPTC workflow in project AGENTS.md - sync with current version. Use when the user asks for /rptc:config or the equivalent RPTC Codex workflow intent.
 ---
 
-# /rptc:config
-
+# RPTC Config
 Configure and maintain RPTC workflow settings in your project's AGENTS.md.
 
 **Arguments**: None
@@ -14,6 +13,50 @@ Configure and maintain RPTC workflow settings in your project's AGENTS.md.
 - After updating RPTC plugin to sync configuration
 - To verify project is properly configured
 
+---
+
+## Phase 1: Detect Current State
+
+**Goal**: Understand what exists and what needs to be done.
+
+**Actions**:
+
+1. **Get current RPTC version** from plugin metadata:
+   - Read `RPTC plugin root/.codex-plugin/plugin.json`
+   - Extract `version` field (e.g., "2.25.6")
+
+2. **Check for project AGENTS.md**:
+   - Look for `AGENTS.md` in current working directory (project root)
+   - Note: This is the PROJECT's AGENTS.md, not the RPTC plugin's
+
+3. **Determine action needed**:
+
+   | State | Action |
+   |-------|--------|
+   | No AGENTS.md | Create with RPTC section |
+   | AGENTS.md exists, no RPTC section | Append RPTC section |
+   | AGENTS.md exists, RPTC section present | Check version, update if outdated |
+   | AGENTS.md exists, RPTC section current | Report "already up to date" |
+
+4. **Detect RPTC section** by searching for marker:
+   ```
+   <!-- RPTC-START v
+   ```
+   If found, extract version number from the marker line.
+
+5. **Scan for legacy/orphaned RPTC content** (content without proper markers):
+
+   Search patterns to detect legacy content:
+   - `## RPTC` or `### RPTC` headers without markers nearby
+   - `rptc:rptc-feat` or `rptc:rptc-fix` skill references outside marked section
+   - `rptc:research-agent` or `rptc:tdd-agent` mentions outside marked section
+   - `verification-agent-mode:` outside marked section
+   - Duplicate `<!-- RPTC-START` markers (multiple sections)
+
+   If legacy content detected, set `legacy_cleanup_needed = true`.
+
+---
+
 ## Phase 2: User Preferences (New Installs Only)
 
 **Goal**: Gather user preferences before generating configuration.
@@ -22,24 +65,77 @@ Configure and maintain RPTC workflow settings in your project's AGENTS.md.
 
 **Actions**:
 
-1. **Ask user for verification mode preference** using request_user_input when available, otherwise ask directly in chat:
+1. **Ask user for verification mode preference** using request_user_input:
 
-   ```
-   Question: "Which verification mode would you like for Phase 4 quality verification?"
-   Header: "Verification Mode"
-   Options:
-   - label: "Automatic (Recommended)"
-     description: "Smart selection based on file types and change patterns. Launches relevant agents only."
-   - label: "All"
-     description: "Always launch all 3 verification agents (code-review, security, docs) regardless of changes."
-   - label: "Minimal"
-     description: "Only launch agents when strongly indicated (>50 lines changed or security keywords)."
+   ```json
+   {
+     "questions": [{
+       "id": "verification_mode",
+       "header": "Verification",
+       "question": "Which verification mode would you like for Phase 4 quality verification?",
+       "options": [
+         {"label": "Automatic (Recommended)", "description": "Smart selection based on file types and change patterns. Launches relevant agents only."},
+         {"label": "All", "description": "Always launch all 3 verification agents (code-review, security, docs) regardless of changes."},
+         {"label": "Minimal", "description": "Only launch agents when strongly indicated (>50 lines changed or security keywords)."}
+       ]
+     }]
+   }
    ```
 
 2. **Map selection to config value**:
    - "Automatic (Recommended)" → `automatic`
    - "All" → `all`
    - "Minimal" → `minimal`
+
+---
+
+## Phase 3: Generate Configuration
+
+**Goal**: Build the RPTC configuration block with user's selected verification mode.
+
+**Configuration Template**:
+
+```markdown
+<!-- RPTC-START v{VERSION} -->
+## RPTC Workflow Configuration
+
+**RPTC Version**: {VERSION} | [Documentation](https://github.com/kuklaph/rptc-workflow)
+
+### Quick Reference
+
+| Skill | Purpose |
+|---------|---------|
+| `rptc:rptc-feat "description"` | Full workflow: Research → Plan → TDD → Verify |
+| `rptc:rptc-fix "bug description"` | Bug fixing: Reproduce → Root Cause → Fix → Verify |
+| `rptc:rptc-research "topic"` | Standalone research and exploration |
+| `rptc:rptc-commit [pr]` | Verify quality gates and ship (add `pr` for pull request) |
+| `rptc:rptc-verify [path]` | Run quality verification agents on demand |
+| `rptc:rptc-sync-prod-to-tests "dir"` | Sync tests to match production code |
+| `rptc:rptc-config` | Initialize or update this configuration |
+
+### Verification Configuration
+
+verification-agent-mode: {VERIFICATION_MODE}
+
+<!--
+Verification mode options:
+- automatic: Smart selection based on file types and change patterns
+- all: Always launch all 3 verification agents (code-review, security, docs)
+- minimal: Only launch when strongly indicated (>50 lines or keywords)
+-->
+
+### Project-Specific Notes
+
+<!-- Add any project-specific RPTC notes here -->
+
+<!-- RPTC-END -->
+```
+
+**Replace placeholders:**
+- `{VERSION}` → actual version from plugin.json
+- `{VERIFICATION_MODE}` → user's selection from Phase 2 (or preserved value for updates)
+
+---
 
 ## Phase 4: Apply Configuration
 
@@ -140,17 +236,20 @@ Configure and maintain RPTC workflow settings in your project's AGENTS.md.
    - Line 120: "verification-agent-mode: all" (orphaned setting)
    ```
 
-2. **Ask user for cleanup preference** using request_user_input when available, otherwise ask directly in chat:
-   ```
-   Question: "How should I handle the legacy RPTC content?"
-   Header: "Cleanup"
-   Options:
-   - label: "Remove legacy content (Recommended)"
-     description: "Delete orphaned RPTC references. The marked section contains all needed configuration."
-   - label: "Keep legacy content"
-     description: "Leave orphaned content in place. May cause confusion with duplicate settings."
-   - label: "Show me the content first"
-     description: "Display the legacy content so I can decide what to do."
+2. **Ask user for cleanup preference** using request_user_input:
+   ```json
+   {
+     "questions": [{
+       "id": "legacy_cleanup",
+       "header": "Cleanup",
+       "question": "How should I handle the legacy RPTC content?",
+       "options": [
+         {"label": "Remove legacy content (Recommended)", "description": "Delete orphaned RPTC references. The marked section contains all needed configuration."},
+         {"label": "Keep legacy content", "description": "Leave orphaned content in place. May cause confusion with duplicate settings."},
+         {"label": "Show me the content first", "description": "Display the legacy content so I can decide what to do."}
+       ]
+     }]
+   }
    ```
 
 3. **If "Remove legacy content" selected**:
@@ -172,6 +271,42 @@ Configure and maintain RPTC workflow settings in your project's AGENTS.md.
    All RPTC configuration is now in the marked section at the top.
    ```
 
+---
+
+## Phase 5: Verify Setup
+
+**Goal**: Confirm configuration is valid and complete.
+
+**Actions**:
+
+1. **Read back AGENTS.md** to verify markers are present
+2. **Check for required sections**:
+   - [ ] RPTC version marker present
+   - [ ] Quick reference table present
+   - [ ] Tool prioritization section present
+   - [ ] Verification configuration present
+
+3. **Report status**:
+
+```markdown
+## RPTC Setup Complete
+
+**Project**: {project_name}
+**RPTC Version**: {version}
+**Status**: ✓ Configured
+
+### Configuration
+- Verification Mode: {verification_agent_mode}
+- AGENTS.md Location: ./AGENTS.md
+
+### Next Steps
+1. Customize `verification-agent-mode` if needed (automatic/all/minimal)
+2. Add project-specific notes to the configuration section
+3. Start developing with `rptc:rptc-feat "your feature"`
+```
+
+---
+
 ## Error Handling
 
 | Error | Resolution |
@@ -183,6 +318,63 @@ Configure and maintain RPTC workflow settings in your project's AGENTS.md.
 | Legacy content without markers | Prompt user for cleanup (Case E) |
 | Multiple RPTC sections | Keep first marked section, flag others as legacy |
 | Orphaned settings outside markers | Include in legacy cleanup prompt |
+
+---
+
+## Examples
+
+### First-time setup
+```
+User: `rptc:rptc-config`
+
+Codex: Checking RPTC configuration...
+
+No AGENTS.md found in project root.
+Creating AGENTS.md with RPTC v2.25.6 configuration...
+
+✓ Created ./AGENTS.md
+
+Configuration:
+- verification-agent-mode: automatic (default)
+
+Next steps:
+1. Review and customize the configuration
+2. Start developing with `rptc:rptc-feat` "your feature"
+```
+
+### Update existing
+```
+User: `rptc:rptc-config`
+
+Codex: Checking RPTC configuration...
+
+Found AGENTS.md with RPTC v2.24.0 configuration.
+Current RPTC version: v2.25.6
+
+Updating configuration...
+- Preserved verification-agent-mode: all
+- Preserved project-specific notes
+
+✓ Updated RPTC configuration to v2.25.6
+
+Key changes in this update:
+- Added Tier 4 nits to code review
+- Mandatory Phase 4 quality verification gate
+```
+
+### Already current
+```
+User: `rptc:rptc-config`
+
+Codex: Checking RPTC configuration...
+
+✓ RPTC v2.25.6 configuration is already up to date.
+
+Current settings:
+- verification-agent-mode: automatic
+```
+
+---
 
 ## Key Principles
 

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.16.3] - 2026-05-13
+
+### Fixed
+
+- Restored Codex `rptc-*` skill parity with the Claude command workflows while translating provider-specific tool surfaces to Codex equivalents.
+- Replaced Claude command/tool references in Codex skills with `spawn_agent`, `update_plan`, `request_user_input`, `AGENTS.md`, `.codex-plugin`, and Codex skill invocation wording.
+- Corrected Codex verification and planning instructions so RPTC workflows require agent-based verification and explicit user-confirmed mode transitions.
+
+---
+
+
 ## [3.16.2] - 2026-05-11
 
 ### Fixed

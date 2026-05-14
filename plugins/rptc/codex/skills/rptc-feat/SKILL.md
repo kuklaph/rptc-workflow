@@ -1,10 +1,9 @@
 ---
 name: rptc-feat
-description: Research → Plan → TDD → Verify in one seamless flow. Use when the user asks for /rptc:feat or the equivalent RPTC Codex workflow intent.
+description: Research -> Plan -> TDD -> Verify in one seamless flow. Use when the user asks for /rptc:feat or the equivalent RPTC Codex workflow intent.
 ---
 
-# /rptc:feat
-
+# RPTC Feat
 Complete feature development: Discovery → Architecture → Implementation → Quality Verification.
 
 ## Step 0: RPTC Workflow Initialization (MANDATORY - CANNOT SKIP)
@@ -13,7 +12,7 @@ Complete feature development: Discovery → Architecture → Implementation → 
 
 ### 0.1 Load Required Skills (ALL FIVE MANDATORY)
 
-Load ALL five skills below. Each listed skill is MANDATORY — do not skip any.
+Load ALL five skills below. Each skill load is MANDATORY - do not skip any.
 
 ```
 Use/load the `rptc:tool-guide` skill.
@@ -25,7 +24,7 @@ Use/load the `rptc:structure-methodology` skill.
 
 After loading, confirm all five loaded. If ANY skill fails to load, STOP and report the failure.
 
-> **Note**: Codex omits the Claude `feat-team` command because it depends on persistent team-agent messaging. For larger features, use this workflow with parent-orchestrated `spawn_agent` delegation where appropriate.
+> **Note**: Codex omits Claude's persistent team commands. For batch work across independent features, use parent-orchestrated `spawn_agent` delegation with clear ownership boundaries.
 
 ### 0.1.1 Conditional Skills (Load When Applicable)
 
@@ -43,23 +42,15 @@ Use/load the `rptc:frontend-design` skill.
 
 Serena tools are **deferred** in the main context — they require explicit loading before they can be called.
 
-Use tool discovery to activate them when available:
+Call ToolSearch now to activate them:
 
 ```
-Use tool discovery for Serena when available, then activate Serena tools.
+ToolSearch(query: "serena")
 ```
 
 Once loaded, Serena tools appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*`. This activates both read tools (`find_symbol`, `get_symbols_overview`, `search_for_pattern`, etc.) and edit tools (`replace_symbol_body`, `insert_after_symbol`, etc.). Use them throughout this workflow — refer to the Tool Prioritization section for the full map of Serena vs. native tools.
 
 If Serena is unavailable (not installed), skip silently and fall back to native Grep and Glob.
-
-### 0.1.3 Custom Agent Availability (Before Delegation)
-
-Before any `spawn_agent` call for an RPTC custom agent, verify the required TOML agents are installed in `.codex/agents/` or the user's Codex agents directory.
-
-Required for this workflow when delegation is used: `rptc:architect-agent`, `rptc:research-agent`, `rptc:tdd-agent`, `rptc:code-review-agent`, `rptc:security-agent`, `rptc:docs-agent`.
-
-If any required TOML is missing, use/load `rptc-init` to copy the packaged agents, then re-check. If agents are still unavailable, use built-in `explorer`/`worker` agents only when they can preserve the same role boundaries; otherwise keep the work in the main context and report the limitation.
 
 ### 0.2 RPTC Workflow Understanding (INTERNALIZE)
 
@@ -75,14 +66,14 @@ You are executing the **RPTC (Research → Plan → TDD → Commit)** workflow.
 
 | Topic | Check First (User) | Fallback (RPTC) |
 |-------|-------------------|-----------------|
-| Architecture | Project `sop/`, `user/project SOPs` | `the RPTC plugin root/sop/architecture-patterns.md` |
-| Testing | Project `sop/`, `user/project SOPs` | `the RPTC plugin root/sop/testing-guide.md` |
-| Security | Project `sop/`, `user/project SOPs` | `the RPTC plugin root/sop/security-and-performance.md` |
-| Progress Tracking | Project `sop/`, `user/project SOPs` | `update_plan` with explicit ordered phase steps (see Step 0.5) |
-| Refactoring | Project `sop/`, `user/project SOPs` | `the RPTC plugin root/sop/post-tdd-refactoring.md` |
-| Frontend | Project `sop/`, `user/project SOPs` | `the RPTC plugin root/sop/frontend-guidelines.md` |
+| Architecture | Project `sop/`, `Codex global guidance` | `RPTC plugin root/sop/architecture-patterns.md` |
+| Testing | Project `sop/`, `Codex global guidance` | `RPTC plugin root/sop/testing-guide.md` |
+| Security | Project `sop/`, `Codex global guidance` | `RPTC plugin root/sop/security-and-performance.md` |
+| Progress Tracking | Project `sop/`, `Codex global guidance` | update_plan status tracking with sequential dependencies in prose (see Step 0.5) |
+| Refactoring | Project `sop/`, `Codex global guidance` | `RPTC plugin root/sop/post-tdd-refactoring.md` |
+| Frontend | Project `sop/`, `Codex global guidance` | `RPTC plugin root/sop/frontend-guidelines.md` |
 
-**Precedence Rule**: If user specifies custom SOPs (in project AGENTS.md, project `sop/` dir, or `user/project SOPs`), use those for the matching topic. RPTC SOPs are the fallback default.
+**Precedence Rule**: If user specifies custom SOPs (in project AGENTS.md, project `sop/` dir, or `Codex global guidance`), use those for the matching topic. RPTC SOPs are the fallback default.
 
 ### 0.3 Phase Structure Awareness
 
@@ -108,18 +99,21 @@ Before proceeding to Phase 1, confirm:
 
 ### 0.5 Phase Task Initialization
 
-Create the workflow phases as an ordered `update_plan` list. Codex supports `step` and `status`; enforce dependencies by sequence: do not start a phase until the previous phase is completed.
+Create the workflow phases with `update_plan`. Keep phases sequential in prose: do not start a later phase until the previous phase is complete.
 
-```
-update_plan:
-- pending: Phase 1: Discovery — Understand what to build and existing patterns
-- pending: Phase 2: Architecture — Design implementation approach with user approval
-- pending: Phase 3: Implementation — Execute plan using appropriate method
-- pending: Phase 4: Quality Verification — Review agents verify changes
-- pending: Phase 5: Complete — Summarize what was built
+```json
+{
+  "plan": [
+    {"step": "Phase 1: Discovery - Understand what to build and existing patterns", "status": "pending"},
+    {"step": "Phase 2: Architecture - Design implementation approach with user approval", "status": "pending"},
+    {"step": "Phase 3: Implementation - Execute plan using appropriate method", "status": "pending"},
+    {"step": "Phase 4: Quality Verification - Review agents verify changes", "status": "pending"},
+    {"step": "Phase 5: Complete - Summarize what was built", "status": "pending"}
+  ]
+}
 ```
 
-**At each phase**: Call `update_plan(status: "in_progress")` when starting, `update_plan(status: "completed")` when done.
+**At each phase**: call `update_plan` with the current phase `in_progress`, completed phases `completed`, and future phases `pending`.
 
 ### 0.6 Plan Continuation Detection
 
@@ -132,12 +126,22 @@ Check if the feature description argument contains **"Plan is approved"**:
    Check if currently inside a worktree: compare `git rev-parse --show-toplevel` against `git worktree list`. If in a worktree, set `WORKTREE_PATH` accordingly.
 3. Mark Phases 1 and 2 complete:
    ```
-   update_plan(Phase 1, status: "completed")
-   update_plan(Phase 2, status: "completed")
+   Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
+   Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
    ```
 4. **Proceed directly to Phase 3: Implementation** — the plan is already approved and available in the plan file.
 
 **If NO** — this is a new feature request. Proceed to Phase 1.
+
+---
+
+## Arguments
+
+`rptc:rptc-feat <feature-description>`
+
+**Example**: `rptc:rptc-feat "Add user authentication with OAuth2"`
+
+---
 
 ## Task Classification
 
@@ -145,7 +149,7 @@ Check if the feature description argument contains **"Plan is approved"**:
 
 | Task Type | Examples | TDD Phase | Implementation |
 |-----------|----------|-----------|----------------|
-| **Code** | New features, bug fixes, refactoring, API changes | ✅ Required | Delegate to `rptc:tdd-agent` |
+| **Code** | New features, bug fixes, refactoring, API changes | ✅ Required | Delegate to tdd-agent |
 | **Non-Code** | Documentation, config, markdown, plugin updates | ⏭️ Skip | Main context executes directly |
 
 **Classification rules**:
@@ -153,6 +157,37 @@ Check if the feature description argument contains **"Plan is approved"**:
 - **Non-Code tasks**: Create/modify `.md`, `.json`, `.yaml`, `.toml`, config files, or purely documentation
 
 **Result**: Set `task_type` to `code` or `non-code` for Phase 3 routing.
+
+---
+
+## Tool Prioritization
+
+**Serena MCP** (prefer over native tools — activated via ToolSearch in Step 0.1.2):
+
+Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` — use whichever is available.
+
+**Read operations** (use instead of native Grep/Glob/Read for code):
+
+| Task | Prefer Serena | Over Native |
+|------|---------------|-------------|
+| Find functions/classes | `get_symbols_overview` | Grep |
+| Locate specific code | `find_symbol` | Glob |
+| Find usages/references | `find_referencing_symbols` | Grep |
+| Regex search | `search_for_pattern` | Grep |
+| List directory | `list_dir` | LS |
+| Reflect on progress | `think_about_collected_information` | — |
+
+**Edit operations** (use instead of Edit tool for code modifications):
+
+| Task | Prefer Serena | Over Native |
+|------|---------------|-------------|
+| Replace function/method body | `replace_symbol_body` | Edit |
+| Insert code after a symbol | `insert_after_symbol` | Edit |
+| Insert code before a symbol | `insert_before_symbol` | Edit |
+| Rename a symbol everywhere | `rename_symbol` | Edit |
+| Reflect on task adherence | `think_about_task_adherence` | — |
+
+---
 
 ## Skills Usage Guide
 
@@ -163,7 +198,7 @@ Check if the feature description argument contains **"Plan is approved"**:
 | Step 0 (always loaded) | Infrastructure — activates Serena for code navigation throughout |
 | All phases | Serena read ops (`find_symbol`, `search_for_pattern`) |
 
-**Method**: Tool discovery activates Serena at session start (Step 0.1.2 Activate Serena); then prefer `find_symbol`, `get_symbols_overview`, `search_for_pattern` over native Grep/Glob for all code navigation.
+**Method**: ToolSearch activates Serena at session start (Step 0.1.2 Activate Serena); then prefer `find_symbol`, `get_symbols_overview`, `search_for_pattern` over native Grep/Glob for all code navigation.
 **Timing**: Loaded first in Step 0. Applies across all phases wherever code navigation or symbol search is needed.
 
 **`brainstorming`** - Structured dialogue for requirement clarification:
@@ -173,7 +208,7 @@ Check if the feature description argument contains **"Plan is approved"**:
 | Phase 2 (before architect agents) | Clarify unclear requirements with user |
 | Throughout | Explore approaches with 2-3 options, validate incrementally |
 
-**Method**: One question at a time via request_user_input when available, otherwise ask directly in chat, multiple choice preferred, YAGNI ruthlessly.
+**Method**: One question at a time via request_user_input, multiple choice preferred, YAGNI ruthlessly.
 **Timing**: Main context uses this BEFORE delegating to architect agents.
 
 **`writing-clearly-and-concisely`** - Apply Strunk's Elements of Style to all prose:
@@ -190,7 +225,7 @@ Check if the feature description argument contains **"Plan is approved"**:
 
 | When | Apply To |
 |------|----------|
-| Phase 3 (Route A or direct code changes) | Any code written in main context (not delegated to `rptc:tdd-agent`) |
+| Phase 3 (Route A or direct code changes) | Any code written in main context (not delegated to tdd-agent) |
 
 **Method**: Surgical coding (search 3 similar patterns first), context discovery (check existing tests), strict RED-GREEN-REFACTOR cycle.
 **Timing**: Main context applies this when handling code changes directly. Sub-agent `rptc:tdd-agent` has equivalent guidance built in.
@@ -204,9 +239,160 @@ Check if the feature description argument contains **"Plan is approved"**:
 **Method**: Bold aesthetic direction, distinctive typography, cohesive color themes, purposeful motion/animation. Avoids generic AI aesthetics.
 **Timing**: Load in Step 0.1.1 only when the task involves frontend work. Additive creative layer on top of `frontend-guidelines.md` SOP (which always applies for engineering standards).
 
+---
+
+## Phase 1: Discovery
+
+Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
+
+**Goal**: Understand what to build and existing patterns.
+
+> 💡 **Tool Reminder**: Use Serena for code exploration.
+
+**Actions**:
+
+0. **Check for RPTC configuration** in project's AGENTS.md:
+   - Look for `<!-- RPTC-START` marker in local AGENTS.md
+   - If NOT found: Suggest user run `rptc:rptc-config` for best experience
+   - If found but outdated: Suggest user run `rptc:rptc-config` to sync with current plugin version
+
+1. **Get repo root**: `Bash("git rev-parse --show-toplevel")` → store as `REPO_ROOT` for use in worktree path computation and the Environment Context Block.
+
+2. **Classify task type** (see Task Classification above)
+3. **Create initial todo list** with phases based on task type:
+   - Code tasks: Discovery, Architecture, TDD Implementation, Quality Verification, Complete
+   - Non-Code tasks: Discovery, Architecture, Implementation, Quality Verification, Complete
+4. **If codebase exploration needed**, launch 2-3 research agents in parallel (NOT the built-in Explore agent):
+
+```
+IMPORTANT: Use agent_type: "rptc:research-agent", NOT "Explore"
+
+[Prepend the Environment Context Block to each agent prompt]
+
+Use spawn_agent tool with agent_type: "rptc:research-agent" (launch all 3 in parallel):
+
+Agent 1 prompt: "Find similar features and existing patterns for [feature].
+Use code-explorer methodology Phase 1 (Feature Discovery): entry points, core files, boundaries.
+Return: files implementing similar functionality, patterns used."
+
+Agent 2 prompt: "Analyze architecture and abstractions for [feature].
+Use code-explorer methodology Phase 3 (Architecture Analysis): layers, patterns, cross-cutting concerns.
+Return: architectural layers, design patterns, component dependencies."
+
+Agent 3 prompt: "Map integration points and dependencies for [feature].
+Use code-explorer methodology Phase 2 (Code Flow Tracing): call chains, data transformations, side effects.
+Return: external dependencies, internal dependencies, API boundaries."
+```
+
+5. **If web research needed**, use `rptc:research-agent` with Mode B (20+ sources, cross-verification)
+6. **If hybrid research needed** (codebase + best practices), use `rptc:research-agent` with Mode C
+7. **If unclear about requirements**, ask user for clarification
+8. **Summarize findings**: Key patterns, files to modify, dependencies, gap analysis (if hybrid)
+
+### Branch Strategy
+
+**Now that the scope is clear**, ask the user how to organize this work.
+
+**Choose recommendation based on Phase 1 findings:**
+- Recommend **New worktree** when: multi-file feature, >3 files to modify, long-running work, or risky changes the user may want to abandon
+- Recommend **Current branch** when: small change, single-file fix, quick task, or already on a feature branch
+
+Put your recommended option first and append "(Recommended)" to its label.
+
+**Before asking**, prepare the option labels:
+
+1. **Get current branch name**: `git branch --show-current` → e.g. `main`
+2. **Generate worktree branch name** from the feature description:
+   - Lowercase, replace spaces with hyphens, strip special characters
+   - Prefix with `feature/`
+   - Example: `"Add user auth"` → `feature/add-user-auth`
+
+```json
+{
+  "questions": [{
+    "id": "branch_strategy",
+    "header": "Branch",
+    "question": "How should this feature be organized?",
+    "options": [
+      {"label": "<recommended-option> (Recommended)", "description": "<description>"},
+      {"label": "<other-option>", "description": "<description>"}
+    ]
+  }]
+}
+```
+
+Example — small single-file change on a feature branch:
+```
+  - label: "Current branch [feature/auth] (Recommended)"
+  - label: "New worktree [feature/add-user-auth]"
+```
+
+Example — large multi-file feature on main:
+```
+  - label: "New worktree [feature/add-user-auth] (Recommended)"
+  - label: "Current branch [main]"
+```
+
+**If "New worktree" selected:**
+
+1. **Compute worktree path** (sibling `<repo>.worktrees/` directory, branch as subpath):
+   ```bash
+   # REPO_ROOT already set from Phase 1 Action 1
+   REPO_PARENT="$(dirname "$REPO_ROOT")"
+   REPO_NAME="$(basename "$REPO_ROOT")"
+   WORKTREE_PATH="${REPO_PARENT}/${REPO_NAME}.worktrees/<branch-name>"
+   ```
+   Example: repo at `/home/user/projects/myapp`, branch `feature/add-auth` → worktree at `/home/user/projects/myapp.worktrees/feature/add-auth`. `git worktree add` creates the nested directory structure automatically.
+   Store `WORKTREE_PATH` — you will reference it throughout this session.
+
+2. **Create worktree** using the absolute path:
+   ```bash
+   git worktree add -b <branch-name> "$WORKTREE_PATH" HEAD
+   ```
+
+3. **Activate and verify worktree** — change into the new directory and confirm it:
+   ```bash
+   cd "$WORKTREE_PATH" && git rev-parse --show-toplevel
+   ```
+   The output MUST match `WORKTREE_PATH`. If it does not, STOP and fix before continuing.
+
+4. **Confirm to user**:
+   ```
+   Worktree created and activated at <WORKTREE_PATH>
+   Branch: <branch-name>
+   Verified: working directory is inside worktree.
+   All subsequent work proceeds here.
+   ```
+
+5. **Set worktree active flag**: Remember that `WORKTREE_PATH` is set. ALL agent delegation
+   prompts in Phases 2-4 MUST include the worktree lines in the Environment Context Block (defined below).
+
+**If "Current branch" selected:** `WORKTREE_PATH` is not set. Continue to Phase 2.
+
+#### Environment Context Block
+
+Prepend this block to EVERY agent prompt in Phases 2-4 (architect, tdd, code-review, security, docs). It carries Serena activation and worktree info so sub-agents can orient themselves without guessing.
+
+```
+ENVIRONMENT:
+Repo root: <REPO_ROOT>
+Serena project: <SERENA_PROJECT_NAME>
+  → Call activate_project("<SERENA_PROJECT_NAME>") before using any Serena tools.
+[If WORKTREE_PATH is set, include these lines:]
+Worktree: <WORKTREE_PATH>
+  → cd "<WORKTREE_PATH>" before doing ANY work.
+  → All file paths are relative to this worktree root, NOT the original repo.
+```
+
+`<SERENA_PROJECT_NAME>` is the registered name from the main context's successful `activate_project` call in Step 0.1.2. If Serena was unavailable in the main context, omit the Serena lines.
+
+Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
+
+---
+
 ## Phase 2: Architecture
 
-`update_plan(Phase 2, status: "in_progress")`
+Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
 
 **Goal**: Design the implementation approach with user approval.
 
@@ -214,10 +400,10 @@ Check if the feature description argument contains **"Plan is approved"**:
 
 **Actions**:
 
-1. **Enter plan mode** using Codex planning context
+1. **Ask the user to switch to Plan Mode, then halt until the user confirms Plan Mode is active**
 
 2. **Clarify requirements using `brainstorming` skill** (BEFORE launching agents):
-   - Use request_user_input when available, otherwise ask directly in chat to clarify unclear requirements ONE question at a time
+   - Use request_user_input to clarify unclear requirements ONE question at a time
    - Prefer multiple choice options when possible
    - Focus on: purpose, constraints, success criteria, scope boundaries
    - Continue until requirements are clear enough for planning
@@ -227,7 +413,7 @@ Check if the feature description argument contains **"Plan is approved"**:
 3. **Launch 3 plan agents in parallel** with different perspectives:
 
 ```
-Use `spawn_agent` with the RPTC `rptc:architect-agent` role when installed (launch all 3 in parallel):
+Use spawn_agent tool with agent_type: "rptc:architect-agent" (launch all 3 in parallel):
 
 [Prepend the Environment Context Block to each agent prompt]
 
@@ -240,7 +426,7 @@ Agent 3: "Design implementation for [feature]. Perspective: Pragmatic. Provide: 
 
 4. **Review all 3 approaches**, form an opinion on which fits best for this specific feature
 
-5. **MANDATORY: Ask user to choose** via request_user_input when available, otherwise ask directly in chat (put recommended option first with "(Recommended)" suffix):
+5. **MANDATORY: Ask user to choose** via request_user_input (put recommended option first with "(Recommended)" suffix):
 
    **Skip asking ONLY if ALL of these are true:**
    - Single-file change with <20 lines
@@ -272,35 +458,63 @@ Agent 3: "Design implementation for [feature]. Perspective: Pragmatic. Provide: 
 
    **Then ask:**
 
-```
-Use request_user_input when available, otherwise ask directly in chat tool:
-
-question: "Which architecture approach would you like to use for this feature?"
-header: "Architecture"
-options:
-  - label: "[Best fit] (Recommended)"
-    description: "[1-sentence why this fits best + file count]"
-  - label: "[Second option]"
-    description: "[1-sentence trade-off + file count]"
-  - label: "[Third option]"
-    description: "[1-sentence trade-off + file count]"
+```json
+{
+  "questions": [{
+    "id": "architecture_approach",
+    "header": "Architecture",
+    "question": "Which architecture approach would you like to use for this feature?",
+    "options": [
+      {"label": "[Best fit] (Recommended)", "description": "[1-sentence why this fits best + file count]"},
+      {"label": "[Second option]", "description": "[1-sentence trade-off + file count]"},
+      {"label": "[Third option]", "description": "[1-sentence trade-off + file count]"}
+    ]
+  }]
+}
 ```
 
 6. **Write selected plan to plan file** with:
-   - **Step 0: RPTC Re-initialization (ALWAYS FIRST)** — instructs re-invocation of `/rptc:feat` with "Plan is approved, continue to implementation" to restore full RPTC context
+   - **Step 0: RPTC Re-initialization (ALWAYS FIRST)** — instructs re-invocation of `rptc:rptc-feat` with "Plan is approved, continue to implementation" to restore full RPTC context
    - Approach used (with rationale)
    - Implementation steps (ordered)
    - Files to create/modify
    - Test strategy per step (code tasks only)
 
-7. **Verify plan includes Step 0** (re-invocation of `/rptc:feat`), then exit with user approval in chat to get user approval
+7. **Verify plan includes Step 0** (re-invocation of `rptc:rptc-feat`), then ask the user to leave Plan Mode / switch to execution mode. Halt until the user confirms the mode switch so the plan can be approved.
 
 **Plan file format** (flexible):
 
 - Simple features: List steps directly
 - Complex features: Overview + numbered implementation steps
 
-`update_plan(Phase 2, status: "completed")`
+Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
+
+---
+
+## Phase 3: Implementation
+
+Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
+
+**Goal**: Execute the plan using the appropriate method for the task type.
+
+> 💡 **Tool Reminder**: Use Serena for both navigation (`find_symbol`, `get_symbols_overview`) and edits (`replace_symbol_body`, `insert_after_symbol`) — prefer over native Grep/Edit.
+
+### Route A: Non-Code Tasks (Direct Execution)
+
+**When**: `task_type = non-code` (documentation, config, markdown, plugin updates)
+
+**Actions**:
+
+1. **Execute steps directly** in main context (no sub-agent delegation)
+2. **For each step**:
+   - Read target files
+   - Make changes using Edit/Write tools
+   - Verify changes are correct
+3. **Update task status** as each step completes
+
+Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
+
+---
 
 ### Route B: Code Tasks (TDD)
 
@@ -310,7 +524,7 @@ options:
 
 **CRITICAL - Test-First Ordering (NON-NEGOTIABLE)**:
 
-Whether delegating to `rptc:tdd-agent` OR executing in main context:
+Whether delegating to tdd-agent OR executing in main context:
 
 1. Write/update ALL tests BEFORE modifying ANY production code
 2. Run tests and confirm they fail BEFORE writing production code
@@ -322,7 +536,7 @@ Whether delegating to `rptc:tdd-agent` OR executing in main context:
 
 **Before batching**, decide how to execute based on plan complexity:
 
-| Criteria | Execute Directly (Main Context) | Delegate to `rptc:tdd-agent` |
+| Criteria | Execute Directly (Main Context) | Delegate to tdd-agent |
 |----------|--------------------------------|----------------------|
 | Plan steps | 1-2 steps | 3+ steps |
 | Files affected | 1-2 files | 3+ files |
@@ -359,11 +573,11 @@ Use/load the `rptc:tdd-methodology` skill.
 
 Then skip to step 8 (Update task status) below.
 
-**If Delegate**: Use smart batching with `rptc:tdd-agent` (continue below).
+**If Delegate**: Use smart batching with tdd-agent (continue below).
 
-#### Smart Batching (`rptc:tdd-agent` delegation)
+#### Smart Batching (tdd-agent delegation)
 
-Combines related steps into fewer `rptc:tdd-agent` calls, reducing overhead while maintaining TDD discipline.
+Combines related steps into fewer tdd-agent calls, reducing overhead while maintaining TDD discipline.
 
 **Actions**:
 
@@ -395,18 +609,21 @@ Combines related steps into fewer `rptc:tdd-agent` calls, reducing overhead whil
    - Build dependency graph from step analysis (step 1)
    - Batches are independent if: no batch contains steps that depend on steps in other batch
 
-5. **Create tasks per batch** (with dependencies for dependent batches):
-   ```
-   update_plan("Batch 1 [Steps 1-3]: User model + validation + tests")
-   update_plan("Batch 2 [Steps 4-5]: UserService + tests")
-   update_plan("Batch 3 [Step 6]: API endpoint")
-   Note in Batch 3 step text: waits for Batch 2
+5. **Create plan items per batch** (with dependencies described in prose):
+   ```json
+   {
+     "plan": [
+       {"step": "Batch 1 [Steps 1-3]: User model + validation + tests", "status": "pending"},
+       {"step": "Batch 2 [Steps 4-5]: UserService + tests", "status": "pending"},
+       {"step": "Batch 3 [Step 6]: API endpoint - wait for Batch 2", "status": "pending"}
+     ]
+   }
    ```
 
-6. **For each batch, invoke `rptc:tdd-agent`** using the `spawn_agent`:
+6. **For each batch, invoke tdd-agent** using the spawn_agent tool:
 
 ```
-Use `spawn_agent` with the RPTC `rptc:tdd-agent` role when installed:
+Use spawn_agent tool with agent_type: "rptc:tdd-agent":
 
 [Prepend the Environment Context Block]
 
@@ -444,18 +661,18 @@ Then move to next step in batch.
 
 7. **Launch parallel batches** simultaneously when independent:
    - Identify batches with no inter-dependencies (from step 4)
-   - Invoke ALL independent `spawn_agent`s in the same message (parallel execution)
+   - Invoke ALL independent spawn_agent calls in the same message (parallel execution)
    - Wait for all to complete before processing dependent batches
-   - Example: Batch A and B independent → invoke both `spawn_agent(rptc:tdd-agent)` calls together
+   - Example: Batch A and B independent → invoke both `spawn_agent` calls with `agent_type: "rptc:tdd-agent"` together
 
-7b. **Verify batch compliance**: After each `rptc:tdd-agent` batch returns, check the exit verification block:
+7b. **Verify batch compliance**: After each tdd-agent batch returns, check the exit verification block:
     - `Test-First Followed: YES` → mark batch complete
     - `Test-First Followed: NO` → flag as TDD violation, ask user whether to re-run or accept
 
-8. **Update task status** as each batch completes (`update_plan(batch, status: "completed")`)
+8. **Update task status** as each batch completes (an `update_plan` call with the full `plan` list and updated statuses)
 9. **Handle failures**: If batch fails after 3 attempts, ask user for guidance
 
-`update_plan(Phase 3, status: "completed")`
+Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
 
 **Example Batching**:
 ```
@@ -470,13 +687,202 @@ Plan steps:                          Batched execution:
 Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
 ```
 
+---
+
+## Phase 4: Quality Verification
+
+Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
+
+**Goal**: Verify changes and report findings for main context to address.
+
+> 💡 **Tool Reminder**: Use Serena (`find_referencing_symbols`, `search_for_pattern`) when applying auto-fixes from verification findings.
+
+**Mode**: Report-only. Verification agents DO NOT make changes—they report findings. Main context handles all fixes.
+
+**Actions**:
+
+1. **Collect files modified** during Phase 3 for verification
+
+2. **Determine verification agent mode** (one-time project configuration):
+
+   a. **Check if project AGENTS.md exists** (in project root)
+
+   b. **If AGENTS.md exists**, look for `verification-agent-mode:` setting:
+      - If found: Use that mode (`automatic`, `all`, or `minimal`)
+      - If not found: Ask user via request_user_input (one-time setup):
+        ```json
+        {
+          "questions": [{
+            "id": "verification_mode",
+            "header": "Verification",
+            "question": "How should verification agents be selected for this project? (saved to AGENTS.md)",
+            "options": [
+              {"label": "Automatic (Recommended)", "description": "Smart selection based on file types and change patterns"},
+              {"label": "All Agents", "description": "Always launch all 3 verification agents"},
+              {"label": "Minimal", "description": "Only launch agents when strongly indicated"}
+            ]
+          }]
+        }
+        ```
+        Then append to AGENTS.md:
+        ```markdown
+        ## RPTC Verification Configuration
+        verification-agent-mode: [selected mode]
+        ```
+
+   c. **If no AGENTS.md exists**: Use `automatic` mode (don't ask, don't create file)
+
+3. **Select agents based on mode**:
+
+   **Mode: `all`** — Launch all 3 agents (skip to step 4)
+
+   **Mode: `automatic`** — Select based on changes:
+
+   | Change Type | code-review | security | docs |
+   |-------------|:-----------:|:--------:|:----:|
+   | Source code in `auth/`, `api/`, `security/`, `middleware/` paths | ✅ | ✅ | Check keywords |
+   | Source code (other paths) | ✅ | Check keywords | Check keywords |
+   | Source code with `export` statements | ✅ | Check keywords | ✅ |
+   | Test files only | ✅ | ❌ | ❌ |
+   | Dependencies changed (`package.json`, `requirements.txt`, etc.) | ❌ | ✅ | ❌ |
+   | Docs/markdown only | ❌ | ❌ | ✅ |
+   | Config files (non-sensitive) | ❌ | ❌ | ✅ |
+
+   **Keyword detection** (scan git diff):
+   - Security keywords: `password`, `token`, `secret`, `auth`, `session`, `crypto`, `hash`, `sql`, `exec`, `eval` → include security-agent
+   - API keywords: `export`, `interface`, `endpoint`, `route`, `version`, `deprecated` → include docs-agent
+
+   **Default**: If uncertain, include the agent
+
+   **Mode: `minimal`** — Only launch when strongly indicated:
+   - code-review: **ALWAYS** (minimum floor — at least one verification agent must launch)
+   - security: Only if auth/api paths OR security keywords found
+   - docs: Only if doc files changed OR `export` keyword found
+
+4. **Launch selected verification agents** — Make spawn_agent calls for each selected agent:
+
+   **AGENT NAMESPACE LOCKOUT (Phase 4):**
+   - ✅ CORRECT: `agent_type: "rptc:code-review-agent"`
+   - ❌ WRONG: `agent_type: "feature-dev:code-reviewer"` — different plugin, not RPTC
+   - ❌ WRONG: `agent_type: "code-review:code-review"` — different plugin, not RPTC
+   - The `rptc:` prefix is required for ALL verification agents. No exceptions.
+
+   **Code Review Agent** (if selected):
+   ```
+   Use spawn_agent tool with agent_type: "rptc:code-review-agent":
+   ⚠️ WRONG agents: "feature-dev:code-reviewer", "code-review:code-review" — DO NOT USE
+
+   [Prepend the Environment Context Block]
+
+   prompt: "Review code quality for these files: [list files].
+   Focus: complexity, KISS/YAGNI violations, dead code, readability.
+   REPORT ONLY - do not make changes. Output: confidence-scored findings (≥80 only)."
+   ```
+
+   **Security Agent** (if selected):
+   ```
+   Use spawn_agent tool with agent_type: "rptc:security-agent":
+
+   [Prepend the Environment Context Block]
+
+   prompt: "Security review for these files: [list files].
+   Focus: input validation, auth checks, injection vulnerabilities, data exposure.
+   REPORT ONLY - do not make changes. Output: confidence-scored findings (≥80 only)."
+   ```
+
+   **Documentation Agent** (if selected):
+   ```
+   Use spawn_agent tool with agent_type: "rptc:docs-agent":
+
+   [Prepend the Environment Context Block]
+
+   prompt: "Review documentation impact for these files: [list files].
+   Focus: README updates, API doc changes, inline comment accuracy, breaking changes.
+   REPORT ONLY - do not make changes. Output: documentation updates needed (≥80 only)."
+   ```
+
+5. **Consolidate findings** from launched agents:
+   - Categorize: bugs, security, style, structural, documentation
+   - Filter to high-confidence issues only (≥80)
+
+6. **Create tasks for findings** (auto-fix by default):
+   ```json
+   {
+     "plan": [
+       {"step": "[Category] Finding 1: description (file:line)", "status": "pending"},
+       {"step": "[Category] Finding 2: description (file:line)", "status": "pending"}
+     ]
+   }
+   ```
+
+7. **Auto-fix findings** (no user approval needed for most issues):
+
+   **Fix automatically** (Tier 2-4):
+   - Nits: naming, formatting, minor style issues
+   - Dead code removal
+   - Missing error handling
+   - Documentation updates
+   - Test coverage gaps
+   - Minor refactoring (<30 lines)
+
+   **Ask user FIRST** (Tier 1 or significant work):
+   - Architecture changes (layer violations, new abstractions)
+   - Security vulnerabilities (may need broader review)
+   - Breaking API changes
+   - Major refactoring (>50 lines or multiple files)
+   - Integration issues (orphan code - user decides: wire up or remove)
+
+   **Process**:
+   - Work through finding tasks sequentially
+   - For auto-fix items: Apply fix, an `update_plan` call with the full `plan` list and updated statuses
+   - For ask-first items: Use request_user_input with fix proposal, then apply or skip
+   - Mark all finding tasks complete as addressed
+
+8. **User Acknowledgment**:
+
+   Present review results to the user. This is a tool-enforced gate — you MUST call request_user_input here.
+
+   ```json
+   {
+     "questions": [{
+       "id": "verification_gate",
+       "header": "Verification",
+       "question": "Phase 4 verification complete. [N] findings addressed. Proceed to completion?",
+       "options": [
+         {"label": "Proceed to Phase 5 (Recommended)", "description": "All verification findings addressed, ready to wrap up"},
+         {"label": "Re-verify with `rptc:rptc-verify`", "description": "Run the standalone verification workflow to check current state"}
+       ]
+     }]
+   }
+   ```
+
+   If user selects "Re-verify" → invoke `rptc:rptc-verify` (uses the standalone verify workflow with agent selection and full re-scan).
+
+Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
+
+---
+
 ## Phase 5: Complete
 
-`update_plan(Phase 5, status: "in_progress")`
+Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
 
-Mark remaining tasks complete. Output 1-2 sentences: what changed, ready for `/rptc:commit`.
+Mark remaining tasks complete. Output 1-2 sentences: what changed, ready for `rptc:rptc-commit`.
 
-`update_plan(Phase 5, status: "completed")`
+Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
+
+---
+
+## Key Principles
+
+1. **Single approval point**: ask the user to leave Plan Mode / switch to execution mode, then halt until confirmed after Architecture phase
+2. **Ask when uncertain**: Use request_user_input only when genuinely unclear
+3. **Smart parallelism**: Parallelize independent steps, sequence dependent ones
+4. **Task-appropriate workflow**: TDD for code, direct execution for non-code
+5. **Auto-fix by default**: Fix Tier 2-4 issues automatically; ask only for Tier 1 or major changes
+6. **Confidence filtering**: Only surface issues ≥80 confidence
+7. **Goal+Actions format**: Trust agents to handle details
+
+---
 
 ## Error Handling
 

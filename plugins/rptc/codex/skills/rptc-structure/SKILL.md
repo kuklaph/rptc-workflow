@@ -3,23 +3,72 @@ name: rptc-structure
 description: Analyze and improve codebase structure for AI-ready development. Use when the user asks for /rptc:structure or the equivalent RPTC Codex workflow intent.
 ---
 
-# /rptc:structure
-
+# RPTC Structure
 Analyze codebase structure, identify organizational problems, and generate a restructuring plan.
 
 **Arguments:**
-- None: `/rptc:structure` — Analyze entire project from repo root
-- With path: `/rptc:structure "src/"` — Analyze specific directory
+- None: `rptc:rptc-structure` — Analyze entire project from repo root
+- With path: `rptc:rptc-structure "src/"` — Analyze specific directory
 - `--report-only` — Produce assessment only, skip restructuring plan
-- `--plan` — Generate restructuring plan (feeds into `/rptc:feat`)
+- `--plan` — Generate restructuring plan (feeds into `rptc:rptc-feat`)
 
 **Examples:**
 ```bash
-/rptc:structure                        # Full project analysis
-/rptc:structure "src/services/"        # Target specific area
-/rptc:structure --report-only          # Assessment without plan
-/rptc:structure "src/" --plan          # Assessment + restructuring plan
+`rptc:rptc-structure`                        # Full project analysis
+`rptc:rptc-structure` "src/services/"        # Target specific area
+`rptc:rptc-structure` --report-only          # Assessment without plan
+`rptc:rptc-structure` "src/" --plan          # Assessment + restructuring plan
 ```
+
+---
+
+## Step 0: RPTC Workflow Initialization (MANDATORY - CANNOT SKIP)
+
+**Before ANY other action, establish RPTC workflow context.**
+
+### 0.1 Load Required Skills
+
+```
+Use/load the `rptc:structure-methodology` skill.
+Use/load the `rptc:writing-clearly-and-concisely` skill.
+```
+
+**Wait for both skills to load before proceeding.**
+
+### 0.2 RPTC Workflow Understanding (INTERNALIZE)
+
+You are executing **RPTC Structure** — codebase structural analysis and optional restructuring planning.
+
+**Core Philosophy:**
+- Structure determines AI effectiveness more than any prompt or agent configuration
+- AI agents are perpetual new starters — navigability is non-negotiable
+- Deep modules with simple interfaces beat shallow module webs every time
+- Assessment produces actionable findings, not theoretical advice
+
+**Non-Negotiable Directives:**
+
+| Directive | Meaning |
+|-----------|---------|
+| **Evidence-Based** | Every finding cites specific files, directories, and import paths |
+| **Scored Assessment** | All categories scored 1-5 with clear criteria |
+| **Actionable Output** | Recommendations are concrete file moves, not vague suggestions |
+| **User Authority** | User decides which recommendations to pursue |
+
+**SOP Reference Chain (with Precedence):**
+
+| Topic | Check First (User) | Fallback (RPTC) |
+|-------|-------------------|-----------------|
+| Architecture | Project `sop/`, `Codex global guidance` | `RPTC plugin root/sop/architecture-patterns.md` |
+| Testing | Project `sop/`, `Codex global guidance` | `RPTC plugin root/sop/testing-guide.md` |
+
+### 0.3 Initialization Verification
+
+Before proceeding to Phase 1, confirm:
+- Both skills loaded and active
+- RPTC directives understood
+- Target scope clear (arguments parsed)
+
+---
 
 ## Skills Usage Guide
 
@@ -32,9 +81,59 @@ Analyze codebase structure, identify organizational problems, and generate a res
 | Phase 3 | Assessment report, finding descriptions |
 | Phase 4 | Restructuring plan, action items |
 
-## Custom Agent Availability
+---
 
-Before spawning `rptc:research-agent`, verify its TOML is installed in `.codex/agents/` or the user's Codex agents directory. If missing, use/load `rptc-init` to copy the packaged agents, then re-check. If still unavailable, use the built-in `explorer` agent and report the fallback.
+## Phase 1: Scope and Discovery
+
+**Goal**: Determine analysis scope and gather baseline structural data.
+
+### 1.1 Parse Arguments
+
+| Input | Scope |
+|-------|-------|
+| No arguments | Repo root (auto-detect via `git rev-parse --show-toplevel`) |
+| Path argument | Specified directory |
+| `--report-only` | Flag: skip Phase 4 |
+| `--plan` | Flag: generate restructuring plan in Phase 4 |
+
+**Default behavior** (no flags): Produce assessment report. Ask user whether to generate restructuring plan.
+
+### 1.2 Baseline Discovery
+
+Gather structural baseline before analysis:
+
+1. **Directory tree** (depth 3-4):
+   ```bash
+   tree -d -L 3 [target]   # or equivalent for the platform
+   ```
+
+2. **File counts by directory**:
+   ```bash
+   # Count source files per top-level directory
+   # Identify: src/, lib/, app/, packages/, services/, modules/, features/
+   ```
+
+3. **Language and framework detection**:
+   - Package files: `package.json`, `Cargo.toml`, `go.mod`, `pyproject.toml`, etc.
+   - Framework markers: React, Next.js, Express, Django, FastAPI, etc.
+   - This determines what "good structure" looks like (React app vs. Go service vs. Python package)
+
+4. **Test structure detection**:
+   - Test locations: `tests/`, `__tests__/`, co-located `*.test.*`, `*_test.*`
+   - Test framework: jest, vitest, pytest, go test, etc.
+
+### 1.3 Report Baseline
+
+```
+Structure analysis scope: [path]
+Language: [detected]
+Framework: [detected]
+Source directories: [N]
+Total source files: [N]
+Test structure: [description]
+```
+
+---
 
 ## Phase 2: Structural Analysis
 
@@ -43,13 +142,13 @@ Before spawning `rptc:research-agent`, verify its TOML is installed in `.codex/a
 Launch 3 research agents in parallel. Each examines the codebase from a different angle.
 
 **AGENT NAMESPACE LOCKOUT:**
-- ✅ CORRECT: RPTC `rptc:research-agent` role
+- ✅ CORRECT: `agent_type: "rptc:research-agent"`
 - ❌ WRONG: Any other namespace prefix
 
 ### Agent 1: Module Mapping
 
 ```
-Use `spawn_agent` with the RPTC `rptc:research-agent` role when installed:
+Use spawn_agent tool with agent_type: "rptc:research-agent":
 
 ## Context
 Analyzing project structure at [path] for module depth and organization.
@@ -77,7 +176,7 @@ Structured list of feature areas with classifications and evidence.
 ### Agent 2: Dependency and Interface Analysis
 
 ```
-Use `spawn_agent` with the RPTC `rptc:research-agent` role when installed:
+Use spawn_agent tool with agent_type: "rptc:research-agent":
 
 ## Context
 Analyzing project structure at [path] for dependency health and interface quality.
@@ -104,7 +203,7 @@ Check for:
 ### Agent 3: Progressive Disclosure and Testability
 
 ```
-Use `spawn_agent` with the RPTC `rptc:research-agent` role when installed:
+Use spawn_agent tool with agent_type: "rptc:research-agent":
 
 ## Context
 Analyzing project structure at [path] for progressive disclosure and test boundary alignment.
@@ -130,6 +229,104 @@ Check for:
 ### Wait for All Agents
 
 Collect all three agent reports before proceeding.
+
+---
+
+## Phase 3: Assessment Report
+
+**Goal**: Consolidate agent findings into a scored assessment.
+
+### 3.1 Consolidate Findings
+
+Merge findings from all three agents into a unified view:
+
+1. **Module Map**: Combine Agent 1's feature area classifications
+2. **Dependency Health**: Integrate Agent 2's dependency analysis
+3. **Disclosure and Testing**: Incorporate Agent 3's progressive disclosure and test findings
+
+### 3.2 Detect Anti-Patterns
+
+Cross-reference findings against the anti-pattern table from the `structure-methodology` skill:
+
+| Anti-Pattern | Detection Signal |
+|--------------|-----------------|
+| **Shallow module web** | Multiple feature areas classified "shallow" + high cross-boundary imports |
+| **God module** | Files with 1000+ lines or 20+ exports appearing in fan-in top 10 |
+| **Leaky abstraction** | Internal types imported across module boundaries |
+| **Feature scatter** | Feature area spans 4+ top-level directories |
+| **Missing entry point** | Directory with 5+ source files but no index/barrel file |
+| **Test-implementation coupling** | Tests importing from `internal/` paths or mocking internal functions |
+
+### 3.3 Score
+
+Rate each category 1-5 using these criteria:
+
+| Score | Meaning |
+|-------|---------|
+| 5 | Excellent — well-structured, AI-navigable, no issues |
+| 4 | Good — minor improvements possible, fundamentally sound |
+| 3 | Adequate — some structural issues, AI can work but wastes effort |
+| 2 | Poor — significant structural problems, AI struggles |
+| 1 | Critical — major restructuring needed, AI frequently fails |
+
+**Categories**:
+- **File system navigability**: Can features be found by browsing?
+- **Interface clarity**: Are entry points and public APIs well-defined?
+- **Implementation hiding**: Are internals separated from public API?
+- **Test boundary alignment**: Do tests test at the right level?
+- **Overall AI readiness**: Weighted average with emphasis on navigability and interfaces
+
+### 3.4 Present Assessment
+
+Use the assessment output template from the `structure-methodology` skill. Present to user with:
+
+```markdown
+## Structure Assessment: [project/directory]
+
+### Module Map
+[Table of feature areas with depth classification]
+
+### Key Findings
+[Numbered findings with evidence and severity]
+
+### Structural Hotspots
+[Areas most in need of restructuring]
+
+### Anti-Patterns Detected
+[Which anti-patterns are present and where]
+
+### Structure Score
+- File system navigability: [1-5]
+- Interface clarity: [1-5]
+- Implementation hiding: [1-5]
+- Test boundary alignment: [1-5]
+- **Overall AI readiness: [1-5]**
+```
+
+### 3.5 Decision Point
+
+If `--report-only` flag: **Stop here.** Assessment is the deliverable.
+
+If `--plan` flag: **Proceed to Phase 4.**
+
+Otherwise, ask the user:
+
+```json
+{
+  "questions": [{
+    "id": "structure_next_step",
+    "header": "Next Steps",
+    "question": "Assessment complete. Want me to generate a restructuring plan?",
+    "options": [
+      {"label": "Generate plan (Recommended)", "description": "Create a prioritized restructuring plan I can execute with `rptc:rptc-feat`"},
+      {"label": "Done", "description": "Assessment is enough for now"},
+      {"label": "Focus on hotspots", "description": "Generate plan for the worst areas only"}
+    ]
+  }]
+}
+```
+
+---
 
 ## Phase 4: Restructuring Plan
 
@@ -187,8 +384,8 @@ For each action, classify:
 | Effort | Meaning | Execution Method |
 |--------|---------|-----------------|
 | Small | ≤5 files, no logic changes | Direct execution in main context |
-| Medium | 5-20 files, import refactoring | Single `/rptc:feat` task |
-| Large | 20+ files, structural reorganization | Multiple `/rptc:feat` tasks or parent-orchestrated `spawn_agent` delegation |
+| Medium | 5-20 files, import refactoring | Single `rptc:rptc-feat` task |
+| Large | 20+ files, structural reorganization | Multiple `rptc:rptc-feat` tasks or Agent Teams |
 
 ### 4.4 Present Plan
 
@@ -210,30 +407,61 @@ For each action, classify:
 
 ### Next Steps
 Each action can be executed via:
-- `/rptc:feat "Restructure: [action title]"` — for individual actions
-- Parent-orchestrated `spawn_agent` delegation — for executing multiple independent actions in parallel
+- `rptc:rptc-feat "Restructure: [action title]"` — for individual actions
+- Agent Teams mode — for executing multiple independent actions in parallel
 ```
 
 ### 4.5 User Decision
 
-```
-Use request_user_input when available, otherwise ask directly in chat:
-question: "Restructuring plan ready. How would you like to proceed?"
-header: "Execution"
-options:
-  - label: "Execute all"
-    description: "Start working through the plan (priority order)"
-  - label: "Execute Priority 1 only"
-    description: "Focus on highest-impact changes first"
-  - label: "Save plan"
-    description: "Save to a file for later — I'll run /rptc:feat myself"
-  - label: "Review first"
-    description: "Let me look at the plan before deciding"
+```json
+{
+  "questions": [{
+    "id": "structure_execution",
+    "header": "Execution",
+    "question": "Restructuring plan ready. How would you like to proceed?",
+    "options": [
+      {"label": "Execute all (Recommended)", "description": "Start working through the plan in priority order"},
+      {"label": "Execute Priority 1 only", "description": "Focus on highest-impact changes first"},
+      {"label": "Save plan", "description": "Save to a file for later; I'll run `rptc:rptc-feat` myself"},
+      {"label": "Review first", "description": "Let me look at the plan before deciding"}
+    ]
+  }]
+}
 ```
 
-If **Execute all** or **Execute Priority 1 only**: Enter plan mode and begin execution using `/rptc:feat` pattern (TDD for each restructuring action — write tests for expected import structure first, then move files).
+If **Execute all** or **Execute Priority 1 only**: Ask the user to switch to execution mode, then halt until the user confirms execution mode is active. After confirmation, begin execution using the `rptc:rptc-feat` workflow pattern (TDD for each restructuring action — write tests for expected import structure first, then move files).
 
 If **Save plan**: Write to `docs/structure-plan.md` (or user-specified location).
+
+---
+
+## Phase 5: Summary
+
+**Goal**: Report what was analyzed and what happens next.
+
+```markdown
+## Structure Analysis Complete
+
+### Scope
+- Directory analyzed: [path]
+- Feature areas identified: [N]
+- Files analyzed: [N]
+
+### Assessment
+- Overall AI readiness: [1-5]
+- Anti-patterns detected: [N]
+- Structural hotspots: [N]
+
+### Plan (if generated)
+- Restructuring actions: [N]
+- Priority 1 actions: [N]
+- Estimated effort: [description]
+
+### Next Steps
+- [Execute plan via `rptc:rptc-feat`, or revisit specific areas, or ready for development]
+```
+
+---
 
 ## Key Principles
 
@@ -242,7 +470,7 @@ If **Save plan**: Write to `docs/structure-plan.md` (or user-specified location)
 3. **Actionable output**: Recommendations are concrete file operations, not abstract advice
 4. **Framework-aware**: "Good structure" adapts to the language and framework detected
 5. **Non-destructive**: Analysis never modifies code — restructuring only happens with user approval
-6. **Feeds existing workflow**: Restructuring actions execute through `/rptc:feat` with full TDD discipline
+6. **Feeds existing workflow**: Restructuring actions execute through `rptc:rptc-feat` with full TDD discipline
 
 ---
 
