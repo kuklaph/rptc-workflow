@@ -184,7 +184,8 @@ Phase 3: Implementation
     → Route B (code): TDD with smart batching via rptc:tdd-agent
     ↓
 Phase 4: Quality Verification (Report-Only)
-    → Parallel: code-review-agent + security-agent + docs-agent
+    → Parallel: selected report-only verification agents
+    → all mode: code-review-agent + security-agent + docs-agent
     → Agents report findings only (no auto-fix)
     → Main context handles fixes via provider task tracker
     ↓
@@ -299,7 +300,7 @@ RPTC maximizes efficiency through parallelization:
     ┌─────┼─────┐
     ▼     ▼     ▼
 ┌─────┐ ┌─────┐ ┌─────┐
-│Code │ │Secu-│ │Docs │  (All 3 run in parallel)
+│Code │ │Secu-│ │Docs │  (Selected agents run in parallel)
 │Revw │ │rity │ │Agent│  (REPORT-ONLY)
 └──┬──┘ └──┬──┘ └──┬──┘
    │       │       │

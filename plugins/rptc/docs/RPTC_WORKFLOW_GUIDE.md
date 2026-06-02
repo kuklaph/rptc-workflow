@@ -143,7 +143,7 @@ For documentation, config, and non-code changes:
 
 **What happens:**
 1. Collects all files modified during Implementation phase
-2. Launches ALL THREE verification agents in parallel:
+2. Launches selected report-only verification agents in parallel (`all` mode runs all three):
    - **Code Review Agent**: Complexity, KISS/YAGNI violations, dead code, readability
    - **Security Agent**: Input validation, auth checks, injection vulnerabilities, data exposure
    - **Documentation Agent**: README updates, API doc changes, inline comment accuracy
@@ -153,7 +153,7 @@ For documentation, config, and non-code changes:
    - Simple fixes: Applied directly
    - Structural changes: Shown to you for approval
 
-**Agents used:** `rptc:code-review-agent` + `rptc:security-agent` + `rptc:docs-agent` (parallel, report-only)
+**Agents used:** Selected verification agents: one or more of `rptc:code-review-agent`, `rptc:security-agent`, and `rptc:docs-agent`; `all` mode runs all three in parallel.
 
 ### Phase 5: Complete
 
@@ -365,7 +365,7 @@ RPTC maximizes efficiency through parallelization:
 - **Discovery**: 2-3 exploration agents run simultaneously
 - **Architecture**: 3 plan perspectives generated in parallel
 - **TDD**: Independent batches execute in parallel
-- **Quality Verification**: Code Review, Security, and Documentation agents run together
+- **Quality Verification**: Selected report-only verification agents run together; `all` mode runs Code Review, Security, and Documentation
 
 ### Report-Only Verification System
 

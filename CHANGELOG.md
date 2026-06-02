@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.16.4] - 2026-06-02
+
+### Changed
+
+- Tightened Codex feature and fix workflows so `update_plan` preserves top-level phases while tracking implementation, fixes, verification, and re-checks as phase-prefixed child items.
+- Clarified parent-session delegation behavior so the parent waits while RPTC sub-agents own implementation or verification work.
+- Updated project documentation to describe selected report-only verification agents, with `all` mode running Code Review, Security, and Documentation.
+
+---
+
 ## [3.16.3] - 2026-05-13
 
 ### Fixed

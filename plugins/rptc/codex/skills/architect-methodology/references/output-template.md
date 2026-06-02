@@ -11,8 +11,7 @@ Follow this template EXACTLY when generating implementation plans. Use checkbox 
 
 - [x] Planned
 - [ ] In Progress (TDD Phase)
-- [ ] Code Review
-- [ ] Security Review
+- [ ] Quality Verification
 - [ ] Complete
 
 **Created:** [Date]
@@ -26,12 +25,16 @@ Follow this template EXACTLY when generating implementation plans. Use checkbox 
 
 Re-invoke the originating RPTC workflow to restore full context:
 
-- Features: `/rptc:feat Plan is approved, continue to implementation`
-- Bug fixes: `/rptc:fix Plan is approved, continue to implementation`
+- Features: `rptc:rptc-feat Plan is approved, continue to implementation`
+- Bug fixes: `rptc:rptc-fix Plan is approved, continue to implementation`
 
 This handles all re-initialization automatically: skill loading, Serena activation, task tracking, and routing to Phase 3.
+In Codex, the parent session imports this plan's implementation or fix steps as
+`Phase 3.x` child items under the originating Phase 3 parent. It must keep
+Phases 1-5 visible and must not replace them with bare implementation or fix
+tasks.
 
-**Do not manually load skills or rebuild tasks** — the command handles everything.
+**Do not manually load skills or rebuild tasks** — the Codex workflow intent handles everything.
 
 ---
 
@@ -410,7 +413,7 @@ Request full replan if:
 **After Plan Complete:**
 
 1. **For Developer:** Continue with TDD implementation phase
-2. **Quality Gates:** Code Review Agent + Security Agent (parallel execution)
+2. **Quality Gates:** Selected report-only verification agents (parallel execution)
 3. **Completion:** Verify all acceptance criteria met
 
 **Next:** TDD implementation begins automatically in the originating RPTC workflow

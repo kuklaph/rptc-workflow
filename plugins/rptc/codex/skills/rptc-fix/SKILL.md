@@ -117,6 +117,22 @@ Create the workflow phases with `update_plan`. Keep phases sequential in prose: 
 
 **At each phase**: call `update_plan` with the current phase `in_progress`, completed phases `completed`, and future phases `pending`.
 
+### 0.5.1 Codex Phase Hierarchy Protocol
+
+Codex `update_plan` is flat and cannot enforce nested blocking task types. Preserve
+RPTC phase structure through naming and ordering.
+
+**Rules**:
+- NEVER replace the top-level phase list with bare fix tasks.
+- Keep all five phases visible for the whole workflow.
+- When Phase 3 starts, import approved or direct fix steps as `Phase 3.x` child
+  items immediately after the Phase 3 parent item.
+- When Phase 4 starts, import verification agent launches, findings, and re-checks
+  as `Phase 4.x` child items immediately after the Phase 4 parent item.
+- Because only one item can be `in_progress`, the active child item owns
+  `in_progress`. The parent phase stays as the phase boundary and is marked
+  `completed` only after all of its child items complete.
+
 ### 0.6 Plan Continuation Detection
 
 Check if the bug description argument contains **"Plan is approved"**:
@@ -126,12 +142,16 @@ Check if the bug description argument contains **"Plan is approved"**:
 1. Step 0 initialization is already complete (skills loaded, Serena active, tasks created)
 2. **Verify environment**: re-derive `REPO_ROOT` from `git rev-parse --show-toplevel`.
    Check if currently inside a worktree: compare `git rev-parse --show-toplevel` against `git worktree list`. If in a worktree, set `WORKTREE_PATH` accordingly.
-3. Mark Phases 1 and 2 complete:
+3. **Load the approved plan file** and extract its fix steps.
+4. **Expand Phase 3** by adding those fix steps as `Phase 3.x` child items.
+   Do not replace the five-phase workflow list.
+5. Mark Phases 1 and 2 complete and start the first fix child item:
    ```
-   Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
-   Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
+   Call `update_plan` with the full phase list: Phases 1 and 2 completed,
+   Phase 3 parent present, first Phase 3.x child item in_progress, Phases 4
+   and 5 pending.
    ```
-4. **Proceed directly to Phase 3: Fix Application** — the plan is already approved and available in the plan file.
+6. **Proceed directly to Phase 3: Fix Application** — the plan is already approved and available in the plan file.
 
 **If NO** — this is a new bug report. Proceed to Phase 1.
 
@@ -477,7 +497,9 @@ Call `update_plan` with the full `plan` list, setting completed items to `comple
 
 ## Phase 3: Fix Application
 
-Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
+Call `update_plan` with the full `plan` list. Preserve Phases 1-5 and add the
+approved or direct fix steps as `Phase 3.x` child items. Do not overwrite the
+phase list with unprefixed fix tasks.
 
 **Goal**: Apply the fix using test-driven approach (regression test first).
 
@@ -602,7 +624,13 @@ Apply MINIMAL fix to make the test pass:
     - `Test-First Followed: YES` → continue
     - `Test-First Followed: NO` → flag as TDD violation, ask user whether to re-run or accept
 
-2. **Update task status** as fix progresses (an `update_plan` call with the full `plan` list and updated statuses)
+   **Parent-session wait rule**: After launching the tdd-agent, the main context
+   waits for it to return. Do not start independent research, ad hoc fixes, or
+   self-verification in the same scope while the agent runs. Allowed parent work
+   while waiting is coordination only: keep `update_plan` accurate, prepare the
+   next already-known prompt, and process completed agent results.
+
+2. **Update task status** as each `Phase 3.x` fix item progresses (an `update_plan` call with the full `plan` list and updated statuses)
 
 3. **Handle failures**:
    - If test won't reproduce bug: Return to Phase 1 for better reproduction
@@ -615,13 +643,21 @@ Call `update_plan` with the full `plan` list, setting completed items to `comple
 
 ## Phase 4: Verification
 
-Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
+Call `update_plan` with the full `plan` list. Preserve Phases 1-5 and add
+verification work as `Phase 4.x` child items. Phase 4 starts only after all
+`Phase 3.x` fix items are complete.
 
 **Goal**: Verify the fix works and didn't introduce regressions.
 
 > 💡 **Tool Reminder**: Use Serena (`find_referencing_symbols`, `search_for_pattern`) when applying auto-fixes from verification findings.
 
 **This phase runs for ALL bugs regardless of severity (S1-S4).** Even urgent S1 fixes must be reviewed before completion.
+
+**Phase boundary**: Phase 3 regression checks are not Phase 4 verification.
+Running affected tests, checking diffs, or reading changed files in the main
+context does not satisfy Phase 4. Phase 4 requires the selected RPTC verification
+agent calls below. If verification agents are unavailable, report that as a
+workflow blocker instead of silently substituting self-review.
 
 **Actions**:
 
@@ -679,7 +715,24 @@ Call `update_plan` with the full `plan` list, setting completed items to `comple
    - security: Only if auth/api paths OR security keywords found
    - docs: Only if doc files changed OR export keyword found
 
-3. **Launch selected verification agents**:
+3. **Create Phase 4 child plan items** for selected verification work:
+   ```json
+   {
+     "plan": [
+       {"step": "Phase 1: Reproduction & Triage - Confirm bug with reproduction steps", "status": "completed"},
+       {"step": "Phase 2: Root Cause Analysis - 5 Whys methodology, identify fix approach", "status": "completed"},
+       {"step": "Phase 3: Fix Application - Regression test + minimal fix via TDD", "status": "completed"},
+       {"step": "Phase 4: Verification - Parent phase for review agents and findings", "status": "pending"},
+       {"step": "Phase 4.1: Launch selected report-only verification agents", "status": "in_progress"},
+       {"step": "Phase 4.2: Consolidate high-confidence findings", "status": "pending"},
+       {"step": "Phase 4.3: Address verification findings", "status": "pending"},
+       {"step": "Phase 4.4: Re-run verification if requested", "status": "pending"},
+       {"step": "Phase 5: Complete - Summarize fix for commit", "status": "pending"}
+     ]
+   }
+   ```
+
+4. **Launch selected verification agents**:
 
    **AGENT NAMESPACE LOCKOUT (Phase 4):**
    - ✅ CORRECT: `agent_type: "rptc:code-review-agent"`
@@ -724,14 +777,35 @@ Call `update_plan` with the full `plan` list, setting completed items to `comple
    REPORT ONLY - do not make changes. Output: documentation updates needed (≥80 only)."
    ```
 
-4. **Consolidate findings** from launched agents:
+   **Parent-session wait rule**: After launching verification agents, wait for
+   all selected agents to return. Do not perform independent main-context
+   verification in the same scope while agents run. The parent session owns only
+   coordination, finding consolidation, and fixes after reports return.
+
+5. **Consolidate findings** from launched agents:
    - Fix quality: Root cause addressed? Minimal scope?
    - Regression risk: Side effects identified?
    - Documentation: Updates needed?
 
-5. **Create tasks for findings** (auto-fix by default)
+6. **Create Phase 4 child tasks for findings** (auto-fix by default):
+   ```json
+   {
+     "plan": [
+       {"step": "Phase 1: Reproduction & Triage - Confirm bug with reproduction steps", "status": "completed"},
+       {"step": "Phase 2: Root Cause Analysis - 5 Whys methodology, identify fix approach", "status": "completed"},
+       {"step": "Phase 3: Fix Application - Regression test + minimal fix via TDD", "status": "completed"},
+       {"step": "Phase 4: Verification - Parent phase for review agents and findings", "status": "pending"},
+       {"step": "Phase 4.1: Launch selected report-only verification agents", "status": "completed"},
+       {"step": "Phase 4.2: Consolidate high-confidence findings", "status": "completed"},
+       {"step": "Phase 4.3.1: [Category] Finding 1 - description (file:line)", "status": "pending"},
+       {"step": "Phase 4.3.2: [Category] Finding 2 - description (file:line)", "status": "pending"},
+       {"step": "Phase 4.4: Re-run verification if requested", "status": "pending"},
+       {"step": "Phase 5: Complete - Summarize fix for commit", "status": "pending"}
+     ]
+   }
+   ```
 
-6. **Auto-fix findings** (no user approval needed for most issues):
+7. **Auto-fix findings** (no user approval needed for most issues):
 
    **Fix automatically**:
    - Nits: naming, formatting, minor style issues
@@ -751,7 +825,7 @@ Call `update_plan` with the full `plan` list, setting completed items to `comple
    - For ask-first items: Use request_user_input with fix proposal, then apply or skip
    - Mark all finding tasks complete as addressed
 
-7. **User Acknowledgment**:
+8. **User Acknowledgment**:
 
    Present review results to the user. This is a tool-enforced gate — you MUST call request_user_input here.
 
@@ -769,7 +843,10 @@ Call `update_plan` with the full `plan` list, setting completed items to `comple
    }
    ```
 
-   If user selects "Re-verify" → invoke `rptc:rptc-verify` (uses the standalone verify workflow with agent selection and full re-scan).
+   If user selects "Re-verify" → mark `Phase 4.4: Re-run verification if requested`
+   as `in_progress`, then invoke `rptc:rptc-verify` (uses the standalone verify
+   workflow with agent selection and full re-scan). When it returns, mark
+   `Phase 4.4` completed before proceeding.
 
 Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
 

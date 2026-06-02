@@ -37,7 +37,7 @@ The unified `/rptc:feat` command handles the complete workflow:
 **DISCOVERY** → Codebase exploration and pattern analysis
 **ARCHITECTURE** → User-selected planning approach (Minimal/Clean/Pragmatic)
 **TDD** → Test-driven implementation with smart batching
-**QUALITY VERIFICATION** → Parallel Code Review, Security, and Documentation agents
+**QUALITY VERIFICATION** → Selected report-only verification agents in parallel
 **COMPLETE** → Summary and documentation
 
 ### Your Role as PM
@@ -101,7 +101,7 @@ The unified `/rptc:feat` command handles the complete workflow:
 - **Code Review Agent**: Complexity, KISS/YAGNI violations, dead code
 - **Security Agent**: Input validation, auth checks, injection vulnerabilities
 - **Documentation Agent**: README updates, API doc changes
-- All three run in parallel, **report findings only**
+- Selected report-only verification agents run in parallel; `all` mode runs Code Review, Security, and Documentation
 - Main context handles fixes via provider task tracker
 
 ### Phase 5: Complete
@@ -143,7 +143,7 @@ When `/rptc:feat` presents 3 planning approaches, consider:
 - **Code Review Gate**: Catches over-engineering, enforces KISS/YAGNI
 - **Security Gate**: Prevents vulnerabilities before they ship
 - **Documentation Gate**: Ensures docs stay in sync with code
-- All three run in parallel for speed
+- Selected report-only verification agents run in parallel for speed
 - **Report-only mode**: Agents report findings, main context handles fixes
 
 ## AI Coding Assistant Guidelines
@@ -249,7 +249,7 @@ docs/research/
 [Progress shown via todos]
 
 # Phase 4: Quality Verification
-[Code Review, Security, and Documentation agents run in parallel]
+[Selected report-only verification agents run in parallel; all mode runs Code Review, Security, and Documentation]
 [You review findings, approve fixes]
 
 # Phase 5: Complete

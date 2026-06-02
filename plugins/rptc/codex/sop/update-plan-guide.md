@@ -41,6 +41,53 @@ update_plan:
 
 ---
 
+## Codex Phase Hierarchy
+
+Codex `update_plan` is flat. It does not provide nested, blocking task types.
+Preserve RPTC hierarchy through step text and ordering.
+
+### Required Pattern
+
+Keep the top-level workflow phases visible. When approved plan work begins, add
+phase-prefixed child items immediately after the active phase instead of
+replacing the whole plan with bare implementation steps.
+
+```text
+update_plan:
+  plan:
+    - step: Phase 1: Discovery - Understand scope
+      status: completed
+    - step: Phase 2: Architecture - Approved implementation plan
+      status: completed
+    - step: Phase 3: Implementation - Parent phase for approved plan steps
+      status: pending
+    - step: Phase 3.1: RED - Write parser validation tests
+      status: in_progress
+    - step: Phase 3.2: GREEN - Implement parser validation
+      status: pending
+    - step: Phase 4: Quality Verification - Agent review and findings
+      status: pending
+    - step: Phase 5: Complete - Summarize outcome
+      status: pending
+```
+
+Because only one item can be `in_progress`, the current child item owns
+`in_progress`. The parent phase remains in the list as the phase boundary and is
+marked `completed` only after all of its `Phase N.x` children complete.
+
+### Rules
+
+- NEVER replace the phase list with unprefixed implementation tasks.
+- ALWAYS import approved implementation plan steps as `Phase 3.x` items.
+- ALWAYS import verification agent launches, findings, and re-checks as
+  `Phase 4.x` items.
+- Treat Phase 3 local checks as implementation checks only. They do not satisfy
+  Phase 4.
+- Phase 4 is report-only agent verification. Main-context self-review is not a
+  substitute.
+
+---
+
 ## Command-Specific Examples
 
 ### Research Intent
@@ -175,7 +222,21 @@ Use `update_plan` for visible phase tracking:
 - Quality verification
 - Completion summary
 
+Feature workflows import approved implementation steps as `Phase 3.x`; fix
+workflows import approved or direct fix steps as `Phase 3.x`. Both import
+verification agent launches, findings, and re-checks as `Phase 4.x`.
+
 When the workflow delegates to Codex custom agents, the parent session owns the plan. Child agents report status and findings back to the parent session.
+
+Parent-session requirements during delegation:
+- Keep the delegated `Phase 3.x` implementation/fix item or `Phase 4.1`
+  verification item `in_progress` while the parent waits for the agent result.
+- While a delegated agent owns the work, wait for its result. Do not start
+  independent research, implementation, or verification in the same scope.
+- Allowed parent work while waiting is coordination only: maintain plan state,
+  prepare the next already-known prompt, and process returned results.
+- After the agent returns, update the matching child item before starting the
+  next child item.
 
 ### Commit Intent
 

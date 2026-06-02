@@ -115,6 +115,37 @@ Create the workflow phases with `update_plan`. Keep phases sequential in prose: 
 
 **At each phase**: call `update_plan` with the current phase `in_progress`, completed phases `completed`, and future phases `pending`.
 
+### 0.5.1 Codex Phase Hierarchy Protocol
+
+Codex `update_plan` is flat and cannot enforce nested blocking task types. Preserve
+RPTC phase structure through naming and ordering.
+
+**Rules**:
+- NEVER replace the top-level phase list with bare implementation tasks.
+- Keep all five phases visible for the whole workflow.
+- When Phase 3 starts, import approved implementation steps as `Phase 3.x` child
+  items immediately after the Phase 3 parent item.
+- When Phase 4 starts, import verification agent launches, findings, and re-checks
+  as `Phase 4.x` child items immediately after the Phase 4 parent item.
+- Because only one item can be `in_progress`, the active child item owns
+  `in_progress`. The parent phase stays as the phase boundary and is marked
+  `completed` only after all of its child items complete.
+
+**Example Phase 3 expansion**:
+```json
+{
+  "plan": [
+    {"step": "Phase 1: Discovery - Understand what to build and existing patterns", "status": "completed"},
+    {"step": "Phase 2: Architecture - Design implementation approach with user approval", "status": "completed"},
+    {"step": "Phase 3: Implementation - Parent phase for approved plan steps", "status": "pending"},
+    {"step": "Phase 3.1: RED - Write validation tests", "status": "in_progress"},
+    {"step": "Phase 3.2: GREEN - Implement validation behavior", "status": "pending"},
+    {"step": "Phase 4: Quality Verification - Review agents verify changes", "status": "pending"},
+    {"step": "Phase 5: Complete - Summarize what was built", "status": "pending"}
+  ]
+}
+```
+
 ### 0.6 Plan Continuation Detection
 
 Check if the feature description argument contains **"Plan is approved"**:
@@ -124,12 +155,16 @@ Check if the feature description argument contains **"Plan is approved"**:
 1. Step 0 initialization is already complete (skills loaded, Serena active, tasks created)
 2. **Verify environment**: re-derive `REPO_ROOT` from `git rev-parse --show-toplevel`.
    Check if currently inside a worktree: compare `git rev-parse --show-toplevel` against `git worktree list`. If in a worktree, set `WORKTREE_PATH` accordingly.
-3. Mark Phases 1 and 2 complete:
+3. **Load the approved plan file** and extract its implementation steps.
+4. **Expand Phase 3** by adding those implementation steps as `Phase 3.x` child
+   items. Do not replace the five-phase workflow list.
+5. Mark Phases 1 and 2 complete and start the first implementation child item:
    ```
-   Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
-   Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
+   Call `update_plan` with the full phase list: Phases 1 and 2 completed,
+   Phase 3 parent present, first Phase 3.x child item in_progress, Phases 4
+   and 5 pending.
    ```
-4. **Proceed directly to Phase 3: Implementation** — the plan is already approved and available in the plan file.
+6. **Proceed directly to Phase 3: Implementation** — the plan is already approved and available in the plan file.
 
 **If NO** — this is a new feature request. Proceed to Phase 1.
 
@@ -493,7 +528,9 @@ Call `update_plan` with the full `plan` list, setting completed items to `comple
 
 ## Phase 3: Implementation
 
-Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
+Call `update_plan` with the full `plan` list. Preserve Phases 1-5 and add the
+approved implementation steps as `Phase 3.x` child items. Do not overwrite the
+phase list with unprefixed plan steps.
 
 **Goal**: Execute the plan using the appropriate method for the task type.
 
@@ -510,7 +547,7 @@ Call `update_plan` with the full `plan` list, setting completed items to `comple
    - Read target files
    - Make changes using Edit/Write tools
    - Verify changes are correct
-3. **Update task status** as each step completes
+3. **Update task status** as each `Phase 3.x` child item completes
 
 Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
 
@@ -609,16 +646,24 @@ Combines related steps into fewer tdd-agent calls, reducing overhead while maint
    - Build dependency graph from step analysis (step 1)
    - Batches are independent if: no batch contains steps that depend on steps in other batch
 
-5. **Create plan items per batch** (with dependencies described in prose):
+5. **Create Phase 3 child plan items per batch** (with dependencies described in prose):
    ```json
    {
      "plan": [
-       {"step": "Batch 1 [Steps 1-3]: User model + validation + tests", "status": "pending"},
-       {"step": "Batch 2 [Steps 4-5]: UserService + tests", "status": "pending"},
-       {"step": "Batch 3 [Step 6]: API endpoint - wait for Batch 2", "status": "pending"}
+       {"step": "Phase 1: Discovery - Understand what to build and existing patterns", "status": "completed"},
+       {"step": "Phase 2: Architecture - Design implementation approach with user approval", "status": "completed"},
+       {"step": "Phase 3: Implementation - Parent phase for approved plan steps", "status": "pending"},
+       {"step": "Phase 3.1: Batch 1 [Steps 1-3] - User model + validation + tests", "status": "pending"},
+       {"step": "Phase 3.2: Batch 2 [Steps 4-5] - UserService + tests", "status": "pending"},
+       {"step": "Phase 3.3: Batch 3 [Step 6] - API endpoint; wait for Phase 3.2", "status": "pending"},
+       {"step": "Phase 4: Quality Verification - Review agents verify changes", "status": "pending"},
+       {"step": "Phase 5: Complete - Summarize what was built", "status": "pending"}
      ]
    }
    ```
+
+   **Do not** replace the plan with only batch items. The Phase 3 parent and
+   Phases 4-5 must remain visible.
 
 6. **For each batch, invoke tdd-agent** using the spawn_agent tool:
 
@@ -665,11 +710,18 @@ Then move to next step in batch.
    - Wait for all to complete before processing dependent batches
    - Example: Batch A and B independent → invoke both `spawn_agent` calls with `agent_type: "rptc:tdd-agent"` together
 
+   **Parent-session wait rule**: After launching tdd-agent batches, the main
+   context waits for those batches to return. Do not start independent research,
+   ad hoc implementation, or self-verification in the same scope while the agents
+   run. Allowed parent work while waiting is coordination only: keep
+   `update_plan` accurate, prepare the next already-known batch prompt, and
+   process completed agent results.
+
 7b. **Verify batch compliance**: After each tdd-agent batch returns, check the exit verification block:
     - `Test-First Followed: YES` → mark batch complete
     - `Test-First Followed: NO` → flag as TDD violation, ask user whether to re-run or accept
 
-8. **Update task status** as each batch completes (an `update_plan` call with the full `plan` list and updated statuses)
+8. **Update task status** as each `Phase 3.x` batch completes (an `update_plan` call with the full `plan` list and updated statuses)
 9. **Handle failures**: If batch fails after 3 attempts, ask user for guidance
 
 Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
@@ -691,13 +743,21 @@ Result: 6 steps → 3 agents (vs 6 agents), ~40% token reduction
 
 ## Phase 4: Quality Verification
 
-Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
+Call `update_plan` with the full `plan` list. Preserve Phases 1-5 and add
+verification work as `Phase 4.x` child items. Phase 4 starts only after all
+`Phase 3.x` implementation items are complete.
 
 **Goal**: Verify changes and report findings for main context to address.
 
 > 💡 **Tool Reminder**: Use Serena (`find_referencing_symbols`, `search_for_pattern`) when applying auto-fixes from verification findings.
 
 **Mode**: Report-only. Verification agents DO NOT make changes—they report findings. Main context handles all fixes.
+
+**Phase boundary**: Phase 3 implementation checks are not Phase 4 verification.
+Running affected tests, checking diffs, or reading changed files in the main
+context does not satisfy Phase 4. Phase 4 requires the selected RPTC verification
+agent calls below. If verification agents are unavailable, report that as a
+workflow blocker instead of silently substituting self-review.
 
 **Actions**:
 
@@ -759,7 +819,24 @@ Call `update_plan` with the full `plan` list, setting completed items to `comple
    - security: Only if auth/api paths OR security keywords found
    - docs: Only if doc files changed OR `export` keyword found
 
-4. **Launch selected verification agents** — Make spawn_agent calls for each selected agent:
+4. **Create Phase 4 child plan items** for selected verification work:
+   ```json
+   {
+     "plan": [
+       {"step": "Phase 1: Discovery - Understand what to build and existing patterns", "status": "completed"},
+       {"step": "Phase 2: Architecture - Design implementation approach with user approval", "status": "completed"},
+       {"step": "Phase 3: Implementation - Execute approved plan steps", "status": "completed"},
+       {"step": "Phase 4: Quality Verification - Parent phase for review agents and findings", "status": "pending"},
+       {"step": "Phase 4.1: Launch selected report-only verification agents", "status": "in_progress"},
+       {"step": "Phase 4.2: Consolidate high-confidence findings", "status": "pending"},
+       {"step": "Phase 4.3: Address verification findings", "status": "pending"},
+       {"step": "Phase 4.4: Re-run verification if requested", "status": "pending"},
+       {"step": "Phase 5: Complete - Summarize what was built", "status": "pending"}
+     ]
+   }
+   ```
+
+5. **Launch selected verification agents** — Make spawn_agent calls for each selected agent:
 
    **AGENT NAMESPACE LOCKOUT (Phase 4):**
    - ✅ CORRECT: `agent_type: "rptc:code-review-agent"`
@@ -801,21 +878,34 @@ Call `update_plan` with the full `plan` list, setting completed items to `comple
    REPORT ONLY - do not make changes. Output: documentation updates needed (≥80 only)."
    ```
 
-5. **Consolidate findings** from launched agents:
+   **Parent-session wait rule**: After launching verification agents, wait for
+   all selected agents to return. Do not perform independent main-context
+   verification in the same scope while agents run. The parent session owns only
+   coordination, finding consolidation, and fixes after reports return.
+
+6. **Consolidate findings** from launched agents:
    - Categorize: bugs, security, style, structural, documentation
    - Filter to high-confidence issues only (≥80)
 
-6. **Create tasks for findings** (auto-fix by default):
+7. **Create Phase 4 child tasks for findings** (auto-fix by default):
    ```json
    {
      "plan": [
-       {"step": "[Category] Finding 1: description (file:line)", "status": "pending"},
-       {"step": "[Category] Finding 2: description (file:line)", "status": "pending"}
+       {"step": "Phase 1: Discovery - Understand what to build and existing patterns", "status": "completed"},
+       {"step": "Phase 2: Architecture - Design implementation approach with user approval", "status": "completed"},
+       {"step": "Phase 3: Implementation - Execute approved plan steps", "status": "completed"},
+       {"step": "Phase 4: Quality Verification - Parent phase for review agents and findings", "status": "pending"},
+       {"step": "Phase 4.1: Launch selected report-only verification agents", "status": "completed"},
+       {"step": "Phase 4.2: Consolidate high-confidence findings", "status": "completed"},
+       {"step": "Phase 4.3.1: [Category] Finding 1 - description (file:line)", "status": "pending"},
+       {"step": "Phase 4.3.2: [Category] Finding 2 - description (file:line)", "status": "pending"},
+       {"step": "Phase 4.4: Re-run verification if requested", "status": "pending"},
+       {"step": "Phase 5: Complete - Summarize what was built", "status": "pending"}
      ]
    }
    ```
 
-7. **Auto-fix findings** (no user approval needed for most issues):
+8. **Auto-fix findings** (no user approval needed for most issues):
 
    **Fix automatically** (Tier 2-4):
    - Nits: naming, formatting, minor style issues
@@ -838,7 +928,7 @@ Call `update_plan` with the full `plan` list, setting completed items to `comple
    - For ask-first items: Use request_user_input with fix proposal, then apply or skip
    - Mark all finding tasks complete as addressed
 
-8. **User Acknowledgment**:
+9. **User Acknowledgment**:
 
    Present review results to the user. This is a tool-enforced gate — you MUST call request_user_input here.
 
@@ -856,7 +946,10 @@ Call `update_plan` with the full `plan` list, setting completed items to `comple
    }
    ```
 
-   If user selects "Re-verify" → invoke `rptc:rptc-verify` (uses the standalone verify workflow with agent selection and full re-scan).
+   If user selects "Re-verify" → mark `Phase 4.4: Re-run verification if requested`
+   as `in_progress`, then invoke `rptc:rptc-verify` (uses the standalone verify
+   workflow with agent selection and full re-scan). When it returns, mark
+   `Phase 4.4` completed before proceeding.
 
 Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
 
