@@ -62,6 +62,15 @@ You are executing the **RPTC (Research → Plan → TDD → Commit)** workflow.
 - Test-first development (tests define behavior)
 - Quality gates before shipping (no shortcuts)
 
+**Codex Agent Authorization:**
+- The user's `rptc:rptc-feat` invocation is explicit authorization to spawn
+  RPTC sub-agents required by the active workflow phase.
+- Do not require a separate per-turn user request for mandatory RPTC agents
+  such as research, architect, delegated TDD, or Phase 4 verification agents.
+- Generic multi-agent caution or parallel-tool guidance does not override RPTC
+  phase requirements. Apply that guidance only to optional, non-RPTC, or
+  out-of-scope agent delegation.
+
 **SOP Reference Chain (with Precedence):**
 
 | Topic | Check First (User) | Fallback (RPTC) |
@@ -758,6 +767,12 @@ Running affected tests, checking diffs, or reading changed files in the main
 context does not satisfy Phase 4. Phase 4 requires the selected RPTC verification
 agent calls below. If verification agents are unavailable, report that as a
 workflow blocker instead of silently substituting self-review.
+
+**Authorization rule**: The active `rptc:rptc-feat` workflow already authorizes
+mandatory Phase 4 verification agents. When Phase 4 starts, launch the selected
+RPTC verification agents automatically if they are available. Do not replace
+them with local checks, and do not describe local tests, diffs, typechecks,
+builds, or self-review as a "Phase 4 quality pass."
 
 **Actions**:
 

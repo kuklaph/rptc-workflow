@@ -2,7 +2,7 @@
 
 > Research -> Plan -> TDD -> Commit workflow for Claude Code and Codex.
 
-**Version**: 3.16.4
+**Version**: 3.16.5
 **Status**: Beta
 **License**: MIT
 

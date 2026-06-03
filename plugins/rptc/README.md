@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 3.16.4
+**Version**: 3.16.5
 **Status**: Beta
 **License**: MIT
 
@@ -131,8 +131,13 @@ Claude exposes `/rptc:*` slash commands. Codex exposes equivalent `rptc-*` skill
 - **Code Review Agent**: Complexity, KISS/YAGNI violations, dead code
 - **Security Agent**: Input validation, auth checks, injection vulnerabilities
 - **Documentation Agent**: README updates, API doc changes, inline comment accuracy
-- All three run in parallel, report findings
+- Selected report-only verification agents run in parallel; `all` mode runs all three
 - Main context addresses findings via provider task tracker
+
+Codex note: the active RPTC workflow invocation authorizes mandatory workflow
+agents. Phase 4 must use the selected RPTC verification agents when available;
+local tests, diffs, typechecks, builds, or self-review are implementation checks,
+not a substitute for Phase 4.
 
 ### Phase 5: Complete
 

@@ -102,6 +102,7 @@ The unified `/rptc:feat` command handles the complete workflow:
 - **Security Agent**: Input validation, auth checks, injection vulnerabilities
 - **Documentation Agent**: README updates, API doc changes
 - Selected report-only verification agents run in parallel; `all` mode runs Code Review, Security, and Documentation
+- In Codex, the active RPTC workflow invocation authorizes mandatory Phase 4 agents
 - Main context handles fixes via provider task tracker
 
 ### Phase 5: Complete

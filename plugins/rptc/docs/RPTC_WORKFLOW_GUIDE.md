@@ -155,6 +155,11 @@ For documentation, config, and non-code changes:
 
 **Agents used:** Selected verification agents: one or more of `rptc:code-review-agent`, `rptc:security-agent`, and `rptc:docs-agent`; `all` mode runs all three in parallel.
 
+**Codex authorization:** The active RPTC workflow invocation authorizes
+mandatory workflow agents. Codex must launch the selected Phase 4 verification
+agents when available and must not substitute local tests, diffs, typechecks,
+builds, or self-review for Phase 4.
+
 ### Phase 5: Complete
 
 **Goal**: Summarize what was built.

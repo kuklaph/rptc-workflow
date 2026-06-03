@@ -186,6 +186,7 @@ Phase 3: Implementation
 Phase 4: Quality Verification (Report-Only)
     → Parallel: selected report-only verification agents
     → all mode: code-review-agent + security-agent + docs-agent
+    → Codex RPTC invocation authorizes mandatory Phase 4 agents
     → Agents report findings only (no auto-fix)
     → Main context handles fixes via provider task tracker
     ↓

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.16.5] - 2026-06-03
+
+### Fixed
+
+- Clarified Codex feature and fix workflows so the active RPTC invocation authorizes mandatory RPTC agents for each workflow phase.
+- Prevented Phase 4 verification from being replaced by local tests, diffs, typechecks, builds, or self-review.
+- Aligned Codex task tracking and package documentation with selected report-only verification agent behavior.
+
+---
+
 ## [3.16.4] - 2026-06-02
 
 ### Changed

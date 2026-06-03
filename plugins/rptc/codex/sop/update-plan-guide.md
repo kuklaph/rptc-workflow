@@ -85,6 +85,13 @@ marked `completed` only after all of its `Phase N.x` children complete.
   Phase 4.
 - Phase 4 is report-only agent verification. Main-context self-review is not a
   substitute.
+- The user's RPTC workflow invocation is explicit authorization to spawn
+  mandatory RPTC agents required by the active phase. Do not require a separate
+  per-turn request for mandatory RPTC research, planning, delegated TDD, or
+  verification agents.
+- Do not label local tests, diffs, typechecks, builds, or self-review as a
+  "Phase 4 quality pass." Use Phase 4 wording only after the selected RPTC
+  verification agents have run or have been reported unavailable as a blocker.
 
 ---
 
@@ -314,7 +321,7 @@ Avoid:
 
 ### Automatic Phases
 
-Quality verification agents may run automatically in report-only mode after implementation when the workflow calls for them. They do not make changes. The parent session reports findings and applies approved fixes.
+Quality verification agents run automatically in report-only mode after implementation when the active RPTC workflow calls for them. The RPTC invocation is the explicit authorization for mandatory workflow agents; no extra per-turn request is required. They do not make changes. The parent session reports findings and applies approved fixes.
 
 ### Approval Template
 
