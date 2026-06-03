@@ -62,6 +62,13 @@ You are executing the **RPTC (Research → Plan → TDD → Commit)** workflow f
 - Test-first development (regression test proves the bug)
 - Quality gates before shipping (no shortcuts)
 
+**Codex Spawn Barrier (MANDATORY):**
+- At every Codex `spawn_agent` point in this workflow, immediately wait for the spawned RPTC agents to finish before moving to the next numbered action or phase.
+- Use `wait_agent` for the spawned agent IDs. Do not continue researching, planning, implementing, testing, verifying, or editing in the main context while those agents run.
+- The purpose of Codex sub-agents here is context isolation: agents gather or execute the context-heavy work, then the parent session consumes their returned reports.
+- Allowed parent-session activity while waiting is coordination only: record spawned agent IDs, call `wait_agent`, and keep `update_plan` accurate. Process agent results only after the required agents return.
+- If only some parallel agents return, do not synthesize findings or proceed until all agents required for that spawn point have returned or failed.
+
 **Codex Agent Authorization:**
 - The user's `rptc:rptc-fix` invocation is explicit authorization to spawn
   RPTC sub-agents required by the active workflow phase.
@@ -237,7 +244,7 @@ Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` �
 | Phase 2 (before architect agent) | Explore fix approaches when multiple options exist |
 | Throughout | Validate assumptions, clarify constraints |
 
-**Method**: One question at a time via request_user_input, multiple choice preferred, YAGNI ruthlessly.
+**Method**: One question at a time via `request_user_input` once Plan Mode is active; otherwise ask in normal chat and halt. Multiple choice preferred, YAGNI ruthlessly.
 **Timing**: Main context uses this BEFORE delegating to architect agent.
 
 **`writing-clearly-and-concisely`** - Apply Strunk's Elements of Style to all prose:
@@ -297,7 +304,7 @@ Call `update_plan` with the full `plan` list, setting completed items to `comple
    - Environment details (if relevant)
    - Error messages, stack traces, logs
 
-4. **If reproduction steps unclear**, ask user for clarification via request_user_input
+4. **If reproduction steps unclear**, ask user for clarification in normal chat and halt. Do not call `request_user_input` unless Plan Mode is already active.
 
 5. **Launch 2-3 research agents in parallel** for bug investigation (NOT the built-in Explore agent):
 
@@ -321,20 +328,38 @@ Use code-explorer methodology Phase 3 (Architecture Analysis): What components a
 Return: Affected files/functions, related code with same pattern, potential regression scope."
 ```
 
-6. **Optional: Git bisect** for regressions:
+6. **Codex spawn barrier**: Immediately call `wait_agent` for all Phase 1 research agents and wait for every required report. Do not continue bug analysis, inspect additional code, hypothesize root causes, or proceed to bisect/summary in the main context while research agents run.
+
+7. **Optional: Git bisect** for regressions:
    - If bug worked before: "When did this break?"
    - Use `git log` to find likely commit range
    - Suggest bisect if >20 commits in range
 
-7. **Summarize findings**:
+8. **Summarize findings**:
    - Bug confirmed: Y/N
    - Failure point: file:line
    - Affected code paths
    - Severity classification
 
+### Plan Mode Handoff (Codex Gate)
+
+**After Phase 1 research/triage is complete and before any Branch Strategy or Phase 2 planning/questions**, ask the user to switch Codex into Plan Mode.
+
+Codex does not expose a reliable automatic Plan Mode switch or a dependable way to detect the current mode from skill instructions. Because `request_user_input` is only available in Plan Mode, do not call `request_user_input` until the user confirms Plan Mode is active.
+
+**Required behavior:**
+
+1. Present the Phase 1 summary in normal chat.
+2. Ask the user to switch to Plan Mode and reply with confirmation, for example:
+   ```
+   Phase 1 research/triage is complete. Please switch Codex to Plan Mode, then reply "Plan Mode active" so I can continue with Branch Strategy and Phase 2 planning questions.
+   ```
+3. Halt. Do not proceed to Branch Strategy, Phase 2, architect agents, or any `request_user_input` calls until the user confirms Plan Mode is active.
+4. If the runtime clearly exposes that Plan Mode is already active (for example, `request_user_input` is available in the current tool set), continue without asking for a mode switch.
+
 ### Branch Strategy
 
-**Now that the scope is clear**, ask the user how to organize this work.
+**Now that the scope is clear and Plan Mode is active**, ask the user how to organize this work.
 
 **Choose recommendation based on Phase 1 findings:**
 - Recommend **New worktree** when: multi-file fix, >3 files to modify, risky changes, or unclear root cause that may require multiple attempts
@@ -456,7 +481,7 @@ Call `update_plan` with the full `plan` list, setting completed items to `comple
    - Document root cause inline
    - Proceed directly to Phase 3
 
-3. **For complex bugs (S1-S2, or unclear root cause)**: Ask the user to switch to Plan Mode, then halt until the user confirms Plan Mode is active
+3. **For complex bugs (S1-S2, or unclear root cause)**: Confirm Plan Mode is active (normally completed by the Phase 1 Plan Mode Handoff). If not confirmed, ask the user to switch to Plan Mode and halt until confirmation before using `request_user_input`
    - **Clarify fix approach using `brainstorming` skill** (BEFORE architect-agent):
      - Use request_user_input to explore fix options ONE question at a time
      - Present 2-3 fix approaches with trade-offs
@@ -493,12 +518,14 @@ Constraints:
 Plan structure: Begin with Step 0: RPTC Re-initialization — instructs re-invocation of `rptc:rptc-fix` with "Plan is approved, continue to implementation" to restore full RPTC context.
 ```
 
-4. **Review fix plan**:
+4. **Codex spawn barrier**: Immediately call `wait_agent` for the architect agent and wait for its fix plan. Do not refine the plan, ask plan-approval questions, or proceed to Phase 3 in the main context while the architect runs.
+
+5. **Review fix plan**:
    - Is the fix addressing root cause (not just symptom)?
    - Is the fix minimal and surgical?
    - What's the regression risk?
 
-5. **If plan mode used**: Verify plan includes Step 0 (re-invocation of `rptc:rptc-fix`), then ask the user to leave Plan Mode / switch to execution mode. Halt until the user confirms the mode switch so the plan can be approved.
+6. **If plan mode used**: Verify plan includes Step 0 (re-invocation of `rptc:rptc-fix`), then ask the user to leave Plan Mode / switch to execution mode. Halt until the user confirms the mode switch so the plan can be approved.
 
 Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
 
@@ -629,15 +656,11 @@ Apply MINIMAL fix to make the test pass:
 - Flag if fix suggests larger refactoring need (don't do it, just flag)
 ```
 
-1b. **Verify fix compliance**: After tdd-agent returns, check the exit verification block:
+1b. **Codex spawn barrier**: Immediately call `wait_agent` for the tdd-agent and wait for it to return. Do not start independent research, ad hoc fixes, production/test edits, or self-verification in the main context while the agent runs.
+
+1c. **Verify fix compliance**: After tdd-agent returns, check the exit verification block:
     - `Test-First Followed: YES` → continue
     - `Test-First Followed: NO` → flag as TDD violation, ask user whether to re-run or accept
-
-   **Parent-session wait rule**: After launching the tdd-agent, the main context
-   waits for it to return. Do not start independent research, ad hoc fixes, or
-   self-verification in the same scope while the agent runs. Allowed parent work
-   while waiting is coordination only: keep `update_plan` accurate, prepare the
-   next already-known prompt, and process completed agent results.
 
 2. **Update task status** as each `Phase 3.x` fix item progresses (an `update_plan` call with the full `plan` list and updated statuses)
 
@@ -792,10 +815,11 @@ builds, or self-review as a "Phase 4 quality pass."
    REPORT ONLY - do not make changes. Output: documentation updates needed (≥80 only)."
    ```
 
-   **Parent-session wait rule**: After launching verification agents, wait for
-   all selected agents to return. Do not perform independent main-context
-   verification in the same scope while agents run. The parent session owns only
-   coordination, finding consolidation, and fixes after reports return.
+   **Codex spawn barrier**: After launching verification agents, immediately call
+   `wait_agent` and wait for all selected agents to return. Do not perform
+   independent main-context verification, inspect more files, consolidate
+   findings, or start fixes while agents run. The parent session resumes
+   substantive work only after reports return.
 
 5. **Consolidate findings** from launched agents:
    - Fix quality: Root cause addressed? Minimal scope?

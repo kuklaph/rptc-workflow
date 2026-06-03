@@ -192,7 +192,7 @@ Before proceeding to Phase 1, confirm:
    REPORT ONLY - do not make changes. Output: documentation updates needed (≥80 only)."
    ```
 
-2. **Wait for all agents** to complete
+2. **Codex spawn barrier**: Immediately call `wait_agent` for all selected verification agents and wait for every report before evaluating findings. Do not run independent main-context verification, inspect more files, or start fixes while the agents run; the parent session resumes substantive work only after reports return.
 
 ---
 

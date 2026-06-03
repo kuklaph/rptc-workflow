@@ -487,6 +487,8 @@ echo "════════════════════════�
 
 **VIOLATION OF THESE RULES BREAKS THE WORKFLOW.**
 
+**Codex spawn barrier for EXPLORE:** After spawning `rptc:test-sync-agent` agents for the iteration, immediately call `wait_agent` for all spawned analysis agents and wait for every report. Do not read production/test contents, analyze matching, calculate gaps, or proceed to EXIT_CHECK in the main context while analysis agents run.
+
 ---
 
 **Reset per-iteration tracking:**
@@ -810,6 +812,8 @@ fi
 - ❌ Create test files in main context
 - ❌ Run test commands in main context
 - ❌ Apply any fix scenario logic in main context
+
+**Codex spawn barrier for FIX:** After spawning `rptc:test-fixer-agent` agents for approved gaps, immediately call `wait_agent` for all spawned fixer agents and wait for every completion report. Do not edit tests, run tests, apply scenario logic, or proceed to VERIFY in the main context while fixer agents run.
 
 ---
 
