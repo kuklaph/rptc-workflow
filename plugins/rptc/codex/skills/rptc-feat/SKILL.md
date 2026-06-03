@@ -62,6 +62,13 @@ You are executing the **RPTC (Research → Plan → TDD → Commit)** workflow.
 - Test-first development (tests define behavior)
 - Quality gates before shipping (no shortcuts)
 
+**Codex Spawn Barrier (MANDATORY):**
+- At every Codex `spawn_agent` point in this workflow, immediately wait for the spawned RPTC agents to finish before moving to the next numbered action or phase.
+- Use `wait_agent` for the spawned agent IDs. Do not continue researching, planning, implementing, testing, verifying, or editing in the main context while those agents run.
+- The purpose of Codex sub-agents here is context isolation: agents gather or execute the context-heavy work, then the parent session consumes their returned reports.
+- Allowed parent-session activity while waiting is coordination only: record spawned agent IDs, call `wait_agent`, and keep `update_plan` accurate. Process agent results only after the required agents return.
+- If only some parallel agents return, do not synthesize findings or proceed until all agents required for that spawn point have returned or failed.
+
 **Codex Agent Authorization:**
 - The user's `rptc:rptc-feat` invocation is explicit authorization to spawn
   RPTC sub-agents required by the active workflow phase.
@@ -328,10 +335,12 @@ Use code-explorer methodology Phase 2 (Code Flow Tracing): call chains, data tra
 Return: external dependencies, internal dependencies, API boundaries."
 ```
 
-5. **If web research needed**, use `rptc:research-agent` with Mode B (20+ sources, cross-verification)
-6. **If hybrid research needed** (codebase + best practices), use `rptc:research-agent` with Mode C
-7. **If unclear about requirements**, ask user for clarification
-8. **Summarize findings**: Key patterns, files to modify, dependencies, gap analysis (if hybrid)
+5. **Codex spawn barrier**: Immediately call `wait_agent` for all Phase 1 research agents and wait for every required report. Do not continue Phase 1 discovery in the main context while research agents run; summarize only after their outputs return.
+6. **If web research needed**, use `rptc:research-agent` with Mode B (20+ sources, cross-verification)
+7. **If hybrid research needed** (codebase + best practices), use `rptc:research-agent` with Mode C
+8. **If additional web or hybrid research agents are spawned**, apply the same Codex spawn barrier: wait for those agents before summarizing or asking follow-up questions.
+9. **If unclear about requirements**, ask user for clarification
+10. **Summarize findings**: Key patterns, files to modify, dependencies, gap analysis (if hybrid)
 
 ### Plan Mode Handoff (Codex Gate)
 
@@ -484,9 +493,11 @@ Agent 2: "Design implementation for [feature]. Perspective: Clean. Provide: file
 Agent 3: "Design implementation for [feature]. Perspective: Pragmatic. Provide: files to modify, component design, data flow, build sequence. [If code task: include test strategy]"
 ```
 
-4. **Review all 3 approaches**, form an opinion on which fits best for this specific feature
+4. **Codex spawn barrier**: Immediately call `wait_agent` for all three architect agents and wait for every architecture report. Do not inspect files, refine the plan, ask architecture-selection questions, or otherwise continue Phase 2 in the main context while architects run.
 
-5. **MANDATORY: Ask user to choose** via request_user_input (put recommended option first with "(Recommended)" suffix):
+5. **Review all 3 approaches**, form an opinion on which fits best for this specific feature
+
+6. **MANDATORY: Ask user to choose** via request_user_input (put recommended option first with "(Recommended)" suffix):
 
    **Skip asking ONLY if ALL of these are true:**
    - Single-file change with <20 lines
@@ -533,14 +544,14 @@ Agent 3: "Design implementation for [feature]. Perspective: Pragmatic. Provide: 
 }
 ```
 
-6. **Write selected plan to plan file** with:
+7. **Write selected plan to plan file** with:
    - **Step 0: RPTC Re-initialization (ALWAYS FIRST)** — instructs re-invocation of `rptc:rptc-feat` with "Plan is approved, continue to implementation" to restore full RPTC context
    - Approach used (with rationale)
    - Implementation steps (ordered)
    - Files to create/modify
    - Test strategy per step (code tasks only)
 
-7. **Verify plan includes Step 0** (re-invocation of `rptc:rptc-feat`), then ask the user to leave Plan Mode / switch to execution mode. Halt until the user confirms the mode switch so the plan can be approved.
+8. **Verify plan includes Step 0** (re-invocation of `rptc:rptc-feat`), then ask the user to leave Plan Mode / switch to execution mode. Halt until the user confirms the mode switch so the plan can be approved.
 
 **Plan file format** (flexible):
 
@@ -735,12 +746,12 @@ Then move to next step in batch.
    - Wait for all to complete before processing dependent batches
    - Example: Batch A and B independent → invoke both `spawn_agent` calls with `agent_type: "rptc:tdd-agent"` together
 
-   **Parent-session wait rule**: After launching tdd-agent batches, the main
+   **Codex spawn barrier**: After launching tdd-agent batches, the main
    context waits for those batches to return. Do not start independent research,
    ad hoc implementation, or self-verification in the same scope while the agents
-   run. Allowed parent work while waiting is coordination only: keep
-   `update_plan` accurate, prepare the next already-known batch prompt, and
-   process completed agent results.
+   run. Allowed parent work while waiting is coordination only: record spawned
+   agent IDs, call `wait_agent`, and keep `update_plan` accurate. Process
+   agent results only after the required batches return.
 
 7b. **Verify batch compliance**: After each tdd-agent batch returns, check the exit verification block:
     - `Test-First Followed: YES` → mark batch complete
@@ -909,10 +920,11 @@ builds, or self-review as a "Phase 4 quality pass."
    REPORT ONLY - do not make changes. Output: documentation updates needed (≥80 only)."
    ```
 
-   **Parent-session wait rule**: After launching verification agents, wait for
-   all selected agents to return. Do not perform independent main-context
-   verification in the same scope while agents run. The parent session owns only
-   coordination, finding consolidation, and fixes after reports return.
+   **Codex spawn barrier**: After launching verification agents, immediately call
+   `wait_agent` and wait for all selected agents to return. Do not perform
+   independent main-context verification, inspect more files, consolidate
+   findings, or start fixes while agents run. The parent session resumes
+   substantive work only after reports return.
 
 6. **Consolidate findings** from launched agents:
    - Categorize: bugs, security, style, structural, documentation

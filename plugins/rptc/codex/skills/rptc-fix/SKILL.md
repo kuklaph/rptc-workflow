@@ -62,6 +62,13 @@ You are executing the **RPTC (Research → Plan → TDD → Commit)** workflow f
 - Test-first development (regression test proves the bug)
 - Quality gates before shipping (no shortcuts)
 
+**Codex Spawn Barrier (MANDATORY):**
+- At every Codex `spawn_agent` point in this workflow, immediately wait for the spawned RPTC agents to finish before moving to the next numbered action or phase.
+- Use `wait_agent` for the spawned agent IDs. Do not continue researching, planning, implementing, testing, verifying, or editing in the main context while those agents run.
+- The purpose of Codex sub-agents here is context isolation: agents gather or execute the context-heavy work, then the parent session consumes their returned reports.
+- Allowed parent-session activity while waiting is coordination only: record spawned agent IDs, call `wait_agent`, and keep `update_plan` accurate. Process agent results only after the required agents return.
+- If only some parallel agents return, do not synthesize findings or proceed until all agents required for that spawn point have returned or failed.
+
 **Codex Agent Authorization:**
 - The user's `rptc:rptc-fix` invocation is explicit authorization to spawn
   RPTC sub-agents required by the active workflow phase.
@@ -321,12 +328,14 @@ Use code-explorer methodology Phase 3 (Architecture Analysis): What components a
 Return: Affected files/functions, related code with same pattern, potential regression scope."
 ```
 
-6. **Optional: Git bisect** for regressions:
+6. **Codex spawn barrier**: Immediately call `wait_agent` for all Phase 1 research agents and wait for every required report. Do not continue bug analysis, inspect additional code, hypothesize root causes, or proceed to bisect/summary in the main context while research agents run.
+
+7. **Optional: Git bisect** for regressions:
    - If bug worked before: "When did this break?"
    - Use `git log` to find likely commit range
    - Suggest bisect if >20 commits in range
 
-7. **Summarize findings**:
+8. **Summarize findings**:
    - Bug confirmed: Y/N
    - Failure point: file:line
    - Affected code paths
@@ -509,12 +518,14 @@ Constraints:
 Plan structure: Begin with Step 0: RPTC Re-initialization — instructs re-invocation of `rptc:rptc-fix` with "Plan is approved, continue to implementation" to restore full RPTC context.
 ```
 
-4. **Review fix plan**:
+4. **Codex spawn barrier**: Immediately call `wait_agent` for the architect agent and wait for its fix plan. Do not refine the plan, ask plan-approval questions, or proceed to Phase 3 in the main context while the architect runs.
+
+5. **Review fix plan**:
    - Is the fix addressing root cause (not just symptom)?
    - Is the fix minimal and surgical?
    - What's the regression risk?
 
-5. **If plan mode used**: Verify plan includes Step 0 (re-invocation of `rptc:rptc-fix`), then ask the user to leave Plan Mode / switch to execution mode. Halt until the user confirms the mode switch so the plan can be approved.
+6. **If plan mode used**: Verify plan includes Step 0 (re-invocation of `rptc:rptc-fix`), then ask the user to leave Plan Mode / switch to execution mode. Halt until the user confirms the mode switch so the plan can be approved.
 
 Call `update_plan` with the full `plan` list, setting completed items to `completed`, the active item to `in_progress`, and future items to `pending`.
 
@@ -645,15 +656,11 @@ Apply MINIMAL fix to make the test pass:
 - Flag if fix suggests larger refactoring need (don't do it, just flag)
 ```
 
-1b. **Verify fix compliance**: After tdd-agent returns, check the exit verification block:
+1b. **Codex spawn barrier**: Immediately call `wait_agent` for the tdd-agent and wait for it to return. Do not start independent research, ad hoc fixes, production/test edits, or self-verification in the main context while the agent runs.
+
+1c. **Verify fix compliance**: After tdd-agent returns, check the exit verification block:
     - `Test-First Followed: YES` → continue
     - `Test-First Followed: NO` → flag as TDD violation, ask user whether to re-run or accept
-
-   **Parent-session wait rule**: After launching the tdd-agent, the main context
-   waits for it to return. Do not start independent research, ad hoc fixes, or
-   self-verification in the same scope while the agent runs. Allowed parent work
-   while waiting is coordination only: keep `update_plan` accurate, prepare the
-   next already-known prompt, and process completed agent results.
 
 2. **Update task status** as each `Phase 3.x` fix item progresses (an `update_plan` call with the full `plan` list and updated statuses)
 
@@ -808,10 +815,11 @@ builds, or self-review as a "Phase 4 quality pass."
    REPORT ONLY - do not make changes. Output: documentation updates needed (≥80 only)."
    ```
 
-   **Parent-session wait rule**: After launching verification agents, wait for
-   all selected agents to return. Do not perform independent main-context
-   verification in the same scope while agents run. The parent session owns only
-   coordination, finding consolidation, and fixes after reports return.
+   **Codex spawn barrier**: After launching verification agents, immediately call
+   `wait_agent` and wait for all selected agents to return. Do not perform
+   independent main-context verification, inspect more files, consolidate
+   findings, or start fixes while agents run. The parent session resumes
+   substantive work only after reports return.
 
 5. **Consolidate findings** from launched agents:
    - Fix quality: Root cause addressed? Minimal scope?

@@ -248,7 +248,7 @@ Focus: README updates, API doc changes, inline comment accuracy, breaking change
 REPORT ONLY - do not make changes. Output: documentation updates needed (≥80 only)."
 ```
 
-Wait for all agents to complete.
+**Codex spawn barrier**: Immediately call `wait_agent` for all selected verification agents and wait for every report before evaluating findings. Do not run independent main-context verification, inspect more files, or start fixes while the agents run; the parent session resumes substantive work only after reports return.
 
 ---
 

@@ -77,6 +77,12 @@ Before proceeding to Phase 1, confirm:
 
 ---
 
+## Codex Spawn Barrier
+
+Whenever this workflow uses Codex `spawn_agent`, immediately call `wait_agent` for the spawned agent IDs and wait for all required agents to return before moving to the next action. Do not continue codebase/web research, synthesize findings, inspect files, or make decisions in the main context while research agents run; the parent session only coordinates and consumes returned reports.
+
+---
+
 ## Phase 1: Understand the Question
 
 **Goal**: Clarify what the user wants to learn.
@@ -118,7 +124,8 @@ Use code-explorer methodology Phase 2 (Code Flow Tracing).
 Return: external dependencies, internal dependencies, API boundaries."
 ```
 
-2. **Consolidate findings**:
+2. **Codex spawn barrier**: Wait for all codebase research agents to return.
+3. **Consolidate findings**:
    - Essential files list
    - Architecture overview
    - Key patterns identified
@@ -138,7 +145,8 @@ This will inform: [what decisions].
 Return: findings with confidence levels, recommendations, sources."
 ```
 
-2. **Expected output**:
+2. **Codex spawn barrier**: Wait for the web research agent to return.
+3. **Expected output**:
    - 20+ sources consulted
    - Cross-verified findings
    - Recommendations with confidence levels
@@ -147,8 +155,9 @@ Return: findings with confidence levels, recommendations, sources."
 
 **Actions**:
 1. Launch codebase exploration AND web research in parallel
-2. Gap analysis: What does our code do vs. what best practices recommend?
-3. Prioritized recommendations
+2. **Codex spawn barrier**: Wait for every spawned codebase and web research agent to return.
+3. Gap analysis: What does our code do vs. what best practices recommend?
+4. Prioritized recommendations
 
 ---
 

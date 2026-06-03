@@ -226,9 +226,9 @@ Check for:
 - AI discoverability score (steps to find entry point per feature)
 ```
 
-### Wait for All Agents
+### Codex Spawn Barrier — Wait for All Agents
 
-Collect all three agent reports before proceeding.
+Immediately call `wait_agent` for all three research agents and wait for every structure report before proceeding. Do not continue structural analysis, inspect additional files, score the project, or draft the report in the main context while the agents run; the parent session only coordinates and then consumes returned reports.
 
 ---
 
