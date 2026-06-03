@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Added Codex spawn barriers at every RPTC sub-agent launch point so the parent session calls `wait_agent` and avoids main-context research, planning, implementation, or verification while sub-agents run.
-
+- Added a Codex Plan Mode handoff after Phase 1 research in feature and fix workflows so Branch Strategy and Phase 2 questions only use `request_user_input` after Plan Mode is confirmed.
 
 ---
 
@@ -20,7 +20,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Added a Codex Plan Mode handoff after Phase 1 research in feature and fix workflows so Branch Strategy and Phase 2 questions only use `request_user_input` after Plan Mode is confirmed.
 - Clarified Codex feature and fix workflows so the active RPTC invocation authorizes mandatory RPTC agents for each workflow phase.
 - Prevented Phase 4 verification from being replaced by local tests, diffs, typechecks, builds, or self-review.
 - Aligned Codex task tracking and package documentation with selected report-only verification agent behavior.
