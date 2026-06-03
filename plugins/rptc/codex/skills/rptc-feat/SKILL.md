@@ -252,7 +252,7 @@ Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` â€
 | Phase 2 (before architect agents) | Clarify unclear requirements with user |
 | Throughout | Explore approaches with 2-3 options, validate incrementally |
 
-**Method**: One question at a time via request_user_input, multiple choice preferred, YAGNI ruthlessly.
+**Method**: One question at a time via `request_user_input` once Plan Mode is active; otherwise ask in normal chat and halt. Multiple choice preferred, YAGNI ruthlessly.
 **Timing**: Main context uses this BEFORE delegating to architect agents.
 
 **`writing-clearly-and-concisely`** - Apply Strunk's Elements of Style to all prose:
@@ -333,9 +333,25 @@ Return: external dependencies, internal dependencies, API boundaries."
 7. **If unclear about requirements**, ask user for clarification
 8. **Summarize findings**: Key patterns, files to modify, dependencies, gap analysis (if hybrid)
 
+### Plan Mode Handoff (Codex Gate)
+
+**After Phase 1 research is complete and before any Branch Strategy or Phase 2 planning/questions**, ask the user to switch Codex into Plan Mode.
+
+Codex does not expose a reliable automatic Plan Mode switch or a dependable way to detect the current mode from skill instructions. Because `request_user_input` is only available in Plan Mode, do not call `request_user_input` until the user confirms Plan Mode is active.
+
+**Required behavior:**
+
+1. Present the Phase 1 summary in normal chat.
+2. Ask the user to switch to Plan Mode and reply with confirmation, for example:
+   ```
+   Phase 1 research is complete. Please switch Codex to Plan Mode, then reply "Plan Mode active" so I can continue with Branch Strategy and Phase 2 planning questions.
+   ```
+3. Halt. Do not proceed to Branch Strategy, Phase 2, architecture agents, or any `request_user_input` calls until the user confirms Plan Mode is active.
+4. If the runtime clearly exposes that Plan Mode is already active (for example, `request_user_input` is available in the current tool set), continue without asking for a mode switch.
+
 ### Branch Strategy
 
-**Now that the scope is clear**, ask the user how to organize this work.
+**Now that the scope is clear and Plan Mode is active**, ask the user how to organize this work.
 
 **Choose recommendation based on Phase 1 findings:**
 - Recommend **New worktree** when: multi-file feature, >3 files to modify, long-running work, or risky changes the user may want to abandon
@@ -444,7 +460,7 @@ Call `update_plan` with the full `plan` list, setting completed items to `comple
 
 **Actions**:
 
-1. **Ask the user to switch to Plan Mode, then halt until the user confirms Plan Mode is active**
+1. **Confirm Plan Mode is active** (normally completed by the Phase 1 Plan Mode Handoff). If not confirmed, ask the user to switch to Plan Mode and halt until confirmation before using `request_user_input`.
 
 2. **Clarify requirements using `brainstorming` skill** (BEFORE launching agents):
    - Use request_user_input to clarify unclear requirements ONE question at a time
