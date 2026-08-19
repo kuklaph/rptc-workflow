@@ -97,7 +97,7 @@ Options:
 
 **Documentation**:
 - Write validated design to plan file
-- Reference `writing-clearly-and-concisely` skill for prose quality
+- Reference `unslop-writing-clearly` skill for prose quality
 - Get user approval on the final design through the provider's approval flow or direct chat
 
 **Transition**:

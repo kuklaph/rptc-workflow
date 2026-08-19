@@ -18,7 +18,7 @@ Research partner for discovery and brainstorming. Use before `/rptc:feat` when y
 ### 0.1 Load Required Skills
 
 ```
-Skill(skill: "rptc:writing-clearly-and-concisely")
+Skill(skill: "rptc:unslop-writing-clearly")
 Skill(skill: "rptc:html-report-generator")
 ```
 
@@ -67,7 +67,7 @@ Before proceeding to Phase 1, confirm:
 
 ## Skills Usage Guide
 
-**`writing-clearly-and-concisely`** - Apply Strunk's Elements of Style to research output:
+**`unslop-writing-clearly`** - Cut AI tells and add human voice to research output:
 
 | When | Apply To |
 |------|----------|

@@ -17,7 +17,7 @@ Load ALL five skills below. Each skill load is MANDATORY - do not skip any.
 ```
 Use/load the `rptc:tool-guide` skill.
 Use/load the `rptc:brainstorming` skill.
-Use/load the `rptc:writing-clearly-and-concisely` skill.
+Use/load the `rptc:unslop-writing-clearly` skill.
 Use/load the `rptc:tdd-methodology` skill.
 Use/load the `rptc:structure-methodology` skill.
 ```
@@ -247,7 +247,7 @@ Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` â€
 **Method**: One question at a time via `request_user_input` once Plan Mode is active; otherwise ask in normal chat and halt. Multiple choice preferred, YAGNI ruthlessly.
 **Timing**: Main context uses this BEFORE delegating to architect agent.
 
-**`writing-clearly-and-concisely`** - Apply Strunk's Elements of Style to all prose:
+**`unslop-writing-clearly`** - Cut AI tells and add human voice to all prose:
 
 | When | Apply To |
 |------|----------|

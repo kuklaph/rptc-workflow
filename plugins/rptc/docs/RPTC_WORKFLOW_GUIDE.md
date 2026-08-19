@@ -576,7 +576,7 @@ Claude-specific SOPs:
 | `frontend-design` | Distinctive, production-grade frontend aesthetics (complements `frontend-guidelines.md` SOP) |
 | `html-report-generator` | Convert markdown research to professional HTML reports |
 | `tdd-methodology` | TDD guidance in main context (alternative to sub-agent) |
-| `writing-clearly-and-concisely` | Apply Strunk's Elements of Style to prose |
+| `unslop-writing-clearly` | Cut AI tells and add human voice to prose |
 
 ### Agent Methodology Skills
 

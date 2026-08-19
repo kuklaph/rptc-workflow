@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.16.7] - 2026-08-19
+
+### Changed
+
+- Replaced the writing skill with `unslop-writing-clearly`, which removes common AI writing patterns while preserving the intended voice and tone.
+
+---
+
+
 ## [3.16.6] - 2026-06-03
 
 ### Fixed
