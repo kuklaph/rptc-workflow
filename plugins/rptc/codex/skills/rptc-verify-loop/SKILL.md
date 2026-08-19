@@ -23,7 +23,7 @@ single-pass check.
 ### 0.1 Load Required Skills
 
 ```
-Use/load the `rptc:writing-clearly-and-concisely` skill.
+Use/load the `rptc:unslop-writing-clearly` skill.
 ```
 
 **Wait for skill to load before proceeding.**
@@ -70,7 +70,7 @@ Before proceeding to Phase 1, confirm:
 
 ## Skills Usage Guide
 
-**`writing-clearly-and-concisely`** - Apply Strunk's Elements of Style to all output:
+**`unslop-writing-clearly`** - Cut AI tells and add human voice to all output:
 
 | When | Apply To |
 |------|----------|
@@ -379,7 +379,7 @@ Go to step 1 (Iteration Header).
 
 **Actions**:
 
-1. **Apply `writing-clearly-and-concisely` skill** to the summary output
+1. **Apply `unslop-writing-clearly` skill** to the summary output
 
 2. **Output summary**:
 

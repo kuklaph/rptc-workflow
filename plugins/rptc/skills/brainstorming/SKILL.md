@@ -97,7 +97,7 @@ Options:
 
 **Documentation**:
 - Write validated design to plan file
-- Reference `writing-clearly-and-concisely` skill for prose quality
+- Reference `unslop-writing-clearly` skill for prose quality
 - Use `ExitPlanMode` to get user approval on the final design
 
 **Transition**:

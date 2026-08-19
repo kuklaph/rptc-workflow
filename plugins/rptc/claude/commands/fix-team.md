@@ -28,7 +28,7 @@ See `/rptc:feat-team` for the team-vs-standard tradeoff — same criteria apply 
 ```
 Skill(skill: "rptc:tool-guide")
 Skill(skill: "rptc:brainstorming")
-Skill(skill: "rptc:writing-clearly-and-concisely")
+Skill(skill: "rptc:unslop-writing-clearly")
 ```
 
 After loading, confirm all loaded. If ANY skill fails to load, STOP and report.

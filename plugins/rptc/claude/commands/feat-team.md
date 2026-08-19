@@ -35,7 +35,7 @@ Team-based feature development: 4 persistent agents (Research, Architect, TDD, R
 ```
 Skill(skill: "rptc:tool-guide")
 Skill(skill: "rptc:brainstorming")
-Skill(skill: "rptc:writing-clearly-and-concisely")
+Skill(skill: "rptc:unslop-writing-clearly")
 ```
 
 After loading, confirm all loaded. If ANY skill fails to load, STOP and report.

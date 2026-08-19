@@ -65,7 +65,7 @@ rptc-workflow/                      # the RPTC plugin root
 │   ├── test-fixer-methodology/
 │   ├── test-sync-methodology/
 │   ├── tool-guide/
-│   └── writing-clearly-and-concisely/
+│   └── unslop-writing-clearly/
 │
 ├── templates/                      # Document templates
 │   ├── ai-sop-enhancement-pattern.md

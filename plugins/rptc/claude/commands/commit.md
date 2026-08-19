@@ -20,7 +20,7 @@ Verify quality gates and ship. Final step in the workflow.
 ### 0.1 Load Required Skills
 
 ```
-Skill(skill: "rptc:writing-clearly-and-concisely")
+Skill(skill: "rptc:unslop-writing-clearly")
 ```
 
 **Wait for skill to load before proceeding.**
@@ -64,7 +64,7 @@ Before proceeding to Phase 1, confirm:
 
 ## Skills Usage Guide
 
-**`writing-clearly-and-concisely`** - Apply Strunk's Elements of Style to commit prose:
+**`unslop-writing-clearly`** - Cut AI tells and add human voice to commit prose:
 
 | When | Apply To |
 |------|----------|

@@ -73,8 +73,8 @@ Think harder and thoroughly examine similar areas of the codebase to ensure your
    - TDD methodology
    - Test coverage requirements (80%+ critical paths)
 
-4. **`writing-clearly-and-concisely` skill**
-   - Apply Strunk's Elements of Style to prose
+4. **`unslop-writing-clearly` skill**
+   - Cut AI tells and add human voice to prose
    - Clear, concise descriptions and rationales
    - Active voice, definite language, omit needless words
 

@@ -20,7 +20,7 @@ Run quality verification agents independently. Use after any code change — ins
 ### 0.1 Load Required Skills
 
 ```
-Use/load the `rptc:writing-clearly-and-concisely` skill.
+Use/load the `rptc:unslop-writing-clearly` skill.
 ```
 
 **Wait for skill to load before proceeding.**
@@ -65,7 +65,7 @@ Before proceeding to Phase 1, confirm:
 
 ## Skills Usage Guide
 
-**`writing-clearly-and-concisely`** - Apply Strunk's Elements of Style to verification output:
+**`unslop-writing-clearly`** - Cut AI tells and add human voice to verification output:
 
 | When | Apply To |
 |------|----------|

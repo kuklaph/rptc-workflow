@@ -31,7 +31,7 @@ Analyze codebase structure, identify organizational problems, and generate a res
 
 ```
 Skill(skill: "rptc:structure-methodology")
-Skill(skill: "rptc:writing-clearly-and-concisely")
+Skill(skill: "rptc:unslop-writing-clearly")
 ```
 
 **Wait for both skills to load before proceeding.**
@@ -75,7 +75,7 @@ Before proceeding to Phase 1, confirm:
 
 **`structure-methodology`** — The methodology skill. Provides assessment checklists, anti-pattern definitions, module boundary framework, and scoring rubrics. Reference throughout all phases.
 
-**`writing-clearly-and-concisely`** — Apply Strunk's Elements of Style to all output:
+**`unslop-writing-clearly`** — Cut AI tells and add human voice to all output:
 
 | When | Apply To |
 |------|----------|

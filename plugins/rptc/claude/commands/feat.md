@@ -18,7 +18,7 @@ Load ALL five skills below. Each `Skill()` call is MANDATORY â€” do not skip any
 ```
 Skill(skill: "rptc:tool-guide")
 Skill(skill: "rptc:brainstorming")
-Skill(skill: "rptc:writing-clearly-and-concisely")
+Skill(skill: "rptc:unslop-writing-clearly")
 Skill(skill: "rptc:tdd-methodology")
 Skill(skill: "rptc:structure-methodology")
 ```
@@ -213,7 +213,7 @@ Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` â€
 **Method**: One question at a time via AskUserQuestion, multiple choice preferred, YAGNI ruthlessly.
 **Timing**: Main context uses this BEFORE delegating to architect agents.
 
-**`writing-clearly-and-concisely`** - Apply Strunk's Elements of Style to all prose:
+**`unslop-writing-clearly`** - Cut AI tells and add human voice to all prose:
 
 | When | Apply To |
 |------|----------|

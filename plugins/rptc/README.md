@@ -2,7 +2,7 @@
 
 > Research → Plan → TDD → Commit: Systematic development workflow with PM collaboration and quality gates
 
-**Version**: 3.16.6
+**Version**: 3.16.7
 **Status**: Beta
 **License**: MIT
 
@@ -311,7 +311,7 @@ Claude-specific SOPs:
 | `frontend-design` | Distinctive, production-grade frontend aesthetics (complements `frontend-guidelines.md` SOP) |
 | `html-report-generator` | Convert markdown research to professional HTML reports |
 | `tdd-methodology` | TDD guidance in main context (alternative to sub-agent) |
-| `writing-clearly-and-concisely` | Apply Strunk's Elements of Style to prose |
+| `unslop-writing-clearly` | Cut AI tells and add human voice to prose |
 
 ### Agent Methodology Skills
 
@@ -373,7 +373,7 @@ rptc-workflow/
 │   ├── test-sync-methodology/
 │   ├── structure-methodology/
 │   ├── tool-guide/
-│   └── writing-clearly-and-concisely/
+│   └── unslop-writing-clearly/
 └── docs/                        # Documentation
 ```
 
