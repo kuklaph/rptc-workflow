@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "skill": "diagnose-methodology",
+      "should_trigger": [
+        "Checkout sometimes loses items after refresh.",
+        "This command became four times slower after the last change.",
+        "The same test flakes only in CI."
+      ],
+      "should_not_trigger": [
+        "Add a new checkout option.",
+        "Explain how checkout persistence works.",
+        "Rename this local variable."
+      ],
+      "overlap": [
+        {
+          "prompt": "Review this attempted fix for a flaky checkout test.",
+          "expected": [
+            "diagnose-methodology",
+            "code-review-methodology"
+          ]
+        }
+      ]
+    },
+    {
+      "skill": "tdd-methodology",
+      "should_trigger": [
+        "Implement this behavior test-first.",
+        "Add a regression test for the confirmed bug."
+      ],
+      "should_not_trigger": [
+        "Create a throwaway prototype.",
+        "Update the README.",
+        "Investigate why this is slow without changing code."
+      ]
+    },
+    {
+      "skill": "security-methodology",
+      "should_trigger": [
+        "Change authorization for the admin endpoint.",
+        "Parse an untrusted webhook payload.",
+        "Rotate how API secrets are stored."
+      ],
+      "should_not_trigger": [
+        "Rename a CSS class.",
+        "Fix a typo in documentation."
+      ]
+    }
+  ]
+}
