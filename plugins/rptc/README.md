@@ -2,7 +2,7 @@
 
 > Provider-aware engineering workflows for Claude Code and Codex.
 
-**Version**: 3.16.7
+**Version**: 4.0.0
 **Status**: Beta
 **License**: MIT
 
