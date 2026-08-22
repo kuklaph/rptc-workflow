@@ -36,6 +36,19 @@
       ]
     },
     {
+      "skill": "test-impact-methodology",
+      "should_trigger": [
+        "These assertions started failing after the API behavior changed.",
+        "Audit whether this diff has the right regression protection.",
+        "Find tests that no longer have a real implementation path."
+      ],
+      "should_not_trigger": [
+        "Implement a new endpoint test-first.",
+        "Diagnose why this existing test is flaky.",
+        "Increase coverage everywhere."
+      ]
+    },
+    {
       "skill": "security-methodology",
       "should_trigger": [
         "Change authorization for the admin endpoint.",

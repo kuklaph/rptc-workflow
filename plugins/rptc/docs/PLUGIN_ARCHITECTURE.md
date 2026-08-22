@@ -15,8 +15,7 @@ plugins/rptc/
 │   └── workflows/
 ├── claude/
 │   ├── commands/
-│   ├── agents/
-│   └── sop/
+│   └── agents/
 ├── codex/
 │   ├── skills/
 │   ├── agents/
@@ -71,7 +70,7 @@ Codex owns:
 - `spawn_agent` and `wait_agent`;
 - parent-session spawn barriers;
 - packaged TOML agents;
-- `rptc-init` installation;
+- `rptc-init` installation and obsolete managed-agent cleanup;
 - Codex plugin-cache path resolution.
 
 Codex agents do not message one another directly. The parent session relays
@@ -94,6 +93,18 @@ Parity classes:
   harness behavior;
 - `intentional-asymmetry`: one provider exposes a capability the other does not.
 
+## Removed surfaces
+
+RPTC no longer packages:
+
+- an external chat-notification integration;
+- a named semantic-navigation service or its project state;
+- the legacy production-to-test synchronization flow;
+- the old test synchronization and automatic test-fixer agents.
+
+`test-impact` remains as a contract-first workflow. It uses a focused
+methodology and the provider's normal repository, task, and delegation tools.
+
 ## Validation
 
 `python3 scripts/validate-rptc.py` verifies:
@@ -103,7 +114,8 @@ Parity classes:
 - shared workflows contain no provider tool names;
 - adapters cite the correct shared contract;
 - every skill has name and description frontmatter;
-- evaluation fixtures reference known flows.
+- evaluation fixtures reference known flows;
+- removed executable surfaces do not reappear.
 
 The validator warns, but does not yet fail, when legacy skills exceed the
 recommended progressive-disclosure size.

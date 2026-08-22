@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate RPTC provider contracts, skill metadata, and eval fixtures."""
+"""Validate RPTC provider contracts, skill metadata, removed surfaces, and evals."""
 
 from __future__ import annotations
 
@@ -28,7 +28,48 @@ PROVIDER_TOKENS = {
     "CLAUDE_PLUGIN_ROOT",
 }
 
+REMOVED_PATHS = (
+    "skills/discord-notify",
+    "claude/commands/sync-prod-to-tests.md",
+    "codex/skills/rptc-sync-prod-to-tests",
+    "claude/agents/test-sync-agent.md",
+    "claude/agents/test-fixer-agent.md",
+    "codex/agents/test-sync-agent.toml",
+    "codex/agents/test-fixer-agent.toml",
+    "skills/test-sync-methodology",
+    "skills/test-fixer-methodology",
+    "codex/skills/test-sync-methodology",
+    "codex/skills/test-fixer-methodology",
+    "sop/test-sync-guide.md",
+    "claude/sop/todowrite-guide.md",
+    "templates/plan-overview.md",
+    "skills/agent-teams/references/spawn-prompts.md",
+    "skills/architect-methodology/references/output-template.md",
+    "codex/skills/architect-methodology/references/output-template.md",
+)
+
+FORBIDDEN_ACTIVE_MARKERS = (
+    "discord",
+    "serena",
+    "sync-prod-to-tests",
+    "test-sync-agent",
+    "test-fixer-agent",
+)
+
 FRONTMATTER_RE = re.compile(r"\A---\s*\n(.*?)\n---\s*\n", re.DOTALL)
+TEXT_SUFFIXES = {
+    ".md",
+    ".toml",
+    ".json",
+    ".yml",
+    ".yaml",
+    ".py",
+    ".sh",
+    ".html",
+    ".css",
+    ".js",
+    ".mjs",
+}
 
 
 class ValidationError(Exception):
@@ -131,6 +172,67 @@ def validate_contract() -> list[str]:
     return warnings
 
 
+def validate_removed_surfaces() -> list[str]:
+    contract = load_json(CONTRACT_PATH)
+    if "sync-prod-to-tests" in contract.get("flows", {}):
+        raise ValidationError("provider contract still exposes the removed sync flow")
+
+    for relative in REMOVED_PATHS:
+        path = PLUGIN / relative
+        if path.exists():
+            raise ValidationError(
+                f"removed surface still exists: {path.relative_to(ROOT)}"
+            )
+
+    required = (
+        PLUGIN / "skills" / "test-impact-methodology" / "SKILL.md",
+        PLUGIN / "codex" / "skills" / "test-impact-methodology" / "SKILL.md",
+    )
+    for path in required:
+        if not path.is_file():
+            raise ValidationError(
+                f"missing focused test-impact methodology: {path.relative_to(ROOT)}"
+            )
+
+    scan_roots = (
+        PLUGIN / "claude",
+        PLUGIN / "codex",
+        PLUGIN / "skills",
+        PLUGIN / "shared",
+        PLUGIN / "sop",
+        PLUGIN / "templates",
+    )
+    for scan_root in scan_roots:
+        if not scan_root.exists():
+            continue
+        for path in scan_root.rglob("*"):
+            if not path.is_file() or path.suffix.lower() not in TEXT_SUFFIXES:
+                continue
+            text = path.read_text(encoding="utf-8").lower()
+            found = sorted(
+                marker for marker in FORBIDDEN_ACTIVE_MARKERS if marker in text
+            )
+            if found:
+                raise ValidationError(
+                    f"active file {path.relative_to(ROOT)} contains removed marker(s): "
+                    + ", ".join(found)
+                )
+
+    gitignore = (ROOT / ".gitignore").read_text(encoding="utf-8").lower()
+    if ".serena" in gitignore:
+        raise ValidationError(".gitignore still contains removed project state")
+
+    claude_manifest = load_json(PLUGIN / ".claude-plugin" / "plugin.json")
+    agent_paths = claude_manifest.get("agents", [])
+    for removed_name in ("test-sync-agent.md", "test-fixer-agent.md"):
+        if any(removed_name in path for path in agent_paths):
+            raise ValidationError(
+                f"Claude manifest still registers removed agent: {removed_name}"
+            )
+
+    return []
+
+
 def validate_skills() -> list[str]:
     warnings: list[str] = []
     for path in sorted(PLUGIN.rglob("SKILL.md")):
@@ -180,6 +282,7 @@ def main() -> int:
     warnings: list[str] = []
     try:
         warnings.extend(validate_contract())
+        warnings.extend(validate_removed_surfaces())
         warnings.extend(validate_skills())
         warnings.extend(validate_evals())
     except ValidationError as exc:

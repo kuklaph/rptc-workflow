@@ -59,9 +59,6 @@ is `VERIFIED`, `NOT VERIFIED`, or `INCONCLUSIVE`.
 | `/rptc:commit [pr]` | `rptc-commit` | Run project checks, stage selected paths, and perform requested git actions |
 | `/rptc:config` | `rptc-config` | Create a minimal provider-specific project pointer and shared project contract |
 
-`/rptc:sync-prod-to-tests` remains as a deprecated compatibility alias. It does
-not edit files and routes users to `test-impact`.
-
 ## Claude-only flows
 
 Claude provides persistent peer teams and inbox messaging:
@@ -133,7 +130,7 @@ before submitting changes.
 ```
 
 Claude adds one pointer to `CLAUDE.md`. Codex adds one pointer to `AGENTS.md`.
-RPTC no longer copies its command catalog into always-loaded project context.
+RPTC does not copy its command catalog into always-loaded project context.
 
 ## Evidence
 

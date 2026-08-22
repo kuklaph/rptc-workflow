@@ -15,10 +15,11 @@ The target is:
 2. Claude-only persistent teams remain available.
 3. Codex keeps parent-owned spawn barriers and TOML agent installation.
 4. Shared semantics must not contain provider tool names.
-5. Existing primary commands and skills remain available or receive explicit
-   deprecation aliases.
+5. Existing primary commands and skills remain available unless the feature is
+   deliberately removed.
 6. Project rules override RPTC defaults.
 7. No flow may turn unknown or inconclusive evidence into a pass.
+8. Optional third-party integrations must not become workflow dependencies.
 
 ## Phase 1: Provider contract and validation
 
@@ -39,26 +40,28 @@ Acceptance:
 - shared workflow files contain no provider tool names;
 - adapters cite their shared contract.
 
-## Phase 2: Safety corrections
+## Phase 2: Safety and surface cleanup
 
 Status: implemented on the modernization branch.
 
 Deliverables:
 
-- `test-impact` flow;
-- deprecated no-write `sync-prod-to-tests` alias;
-- contract-first test analysis and fixer;
+- focused `test-impact` flow and methodology;
+- removal of the legacy production-to-test synchronization flow;
+- removal of the old test synchronization and automatic test-fixer agents;
+- removal of the external chat-notification skill and assets;
+- removal of named semantic-navigation service instructions and project state;
 - evidence-based `verify-loop`;
 - selected-path staging;
-- project-discovered checks;
-- explicit-only Discord notifications.
+- project-discovered checks.
 
 Acceptance:
 
-- rejected production fixes cannot become weakened tests;
+- neither implementation nor tests are automatic behavioral truth;
 - agent failure cannot count as zero findings;
-- no broad git staging command appears in the ship adapters;
-- external notifications require explicit user intent.
+- no broad git staging command appears in ship adapters;
+- removed commands, skills, agents, assets, SOPs, and stale templates are absent;
+- `test-impact` still works through provider-native tools and focused policy.
 
 ## Phase 3: Core workflow rewrite
 
@@ -111,9 +114,10 @@ Required before merge or release:
 - decide version and fold `docs/UNRELEASED.md` into `CHANGELOG.md`;
 - run Claude plugin validation;
 - install and run Codex `rptc-init`;
+- confirm obsolete RPTC-managed Codex agents are removed during refresh;
 - exercise both provider adapters on fixture repositories;
 - validate Windows path and shell behavior;
-- confirm deprecated aliases and documentation links;
+- confirm removed surfaces cannot route or install;
 - update release version locations together.
 
 ## Non-goals

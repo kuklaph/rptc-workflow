@@ -19,6 +19,15 @@
       ]
     },
     {
+      "flow": "test-impact",
+      "invariants": [
+        "Neither implementation nor tests are treated as automatic behavioral truth.",
+        "Corrections cite requirements, contracts, prior verified behavior, or explicit uncertainty.",
+        "Ambiguous expectations remain INCONCLUSIVE until resolved.",
+        "Provider-native tools are used without legacy synchronization agents."
+      ]
+    },
+    {
       "flow": "commit",
       "invariants": [
         "Project checks are discovered rather than guessed.",

@@ -18,12 +18,14 @@
 - Vertical TDD.
 - Evidence statuses.
 - Verification and recheck flows.
-- Contract-first test impact with safe deprecated alias.
+- Focused test-impact methodology with no legacy synchronization or automatic
+  test-fixer agents.
 - Project-discovered ship checks and selected-path staging.
 - Minimal provider-specific project configuration.
 - Modernized specialist agents and methodology skills.
-- Explicit-only Discord notifications.
-- Automated contract and frontmatter validation.
+- Removed external chat-notification assets and behavior.
+- Removed named semantic-navigation service instructions and project state.
+- Automated contract, frontmatter, and removed-surface validation.
 - Routing and provider-parity fixture schemas.
 - Updated architecture, workflow, provider, and contribution documentation.
 
@@ -48,16 +50,20 @@ Then test:
 - run `/rptc:test-impact`;
 - run `/rptc:verify-loop`;
 - run `/rptc:commit` without and with `pr`;
-- confirm `rptc-config` writes only the concise pointer.
+- confirm `rptc-config` writes only the concise pointer;
+- confirm removed commands and skills are unavailable.
 
 ### Codex
 
 - install the branch plugin;
 - run `rptc-init`;
+- confirm it installs the packaged agent set and removes obsolete
+  RPTC-managed TOMLs;
 - invoke `rptc-feat`, `rptc-fix`, `rptc-test-impact`,
   `rptc-verify-loop`, and `rptc-commit`;
 - confirm `update_plan`, Plan Mode, `spawn_agent`, and `wait_agent` behavior;
-- confirm no peer-team or inbox behavior is implied.
+- confirm no peer-team or inbox behavior is implied;
+- confirm removed skills and agents are unavailable.
 
 ## Release work
 

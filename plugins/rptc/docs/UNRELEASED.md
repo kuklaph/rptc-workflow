@@ -6,7 +6,7 @@
 - Machine-readable Claude/Codex provider mapping.
 - Provider-parity and routing evaluation fixtures.
 - Repository validation workflow.
-- `test-impact` replacement for unsafe production-to-test synchronization.
+- Focused `test-impact` methodology.
 - `diagnose-methodology` and `verification-evidence` skills.
 - Minimal `.rptc/project.yml` configuration.
 
@@ -17,14 +17,19 @@
 - Verification resolves evidence rather than seeking zero model findings.
 - Commit flows discover project checks and stage selected paths only.
 - Review findings require evidence or a documented rule.
-- Research source depth now follows the claim rather than a fixed quota.
-- Discord notifications require explicit user intent.
+- Research source depth follows the claim rather than a fixed quota.
 - Claude and Codex adapters cite shared semantics while preserving harness
   differences.
+- Codex agent refresh synchronizes the packaged RPTC-managed agent set.
 
-## Deprecated
+## Removed
 
-- `sync-prod-to-tests`. Use `test-impact`.
+- The external chat-notification skill, webhook assets, and examples.
+- Named semantic-navigation service instructions, project state, and stale plan
+  templates.
+- The legacy production-to-test synchronization command and Codex skill.
+- The old test synchronization and automatic test-fixer agents,
+  methodologies, references, and SOP.
 
 This file should be folded into the root `CHANGELOG.md` when the release version
 is selected.
