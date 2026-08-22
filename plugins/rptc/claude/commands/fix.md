@@ -121,5 +121,5 @@ Report:
 - reviews;
 - each material claim as `VERIFIED`, `NOT VERIFIED`, or `INCONCLUSIVE`.
 
-Do not commit, push, create a pull request, deploy, or notify externally unless
-the user explicitly requests it.
+Do not commit, push, create a pull request, or deploy unless the user explicitly
+requests it.

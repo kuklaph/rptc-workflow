@@ -146,5 +146,4 @@ Shut down team members after collecting their final reports.
 Report delivered behavior, files, design changes, feedback addressed, project
 checks, and each predicate as `VERIFIED`, `NOT VERIFIED`, or `INCONCLUSIVE`.
 
-Do not commit, push, open a pull request, deploy, or send an external
-notification unless explicitly requested.
+Do not commit, push, open a pull request, or deploy unless explicitly requested.

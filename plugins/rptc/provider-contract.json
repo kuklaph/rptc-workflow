@@ -60,13 +60,6 @@
       "codex": "codex/skills/rptc-test-impact/SKILL.md",
       "parity": "semantic"
     },
-    "sync-prod-to-tests": {
-      "shared_contract": "shared/workflows/test-impact.md",
-      "claude": "claude/commands/sync-prod-to-tests.md",
-      "codex": "codex/skills/rptc-sync-prod-to-tests/SKILL.md",
-      "parity": "semantic",
-      "status": "deprecated"
-    },
     "commit": {
       "shared_contract": "shared/workflows/ship.md",
       "claude": "claude/commands/commit.md",

@@ -64,8 +64,8 @@ Inspect:
 - relevant public contracts;
 - current git status and branch.
 
-Use Serena when available and useful. It is an optional capability, not a
-blocking dependency.
+Use repository search, symbol navigation, and runtime tools according to the
+evidence needed. No optional navigation service is required.
 
 Classify the route.
 
@@ -205,5 +205,5 @@ Report:
 - review findings addressed or left open;
 - anything deliberately out of scope.
 
-Do not commit, push, create a pull request, deploy, or send a notification unless
-the user explicitly invokes the corresponding action.
+Do not commit, push, create a pull request, or deploy unless the user explicitly
+invokes the corresponding action.

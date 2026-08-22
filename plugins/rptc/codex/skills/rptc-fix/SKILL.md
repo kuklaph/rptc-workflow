@@ -115,5 +115,5 @@ Report the symptom, mechanism, fix, failing-before and passing-after evidence,
 adjacent checks, reviews, and each material claim as `VERIFIED`,
 `NOT VERIFIED`, or `INCONCLUSIVE`.
 
-No commit, push, pull request, deployment, or external notification occurs
-without explicit user intent.
+No commit, push, pull request, or deployment occurs without explicit user
+intent.

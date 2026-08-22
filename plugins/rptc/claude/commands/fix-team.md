@@ -103,5 +103,5 @@ Shut down team members after collecting reports.
 Return the symptom, confirmed mechanism, fix, failing-before and passing-after
 evidence, checks, feedback, and unresolved claims.
 
-No commit, push, pull request, deployment, or external notification occurs
-without explicit user intent.
+No commit, push, pull request, or deployment occurs without explicit user
+intent.

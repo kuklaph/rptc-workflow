@@ -48,12 +48,16 @@ hard-coding an operating-system path.
 ## Procedure
 
 1. Resolve the source and target.
-2. Verify every packaged TOML contains `name`, `description`, and
+2. Build the packaged filename set from source `*.toml` files.
+3. Verify every packaged TOML contains `name`, `description`, and
    `developer_instructions`.
-3. Create the target directory when missing.
-4. Copy RPTC-managed TOMLs exactly. Do not generate or transform them.
-5. Refresh existing RPTC-managed files when requested.
-6. Verify every target file and its `rptc:` name.
-7. Report the target and files installed.
+4. Create the target directory when missing.
+5. Copy RPTC-managed TOMLs exactly. Do not generate or transform them.
+6. In the target, remove an existing TOML only when:
+   - its `name` field starts with `rptc:`, and
+   - its filename is absent from the packaged set.
+7. Verify every installed RPTC file and its `rptc:` name.
+8. Report the target, installed files, refreshed files, and removed obsolete
+   RPTC-managed files.
 
 Do not modify unrelated custom agents.

@@ -61,7 +61,8 @@ their phase number rather than replacing the top-level phases.
 Inspect the affected entry points, consumers, tests, project checks, public
 contracts, nearby patterns, git status, and branch.
 
-Use available semantic navigation tools when useful. No MCP is mandatory.
+Use repository search, symbol navigation, and runtime tools according to the
+evidence needed. No optional navigation service is required.
 
 Classify the route:
 
@@ -155,5 +156,5 @@ raised the finding. Do not loop solely to produce an empty model report.
 Report the route, delivered behavior, files changed, checks run, reviews, and
 each acceptance predicate as `VERIFIED`, `NOT VERIFIED`, or `INCONCLUSIVE`.
 
-Do not commit, push, create a pull request, deploy, or notify an external service
-unless the user explicitly requests that action.
+Do not commit, push, create a pull request, or deploy unless the user explicitly
+requests that action.

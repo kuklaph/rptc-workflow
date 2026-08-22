@@ -28,8 +28,6 @@
     "./claude/agents/research-agent.md",
     "./claude/agents/review-agent.md",
     "./claude/agents/security-agent.md",
-    "./claude/agents/tdd-agent.md",
-    "./claude/agents/test-fixer-agent.md",
-    "./claude/agents/test-sync-agent.md"
+    "./claude/agents/tdd-agent.md"
   ]
 }

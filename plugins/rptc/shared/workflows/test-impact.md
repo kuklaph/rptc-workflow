@@ -3,7 +3,7 @@
 ## Purpose
 
 Audit how a behavior change affects tests. Do not assume that either current
-production code or an existing test is automatically correct.
+implementation or an existing test is automatically correct.
 
 ## Behavioral authority
 
@@ -25,7 +25,7 @@ When no independent source resolves a disagreement, classify it as
 3. Run the narrowest relevant checks.
 4. Compare failures against the behavioral authority above.
 5. Classify each item as:
-   - production defect;
+   - implementation defect;
    - stale or incorrect test;
    - missing regression protection;
    - orphaned test;
@@ -39,8 +39,8 @@ When no independent source resolves a disagreement, classify it as
 
 ## Prohibitions
 
-- Do not update an assertion merely because production returns a different
+- Do not update an assertion merely because implementation returns a different
   value.
-- Do not convert a rejected production fix into a test rewrite.
+- Do not convert a rejected implementation fix into a test rewrite.
 - Do not use coverage percentage alone to decide whether a behavior is protected.
 - Do not infer test relationships only from matching filenames.
