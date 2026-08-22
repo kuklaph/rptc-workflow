@@ -1,391 +1,87 @@
 # Contributing to RPTC Workflow
 
-Thank you for your interest in contributing to the RPTC Workflow plugin! This document provides guidelines for contributing to the project.
+## Design rule
 
----
+RPTC ships one engineering workflow through two different harnesses.
 
-## Table of Contents
+Before editing, classify the change:
 
-- [Code of Conduct](#code-of-conduct)
-- [Getting Started](#getting-started)
-- [How to Contribute](#how-to-contribute)
-- [Development Setup](#development-setup)
-- [Testing Guidelines](#testing-guidelines)
-- [Documentation Standards](#documentation-standards)
-- [Pull Request Process](#pull-request-process)
-- [Style Guidelines](#style-guidelines)
+- **Semantic:** changes an engineering outcome, evidence rule, approval boundary,
+  or workflow decision. Edit the shared contract and both affected adapters.
+- **Mechanical:** changes one provider's tool names, planning, task tracking,
+  installation, delegation, or path resolution. Edit that adapter only.
 
----
+Do not remove Claude/Codex differences merely because the files look similar.
 
-## Code of Conduct
+## Repository layout
 
-Be respectful, constructive, and professional in all interactions.
+```text
+plugins/rptc/
+├── provider-contract.json
+├── shared/
+├── claude/
+├── codex/
+├── skills/
+├── sop/
+├── templates/
+└── docs/
+```
 
----
-
-## Getting Started
-
-### Prerequisites
-
-- Claude Code CLI (v2.0.0 or higher)
-- Git
-- Basic understanding of:
-  - Markdown (for commands, agents, and documentation)
-  - Test-Driven Development (TDD)
-  - Claude Code plugin architecture
-
-### Installation for Development
+## Required checks
 
 ```bash
-# Clone the repository
-git clone https://github.com/kuklaph/rptc-workflow
-cd rptc-workflow
-
-# Install as local plugin for testing
-claude plugin install .
-
-# Test in a separate project
-mkdir test-project && cd test-project
-/rptc:feat "test feature"
+python3 scripts/validate-rptc.py
+bash scripts/verify-version.sh
+git diff --check
 ```
 
----
+Run Claude plugin validation when available.
 
-## How to Contribute
+## Workflow changes
 
-### Reporting Issues
+For each changed flow:
 
-**Found a bug or have a feature request?**
+1. Update its shared contract for semantic changes.
+2. Update the provider adapters.
+3. Preserve intentional asymmetries.
+4. Add routing or parity fixtures.
+5. Test the flow in every provider that implements it.
+6. Report exact commands and observations.
 
-1. **Search existing issues** first to avoid duplicates
-2. **Create a new issue** with:
-   - Clear, descriptive title
-   - Steps to reproduce (for bugs)
-   - Expected vs. actual behavior
-   - Environment details (OS, Claude Code version)
-   - Relevant logs or screenshots
+## Skills
 
-**Issue Labels:**
+Every `SKILL.md` needs `name` and `description` frontmatter.
 
-- `bug` - Something isn't working
-- `enhancement` - New feature or improvement
-- `documentation` - Documentation improvements
-- `question` - Questions about usage
+Descriptions state the user situation and activation boundary. The body owns
+the procedure. Move branch-specific or optional reference material behind
+focused files.
 
-### Suggesting Features
+Avoid:
 
-Before suggesting a feature:
+- universal file, line, test-count, or coverage quotas;
+- self-reported compliance as proof;
+- arbitrary numerical model confidence;
+- restating discoverable project configuration;
+- automatic external side effects.
 
-1. Check if it aligns with RPTC workflow principles (Research → Plan → TDD → Commit)
-2. Search for existing feature requests
-3. Create an issue with:
-   - Clear use case and rationale
-   - How it fits into the workflow
-   - Proposed implementation approach (if any)
+## Git writes
 
----
+Stage only intended paths:
 
-## Development Setup
-
-### Project Structure
-
-```text
-rptc-workflow/
-├── .claude-plugin/        # Plugin metadata
-├── commands/              # Slash command definitions (flat structure, 11 commands)
-│   ├── commit.md         # /rptc:commit
-│   ├── config.md         # /rptc:config
-│   ├── feat.md           # /rptc:feat (PRIMARY)
-│   ├── feat-team.md      # /rptc:feat-team (team-based feat)
-│   ├── fix.md            # /rptc:fix
-│   ├── fix-team.md       # /rptc:fix-team (team-based fix)
-│   ├── research.md       # /rptc:research
-│   ├── sync-prod-to-tests.md  # /rptc:sync-prod-to-tests
-│   ├── structure.md      # /rptc:structure
-│   ├── verify.md         # /rptc:verify
-│   └── verify-loop.md    # /rptc:verify-loop
-├── agents/                # Specialist agent definitions (9 agents)
-├── sop/                   # Standard Operating Procedures (10 SOPs)
-├── templates/             # Templates for artifacts
-├── skills/                # Skills (18 skills)
-└── docs/                  # Documentation
+```bash
+git add -- <paths>
 ```
 
-### Key Files
-
-- **`plugin.json`**: Plugin metadata and configuration
-- **`marketplace.json`**: Marketplace listing information
-- **Command files** (`.md`): Command prompt definitions
-- **Agent files** (`.md`): Specialized agent definitions
-- **SOP files** (`.md`): Standard operating procedures
-
----
-
-## Testing Guidelines
-
-### Manual Testing Checklist
-
-Before submitting a PR, test the following:
-
-**Core Commands:**
-
-- [ ] `/rptc:feat "test feature"` completes all 5 phases (Discovery → Architecture → TDD → Quality → Complete)
-- [ ] `/rptc:feat-team "test feature"` spawns 4 agents and completes team workflow (Discovery → Architecture → Implementation+Review → Complete)
-- [ ] `/rptc:fix "test bug"` completes all 5 phases (Reproduction → RCA → Fix → Verification → Complete)
-- [ ] `/rptc:research "test topic"` performs discovery with exploration agents
-- [ ] `/rptc:commit` verifies and creates commits
-- [ ] `/rptc:structure` analyzes codebase structure
-- [ ] `/rptc:verify` runs selected verification agents on demand
-- [ ] `/rptc:verify-loop` runs agents in a convergence loop, exits cleanly
-- [ ] `/rptc:sync-prod-to-tests "src/"` analyzes and syncs tests
-
-**Workflow Verification:**
-
-- [ ] Phase 1 (Discovery) launches parallel exploration agents
-- [ ] Branch Strategy prompt appears after Phase 1 and offers worktree option
-- [ ] Phase 2 (Architecture) presents 3 planning perspectives
-- [ ] Phase 3 (TDD) uses smart batching for implementation
-- [ ] Phase 4 (Quality Verification) runs code-review, security, and docs agents in parallel (report-only). Note: `/rptc:feat-team` uses `review-agent` instead (unified, real-time feedback)
-- [ ] Plans are stored in Claude's native plan mode (`~/.claude/plans/`)
-
-### Test on Multiple Platforms
-
-If possible, test on:
-
-- Windows (Git Bash, PowerShell)
-- macOS (Zsh, Bash)
-- Linux (Bash)
-
----
-
-## Documentation Standards
-
-### Command Documentation
-
-All command files must include:
-
-```markdown
----
-description: Brief command description
----
-
-# Command Name
-
-## Purpose
-
-Clear statement of what this command does
-
-## Arguments
-
-List and explain all arguments
-
-## Step-by-step Process
-
-Detailed workflow steps
-
-## Important Notes
-
-Edge cases, limitations, or warnings
-
-## Error Handling
-
-How failures are handled
-```
-
-### Agent Documentation
-
-Agent files are thin shells — skills are loaded via frontmatter (`skills:` field), not manual Read calls. All agent files must include:
-
-```markdown
----
-name: agent-name
-description: Brief description. REPORT ONLY if applicable.
-tools: [tool list]
-skills:
-  - rptc:core-principles
-  - rptc:tool-guide
-  - rptc:[agent]-methodology
-color: [color]
-model: inherit
----
-
-# Agent Name
-
-[One-line role description]. **REPORT ONLY** (if applicable).
-
-## RPTC Workflow Context (MANDATORY)
-
-[Phase, directives table, SOPs table, exit verification block]
-
-## Operating Methodology
-
-[Brief reinforcement pointing to preloaded skills]
-```
-
-### Code Comments
-
-- Use clear, concise comments
-- Explain "why" not "what" (code should be self-documenting)
-- Comment complex logic or non-obvious decisions
-
----
-
-## Pull Request Process
-
-### Before Submitting
-
-1. **Test thoroughly** using the manual testing checklist
-2. **Update documentation** for any changed behavior
-3. **Follow style guidelines** (see below)
-4. **Write clear commit messages** (see Commit Message Format)
-
-### PR Description Template
-
-```markdown
-## Description
-
-Brief description of changes
-
-## Type of Change
-
-- [ ] Bug fix
-- [ ] New feature
-- [ ] Documentation update
-- [ ] Refactoring
-- [ ] Performance improvement
-
-## Motivation and Context
-
-Why is this change needed? What problem does it solve?
-
-## Testing
-
-How was this tested? Include:
-
-- Test scenarios
-- Platforms tested
-- Any edge cases considered
-
-## Checklist
-
-- [ ] Commands tested manually
-- [ ] Documentation updated
-- [ ] No breaking changes (or documented if unavoidable)
-- [ ] Follows style guidelines
-- [ ] Plugin SOPs load correctly (from `sop/` directory)
-```
-
-### Commit Message Format
-
-Follow Conventional Commits:
-
-```text
-<type>(<scope>): <subject>
-
-<body>
-
-<footer>
-```
-
-**Types:**
-
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `refactor`: Code refactoring
-- `test`: Testing changes
-- `chore`: Maintenance tasks
-
-**Examples:**
-
-```text
-feat(commands): add smart batching to /rptc:feat TDD phase
-
-Implements intelligent step grouping for ~40% token reduction.
-Related steps are batched together for parallel execution.
-
-Closes #42
-```
-
-```text
-fix(agents): correct parallel agent invocation in quality review
-
-Code Review and Security agents now launch in same message
-for true parallel execution instead of sequential.
-```
-
-### Review Process
-
-1. **Maintainers review** within 3-5 days
-2. **Address feedback** promptly
-3. **Squash commits** before merge (if requested)
-4. **Celebrate** when merged! 🎉
-
----
-
-## Style Guidelines
-
-### Markdown
-
-- Use ATX-style headers (`#` not `===`)
-- Wrap lines at 100 characters (except code blocks)
-- Use fenced code blocks with language identifiers
-- Use tables for structured data
-- Use bullet lists for unordered items
-
-### Bash Scripts (Hooks)
-
-- Use `#!/usr/bin/env bash` shebang
-- Set strict mode: `set -euo pipefail`
-- Quote all variables: `"${var}"`
-- Use meaningful variable names (lowercase with underscores)
-- Comment complex logic
-
-### File Naming
-
-- Commands: `kebab-case.md` (e.g., `catch-up-med.md`)
-- Agents: `kebab-case-agent.md` (e.g., `architect-agent.md`)
-- SOPs: `kebab-case.md` (e.g., `testing-guide.md`)
-- Docs: `SCREAMING_SNAKE_CASE.md` (e.g., `RPTC_WORKFLOW_GUIDE.md`)
-
-### Command Structure
-
-- Always include frontmatter with `description`
-- Use clear section headers
-- Provide examples where helpful
-- Include error handling guidance
-
----
-
-## Areas for Contribution
-
-### High Priority
-
-- **Cross-platform testing**: Ensure Windows/macOS/Linux compatibility
-- **Bug fixes**: Address any reported issues
-- **Documentation improvements**: Clarify unclear sections
-
-### Medium Priority
-
-- **New helper commands**: Add useful utilities
-- **Enhanced error messages**: Improve user feedback
-- **Performance optimizations**: Speed up command execution
-
-### Nice to Have
-
-- **Additional SOPs**: Domain-specific best practices
-- **Example projects**: Demonstrate workflow usage
-- **Video tutorials**: Visual guides for new users
-- **Community templates**: Shareable plan/research templates
-
----
-
-## Questions?
-
-- **Issues**: https://github.com/kuklaph/rptc-workflow/issues
-- **Discussions**: https://github.com/kuklaph/rptc-workflow/discussions
-- **Documentation**: See `docs/RPTC_WORKFLOW_GUIDE.md`
-
----
-
-Thank you for contributing to RPTC Workflow! Your efforts help make systematic development accessible to everyone. 🚀
+Never use broad staging commands in RPTC ship guidance.
+
+## Pull requests
+
+Include:
+
+- semantic versus provider-mechanical classification;
+- providers affected;
+- shared contracts changed;
+- eval fixtures changed;
+- checks run;
+- live provider verification;
+- remaining inconclusive items.
