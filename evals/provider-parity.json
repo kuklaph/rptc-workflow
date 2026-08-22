@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "flow": "feat",
+      "invariants": [
+        "Acceptance predicates are stated before implementation.",
+        "Architecture work is conditional on uncertainty and risk.",
+        "Completion claims use VERIFIED, NOT VERIFIED, or INCONCLUSIVE.",
+        "The provider's own planning and task-tracking tools are used."
+      ]
+    },
+    {
+      "flow": "fix",
+      "invariants": [
+        "The reported symptom is reproduced before a root-cause claim.",
+        "The original surface is rerun after the fix.",
+        "Speculative changes are removed when evidence rejects them."
+      ]
+    },
+    {
+      "flow": "test-impact",
+      "invariants": [
+        "Neither implementation nor tests are treated as automatic behavioral truth.",
+        "Corrections cite requirements, contracts, prior verified behavior, or explicit uncertainty.",
+        "Ambiguous expectations remain INCONCLUSIVE until resolved.",
+        "Provider-native tools are used without legacy synchronization agents."
+      ]
+    },
+    {
+      "flow": "commit",
+      "invariants": [
+        "Project checks are discovered rather than guessed.",
+        "Only confirmed paths are staged.",
+        "Push and pull-request creation require explicit user intent."
+      ]
+    },
+    {
+      "flow": "feat-team",
+      "intentional_asymmetry": true,
+      "invariants": [
+        "Claude may use persistent teams.",
+        "Codex uses parent-orchestrated agents and does not pretend to expose a peer-team inbox."
+      ]
+    }
+  ]
+}

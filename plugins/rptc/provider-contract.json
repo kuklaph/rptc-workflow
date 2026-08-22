@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "contract_version": "2026-08-21",
+  "shared_root": "shared",
+  "enforce_adapter_contract_refs": true,
+  "providers": {
+    "claude": {
+      "manifest": ".claude-plugin/plugin.json",
+      "command_root": "claude/commands",
+      "agent_root": "claude/agents",
+      "skill_root": "skills",
+      "planning": "EnterPlanMode and ExitPlanMode",
+      "tracking": "TaskCreate and TaskUpdate",
+      "delegation": "Task",
+      "interactive_questions": "AskUserQuestion",
+      "persistent_teams": true,
+      "agent_installation": "Declared by the Claude plugin manifest"
+    },
+    "codex": {
+      "manifest": ".codex-plugin/plugin.json",
+      "command_root": null,
+      "agent_root": "codex/agents",
+      "skill_root": "codex/skills",
+      "planning": "Codex plan mode and request_user_input",
+      "tracking": "update_plan",
+      "delegation": "spawn_agent and wait_agent",
+      "interactive_questions": "request_user_input in plan mode; normal chat otherwise",
+      "persistent_teams": false,
+      "agent_installation": "rptc-init copies packaged TOML agents to the project or Codex home"
+    }
+  },
+  "flows": {
+    "feat": {
+      "shared_contract": "shared/workflows/feature.md",
+      "claude": "claude/commands/feat.md",
+      "codex": "codex/skills/rptc-feat/SKILL.md",
+      "parity": "semantic"
+    },
+    "fix": {
+      "shared_contract": "shared/workflows/fix.md",
+      "claude": "claude/commands/fix.md",
+      "codex": "codex/skills/rptc-fix/SKILL.md",
+      "parity": "semantic"
+    },
+    "verify": {
+      "shared_contract": "shared/workflows/verification.md",
+      "claude": "claude/commands/verify.md",
+      "codex": "codex/skills/rptc-verify/SKILL.md",
+      "parity": "semantic"
+    },
+    "verify-loop": {
+      "shared_contract": "shared/workflows/verification.md",
+      "claude": "claude/commands/verify-loop.md",
+      "codex": "codex/skills/rptc-verify-loop/SKILL.md",
+      "parity": "semantic"
+    },
+    "test-impact": {
+      "shared_contract": "shared/workflows/test-impact.md",
+      "claude": "claude/commands/test-impact.md",
+      "codex": "codex/skills/rptc-test-impact/SKILL.md",
+      "parity": "semantic"
+    },
+    "commit": {
+      "shared_contract": "shared/workflows/ship.md",
+      "claude": "claude/commands/commit.md",
+      "codex": "codex/skills/rptc-commit/SKILL.md",
+      "parity": "semantic"
+    },
+    "config": {
+      "shared_contract": "shared/provider-adapter-contract.md",
+      "claude": "claude/commands/config.md",
+      "codex": "codex/skills/rptc-config/SKILL.md",
+      "parity": "provider-specific",
+      "reason": "Claude writes CLAUDE.md and Codex writes AGENTS.md; their project instruction and plugin discovery surfaces differ."
+    },
+    "feat-team": {
+      "shared_contract": "shared/workflows/feature.md",
+      "claude": "claude/commands/feat-team.md",
+      "codex": null,
+      "parity": "intentional-asymmetry",
+      "reason": "Claude exposes persistent peer teams and inbox messaging. Codex uses parent-orchestrated spawn_agent delegation without an equivalent persistent team command."
+    },
+    "fix-team": {
+      "shared_contract": "shared/workflows/fix.md",
+      "claude": "claude/commands/fix-team.md",
+      "codex": null,
+      "parity": "intentional-asymmetry",
+      "reason": "Claude exposes persistent peer teams and inbox messaging. Codex uses parent-orchestrated spawn_agent delegation without an equivalent persistent team command."
+    },
+    "init": {
+      "shared_contract": "shared/provider-adapter-contract.md",
+      "claude": null,
+      "codex": "codex/skills/rptc-init/SKILL.md",
+      "parity": "intentional-asymmetry",
+      "reason": "Claude agents are installed through its plugin manifest. Codex requires packaged TOML agents to be copied into an agents directory."
+    },
+    "research": {
+      "shared_contract": "shared/workflows/research.md",
+      "claude": "claude/commands/research.md",
+      "codex": "codex/skills/rptc-research/SKILL.md",
+      "parity": "semantic"
+    },
+    "structure": {
+      "shared_contract": "shared/workflows/structure.md",
+      "claude": "claude/commands/structure.md",
+      "codex": "codex/skills/rptc-structure/SKILL.md",
+      "parity": "semantic"
+    }
+  }
+}

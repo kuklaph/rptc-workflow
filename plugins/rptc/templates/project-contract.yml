@@ -1,0 +1,19 @@
+version: 1
+
+approval: balanced
+workspace: auto
+
+context:
+  glossary: null
+  adrs: null
+
+checks:
+  focused: null
+  full: null
+  typecheck: null
+  lint: null
+  build: null
+
+ship:
+  commit_style: project
+  stage: selected-files

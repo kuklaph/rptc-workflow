@@ -1,380 +1,57 @@
 ---
-description: Configure RPTC workflow in project CLAUDE.md - sync with current version
-allowed-tools: Read, Write, Edit, Glob, Grep
+description: Discover project conventions and configure a minimal Claude-facing RPTC project contract
+allowed-tools: Bash(git *), Read, Write, Edit, Glob, Grep, LS, AskUserQuestion
 ---
 
 # /rptc:config
 
-Configure and maintain RPTC workflow settings in your project's CLAUDE.md.
+Shared contract: `shared/provider-adapter-contract.md`
 
-**Arguments**: None
+Claude and Codex have different project-instruction files. This adapter writes
+Claude's `CLAUDE.md` pointer and the provider-neutral project contract.
 
-**Use when**:
-- First time setting up RPTC in a project
-- After updating RPTC plugin to sync configuration
-- To verify project is properly configured
+## 1. Discover
 
----
+Inspect:
 
-## Phase 1: Detect Current State
+- `CLAUDE.md`;
+- `CONTRIBUTING.md` and repository docs;
+- package, build, and task-runner files;
+- CI workflows;
+- existing test, typecheck, lint, and build commands;
+- glossary or ADR locations;
+- current git and worktree conventions.
 
-**Goal**: Understand what exists and what needs to be done.
+Do not copy the plugin command catalog into project context.
 
-**Actions**:
+## 2. Propose
 
-1. **Get current RPTC version** from plugin metadata:
-   - Read `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json`
-   - Extract `version` field (e.g., "2.25.6")
+Start from `${CLAUDE_PLUGIN_ROOT}/templates/project-contract.yml`.
 
-2. **Check for project CLAUDE.md**:
-   - Look for `CLAUDE.md` in current working directory (project root)
-   - Note: This is the PROJECT's CLAUDE.md, not the RPTC plugin's
+Propose only facts that are durable or cannot be reliably rediscovered:
 
-3. **Determine action needed**:
+- approval mode: `guided`, `balanced`, or `autonomous`;
+- workspace mode: `current`, `auto`, or `worktree`;
+- project check commands;
+- glossary and ADR locations;
+- commit convention when project-defined.
 
-   | State | Action |
-   |-------|--------|
-   | No CLAUDE.md | Create with RPTC section |
-   | CLAUDE.md exists, no RPTC section | Append RPTC section |
-   | CLAUDE.md exists, RPTC section present | Check version, update if outdated |
-   | CLAUDE.md exists, RPTC section current | Report "already up to date" |
+Ask the user to confirm unresolved preferences. Preserve existing custom values.
 
-4. **Detect RPTC section** by searching for marker:
-   ```
-   <!-- RPTC-START v
-   ```
-   If found, extract version number from the marker line.
+## 3. Write
 
-5. **Scan for legacy/orphaned RPTC content** (content without proper markers):
+Write `.rptc/project.yml`.
 
-   Search patterns to detect legacy content:
-   - `## RPTC` or `### RPTC` headers without markers nearby
-   - `/rptc:feat` or `/rptc:fix` command references outside marked section
-   - `rptc:research-agent` or `rptc:tdd-agent` mentions outside marked section
-   - `verification-agent-mode:` outside marked section
-   - Duplicate `<!-- RPTC-START` markers (multiple sections)
-
-   If legacy content detected, set `legacy_cleanup_needed = true`.
-
----
-
-## Phase 2: User Preferences (New Installs Only)
-
-**Goal**: Gather user preferences before generating configuration.
-
-**Skip this phase if**: Updating an existing RPTC section (preserve existing settings).
-
-**Actions**:
-
-1. **Ask user for verification mode preference** using AskUserQuestion:
-
-   ```
-   Question: "Which verification mode would you like for Phase 4 quality verification?"
-   Header: "Verification Mode"
-   Options:
-   - label: "Automatic (Recommended)"
-     description: "Smart selection based on file types and change patterns. Launches relevant agents only."
-   - label: "All"
-     description: "Always launch all 3 verification agents (code-review, security, docs) regardless of changes."
-   - label: "Minimal"
-     description: "Only launch agents when strongly indicated (>50 lines changed or security keywords)."
-   ```
-
-2. **Map selection to config value**:
-   - "Automatic (Recommended)" → `automatic`
-   - "All" → `all`
-   - "Minimal" → `minimal`
-
----
-
-## Phase 3: Generate Configuration
-
-**Goal**: Build the RPTC configuration block with user's selected verification mode.
-
-**Configuration Template**:
+Ensure `CLAUDE.md` contains one concise pointer:
 
 ```markdown
-<!-- RPTC-START v{VERSION} -->
-## RPTC Workflow Configuration
-
-**RPTC Version**: {VERSION} | [Documentation](https://github.com/kuklaph/rptc-workflow)
-
-### Quick Reference
-
-| Command | Purpose |
-|---------|---------|
-| `/rptc:feat "description"` | Full workflow: Research → Plan → TDD → Verify |
-| `/rptc:fix "bug description"` | Bug fixing: Reproduce → Root Cause → Fix → Verify |
-| `/rptc:research "topic"` | Standalone research and exploration |
-| `/rptc:commit [pr]` | Verify quality gates and ship (add `pr` for pull request) |
-| `/rptc:verify [path]` | Run quality verification agents on demand |
-| `/rptc:sync-prod-to-tests "dir"` | Sync tests to match production code |
-| `/rptc:config` | Initialize or update this configuration |
-
-### Verification Configuration
-
-verification-agent-mode: {VERIFICATION_MODE}
-
-<!--
-Verification mode options:
-- automatic: Smart selection based on file types and change patterns
-- all: Always launch all 3 verification agents (code-review, security, docs)
-- minimal: Only launch when strongly indicated (>50 lines or keywords)
--->
-
-### Project-Specific Notes
-
-<!-- Add any project-specific RPTC notes here -->
-
-<!-- RPTC-END -->
+RPTC project contract: `.rptc/project.yml`.
 ```
 
-**Replace placeholders:**
-- `{VERSION}` → actual version from plugin.json
-- `{VERIFICATION_MODE}` → user's selection from Phase 2 (or preserved value for updates)
+Update an existing pointer in place. Do not add command tables, workflow
+diagrams, version markers, or duplicated plugin documentation.
 
----
+## 4. Verify
 
-## Phase 4: Apply Configuration
-
-**Goal**: Update or create CLAUDE.md with the configuration.
-
-### Case A: No CLAUDE.md exists
-
-1. **Create new CLAUDE.md** with RPTC section prominently at top:
-   ```markdown
-   # CLAUDE.md
-
-   {RPTC_CONFIGURATION_BLOCK}
-
-   ---
-
-   ## Project-Specific Instructions
-
-   <!-- Add your project-specific Claude Code instructions here -->
-   ```
-
-2. **Inform user**:
-   ```
-   Created CLAUDE.md with RPTC v{VERSION} configuration at top.
-
-   You can customize:
-   - verification-agent-mode (automatic/all/minimal)
-   - Project-specific notes section within RPTC block
-   - Add project instructions below the RPTC section
-   ```
-
-### Case B: CLAUDE.md exists, no RPTC section
-
-1. **Insert RPTC section near the TOP** (after main heading):
-   - Look for the first `# ` heading in the file
-   - Insert RPTC section immediately after that heading (and any tagline/description on the next line)
-   - If no heading found, insert at the very top
-
-   ```markdown
-   # Existing Title
-
-   {RPTC_CONFIGURATION_BLOCK}
-
-   ---
-
-   [Rest of existing CLAUDE.md content]
-   ```
-
-2. **Inform user**:
-   ```
-   Added RPTC v{VERSION} configuration to existing CLAUDE.md (near top, after title).
-   ```
-
-### Case C: CLAUDE.md exists, RPTC section outdated
-
-1. **Find and replace** the entire section:
-   - Start marker: `<!-- RPTC-START v`
-   - End marker: `<!-- RPTC-END -->`
-   - Replace everything between (inclusive) with new configuration
-
-2. **Preserve verification-agent-mode** if user has customized it:
-   - Before replacing, extract current `verification-agent-mode:` value
-   - After generating new block, restore the user's setting
-
-3. **Preserve project-specific notes**:
-   - Extract content between `### Project-Specific Notes` and `<!-- RPTC-END -->`
-   - Restore in new block
-
-4. **Inform user**:
-   ```
-   Updated RPTC configuration from v{OLD} to v{NEW}.
-
-   Changes in this version:
-   - [List key changes from CHANGELOG if significant]
-   ```
-
-### Case D: CLAUDE.md exists, RPTC section current
-
-1. **No changes needed**
-
-2. **Inform user**:
-   ```
-   RPTC v{VERSION} configuration is already up to date.
-
-   Current settings:
-   - verification-agent-mode: {current_mode}
-   ```
-
-### Case E: Legacy/orphaned RPTC content detected
-
-**Applies to**: Any case where `legacy_cleanup_needed = true` from Phase 1 scan.
-
-1. **Show user what was found**:
-   ```
-   ⚠️  Legacy RPTC content detected outside the marked configuration section:
-
-   - Line 45: "## RPTC Workflow" (unmarked header)
-   - Line 78-82: Command reference table (duplicate)
-   - Line 120: "verification-agent-mode: all" (orphaned setting)
-   ```
-
-2. **Ask user for cleanup preference** using AskUserQuestion:
-   ```
-   Question: "How should I handle the legacy RPTC content?"
-   Header: "Cleanup"
-   Options:
-   - label: "Remove legacy content (Recommended)"
-     description: "Delete orphaned RPTC references. The marked section contains all needed configuration."
-   - label: "Keep legacy content"
-     description: "Leave orphaned content in place. May cause confusion with duplicate settings."
-   - label: "Show me the content first"
-     description: "Display the legacy content so I can decide what to do."
-   ```
-
-3. **If "Remove legacy content" selected**:
-   - Remove identified legacy sections/lines
-   - Preserve any non-RPTC content around them
-   - Report what was removed
-
-4. **If "Show me the content first" selected**:
-   - Display each legacy section with surrounding context
-   - Re-prompt for cleanup decision
-
-5. **Inform user**:
-   ```
-   ✓ Cleaned up legacy RPTC content:
-   - Removed unmarked "## RPTC Workflow" section (lines 45-72)
-   - Removed duplicate command table (lines 78-82)
-   - Removed orphaned setting (line 120)
-
-   All RPTC configuration is now in the marked section at the top.
-   ```
-
----
-
-## Phase 5: Verify Setup
-
-**Goal**: Confirm configuration is valid and complete.
-
-**Actions**:
-
-1. **Read back CLAUDE.md** to verify markers are present
-2. **Check for required sections**:
-   - [ ] RPTC version marker present
-   - [ ] Quick reference table present
-   - [ ] Tool prioritization section present
-   - [ ] Verification configuration present
-
-3. **Report status**:
-
-```markdown
-## RPTC Setup Complete
-
-**Project**: {project_name}
-**RPTC Version**: {version}
-**Status**: ✓ Configured
-
-### Configuration
-- Verification Mode: {verification_agent_mode}
-- CLAUDE.md Location: ./CLAUDE.md
-
-### Next Steps
-1. Customize `verification-agent-mode` if needed (automatic/all/minimal)
-2. Add project-specific notes to the configuration section
-3. Start developing with `/rptc:feat "your feature"`
-```
-
----
-
-## Error Handling
-
-| Error | Resolution |
-|-------|------------|
-| Cannot read plugin.json | Report error, use "unknown" as version |
-| Cannot write CLAUDE.md | Check permissions, report error |
-| Malformed existing RPTC section | Backup existing, replace entirely |
-| Markers corrupted | Remove partial markers, insert fresh section |
-| Legacy content without markers | Prompt user for cleanup (Case E) |
-| Multiple RPTC sections | Keep first marked section, flag others as legacy |
-| Orphaned settings outside markers | Include in legacy cleanup prompt |
-
----
-
-## Examples
-
-### First-time setup
-```
-User: /rptc:config
-
-Claude: Checking RPTC configuration...
-
-No CLAUDE.md found in project root.
-Creating CLAUDE.md with RPTC v2.25.6 configuration...
-
-✓ Created ./CLAUDE.md
-
-Configuration:
-- verification-agent-mode: automatic (default)
-
-Next steps:
-1. Review and customize the configuration
-2. Start developing with /rptc:feat "your feature"
-```
-
-### Update existing
-```
-User: /rptc:config
-
-Claude: Checking RPTC configuration...
-
-Found CLAUDE.md with RPTC v2.24.0 configuration.
-Current RPTC version: v2.25.6
-
-Updating configuration...
-- Preserved verification-agent-mode: all
-- Preserved project-specific notes
-
-✓ Updated RPTC configuration to v2.25.6
-
-Key changes in this update:
-- Added Tier 4 nits to code review
-- Mandatory Phase 4 quality verification gate
-```
-
-### Already current
-```
-User: /rptc:config
-
-Claude: Checking RPTC configuration...
-
-✓ RPTC v2.25.6 configuration is already up to date.
-
-Current settings:
-- verification-agent-mode: automatic
-```
-
----
-
-## Key Principles
-
-1. **Preserve user customizations**: Never overwrite `verification-agent-mode` or project-specific notes
-2. **Non-destructive updates**: Only modify the RPTC section, leave rest of CLAUDE.md untouched
-3. **Graceful degradation**: If plugin.json unreadable, use "unknown" version and warn user
-4. **Always report status**: Show current configuration after every run
-5. **Idempotent operation**: Running multiple times is safe, produces same result
+Read both files back, validate the configured commands against the repository,
+and report what was discovered versus explicitly chosen.

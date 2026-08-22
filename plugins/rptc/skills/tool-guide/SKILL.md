@@ -1,98 +1,44 @@
 ---
 name: tool-guide
-description: Shared tool prioritization for all RPTC agents. Covers Serena MCP (read-only and edit operations), Serena Memory, Context7, Fetch MCP, and directory exploration. Load at session start before any work.
+description: Choose repository, semantic-navigation, documentation, web, and runtime tools based on the evidence needed. Use when an RPTC flow needs capability discovery or a preferred tool is unavailable.
 ---
 
 # Tool Guide
 
-Tool prioritization and usage patterns for RPTC agents.
+## Principle
 
----
+Choose the tool that gives the most direct reliable evidence with the least
+unnecessary context.
 
-## Serena MCP (Prefer Over Native Tools)
+## Repository work
 
-Serena tools may appear as `mcp__serena__*` or `mcp__plugin_serena_serena__*` — use whichever is available.
+- Use git and project files for exact current state.
+- Use semantic symbol tools when they make callers, references, or module
+  structure faster to establish.
+- Use native search and file tools when semantic tooling is unavailable or a
+  plain text search is the better fit.
+- Read actual configuration and command help rather than restating cached tool
+  behavior.
 
-### Read-Only Operations
+No MCP server is mandatory. A missing optional tool changes the method, not the
+engineering contract.
 
-| Task | Prefer Serena | Over Native |
-|------|---------------|-------------|
-| Find functions/classes | `get_symbols_overview` | Grep |
-| Locate specific code | `find_symbol` | Glob |
-| Find usages/references | `find_referencing_symbols` | Grep |
-| Regex search | `search_for_pattern` | Grep |
-| Reflect on findings | `think_about_collected_information` | — |
-| List directory | `list_dir` | LS |
+## External facts
 
-### Edit Operations (Agents with Edit Access Only)
+Prefer official documentation, source repositories, specifications, and
+first-party changelogs. Use community sources for practice and edge cases, with
+their status made clear.
 
-| Task | Prefer Serena | Over Native |
-|------|---------------|-------------|
-| Replace function body | `replace_symbol_body` | Edit |
-| Insert after symbol | `insert_after_symbol` | Edit |
-| Insert before symbol | `insert_before_symbol` | Edit |
-| Rename symbol | `rename_symbol` | Edit |
-| Reflect on task | `think_about_task_adherence` | — |
+## Runtime evidence
 
----
+Use the closest available control surface for the user's actual experience.
+When no control surface exists, state the limitation and use the strongest
+repeatable proxy without overstating what it proves.
 
-## Serena Memory (Optional)
+## Delegation
 
-Use `write_memory` to persist important discoveries for future sessions — things that would go in CLAUDE.md:
+Use sub-agents for bounded context-heavy work, independent evidence sources, or
+separate artifacts. The parent inspects outputs and owns final judgment.
 
-- Architectural decisions and constraints
-- Non-obvious patterns or gotchas ("X uses Y because of Z")
-- Key relationships between components
-- Testing patterns specific to the project
-- Documentation conventions and structures
-
-**Read memory first** to check for existing knowledge before starting analysis.
-
-**Naming convention**: `[domain]-[project]-[topic]` (e.g., `docs-rptc-structure`, `security-myapp-auth`)
-
----
-
-## Other MCP Tools
-
-### Context7 (Library Documentation)
-
-When available, use for up-to-date library documentation:
-- `resolve-library-id` — Find library identifier
-- `get-library-docs` — Fetch documentation
-
-May appear as `mcp__context7__*`, `mcp__MCP_DOCKER__*`, or `mcp__plugin_context7_context7__*`.
-
-### Fetch MCP (Web Content)
-
-Prefer over WebFetch for web content retrieval:
-- May appear as `mcp__fetch__fetch`, `mcp__MCP_DOCKER__fetch`, or `mcp__plugin_MCP_DOCKER_MCP_DOCKER__fetch`
-
-### IDE MCP (Diagnostics)
-
-When available, use for IDE integration:
-- `getDiagnostics` — Get IDE diagnostic information
-- `executeCode` — Execute code in IDE context
-
----
-
-## Directory Exploration
-
-- Use Serena `list_dir` or native `LS` for quick directory listing
-- Use `NotebookRead` for Jupyter notebooks in data science codebases
-
----
-
-## Context Management
-
-- Clear old search results after extracting information
-- Maintain structured notes (smaller token footprint)
-- Preserve all source URLs (never lose citations)
-
----
-
-## Progress Tracking
-
-Use `TodoWrite` for long sessions to track:
-- Phases completed
-- Files analyzed
-- Questions to follow up
+Provider adapters define the actual tool names, spawn mechanics, and waiting
+rules.

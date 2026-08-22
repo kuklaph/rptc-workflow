@@ -1,636 +1,149 @@
 ---
-description: Team-based feature development with parallel research, planning, implementation, and review agents
+description: Develop a complex feature with a persistent Claude team and continuous cross-agent feedback
 allowed-tools: Bash(git *), Bash(npm *), Bash(npx *), Bash(bunx *), Bash(pnpm *), Bash(yarn *), Bash(bun *), Bash(cargo *), Bash(go *), Bash(pytest *), Bash(python -m pytest *), Bash(make *), Bash(dotnet *), Read, Write, Edit, Glob, Grep, LS, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion, EnterPlanMode, ExitPlanMode, TeamCreate, SendMessage
 ---
 
 # /rptc:feat-team
 
-Team-based feature development: 4 persistent agents (Research, Architect, TDD, Review) collaborating via real-time messaging. Unlike `/rptc:feat` which runs agents sequentially as sub-agents, `feat-team` keeps all agents alive so they communicate, cross-check, and provide feedback throughout the session.
+Shared contract: `shared/workflows/feature.md`
 
-## When to Use feat-team vs feat
+Claude-only adapter for one complex feature that benefits from persistent peers.
+Codex has no equivalent peer-team inbox and uses the standard feature adapter
+with parent-orchestrated agents.
 
-| Criteria | `/rptc:feat` (standard) | `/rptc:feat-team` (this) |
-|----------|------------------------|-------------------------|
-| Task size | Any size | Medium-to-large features |
-| Agent lifecycle | Sequential (spawn, complete, discard) | Persistent (alive for entire session) |
-| Feedback | Post-hoc verification (Phase 4) | Real-time during implementation |
-| Plan adherence | Checked at end | Architect monitors continuously |
-| Cost | Lower ($0.50-$2.00) | Higher ($3.00-$10.00) |
-| Best for | Straightforward features, small changes | Complex features needing cross-agent collaboration |
+## When to use
 
----
+Use this flow when:
 
-## Arguments
+- the feature is normal or high risk;
+- research, architecture, implementation, and review need ongoing exchange;
+- one implementation writer can own the shared worktree.
 
-`/rptc:feat-team <feature-description>`
+Use `/rptc:feat` for local changes and ordinary features. Use the
+`rptc:agent-teams` skill for several independent workstreams.
 
-**Example**: `/rptc:feat-team "Add user authentication with OAuth2 and role-based access control"`
+## 1. Initialize
 
----
+Load:
 
-## Step 0: Initialization (MANDATORY - CANNOT SKIP)
-
-### 0.1 Load Required Skills
-
-```
-Skill(skill: "rptc:tool-guide")
-Skill(skill: "rptc:brainstorming")
-Skill(skill: "rptc:unslop-writing-clearly")
+```text
+rptc:core-principles
+rptc:brainstorming
+rptc:unslop-writing-clearly
+rptc:verification-evidence
 ```
 
-After loading, confirm all loaded. If ANY skill fails to load, STOP and report.
+Read `${CLAUDE_PLUGIN_ROOT}/shared/workflows/feature.md`.
 
-#### 0.1.1 Conditional Skills
+Ground the repository enough to state the feature, affected area, route,
+acceptance predicates, and verification surfaces.
 
-**Frontend work** — If the task involves HTML, CSS, UI components:
-```
-Skill(skill: "rptc:frontend-design")
-```
+Ask whether to use the current branch or a sibling worktree. Recommend a
+worktree for high-risk work. Only the implementer writes product files, so the
+team itself does not justify concurrent shared writes.
 
-### 0.1.2 Get Repo Root + Activate Serena MCP (MANDATORY)
+## 2. Create the team
 
-```
-Bash("git rev-parse --show-toplevel")  → store as REPO_ROOT
-ToolSearch(query: "serena")
-```
+Create one team with four persistent roles:
 
-Activate Serena project. Skip silently if unavailable.
+- `researcher`: read-only codebase and external research;
+- `architect`: read-only design and plan guardianship;
+- `implementer`: the only product-code writer;
+- `reviewer`: report-only request, correctness, security, and documentation review.
 
-### 0.2 Task Classification
+Create tasks:
 
-Classify the task:
-- **Code tasks**: Create/modify source files → full team workflow
-- **Non-code tasks**: Documentation, config only → use `/rptc:feat` instead (teams add no value for non-code)
+1. Discovery.
+2. Architecture and acceptance.
+3. Implementation.
+4. Final verification.
+5. Wrap-up.
 
-If non-code, inform user and suggest `/rptc:feat`. STOP.
+Block each task on the previous task.
 
-### 0.3 Branch Strategy
+Every spawn prompt includes:
 
-Ask user how to organize work (same logic as `/rptc:feat`):
+- repo and worktree path;
+- feature request;
+- role and write scope;
+- shared contract path;
+- acceptance predicates known so far;
+- required report shape;
+- instruction to escalate product decisions to the Team Lead.
 
-1. Get current branch name
-2. Generate worktree branch name from feature description (e.g., `feature/add-user-auth`)
-3. Recommend based on expected scope (team workflows are typically multi-file, so default recommend new worktree)
+## 3. Discovery
 
-```
-AskUserQuestion:
-question: "How should this feature be organized?"
-header: "Branch"
-options:
-  - label: "New worktree [feature/<name>] (Recommended)"
-    description: "Isolated branch for team development"
-  - label: "Current branch [<current>]"
-    description: "Work directly on current branch"
-```
+The researcher traces entry points, consumers, data flow, side effects, tests,
+project patterns, and project checks. It reports evidence with file and symbol
+locations to the architect and Team Lead.
 
-If new worktree selected, place it at `$(dirname "$REPO_ROOT")/$(basename "$REPO_ROOT").worktrees/<branch-name>` — a sibling `<repo>.worktrees/` directory next to the repo (see `/rptc:feat` Branch Strategy for `git worktree add` and verification details). Store `WORKTREE_PATH`.
+The researcher stays available for bounded questions. It does not become a
+second implementation worker.
 
----
+## 4. Architecture
 
-## Step 1: Create Team
+The architect uses `rptc:architect-methodology`.
 
-### 1.1 Create the Team
+It returns one recommended design. Alternatives appear only when materially
+different structures are viable.
 
-```
-TeamCreate(
-  team_name: "<feature-slug>",
-  description: "RPTC feat-team: <feature description>"
-)
-```
+The Team Lead enters Plan Mode and presents:
 
-### 1.2 Create Phase Tasks
+- acceptance predicates;
+- route and risk;
+- interface and data shape;
+- ownership and sequencing;
+- verification;
+- rollback for high-risk work;
+- open product decisions.
 
-Create tasks for the team workflow. Dependencies enforce sequencing where needed.
+The user approves consequential choices. After approval, the architect becomes
+a plan guardian. The plan is a hypothesis and may be revised when a
+representative slice disproves it.
 
-```
-TaskCreate("Phase 1: Discovery", description: "Research agent explores codebase and reports findings")
-TaskCreate("Phase 2: Architecture", description: "Architect agent creates implementation plan")
-TaskCreate("Phase 3: Implementation", description: "TDD agent implements with Architect + Review monitoring")
-TaskCreate("Phase 4: Final Review", description: "Architect + Review collaborate on holistic review of all changes")
-TaskCreate("Phase 5: Wrap-up", description: "Team Lead collects reports, presents summary")
+## 5. Implementation and continuous feedback
 
-TaskUpdate(Phase 2, addBlockedBy: [Phase 1])
-TaskUpdate(Phase 3, addBlockedBy: [Phase 2])
-TaskUpdate(Phase 4, addBlockedBy: [Phase 3])
-TaskUpdate(Phase 5, addBlockedBy: [Phase 4])
-```
+The implementer loads `rptc:tdd-agent-methodology`.
 
-### 1.3 Build Environment Context Block
+For each vertical slice:
 
-Construct this block once — it goes into every agent spawn prompt:
+1. announce the behavior, seam, and intended files;
+2. show the failing executable check when practical;
+3. implement the minimum coherent passing change;
+4. run focused and nearby checks;
+5. send the diff summary and evidence to architect and reviewer;
+6. wait for both responses;
+7. address confirmed findings before the next slice.
 
-```
-ENVIRONMENT:
-Repo root: <REPO_ROOT>
-Serena project: <SERENA_PROJECT_NAME>
-  → Call activate_project("<SERENA_PROJECT_NAME>") before using any Serena tools.
-[If WORKTREE_PATH is set:]
-Worktree: <WORKTREE_PATH>
-  → cd "<WORKTREE_PATH>" before doing ANY work.
-  → All file paths are relative to this worktree root.
-```
+The architect checks plan assumptions, ownership, and integration. The reviewer
+keeps these axes separate:
 
----
-
-## Step 2: Spawn All Agents
-
-Spawn all 4 agents. Research starts working immediately. Architect, TDD, and Review wait for messages.
-
-**IMPORTANT**: Launch all 4 Agent calls in the SAME message for parallel startup.
-
-### 2.1 Research Agent
-
-```
-Agent(
-  name: "researcher",
-  subagent_type: "rptc:research-agent",
-  team_name: "<team-name>",
-  prompt: "<spawn prompt below>"
-)
-```
-
-**Spawn prompt**:
-```
-You are the Research agent in an RPTC feat-team.
-
-[ENVIRONMENT CONTEXT BLOCK]
-
-## Your Task
-Explore the codebase to understand what's needed for: [feature description]
-
-## What To Do
-1. Find similar features and existing patterns (code-explorer Phase 1: entry points, core files, boundaries)
-2. Analyze architecture and abstractions (Phase 3: layers, patterns, cross-cutting concerns)
-3. Map integration points and dependencies (Phase 2: call chains, data flow, side effects)
-
-## When Done
-Message the Team Lead with your findings:
-- Key patterns found (with file:line references)
-- Files that will need modification
-- Dependencies and integration points
-- Existing conventions to follow
-- Any risks or concerns
-
-Also message "architect" directly with the same findings so they can begin planning.
-
-Mark your Phase 1 task as completed.
-
-## After Phase 1: On-Call Resource
-Stay available after discovery completes. Teammates may message you with research questions during implementation — codebase lookups, pattern investigations, web research for best practices. Investigate and respond directly to the requesting agent.
-```
-
-### 2.2 Architect Agent
-
-```
-Agent(
-  name: "architect",
-  subagent_type: "rptc:architect-agent",
-  team_name: "<team-name>",
-  prompt: "<spawn prompt below>"
-)
-```
-
-**Spawn prompt**:
-```
-You are the Architect agent in an RPTC feat-team. You have TWO roles:
-1. **Phase 2**: Create the implementation plan
-2. **Phase 3**: Monitor plan adherence as the TDD agent implements
-
-[ENVIRONMENT CONTEXT BLOCK]
-
-## Feature
-[feature description]
-
-## Phase 2: Planning
-Wait for the "researcher" agent to message you with codebase findings. Then:
-
-1. Study the research findings
-2. Design ONE pragmatic implementation plan following your architect-methodology
-3. Include: approach rationale, implementation steps (ordered), files to create/modify, test strategy per step
-4. Message the Team Lead with the complete plan — the Team Lead will present it to the user via plan mode for review
-5. **WAIT** — do not proceed until the Team Lead messages you with approval (the user may request changes, in which case the Team Lead will relay their feedback)
-
-## Phase 3: Plan Guardianship (after approval)
-Once the Team Lead confirms the plan is approved:
-
-1. Mark Phase 2 task as completed
-2. Transition to **plan guardian** mode
-3. When "implementer" messages you that a step is complete:
-   - Read the changed files
-   - Compare against the plan step specification
-   - Check: correct files modified? Right approach used? Scope creep? Missing pieces?
-   - Message "implementer" with your assessment:
-     ```
-     ## Plan Check: Step [N]
-     Adherence: [ON TRACK / DRIFT DETECTED]
-     [If drift:] Expected: [what plan says] | Actual: [what was done]
-     [If on track:] Confirmed — matches plan specification.
-     Proceed to: Step [N+1] / Address drift first
-     ```
-4. If you detect significant drift, also message the Team Lead
-
-## Communication
-- You can message: "researcher", "implementer", "reviewer", and Team Lead
-- If you need codebase or web research during your work, message "researcher" with your question rather than investigating yourself
-- Message the Team Lead for any decisions requiring PM input
-- NEVER modify code files — you are read-only
-
-## When All Steps Complete
-Message the Team Lead with a final plan adherence report:
-- Steps completed as planned: [count]
-- Steps with drift (addressed): [count]
-- Steps with drift (unresolved): [count]
-- Overall plan adherence: [percentage]
-
-## Final Holistic Review (after implementation)
-The Team Lead will message you to perform a final holistic review. This is different from your per-step checks — review ALL changes as a unified body of work:
-- Did the full plan get realized? Any gaps?
-- Do all components integrate correctly?
-- Any scope creep or architectural inconsistency across the whole?
-Share your findings with "reviewer" for cross-checking, then report to the Team Lead.
-```
-
-### 2.3 TDD Agent
-
-```
-Agent(
-  name: "implementer",
-  subagent_type: "rptc:tdd-agent",
-  team_name: "<team-name>",
-  prompt: "<spawn prompt below>"
-)
-```
-
-**Spawn prompt**:
-```
-You are the TDD Implementation agent in an RPTC feat-team. You are the ONLY agent that writes code.
-
-[ENVIRONMENT CONTEXT BLOCK]
-
-## Feature
-[feature description]
-
-## Your Role
-Wait for the Team Lead to message you with the approved implementation plan. Then execute each step using strict TDD (RED-GREEN-REFACTOR).
-
-## Execution Protocol
-
-For EACH plan step, in order:
-
-### 1. Announce
-Message "architect" and "reviewer": "Starting Step [N]: [name]. Files: [list]"
-
-### 2. Implement (TDD)
-Follow your tdd-agent-methodology strictly:
-- **Surgical Coding**: Search for 3 similar patterns first
-- **RED**: Write failing tests. FILE LOCKOUT — only test files.
-- **RED GATE**: Verify before GREEN:
-  - [ ] Only test files created/modified
-  - [ ] Tests fail for expected reasons
-  - [ ] No production files touched
-- **GREEN**: Minimal code to make tests pass
-- **REFACTOR**: Improve while green
-- **VERIFY**: Run tests, confirm passing
-
-### 3. Report
-Message BOTH "architect" AND "reviewer":
-```
-Step [N] complete.
-Files changed: [list with brief description of changes]
-Tests added: [count], all passing: [YES/NO]
-```
-
-### 4. Wait for Feedback
-After messaging, WAIT for responses from both "architect" and "reviewer" before proceeding to the next step.
-
-- "architect" checks plan adherence — if they report drift, address it before continuing
-- "reviewer" checks code quality, security, docs — if they report blocking issues, fix them before continuing
-- Warnings can be noted and addressed before completion
-- Nits must be addressed before moving to the next step — all findings matter
-
-If BOTH respond with no blocking issues (or you receive no response after reporting), proceed to the next step.
-
-### 5. Repeat
-Continue to the next plan step.
-
-## Communication Rules
-- Message "architect" and "reviewer" after EVERY step completion
-- If you need codebase or web research during your work, message "researcher" with your question rather than investigating yourself
-- Message the Team Lead if you hit a blocker or need a PM decision
-- If feedback from architect and reviewer conflict, message the Team Lead to arbitrate
-- NEVER skip the feedback wait — the whole point of this team is cross-agent review
-
-## RPTC Directives (FOLLOW THESE)
-
-| Directive | What It Means |
-|-----------|---------------|
-| Surgical Coding | Search for 3 similar patterns BEFORE writing new code |
-| KISS / YAGNI | Simplest solution. No abstractions until 3+ use cases. |
-| Test-First | Tests BEFORE implementation. Non-negotiable. |
-| Pattern Alignment | Match existing codebase conventions exactly. |
-
-**FILE LOCKOUT (RED phase)**: Only test files during RED. Any production file edit = TDD violation.
-**RED GATE**: Verify before GREEN. If any check fails, STOP and fix.
-
-## When All Steps Complete
-Message the Team Lead with:
-- All steps completed: [YES/NO]
-- Total files changed: [list]
-- Total tests added: [count]
-- All tests passing: [YES/NO]
-- Test-First followed for every step: [YES/NO]
-- Feedback addressed: [summary of architect/reviewer feedback acted on]
-```
-
-### 2.4 Review Agent
-
-```
-Agent(
-  name: "reviewer",
-  subagent_type: "rptc:review-agent",
-  team_name: "<team-name>",
-  prompt: "<spawn prompt below>"
-)
-```
-
-**Spawn prompt**:
-```
-You are the Review agent in an RPTC feat-team. You provide real-time quality feedback across code review, security, and documentation.
-
-[ENVIRONMENT CONTEXT BLOCK]
-
-## Feature
-[feature description]
-
-## Your Role
-Wait for the Team Lead to message you with the approved plan. Then monitor implementation quality as the TDD agent works.
-
-## Review Protocol
-
-When "implementer" messages you that a step is complete:
-
-1. **Read the changed files** listed in the message
-2. **Review across all three domains** in a single pass:
-   - **Code Quality**: 4-tier hierarchy (architecture, maintainability, standards, nits), KISS/YAGNI, dead code, pattern alignment
-   - **Security**: OWASP Top 10, injection, auth, secrets, input validation
-   - **Documentation**: Stale docs, breaking changes, missing API docs, README sync
-3. **Send consolidated feedback** to "implementer":
-   ```
-   ## Review: Step [N]
-
-   ### [filename]
-   - [BLOCKING/WARNING/NIT] [confidence%] [domain] — [description] — [suggested approach]
-
-   ### Summary
-   - Blocking: [count] (must fix before next step)
-   - Warnings: [count] (fix when convenient, but must be addressed before completion)
-   - Nits: [count] (address before next step)
-   ```
-4. **If no issues**: Message "Step [N] reviewed — no findings. Proceed."
-
-## Urgency Categories
-- **BLOCKING** (Tier 1, security critical/high): Implementer MUST fix before next step
-- **WARNING** (Tier 2, security medium): Should fix, can continue to next step
-- **NIT** (Tier 3-4, docs suggestions): Implementer MUST address before moving to next step — nits are NOT optional; clean code ships clean
-
-## Confidence Threshold
-Only report findings with confidence >= 80%. Below 80% = ignore.
-
-## Communication
-- Primary: Message "implementer" with review feedback after each step
-- If you need codebase or web research during your work, message "researcher" with your question rather than investigating yourself
-- Also message the Team Lead if you find critical security issues or architectural problems
-- Message "architect" if you notice plan-related concerns (they are the primary plan guardian)
-- NEVER modify code files — you are strictly read-only and report-only
-
-## RPTC Directives
-| Directive | Your Responsibility |
-|-----------|---------------------|
-| Surgical Coding | Flag code that doesn't reuse existing patterns |
-| KISS/YAGNI | Identify unnecessary complexity and abstractions |
-| Test-First | Verify tests were written before implementation |
-| Pattern Alignment | Flag codebase convention violations |
-
-## When Implementation Is Complete
-After the final step is reviewed, message the Team Lead with a comprehensive report:
-- Total findings by domain (code quality / security / docs)
-- Total findings by urgency (blocking / warning / nit)
-- Findings addressed by implementer: [count]
-- Unresolved findings: [list with details]
-- Overall quality assessment: [PASS / PASS WITH CONCERNS / NEEDS ATTENTION]
-
-## Final Holistic Review (after implementation)
-The Team Lead will message you to perform a final holistic review. This is different from your per-step checks — review ALL changes as a unified body of work:
-- Cross-file consistency, naming coherence, duplication across new files
-- Auth and data flow through all new components end-to-end
-- All public APIs documented, existing docs still accurate
-Share your findings with "architect" for cross-checking, then report to the Team Lead.
-```
-
----
-
-## Step 3: Orchestrate
-
-You (Team Lead) coordinate the workflow by monitoring messages and handling approvals.
-
-### 3.1 Discovery Phase
-
-`TaskUpdate(Phase 1, status: "in_progress")`
-
-The Research agent is already working (spawned in Step 2). Wait for its findings message.
-
-When received:
-- Review the findings briefly
-- The researcher also messages the Architect directly — no forwarding needed
-
-`TaskUpdate(Phase 1, status: "completed")`
-
-### 3.2 Architecture Phase
-
-`TaskUpdate(Phase 2, status: "in_progress")`
-
-The Architect begins planning after receiving research findings. Wait for the Architect's plan message.
-
-When the Architect sends the plan:
-
-1. **Enter plan mode** and write the Architect's plan to the plan file:
-   ```
-   EnterPlanMode()
-   ```
-   Write the plan content the Architect provided into the plan. Include: approach rationale, implementation steps (ordered), files to create/modify, and test strategy per step.
-
-2. **Exit plan mode** so the user can review in the native plan UI:
-   ```
-   ExitPlanMode()
-   ```
-   The user now sees the full plan and can approve, edit inline, or reject.
-
-3. **If user approves the plan**: Message all three remaining agents:
-   - Message "architect": "Plan approved. Transition to plan guardian mode. Monitor implementation for plan adherence."
-   - Message "implementer": "Plan approved. Begin implementation. Here is the plan: [paste plan or reference plan file location]"
-   - Message "reviewer": "Plan approved. Here is the plan for reference: [paste plan or reference plan file location]. Begin monitoring when implementer starts."
-
-4. **If user edits the plan**: The edited plan is the new approved version. Send the updated plan to all three agents as above.
-
-5. **If user rejects the plan**: Read the user's feedback, then message "architect" with the feedback for revision. Wait for the revised plan. Re-enter plan mode and repeat from step 1.
-
-`TaskUpdate(Phase 2, status: "completed")`
-
-### 3.3 Implementation + Review Phase
-
-`TaskUpdate(Phase 3, status: "in_progress")`
-
-TDD, Architect, and Review agents now work in a parallel feedback loop. Your role as Team Lead:
-
-**Monitor** — Watch for messages from agents. You'll receive idle notifications with DM summaries showing peer communication.
-
-**Intervene when**:
-- An agent reports a blocker → help resolve or escalate to user
-- Architect and Review give conflicting feedback → arbitrate
-- Any agent flags a finding needing PM review (80-89% confidence) → batch and present to user
-- TDD reports a TDD violation → decide whether to re-run or accept
-
-**PM Decision Batching**: Collect medium-confidence findings (80-89%) from Architect and Review. Present them to the user in batches rather than one-at-a-time:
-
-```
-AskUserQuestion:
-question: "Agents flagged these items for your review:"
-header: "Findings Review"
-options:
-  - label: "Address all"
-    description: "Send all back to implementer to fix"
-  - label: "Address blocking only"
-    description: "Fix critical issues, accept warnings"
-  - label: "Accept as-is"
-    description: "Proceed without changes"
-```
+- request fidelity;
+- correctness and risk;
+- repository fit;
+- security impact;
+- documentation impact.
 
-**Wait for completion signals** from all three agents:
-- "implementer": All steps complete, all tests passing
-- "architect": Final plan adherence report
-- "reviewer": Final quality assessment
+Neither reviewer edits product files. Findings require a location plus evidence
+or a documented rule. No numerical confidence threshold applies.
 
-`TaskUpdate(Phase 3, status: "completed")`
+## 6. Final verification
 
----
+After all slices:
 
-## Step 4: Final Holistic Review
+1. run project-declared affected checks;
+2. rerun all acceptance predicates on the strongest feasible surfaces;
+3. have architect and reviewer inspect the complete diff and evidence;
+4. address confirmed cross-cutting findings;
+5. rerun affected evidence.
 
-`TaskUpdate(Phase 4, status: "in_progress")`
+Do not repeat reviewers merely to obtain zero findings.
 
-**Goal**: Architect and Review collaborate on a comprehensive review of ALL changes together, catching cross-cutting issues that step-by-step reviews miss.
+## 7. Wrap up
 
-The step-by-step reviews during implementation catch per-step issues. This final pass looks at the complete picture: does everything fit together? Did the full plan get realized? Are there cross-file concerns that only emerge when viewing all changes at once?
+Shut down team members after collecting their final reports.
 
-### 4.1 Trigger Final Review
+Report delivered behavior, files, design changes, feedback addressed, project
+checks, and each predicate as `VERIFIED`, `NOT VERIFIED`, or `INCONCLUSIVE`.
 
-Message both agents to begin their holistic review:
-
-```
-SendMessage(to: "architect", message:
-  "Implementation is complete. Perform a final holistic review of ALL changes together.
-
-  Review the full set of modified files as a whole — not step-by-step, but as a unified body of work.
-
-  Check:
-  - Did the implementation fully realize the plan? Any gaps or missing pieces?
-  - Do all components integrate correctly? Are there orphan code paths or dead ends?
-  - Is the overall architecture consistent with the plan's intent?
-  - Any scope creep that wasn't caught in per-step reviews?
-  - Does the final result match the original feature requirements?
-
-  Share your findings with 'reviewer' so you can cross-check.
-  Then message the Team Lead with your final holistic assessment."
-)
-
-SendMessage(to: "reviewer", message:
-  "Implementation is complete. Perform a final holistic review of ALL changes together.
-
-  Review the full set of modified files as a whole — not step-by-step, but as a unified body of work.
-
-  Check across all three domains:
-  - **Code quality**: Cross-file consistency, naming coherence, unnecessary duplication across new files, overall complexity
-  - **Security**: Auth flow completeness, data flow through all new components, trust boundary crossings
-  - **Documentation**: Do all public APIs have docs? Do existing docs still match? Breaking changes documented?
-
-  Share your findings with 'architect' so you can cross-check.
-  Then message the Team Lead with your final holistic assessment."
-)
-```
-
-### 4.2 Wait for Cross-Check
-
-Both agents review all changes and share findings with each other. Wait for both to send their final holistic assessments to you.
-
-**If findings emerge**:
-- Blocking issues → message "implementer" with the consolidated list, wait for fixes, then re-trigger 4.1
-- Warnings/nits → message "implementer" with the list, wait for fixes
-- No findings → proceed
-
-### 4.3 User Acknowledgment
-
-Present the holistic review results:
-
-```
-AskUserQuestion:
-question: "Final holistic review complete. [N] additional findings addressed. Proceed to wrap-up?"
-header: "Final Review Gate"
-options:
-  - label: "Proceed to wrap-up"
-    description: "All holistic findings addressed, ready to finalize"
-  - label: "Request another pass"
-    description: "Ask architect and reviewer to check again"
-```
-
-If "Request another pass" → re-trigger 4.1.
-
-`TaskUpdate(Phase 4, status: "completed")`
-
----
-
-## Step 5: Complete
-
-`TaskUpdate(Phase 5, status: "in_progress")`
-
-### 5.1 Collect Reports
-
-Gather final reports from all agents. If any agent hasn't sent a completion report, message them requesting one.
-
-### 5.2 Present Summary to User
-
-Output 2-3 sentences: feature, files changed, plan adherence, quality status. End with "Ready for `/rptc:commit`."
-
-### 5.3 Shutdown Team
-
-Send shutdown messages to all agents:
-
-```
-SendMessage(to: "researcher", message: { type: "shutdown_request" })
-SendMessage(to: "architect", message: { type: "shutdown_request" })
-SendMessage(to: "implementer", message: { type: "shutdown_request" })
-SendMessage(to: "reviewer", message: { type: "shutdown_request" })
-```
-
-`TaskUpdate(Phase 5, status: "completed")`
-
----
-
-## Error Handling
-
-- **Research agent finds nothing relevant**: Team Lead provides additional context to researcher, or asks user for clarification
-- **Architect plan rejected multiple times**: Ask user if they want to provide their own plan outline, then send to Architect to formalize
-- **TDD agent hits 3 consecutive failures on a step**: Team Lead pauses implementation, asks user for guidance
-- **Conflicting feedback from Architect and Review**: Team Lead arbitrates based on priority (plan adherence > code quality > polish)
-- **Agent becomes unresponsive**: Message the agent. If no response, spawn a replacement with the same role and context
-- **Critical security finding during implementation**: Team Lead immediately pauses TDD agent, presents to user before continuing
-
----
-
-## Key Principles
-
-1. **Persistent agents**: All 4 agents stay alive for the entire session — this enables real-time feedback
-2. **TDD is sole code owner**: Only the TDD agent writes code. Architect and Review are read-only
-3. **Feedback before progress**: TDD waits for Architect + Review feedback after every step
-4. **Final holistic review**: After all steps, Architect and Review collaborate on a cross-cutting review of all changes together
-5. **Team Lead intermediates**: User never communicates directly with agents — Team Lead handles all PM interactions
-6. **Three-way verification**: Every implementation step is checked by the implementer (tests), the Architect (plan adherence), and the Review (quality/security/docs)
+Do not commit, push, open a pull request, or deploy unless explicitly requested.
