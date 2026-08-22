@@ -1,260 +1,78 @@
 ---
-description: Verify and ship with quality gates
-allowed-tools: Bash(git *), Bash(npm *), Bash(npx *), Bash(pnpm *), Bash(yarn *), Bash(bun *), Bash(cargo *), Bash(go *), Bash(pytest *), Bash(python -m pytest *), Bash(make *), Bash(dotnet *), Bash(gh *), Read, Write, Edit, Glob, Grep, LS, Task, TodoWrite
+description: Run project-defined checks, stage selected paths, and create only the requested commit or pull request
+allowed-tools: Bash(git *), Bash(npm *), Bash(npx *), Bash(pnpm *), Bash(yarn *), Bash(bun *), Bash(cargo *), Bash(go *), Bash(pytest *), Bash(python -m pytest *), Bash(make *), Bash(dotnet *), Bash(gh *), Read, Glob, Grep, LS, AskUserQuestion
 ---
 
 # /rptc:commit
 
-Verify quality gates and ship. Final step in the workflow.
+Shared contract: `shared/workflows/ship.md`
 
-**Arguments**:
-- None: `/rptc:commit` - Commit only
-- With PR: `/rptc:commit pr` - Commit and create pull request
+## Arguments
 
----
+- no argument: prepare and create a commit;
+- `pr`: commit, push, and create a draft pull request.
 
-## Step 0: RPTC Workflow Initialization (MANDATORY - CANNOT SKIP)
+## 1. Initialize
 
-**Before ANY other action, establish RPTC workflow context.**
+Load `rptc:unslop-writing-clearly`.
+Read `${CLAUDE_PLUGIN_ROOT}/shared/workflows/ship.md`.
 
-### 0.1 Load Required Skills
+## 2. Discover checks
 
-```
-Skill(skill: "rptc:unslop-writing-clearly")
-```
+Inspect repository guidance, package scripts, build files, task runners, and CI.
+Run checks relevant to the changed paths. Prefer project commands over guessed
+framework commands.
 
-**Wait for skill to load before proceeding.**
+If no check exists, say so. Do not install a framework or invent an 80 percent
+coverage policy during commit.
 
-### 0.2 RPTC Workflow Understanding (INTERNALIZE)
+## 3. Inspect scope
 
-You are executing **RPTC Commit** - the final quality gate before shipping.
+Run:
 
-**Core Philosophy:**
-- Verify before committing
-- Quality gates are non-negotiable
-- Clear commit messages for history
-- User approves the final commit
-
-**Non-Negotiable Directives:**
-
-| Directive | Meaning |
-|-----------|---------|
-| **Quality Verification** | All tests pass, no critical issues |
-| **Clear Communication** | Commit messages follow conventions |
-| **User Authority** | User approves commit message and PR |
-| **No Shortcuts** | All verification steps must complete |
-
-**SOP Reference Chain (with Precedence):**
-
-| Topic | Check First (User) | Fallback (RPTC) |
-|-------|-------------------|-----------------|
-| Git workflow | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/git-and-deployment.md` |
-| Security | Project `sop/`, `~/.claude/global/` | `${CLAUDE_PLUGIN_ROOT}/sop/security-and-performance.md` |
-
-**Precedence Rule**: If user specifies custom SOPs (in project CLAUDE.md, project `sop/` dir, or `~/.claude/global/`), use those for the matching topic. RPTC SOPs are the fallback default.
-
-### 0.3 Initialization Verification
-
-Before proceeding to Phase 1, confirm:
-- Skill loaded and active
-- RPTC directives understood
-- Commit scope clear
-
----
-
-## Skills Usage Guide
-
-**`unslop-writing-clearly`** - Cut AI tells and add human voice to commit prose:
-
-| When | Apply To |
-|------|----------|
-| Phase 3 | Commit message subject and body |
-| Phase 4 | PR title and description |
-
-**Key rules**: Active voice, positive form, definite language, omit needless words.
-
----
-
-## Phase 1: Pre-Commit Verification
-
-**Goal**: Ensure code is ready to ship.
-
-**Actions**:
-1. **Run affected tests** (targeted to changed files):
-   ```bash
-   # Identify changed files via git diff, then run their associated tests
-   # Use framework-specific targeted run where available:
-   #   jest:   npm test -- --findRelatedTests <changed-files>
-   #   vitest: npx vitest related <changed-files>
-   #   pytest: pytest <test-files-for-changed-modules>
-   #   go:     go test <changed-packages>
-   # If project is small (<50 test files) or changes touch shared utilities, run full suite:
-   #   npm test || pytest || cargo test || go test ./... || dotnet test
-   ```
-   **BLOCKER**: If tests fail, STOP and fix before proceeding.
-
-2. **Check coverage** (if available):
-   ```bash
-   npm run test:coverage || pytest --cov || cargo tarpaulin
-   ```
-   Target: 80%+ on new code.
-
-3. **Lint check**:
-   ```bash
-   npm run lint || ruff check . || cargo clippy
-   ```
-   Fix any errors before proceeding.
-
-4. **Type check** (if applicable):
-   ```bash
-   npm run typecheck || npx tsc --noEmit || mypy .
-   ```
-
----
-
-## Phase 2: Review Changes
-
-**Goal**: Understand what's being committed.
-
-**Actions**:
-1. **Check git status**:
-   ```bash
-   git status
-   git diff --stat
-   ```
-
-2. **Review staged changes**:
-   ```bash
-   git diff --cached
-   ```
-
-3. **Verify no sensitive files**:
-   - No `.env` files
-   - No credentials or secrets
-   - No debug code (console.log, debugger)
-
----
-
-## Phase 3: Create Commit
-
-**Goal**: Create a well-formatted commit.
-
-**Actions**:
-1. **Stage changes** (if not already staged):
-   ```bash
-   git add .  # Or specific files
-   ```
-
-2. **Create commit with conventional format**:
-   ```bash
-   git commit -m "$(cat <<'EOF'
-   <type>(<scope>): <description>
-
-   <body - what and why>
-
-   <footer - breaking changes, closes #issue>
-   EOF
-   )"
-   ```
-
-**Commit types**:
-- `feat`: New feature
-- `fix`: Bug fix
-- `refactor`: Code change (no new feature or fix)
-- `test`: Adding tests
-- `docs`: Documentation only
-- `chore`: Maintenance
-
----
-
-## Phase 4: Optional PR Creation
-
-**Goal**: Create pull request if requested.
-
-**Trigger**: User ran `/rptc:commit pr`
-
-**Actions**:
-1. **Push to remote**:
-   ```bash
-   git push -u origin HEAD
-   ```
-
-2. **Create PR**:
-   ```bash
-   gh pr create --title "<type>: <description>" --body "$(cat <<'EOF'
-   ## Summary
-   <what this PR does>
-
-   ## Changes
-   - <change 1>
-   - <change 2>
-
-   ## Testing
-   - [ ] Tests pass
-   - [ ] Coverage maintained
-
-   ## Notes
-   <any additional context>
-   EOF
-   )"
-   ```
-
-3. **Return PR URL** to user.
-
----
-
-## Quality Gates (Non-Negotiable)
-
-| Check | Required | Blocking |
-|-------|----------|----------|
-| Tests pass | Yes | Yes |
-| Coverage ≥80% new code | Yes | No (warn) |
-| No lint errors | Yes | Yes |
-| No type errors | Yes | Yes |
-| No secrets committed | Yes | Yes |
-| Conventional commit | Yes | No (warn) |
-
----
-
-## Error Handling
-
-### Tests Fail
-```
-❌ Tests failed. Cannot commit.
-
-Failing tests:
-- [test name]: [error]
-
-Fix the failing tests before committing.
+```bash
+git status --short
+git diff --stat
+git diff
+git diff --cached
 ```
 
-### Coverage Below Target
+Identify intended and unrelated paths. Inspect changed content for secrets,
+debug residue, generated artifacts, and accidental broad edits.
+
+## 4. Propose the commit
+
+Present:
+
+- exact paths to stage;
+- checks run and results;
+- skipped checks and reasons;
+- proposed message using the repository's convention.
+
+Use Conventional Commits only when the project requires or already follows
+them.
+
+Ask the user to approve the paths and message.
+
+## 5. Commit
+
+Stage only approved paths:
+
+```bash
+git add -- <path>...
 ```
-⚠️ Coverage at X% (target: 80%)
 
-Consider adding tests for:
-- [uncovered file/function]
+Never use `git add .`, `git add -A`, or `git add --all`.
 
-Proceeding with commit (coverage is a warning, not blocker).
-```
+Create the approved commit and report its SHA.
 
-### Secrets Detected
-```
-❌ Potential secrets detected. Cannot commit.
+## 6. Optional pull request
 
-Files:
-- [file with secret]
+Only when the argument is `pr`:
 
-Remove secrets and use environment variables.
-```
+1. push the current branch;
+2. create a draft pull request unless the user requested otherwise;
+3. include the actual verification evidence;
+4. return the URL.
 
----
-
-## Key Principles
-
-1. **Tests must pass**: Never commit failing tests
-2. **No secrets**: Block if credentials detected
-3. **Conventional commits**: Standardized format
-4. **PR optional**: Only create if explicitly requested
-5. **Fast feedback**: Fail fast on blockers
-
+No deployment or external notification is implied.
