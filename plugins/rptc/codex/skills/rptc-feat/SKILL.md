@@ -27,7 +27,6 @@ Load:
 
 ```text
 rptc:core-principles
-rptc:unslop-writing-clearly
 rptc:verification-evidence
 ```
 
@@ -38,6 +37,7 @@ rptc:brainstorming          unresolved product or preference decisions
 rptc:architect-methodology  uncertain interfaces, data shapes, ownership, or sequencing
 rptc:tdd-methodology        changed behavior with a practical test seam
 rptc:frontend-design        user-facing frontend work
+rptc:unslop-writing-clearly substantial prose, documentation, or user-facing copy
 ```
 
 Read `RPTC plugin root/shared/workflows/feature.md`.
@@ -45,16 +45,10 @@ Read `RPTC plugin root/shared/workflows/feature.md`.
 Read project `AGENTS.md`, repository contribution guidance, task-runner files,
 and project SOPs. Project and Codex global guidance override RPTC defaults.
 
-Initialize `update_plan` with these top-level phases and keep them visible:
-
-1. Ground and classify.
-2. Define acceptance and evidence.
-3. Design when needed.
-4. Implement verified slices.
-5. Verify and summarize.
-
-Codex plans are flat. Prefix implementation and verification child items with
-their phase number rather than replacing the top-level phases.
+Do not initialize the full `update_plan` phase structure before classifying the
+work. For a local route, omit `update_plan` when the work is obvious and can be
+completed without losing dependencies or unfinished items. For normal and
+high-risk routes, track only phases that correspond to real work.
 
 ## 2. Ground and classify
 
@@ -67,7 +61,7 @@ evidence needed. No optional navigation service is required.
 Classify the route:
 
 - **Local:** established, reversible, narrow, and strongly verifiable.
-- **Normal:** behavior or a public seam changes across more than one concern.
+- **Normal:** behavior changes across concerns or execution has enough moving parts that visible progress tracking protects completion.
 - **High risk:** broad, hard to reverse, weakly observable, or sensitive.
 
 State the route and its evidence. Reclassify when new facts change it.
@@ -89,18 +83,20 @@ tool response.
 
 Skip formal planning for a local change that follows an established pattern.
 
-For normal or high-risk work:
-
-1. confirm Plan Mode before planning questions;
-2. load `rptc:architect-methodology`;
-3. produce one recommended design;
-4. add alternatives only when materially different structures are viable;
-5. cover interface, data shape, ownership, sequencing, verification, and
-   rollback where applicable;
-6. obtain approval for consequential choices.
+Execution complexity and decision uncertainty are separate. For normal or
+high-risk work, use Plan Mode and load `rptc:architect-methodology` only when
+interfaces, data shapes, ownership, sequencing, migration, rollback, or
+meaningful alternatives remain unresolved. Obtain approval for consequential
+choices, not routine reversible implementation details that follow the agreed
+intent and repository conventions.
 
 The plan remains a hypothesis. Revise it when a representative slice disproves
 its assumptions.
+
+When the approved work will span many turns, offer a ready-to-paste
+`/goal <condition>` built as the shared contract's long-running work section
+describes. Codex uses the goal text as both the first prompt and the completion
+criteria, so state outcome, constraints, and verification in it.
 
 ## 5. Delegate with Codex mechanics
 
@@ -139,10 +135,12 @@ universal coverage numbers.
 
 Select report-only agents by changed properties:
 
-- code review for normal and high-risk code changes;
+- code review when normal or high-risk changes leave meaningful correctness,
+  request-fidelity, or repository-fit risk not already settled by decisive evidence;
 - security review when trust boundaries or sensitive behavior changed;
 - documentation review when public behavior or operational steps changed;
-- no agent review for a genuinely mechanical local change with decisive
+- independent final verification for high-risk work;
+- no agent review when it would merely duplicate decisive deterministic
   evidence, unless requested.
 
 Use the Codex spawn barrier for every selected verification agent. Give each the

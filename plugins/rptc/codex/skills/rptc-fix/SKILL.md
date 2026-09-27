@@ -17,7 +17,6 @@ Load:
 ```text
 rptc:core-principles
 rptc:diagnose-methodology
-rptc:unslop-writing-clearly
 rptc:verification-evidence
 ```
 
@@ -25,24 +24,19 @@ Load conditionally:
 
 ```text
 rptc:tdd-methodology        a practical regression-test seam exists
-rptc:architect-methodology  the fix changes interfaces or crosses modules
+rptc:architect-methodology  interfaces, ownership, or sequencing remain unresolved
 rptc:brainstorming          a genuine product decision remains
 rptc:frontend-design        user-facing frontend behavior is affected
+rptc:unslop-writing-clearly substantial prose, documentation, or user-facing copy
 ```
 
 Read `RPTC plugin root/shared/workflows/fix.md`, project `AGENTS.md`,
 repository guidance, and declared checks.
 
-Keep these phases visible in `update_plan`:
-
-1. Reproduce.
-2. Diagnose.
-3. Design if needed.
-4. Fix and protect.
-5. Verify and summarize.
-
-Prefix child items with their phase number. Do not replace the phase structure
-with a flat list of edits.
+Do not initialize the full `update_plan` phase structure before reproduction
+establishes the shape of the work. For a narrow correction, omit `update_plan`
+when no real dependency or unfinished item would be lost. For broader or
+high-risk fixes, track only phases that correspond to real work.
 
 ## 2. Reproduce
 
@@ -74,14 +68,17 @@ agent IDs. The parent does not edit, test, or synthesize while they run.
 
 Skip formal planning for a clear localized correction.
 
-Use Codex Plan Mode when the fix changes interfaces, crosses several modules,
-requires migration or rollback, or has meaningful competing approaches.
+Execution breadth alone does not require Plan Mode. Use Codex Plan Mode when interfaces, ownership, sequencing, migration, rollback, or meaningful competing approaches remain unresolved.
 
 Before `request_user_input`, confirm Plan Mode is active. If it cannot be
 entered, ask in normal chat and stop for the answer.
 
 Use one recommended design and preserve the shared contract's evidence and
 approval boundaries.
+
+When the fix will span many turns, offer a ready-to-paste `/goal <condition>`
+as the shared contract's long-running work section describes, stating outcome,
+constraints, and verification.
 
 ## 5. Fix and protect
 
@@ -103,8 +100,7 @@ Rerun:
 3. repository-declared affected checks;
 4. selected independent review.
 
-Select code, security, and documentation reviewers by changed properties rather
-than always running all reviewers. Use the spawn barrier for each selected set.
+Select reviewers by changed properties and unresolved risk rather than always running a general reviewer. Require independent final verification for high-risk fixes. Use the spawn barrier for each selected set.
 
 Address confirmed findings and rerun the affected evidence. Do not loop merely
 to obtain zero findings.

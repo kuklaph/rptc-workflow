@@ -24,7 +24,6 @@ Load:
 ```text
 Skill("rptc:core-principles")
 Skill("rptc:diagnose-methodology")
-Skill("rptc:unslop-writing-clearly")
 Skill("rptc:verification-evidence")
 ```
 
@@ -32,21 +31,19 @@ Load conditionally:
 
 ```text
 rptc:tdd-methodology        a practical regression-test seam exists
-rptc:architect-methodology  the fix changes interfaces or crosses modules
+rptc:architect-methodology  interfaces, ownership, or sequencing remain unresolved
 rptc:brainstorming          a genuine product decision remains
 rptc:frontend-design        the defect is user-facing frontend behavior
+rptc:unslop-writing-clearly substantial prose, documentation, or user-facing copy
 ```
 
 Read `${CLAUDE_PLUGIN_ROOT}/shared/workflows/fix.md` and the project's own
 instructions and checks.
 
-Create tasks for:
-
-1. Reproduce.
-2. Diagnose.
-3. Design if needed.
-4. Fix and protect.
-5. Verify and summarize.
+Do not create the full task structure before reproduction establishes the shape
+of the work. For a narrow correction, track work only when it protects a real
+dependency or unfinished item. For broader or high-risk fixes, keep the
+remaining diagnosis, implementation, and verification work visible.
 
 ## 2. Reproduce
 
@@ -75,12 +72,14 @@ planning the fix.
 
 Skip Plan Mode for a clear localized correction.
 
-Enter Plan Mode when the fix changes a public interface, crosses several
-modules, requires migration or rollback, or has consequential competing
-approaches.
+Execution breadth alone does not require Plan Mode. Enter Plan Mode when interfaces, ownership, sequencing, migration, rollback, or consequential competing approaches remain unresolved.
 
 Use one recommended fix design. Add alternatives only when the choice is real.
 The user decides product behavior and consequential trade-offs.
+
+When the fix will span many turns, offer a ready-to-paste `/goal <condition>`
+as the shared contract's long-running work section describes. Claude's goal
+evaluator reads only the transcript, so print each check's result.
 
 ## 5. Implement the supported fix
 
@@ -102,9 +101,7 @@ Rerun:
 3. nearby affected project checks;
 4. selected independent review.
 
-Use code review for normal or high-risk fixes. Use security review when a trust
-boundary changed. Use documentation review when public or operational behavior
-changed.
+Use independent review when it tests a distinct unresolved risk. Require independent final verification for high-risk fixes. Use security review when a trust boundary changed and documentation review when public or operational behavior changed.
 
 Address confirmed findings and rerun the affected evidence. Do not chase zero
 LLM findings.

@@ -2,7 +2,7 @@
 
 > Provider-aware engineering workflows for Claude Code and Codex.
 
-**Version**: 4.0.0
+**Version**: 4.1.0
 **Status**: Beta
 **License**: MIT
 
@@ -151,5 +151,3 @@ behavior.
 - [Plugin architecture](docs/PLUGIN_ARCHITECTURE.md)
 - [Workflow guide](docs/RPTC_WORKFLOW_GUIDE.md)
 - [Provider adapters](docs/PROVIDER_ADAPTERS.md)
-- [v4 migration plan](docs/RPTC_V4_MIGRATION_PLAN.md)
-- [Implementation handoff](docs/RPTC_V4_HANDOFF.md)

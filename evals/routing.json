@@ -59,6 +59,19 @@
         "Rename a CSS class.",
         "Fix a typo in documentation."
       ]
+    },
+    {
+      "skill": "architect-methodology",
+      "should_trigger": [
+        "We need to choose who owns this new cross-service contract before implementing it.",
+        "Plan a migration where either the API or database can become the source of truth.",
+        "There are two viable data shapes with different compatibility trade-offs. Decide the design first."
+      ],
+      "should_not_trigger": [
+        "Apply the same established field rename across three modules and run the existing checks.",
+        "Update several call sites to the already-approved interface.",
+        "Make this localized reversible change using the repository's existing pattern."
+      ]
     }
   ]
 }

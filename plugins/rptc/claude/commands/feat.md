@@ -24,7 +24,6 @@ Load:
 
 ```text
 Skill("rptc:core-principles")
-Skill("rptc:unslop-writing-clearly")
 Skill("rptc:verification-evidence")
 ```
 
@@ -35,6 +34,7 @@ rptc:brainstorming          unresolved product or preference decisions
 rptc:architect-methodology  uncertain interfaces, data shapes, ownership, or sequencing
 rptc:tdd-methodology        changed behavior with a practical test seam
 rptc:frontend-design        user-facing frontend work
+rptc:unslop-writing-clearly substantial prose, documentation, or user-facing copy
 ```
 
 Read `${CLAUDE_PLUGIN_ROOT}/shared/workflows/feature.md`.
@@ -42,16 +42,10 @@ Read `${CLAUDE_PLUGIN_ROOT}/shared/workflows/feature.md`.
 Read project `CLAUDE.md`, repository contribution guidance, task-runner files,
 and any project SOPs. Project rules override RPTC defaults.
 
-Create five Claude tasks:
-
-1. Ground and classify.
-2. Define acceptance and evidence.
-3. Design when needed.
-4. Implement verified slices.
-5. Verify and summarize.
-
-Use `TaskUpdate` as each phase starts and completes. Do not create child tasks
-for trivial actions.
+Do not create a full phase structure before classifying the work. For a local
+route, track work only when it protects a real dependency or unfinished item.
+For normal and high-risk routes, create only tasks that correspond to real work.
+Use `TaskUpdate` to preserve unfinished work and dependencies.
 
 ## 2. Ground and classify
 
@@ -76,8 +70,9 @@ and has a strong focused check.
 
 ### Normal
 
-Use when behavior changes across modules, a public seam changes, or the design
-has moderate uncertainty.
+Use when behavior changes across concerns or execution has enough moving parts
+that visible progress tracking protects completion. Complexity alone does not
+imply design uncertainty.
 
 ### High risk
 
@@ -112,7 +107,9 @@ obvious edit.
 
 ### Normal or high-risk route
 
-Enter Plan Mode. Load `rptc:architect-methodology`.
+Execution complexity and decision uncertainty are separate. Enter Plan Mode and
+load `rptc:architect-methodology` only when interfaces, data shapes, ownership,
+sequencing, migration, rollback, or meaningful alternatives remain unresolved.
 
 Produce one recommended design. Add alternatives only when materially different
 structures are viable.
@@ -127,6 +124,12 @@ Cover:
 - assumptions that could invalidate the design.
 
 Exit Plan Mode only after the user approves the consequential design choices.
+
+When the approved work will span many turns, offer a ready-to-paste
+`/goal <condition>` built as the shared contract's long-running work section
+describes. Keep it under 4,000 characters and recommend running it in auto mode
+for unattended turns. Claude's goal evaluator reads only the transcript and runs
+no commands, so print each check's result.
 
 A plan is a hypothesis. If the first representative slice repeatedly fights the
 design, stop and revise the plan instead of adding exceptions.
@@ -181,15 +184,17 @@ or impose a universal coverage target.
 
 Then select independent review by changed properties:
 
-- code review for normal and high-risk code changes;
+- code review when normal or high-risk changes leave meaningful correctness,
+  request-fidelity, or repository-fit risk not already settled by decisive evidence;
 - security review when trust boundaries or sensitive behavior changed;
 - documentation review when public behavior or operational steps changed;
-- no agent review for a truly mechanical local change with decisive
-  deterministic evidence, unless the user requested it.
+- independent final verification for high-risk work;
+- no agent review when it would merely duplicate decisive deterministic
+  evidence, unless the user requested it.
 
 Launch selected report-only agents in parallel. Give them the exact diff,
-request or spec, project standards, and evidence. Address confirmed findings,
-then rerun the affected checks and acceptance predicates.
+request or spec, project standards, and evidence. Address confirmed findings, then rerun evidence affected by the fix and any
+acceptance predicates whose state may have changed.
 
 Do not rerun reviewers merely to obtain zero findings.
 

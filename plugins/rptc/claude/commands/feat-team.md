@@ -28,9 +28,14 @@ Load:
 
 ```text
 rptc:core-principles
-rptc:brainstorming
-rptc:unslop-writing-clearly
 rptc:verification-evidence
+```
+
+Load these only when their condition applies:
+
+```text
+rptc:brainstorming          unresolved product or preference decisions
+rptc:unslop-writing-clearly substantial prose, documentation, or user-facing copy
 ```
 
 Read `${CLAUDE_PLUGIN_ROOT}/shared/workflows/feature.md`.
@@ -51,10 +56,10 @@ Create one team with four persistent roles:
 - `implementer`: the only product-code writer;
 - `reviewer`: report-only request, correctness, security, and documentation review.
 
-Create tasks:
+Create tasks only for phases this feature needs, in this order:
 
 1. Discovery.
-2. Architecture and acceptance.
+2. Architecture and acceptance, when design choices remain unresolved.
 3. Implementation.
 4. Final verification.
 5. Wrap-up.

@@ -20,9 +20,11 @@ Load:
 ```text
 rptc:core-principles
 rptc:diagnose-methodology
-rptc:unslop-writing-clearly
 rptc:verification-evidence
 ```
+
+Load `rptc:unslop-writing-clearly` only when the fix produces substantial prose,
+documentation, or user-facing copy.
 
 Read `${CLAUDE_PLUGIN_ROOT}/shared/workflows/fix.md`.
 
@@ -33,8 +35,10 @@ Create one team with:
 - `implementer`: the only product-code writer;
 - `reviewer`: report-only regression, correctness, security, and docs review.
 
-Create sequential tasks for reproduction, diagnosis, fix design, implementation,
-final verification, and wrap-up.
+Create sequential tasks for reproduction and diagnosis. Add fix design,
+implementation, final verification, and wrap-up tasks once the reproduction
+establishes the shape of the work; skip fix design when the mechanism points to
+a clear correction.
 
 Use an isolated worktree when the fix is high risk or the user requests it.
 One implementation writer owns all shared product files.
@@ -60,9 +64,10 @@ The architect and researcher apply `rptc:diagnose-methodology`:
 4. instrument one variable at a time;
 5. confirm the surviving mechanism.
 
-The architect proposes the smallest fix supported by the evidence. Use Plan
-Mode only when the fix changes interfaces, crosses modules, requires migration
-or rollback, or has consequential alternatives.
+The architect proposes the smallest fix supported by the evidence. Execution
+breadth alone does not require Plan Mode. Use Plan Mode when interfaces,
+ownership, sequencing, migration, rollback, or consequential alternatives remain
+unresolved.
 
 The user decides product behavior and consequential trade-offs.
 
