@@ -23,11 +23,15 @@ Produce:
 9. Rerun the original, unminimized reproduction.
 10. Run the repository's affected checks and remove temporary instrumentation.
 
+For a localized defect with an obvious reproduction and correction, do not add a
+multi-phase task structure solely to mirror this procedure.
+
 ## Planning
 
-Use a formal plan only when the fix changes interfaces, crosses several modules,
-requires migration or rollback, or has meaningful competing approaches. A clear
-localized fix should not wait for a planning ceremony.
+Execution complexity does not by itself require a design decision. Use a formal
+plan only when the fix changes interfaces, has uncertain ownership or
+sequencing, requires migration or rollback, or has meaningful competing
+approaches. A clear localized fix should not wait for a planning ceremony.
 
 ## Test-first behavior
 
@@ -37,7 +41,14 @@ check available.
 
 Never weaken a valid test merely to make it agree with current production code.
 
+Reuse still-valid evidence from the current code state. Repeat a check when a
+subsequent edit could invalidate it, not simply because the workflow moved to a
+new phase.
+
 ## Completion
+
+Continue through the passing reproduction and affected checks unless an actual
+approval, access, environment, or product decision blocks progress.
 
 Report:
 
