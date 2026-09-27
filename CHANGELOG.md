@@ -10,6 +10,17 @@ Release history through 3.16.7 is preserved in
 
 ---
 
+## [Unreleased]
+
+### Changed
+
+- Classified feature and fix work before creating formal task or plan structures, so localized work no longer pays mandatory phase bookkeeping.
+- Separated execution complexity from design uncertainty; multi-file work enters formal planning only when consequential design choices remain unresolved.
+- Made the full writing-style methodology conditional on substantial prose, documentation, or user-facing copy instead of loading it for every feature and fix.
+- Changed general independent review to target distinct unresolved risks instead of duplicating decisive deterministic evidence, while preserving independent final verification for high-risk work.
+- Preserved the Codex parent-session spawn/wait barrier and explicit approval boundaries.
+- Added architecture-routing eval cases that distinguish broad mechanical edits from genuine design uncertainty.
+
 ## [4.0.0] - 2026-08-22
 
 ### Added
