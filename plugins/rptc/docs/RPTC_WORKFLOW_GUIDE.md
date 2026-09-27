@@ -31,6 +31,12 @@ ground
 Add blast-radius analysis, rollback, a baseline or harness, staged verification,
 and independent final review.
 
+### Long-running work
+
+When approved work will span many turns, `feat` and `fix` offer a ready-to-paste
+`/goal` condition built from the acceptance predicates, their checks, and the
+constraints that must hold. You start goal mode; RPTC only drafts the condition.
+
 ## Bug fixes
 
 ```text

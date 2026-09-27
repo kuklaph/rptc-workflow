@@ -24,7 +24,7 @@ Load conditionally:
 
 ```text
 rptc:tdd-methodology        a practical regression-test seam exists
-rptc:architect-methodology  the fix changes interfaces or crosses modules
+rptc:architect-methodology  interfaces, ownership, or sequencing remain unresolved
 rptc:brainstorming          a genuine product decision remains
 rptc:frontend-design        user-facing frontend behavior is affected
 rptc:unslop-writing-clearly substantial prose, documentation, or user-facing copy
@@ -75,6 +75,10 @@ entered, ask in normal chat and stop for the answer.
 
 Use one recommended design and preserve the shared contract's evidence and
 approval boundaries.
+
+When the fix will span many turns, offer a ready-to-paste `/goal <condition>`
+as the shared contract's long-running work section describes, stating outcome,
+constraints, and verification.
 
 ## 5. Fix and protect
 

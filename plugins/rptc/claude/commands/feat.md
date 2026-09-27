@@ -125,6 +125,12 @@ Cover:
 
 Exit Plan Mode only after the user approves the consequential design choices.
 
+When the approved work will span many turns, offer a ready-to-paste
+`/goal <condition>` built as the shared contract's long-running work section
+describes. Keep it under 4,000 characters and recommend running it in auto mode
+for unattended turns. Claude's goal evaluator reads only the transcript and runs
+no commands, so print each check's result.
+
 A plan is a hypothesis. If the first representative slice repeatedly fights the
 design, stop and revise the plan instead of adding exceptions.
 

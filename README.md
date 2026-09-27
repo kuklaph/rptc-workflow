@@ -2,7 +2,7 @@
 
 > Provider-aware Research, Plan, Test, and Commit workflows for Claude Code and Codex.
 
-**Version**: 4.0.0
+**Version**: 4.1.0
 **Status**: Beta
 **License**: MIT
 
@@ -25,7 +25,7 @@ See:
 
 - [`plugins/rptc/provider-contract.json`](plugins/rptc/provider-contract.json)
 - [`plugins/rptc/docs/PLUGIN_ARCHITECTURE.md`](plugins/rptc/docs/PLUGIN_ARCHITECTURE.md)
-- [`plugins/rptc/docs/RPTC_V4_MIGRATION_PLAN.md`](plugins/rptc/docs/RPTC_V4_MIGRATION_PLAN.md)
+- [`plugins/rptc/docs/RPTC_WORKFLOW_GUIDE.md`](plugins/rptc/docs/RPTC_WORKFLOW_GUIDE.md)
 
 ## Validation
 

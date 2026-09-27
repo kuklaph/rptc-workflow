@@ -93,6 +93,11 @@ intent and repository conventions.
 The plan remains a hypothesis. Revise it when a representative slice disproves
 its assumptions.
 
+When the approved work will span many turns, offer a ready-to-paste
+`/goal <condition>` built as the shared contract's long-running work section
+describes. Codex uses the goal text as both the first prompt and the completion
+criteria, so state outcome, constraints, and verification in it.
+
 ## 5. Delegate with Codex mechanics
 
 If a required `rptc:*` custom agent is unavailable, run `rptc:rptc-init` once

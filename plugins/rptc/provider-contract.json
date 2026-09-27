@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": "2026-08-21",
+  "contract_version": "2026-09-27",
   "shared_root": "shared",
   "enforce_adapter_contract_refs": true,
   "providers": {
@@ -14,6 +14,7 @@
       "delegation": "Task",
       "interactive_questions": "AskUserQuestion",
       "persistent_teams": true,
+      "goal_mode": "User-started /goal; a small model judges the condition from the transcript after each turn",
       "agent_installation": "Declared by the Claude plugin manifest"
     },
     "codex": {
@@ -26,6 +27,7 @@
       "delegation": "spawn_agent and wait_agent",
       "interactive_questions": "request_user_input in plan mode; normal chat otherwise",
       "persistent_teams": false,
+      "goal_mode": "User-started /goal; the goal text is both the first prompt and the completion criteria",
       "agent_installation": "rptc-init copies packaged TOML agents to the project or Codex home"
     }
   },

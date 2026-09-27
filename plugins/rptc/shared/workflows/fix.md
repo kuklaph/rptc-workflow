@@ -45,6 +45,14 @@ Reuse still-valid evidence from the current code state. Repeat a check when a
 subsequent edit could invalidate it, not simply because the workflow moved to a
 new phase.
 
+## Long-running work
+
+When a trustworthy reproduction exists and the diagnosis or fix will span many
+turns, offer the user a goal condition as described in the feature contract.
+Build it from the original reproduction passing on the same surface, the
+regression check passing, and the affected project checks passing, plus the
+constraints that must hold.
+
 ## Completion
 
 Continue through the passing reproduction and affected checks unless an actual

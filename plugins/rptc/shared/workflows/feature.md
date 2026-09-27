@@ -80,6 +80,24 @@ check merely because the workflow entered a differently named phase. Rerun when
 a subsequent change could invalidate the evidence or when a stronger claim needs
 a stronger observation.
 
+## Long-running work
+
+When the agreed work will span many turns, such as several slices, a migration,
+or a backlog, offer the user a goal condition for the provider's goal mode. Goal
+mode keeps work moving between turns and judges completion against the
+condition. Build the condition from the acceptance predicates:
+
+- the end state, stated as the acceptance predicates;
+- the check that demonstrates each predicate, such as a named command exiting 0;
+- the constraints that must hold on the way, such as the approved scope and
+  files that must not change.
+
+Only the user starts goal mode. An active goal does not replace the approvals
+this workflow reserves for the user. Report each check's observed result in the
+conversation, because the goal judge sees only what the session surfaces.
+
+Skip the offer for local work that one turn can finish.
+
 ## Completion
 
 Continue until every acceptance predicate is resolved or an actual approval,

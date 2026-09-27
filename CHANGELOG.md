@@ -10,16 +10,32 @@ Release history through 3.16.7 is preserved in
 
 ---
 
-## [Unreleased]
+## [4.1.0] - 2026-09-27
+
+### Added
+
+- Long-running work guidance: `feat` and `fix` offer a ready-to-paste `/goal` condition built from acceptance predicates, their checks, and constraints when approved work will span many turns. The user starts goal mode; approvals stay with the user.
+- `goal_mode` entries for Claude and Codex in `provider-contract.json`.
+- Architecture-routing eval cases that distinguish broad mechanical edits from genuine design uncertainty.
+- `.gitattributes` that keeps LF line endings on every OS.
 
 ### Changed
 
 - Classified feature and fix work before creating formal task or plan structures, so localized work no longer pays mandatory phase bookkeeping.
-- Separated execution complexity from design uncertainty; multi-file work enters formal planning only when consequential design choices remain unresolved.
-- Made the full writing-style methodology conditional on substantial prose, documentation, or user-facing copy instead of loading it for every feature and fix.
+- Separated execution complexity from design uncertainty; multi-file work enters formal planning only when consequential design choices remain unresolved. The fix adapters now load architecture methodology on that basis instead of on module count.
+- Made the full writing-style methodology conditional on substantial prose, documentation, or user-facing copy instead of loading it for every feature and fix, and trimmed the skill for both providers.
+- Applied the same conditional loading and needs-based task creation to `/rptc:feat-team` and `/rptc:fix-team`.
 - Changed general independent review to target distinct unresolved risks instead of duplicating decisive deterministic evidence, while preserving independent final verification for high-risk work.
+- Reused still-valid evidence instead of rerunning unchanged checks when a workflow phase changes.
 - Preserved the Codex parent-session spawn/wait barrier and explicit approval boundaries.
-- Added architecture-routing eval cases that distinguish broad mechanical edits from genuine design uncertainty.
+
+### Removed
+
+- Unreferenced 3.x SOPs: flexible testing, testing, languages and style, git and deployment, architecture patterns, post-TDD refactoring, and security and performance. `sop/frontend-guidelines.md` remains for the frontend-design skill.
+- The `tdd-phases.md` references for both providers, which contradicted vertical TDD with horizontal test-first phases and a fixed coverage target.
+- Unreferenced templates: SOP enhancement pattern, plan step, and research output templates.
+- Completed v4 transition documents: migration plan, implementation handoff, and `UNRELEASED.md`.
+- The unwired repository-root `hooks/` scripts.
 
 ## [4.0.0] - 2026-08-22
 

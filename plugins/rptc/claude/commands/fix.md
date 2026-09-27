@@ -31,7 +31,7 @@ Load conditionally:
 
 ```text
 rptc:tdd-methodology        a practical regression-test seam exists
-rptc:architect-methodology  the fix changes interfaces or crosses modules
+rptc:architect-methodology  interfaces, ownership, or sequencing remain unresolved
 rptc:brainstorming          a genuine product decision remains
 rptc:frontend-design        the defect is user-facing frontend behavior
 rptc:unslop-writing-clearly substantial prose, documentation, or user-facing copy
@@ -76,6 +76,10 @@ Execution breadth alone does not require Plan Mode. Enter Plan Mode when interfa
 
 Use one recommended fix design. Add alternatives only when the choice is real.
 The user decides product behavior and consequential trade-offs.
+
+When the fix will span many turns, offer a ready-to-paste `/goal <condition>`
+as the shared contract's long-running work section describes. Claude's goal
+evaluator reads only the transcript, so print each check's result.
 
 ## 5. Implement the supported fix
 
