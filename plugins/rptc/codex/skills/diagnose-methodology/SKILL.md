@@ -5,15 +5,10 @@ description: Reproduce and diagnose a reported bug, regression, flake, crash, or
 
 # Diagnose Methodology
 
-Read `RPTC plugin root/shared/workflows/fix.md`.
+Read `../../../shared/workflows/fix.md` (relative to this SKILL.md) and follow
+its procedure.
 
-## Tight feedback loop
-
-Before proposing a cause, establish one command or controlled interaction that
-reproduces the user's symptom. Make it fast and deterministic enough to run
-repeatedly.
-
-If the symptom does not reproduce:
+## When the symptom does not reproduce
 
 - drive the closest available real surface;
 - tighten the triggering conditions;
@@ -22,20 +17,8 @@ If the symptom does not reproduce:
 
 Do not replace a missing reproduction with a confident theory.
 
-## Hypotheses
+## Narrowing the cause
 
-After the loop is trustworthy:
-
-1. List plausible mechanisms.
-2. Prefer the next observation that eliminates the most possibilities.
-3. Change one variable at a time.
-4. Record what each observation supports or rejects.
-5. Confirm the surviving mechanism before designing the fix.
-
-## Fix and proof
-
-Apply only the change justified by the evidence. Remove speculative changes and
-temporary instrumentation. Rerun both the minimized loop and the original
-reported reproduction.
-
-Report direct evidence separately from inference.
+Choose the next observation that eliminates the most possibilities. Record what
+each observation supports or rejects, and report direct evidence separately from
+inference.

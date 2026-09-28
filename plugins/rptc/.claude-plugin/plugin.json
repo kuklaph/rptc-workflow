@@ -1,7 +1,7 @@
 {
   "name": "rptc",
-  "version": "4.1.0",
-  "description": "Research → Plan → TDD → Commit workflow with PM collaboration. Systematic development with quality gates, test-driven implementation, and intelligent documentation management.",
+  "version": "4.2.0",
+  "description": "Risk-scaled feature, fix, verification, and commit workflows with test-driven implementation and evidence-based completion for Claude Code and Codex.",
   "author": {
     "name": "kuklaph",
     "email": "30103848+kuklaph@users.noreply.github.com"
@@ -11,11 +11,11 @@
     "tdd",
     "research",
     "planning",
-    "quality-gates",
-    "documentation",
-    "pm-collaboration",
     "test-driven-development",
-    "multi-agent"
+    "multi-agent",
+    "debugging",
+    "verification",
+    "codex"
   ],
   "license": "MIT",
   "repository": "https://github.com/kuklaph/rptc-workflow",
@@ -26,7 +26,6 @@
     "./claude/agents/code-review-agent.md",
     "./claude/agents/docs-agent.md",
     "./claude/agents/research-agent.md",
-    "./claude/agents/review-agent.md",
     "./claude/agents/security-agent.md",
     "./claude/agents/tdd-agent.md"
   ]

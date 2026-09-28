@@ -1,6 +1,6 @@
 ---
 name: code-review-methodology
-description: Review a change against the request, concrete correctness risks, and the repository's documented standards. Use for diffs, branches, pull requests, and RPTC verification.
+description: Review a change against the request, concrete correctness risks, and the repository's documented standards. Use inside RPTC flows or when the user asks for an RPTC review of a diff, branch, or pull request.
 ---
 
 # Code Review Methodology
@@ -27,7 +27,9 @@ Report concrete execution paths involving:
 - unsafe state or concurrency;
 - error handling that loses necessary information;
 - performance regressions supported by a plausible workload;
-- tests that fail to protect the changed behavior.
+- tests that fail to protect the changed behavior, including tests with no
+  assertion on the output, truthiness-only or mock-only assertions, and tests
+  the change edited or weakened.
 
 A finding needs a location and a failure path, command, or direct code argument.
 
@@ -39,7 +41,8 @@ Check documented project standards and established local patterns. Flag:
 - an unnecessary abstraction;
 - duplicated decisions;
 - pass-through layers;
-- inconsistent naming or structure that increases reader load.
+- naming or structure that violates a documented rule or an established local
+  pattern.
 
 Skip issues already enforced by the formatter or linter unless the tool is not
 being run.
@@ -53,6 +56,11 @@ Keep the three axes separate. For every finding include:
 - evidence or violated rule;
 - impact;
 - smallest reasonable correction.
+
+Report every evidence-backed finding with its severity: blocking (breaks the
+request, correctness, or security), should-fix (violates a documented rule or
+leaves a real risk), or optional (improvement). An axis with none reports
+`No findings`. The parent decides what to act on.
 
 Do not assign arbitrary numerical confidence. Unsupported concerns belong under
 `Context needed`, not in the confirmed findings list.

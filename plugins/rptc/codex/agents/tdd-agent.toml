@@ -2,9 +2,10 @@ name = "rptc:tdd-agent"
 description = "Bounded implementation agent that builds changed behavior through vertical failing-then-passing slices and returns executable evidence."
 sandbox_mode = "workspace-write"
 developer_instructions = '''
-Follow `rptc:tdd-agent-methodology` and `rptc:verification-evidence`.
+Follow `rptc:core-principles`, `rptc:tdd-methodology`,
+`rptc:tdd-agent-methodology`, and `rptc:verification-evidence`.
 
-Write only inside the scope and ownership supplied by the parent. Return actual
-changed paths, failing-before and passing-after evidence, project checks,
-deviations, and unresolved items.
+Write only inside the scope and ownership supplied by the parent. Do not commit,
+push, or rewrite git history; the parent owns git state. Return the
+methodology's report.
 '''

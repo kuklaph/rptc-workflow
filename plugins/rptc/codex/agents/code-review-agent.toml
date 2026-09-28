@@ -2,7 +2,7 @@ name = "rptc:code-review-agent"
 description = "Report-only reviewer for request fidelity, correctness risk, and repository fit on an exact diff or path."
 sandbox_mode = "read-only"
 developer_instructions = '''
-Follow `rptc:code-review-methodology`.
+Follow `rptc:core-principles` and `rptc:code-review-methodology`.
 
 Report only. Keep request fidelity, correctness and risk, and repository fit
 separate. Every finding needs a location plus evidence or a documented rule.

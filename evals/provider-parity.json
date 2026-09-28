@@ -7,7 +7,7 @@
         "Acceptance predicates are stated before implementation.",
         "Architecture work is conditional on uncertainty and risk.",
         "Completion claims use VERIFIED, NOT VERIFIED, or INCONCLUSIVE.",
-        "The provider's own planning and task-tracking tools are used."
+        "Localized work finishes without a formal plan or phase task structure."
       ]
     },
     {
@@ -15,7 +15,8 @@
       "invariants": [
         "The reported symptom is reproduced before a root-cause claim.",
         "The original surface is rerun after the fix.",
-        "Speculative changes are removed when evidence rejects them."
+        "Speculative changes are removed when evidence rejects them.",
+        "Tests are not deleted, skipped, or loosened to make the fix pass."
       ]
     },
     {
@@ -24,7 +25,7 @@
         "Neither implementation nor tests are treated as automatic behavioral truth.",
         "Corrections cite requirements, contracts, prior verified behavior, or explicit uncertainty.",
         "Ambiguous expectations remain INCONCLUSIVE until resolved.",
-        "Provider-native tools are used without legacy synchronization agents."
+        "Every automatic test edit is listed in the final report."
       ]
     },
     {
@@ -36,11 +37,12 @@
       ]
     },
     {
-      "flow": "feat-team",
+      "flow": "fix-team",
       "intentional_asymmetry": true,
       "invariants": [
-        "Claude may use persistent teams.",
-        "Codex uses parent-orchestrated agents and does not pretend to expose a peer-team inbox."
+        "The lead reproduces the symptom before spawning investigators.",
+        "Only the lead edits product code.",
+        "Codex runs the standard fix flow and does not claim peer-to-peer agent messaging."
       ]
     }
   ]

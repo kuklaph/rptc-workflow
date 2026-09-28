@@ -10,6 +10,83 @@ Release history through 3.16.7 is preserved in
 
 ---
 
+## [4.2.0] - 2026-09-27
+
+A full review of 4.1 against current Anthropic and OpenAI guidance, plus a
+salvage pass that checked the research removed in 4.0 and 4.1 and restored the
+parts that still apply to current models.
+
+### Added
+
+- Test-integrity rules in `tdd-methodology`: reach passing tests only through
+  the requested behavior (no deleting, skipping, loosening, or special-casing
+  tests; report conflicts), mock only external or nondeterministic boundaries,
+  derive expected values from the requirement, cover implied boundary and
+  failure cases, size tests to the change, define affected checks, and assert
+  nondeterministic output by facts and structure.
+- Engineering policy: no unrequested features, abstractions, flags, or shims;
+  reuse existing helpers; secure defaults at trust boundaries.
+- Verification: a shared severity scale (blocking, should-fix, optional),
+  `No findings` as a normal reviewer result, a parent filter rule, and
+  correctness review of tests edited or weakened by a change.
+- Writing skill: a current catalogue of AI-writing tells and integrity rules
+  (no invented sources, marked quotations).
+- Routing cases for `frontend-design` and a manual eval procedure in
+  `evals/README.md`.
+
+### Changed
+
+- `/rptc:fix-team` is now a competing-hypotheses debugging mode: read-only
+  investigators try to disprove each other, then the lead fixes the bug alone.
+  It needs Claude's experimental agent teams.
+- `config` no longer writes `.rptc/project.yml`. It proposes a short "Checks"
+  section with the project's real commands for `CLAUDE.md` or `AGENTS.md`.
+- `frontend-design` follows current practice: restraint, the brief and existing
+  design system first, current generic-design tells, and a WCAG 2.2 / Core Web
+  Vitals floor. Bold direction is reserved for new UI and requested redesigns.
+- `html-report-generator` is a simple, self-contained, consistent template.
+- Claude agents list plain tool names. Reviewers, the architect, and the
+  researcher have no Write or Edit tools and are instructed to use Bash only
+  for read-only commands; the TDD agent leaves git state to the parent.
+- Command permissions: pre-approved Bash rules now cover specific check
+  runners (for example `npm test`, `cargo test`, `pytest`) instead of whole
+  package managers and `npx`. Only `commit` pre-approves git writes (`add`,
+  `commit`, `switch -c`, `push -u origin`) and PR creation, apart from
+  `git worktree add` in `feat`, `fix`, and `fix-team`. Read-only git is
+  already approved by Claude Code. For a pull request, `commit` creates the
+  commit on a feature branch, never on the default branch.
+- The TDD agent preloads `tdd-methodology` and requires a failing check only
+  when behavior changes at a practical seam. The architect names a
+  representative slice instead of implementing it.
+- `verify-loop` stops after accepted fixes are applied and rechecked, not
+  merely when every claim has a status.
+- `commit` inspects scope before running checks, reuses still-valid evidence,
+  asks for approval only when scope is ambiguous or policy requires it, and
+  uses the host CLI that matches the remote (`gh`, `fj`, `glab`).
+- Claude skills resolve plugin files with `${CLAUDE_PLUGIN_ROOT}`; Codex skills
+  use paths relative to the SKILL.md.
+- Manifest descriptions and keywords describe the 4.x workflow.
+
+### Removed
+
+- `/rptc:feat-team` and `review-agent`. The `agent-teams` skill covers parallel
+  workstreams with separate owners.
+- `tool-guide`, `agent-teams/references/team-lifecycle.md`, and
+  `codex/sop/update-plan-guide.md`, which were unreferenced and contradicted
+  current policy.
+- `sop/frontend-guidelines.md` (outdated WCAG 2.1 and FID specifics) and
+  `templates/project-contract.yml`.
+- The broken `report-template.html` and `dark-theme.css` from
+  `html-report-generator`.
+
+### Upgrade notes
+
+- Codex: run `rptc-init` once after upgrading so the retired
+  `rptc:review-agent` TOML is removed from your agents directory. Flows install
+  missing agents automatically but do not remove obsolete ones.
+- Claude: `/rptc:feat-team` no longer exists. Use `/rptc:feat`, or the
+  `rptc:agent-teams` skill for parallel workstreams with separate owners.
+
 ## [4.1.0] - 2026-09-27
 
 ### Added

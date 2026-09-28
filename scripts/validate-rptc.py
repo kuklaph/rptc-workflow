@@ -64,6 +64,19 @@ REMOVED_PATHS = (
     "docs/RPTC_V4_HANDOFF.md",
     "docs/RPTC_V4_MIGRATION_PLAN.md",
     "docs/UNRELEASED.md",
+    "claude/commands/feat-team.md",
+    "claude/agents/review-agent.md",
+    "codex/agents/review-agent.toml",
+    "skills/agent-teams/references/team-lifecycle.md",
+    "skills/tool-guide",
+    "codex/skills/tool-guide",
+    "codex/sop/update-plan-guide.md",
+    "sop/frontend-guidelines.md",
+    "templates/project-contract.yml",
+    "skills/html-report-generator/templates/report-template.html",
+    "skills/html-report-generator/reference/dark-theme.css",
+    "codex/skills/html-report-generator/templates/report-template.html",
+    "codex/skills/html-report-generator/reference/dark-theme.css",
 )
 
 FORBIDDEN_ACTIVE_MARKERS = (

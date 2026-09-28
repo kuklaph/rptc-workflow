@@ -17,9 +17,8 @@ Use for requests such as:
 - `Use RPTC to implement "<feature>".`
 - `Use rptc:rptc-feat for this change.`
 
-Codex does not expose Claude's persistent `/rptc:feat-team` command. For
-parallel work, the parent session coordinates `spawn_agent` workers with
-exclusive ownership and waits for them.
+Codex has no persistent peer teams. For parallel work, the parent session
+coordinates `spawn_agent` workers with exclusive ownership and waits for them.
 
 ## 1. Initialize
 
@@ -36,11 +35,11 @@ Load conditionally:
 rptc:brainstorming          unresolved product or preference decisions
 rptc:architect-methodology  uncertain interfaces, data shapes, ownership, or sequencing
 rptc:tdd-methodology        changed behavior with a practical test seam
-rptc:frontend-design        user-facing frontend work
+rptc:frontend-design        new user-facing UI or an explicit redesign or polish request
 rptc:unslop-writing-clearly substantial prose, documentation, or user-facing copy
 ```
 
-Read `RPTC plugin root/shared/workflows/feature.md`.
+Read `../../../shared/workflows/feature.md` (relative to this SKILL.md).
 
 Read project `AGENTS.md`, repository contribution guidance, task-runner files,
 and project SOPs. Project and Codex global guidance override RPTC defaults.
@@ -100,9 +99,14 @@ criteria, so state outcome, constraints, and verification in it.
 
 ## 5. Delegate with Codex mechanics
 
-If a required `rptc:*` custom agent is unavailable, run `rptc:rptc-init` once
-and retry. If the environment has no sub-agent tools, the parent executes the
-same contract directly.
+Use the current workspace by default. Create a sibling worktree when the user
+requested isolation, parallel writers need exclusive ownership, or the change is
+high risk and an isolated branch materially improves recovery.
+
+If a required `rptc:*` custom agent is unavailable, run `rptc:rptc-init` once to
+install the packaged agents, mention the installation in the final report, and
+retry. If the environment has no sub-agent tools, the parent executes the same
+contract directly.
 
 At each `spawn_agent` point:
 
@@ -146,8 +150,10 @@ Select report-only agents by changed properties:
 Use the Codex spawn barrier for every selected verification agent. Give each the
 exact diff, request or spec, project standards, and evidence.
 
-Fix confirmed findings, rerun affected predicates, and recheck the axis that
-raised the finding. Do not loop solely to produce an empty model report.
+Act on blocking and should-fix findings that affect correctness, the request,
+security, or a documented rule; list optional findings without acting on them.
+Rerun affected predicates and recheck the axis that raised each finding. Do not
+loop solely to produce an empty model report.
 
 ## 8. Complete
 

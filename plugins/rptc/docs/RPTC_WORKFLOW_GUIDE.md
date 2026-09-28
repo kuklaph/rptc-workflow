@@ -97,6 +97,8 @@ Neither production nor tests are automatically correct.
 
 ## Shipping
 
-`commit` discovers project checks, inspects the exact diff, presents selected
-paths, and stages only approved files. Pushes and pull requests occur only when
-explicitly requested.
+`commit` inspects the exact diff first, reuses check results that are still
+valid, runs the remaining project checks, and stages only in-scope paths. It
+asks before committing when the scope is ambiguous or project policy requires
+it. Pushes and pull requests occur only when explicitly requested, from a
+feature branch.

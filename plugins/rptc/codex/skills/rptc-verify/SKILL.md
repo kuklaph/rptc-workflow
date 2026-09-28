@@ -17,7 +17,7 @@ rptc:verification-evidence
 rptc:unslop-writing-clearly
 ```
 
-Read `RPTC plugin root/shared/workflows/verification.md`.
+Read `../../../shared/workflows/verification.md` (relative to this SKILL.md).
 
 ## 2. Establish scope and claims
 
@@ -37,14 +37,18 @@ guidance. Run focused checks first. Record what each observation proves.
 
 ## 4. Select and run reviewers
 
+A mechanical change with decisive deterministic evidence may need no model
+review unless the user requests one.
+
 Select report-only agents by changed properties:
 
 - `rptc:code-review-agent`;
 - `rptc:security-agent`;
 - `rptc:docs-agent`.
 
-If custom agents are missing, run `rptc:rptc-init` once. If sub-agent tools are
-unavailable, perform the review axes in the parent.
+If the custom agents are missing, run `rptc:rptc-init` once to install the
+packaged agents, mention the installation in the final report, and retry. If
+sub-agent tools are unavailable, perform the review axes in the parent.
 
 For every selected set, spawn in parallel and immediately call `wait_agent` for
 all required IDs. Do not edit, test, or synthesize in the parent while they run.
@@ -57,7 +61,12 @@ documentation findings separate.
 A finding needs a location plus evidence or a documented rule. Do not use
 arbitrary numerical confidence as a gate.
 
-This skill is report-only unless the user explicitly asks it to fix findings.
+Mark blocking and should-fix findings that affect correctness, the stated
+request, security, or a documented rule as requiring action; list optional
+findings separately.
+
+Fix them only when the user explicitly asks this pass to fix findings;
+otherwise this skill is report-only.
 
 ## 6. Report
 

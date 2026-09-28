@@ -1,177 +1,111 @@
 ---
 name: frontend-design
-description: Distinctive, production-grade frontend interfaces. Use when the task involves creating or modifying HTML, CSS, UI components, web pages, or frontend interfaces. Trigger for any visual/styling work — landing pages, dashboards, forms, themes, layouts, component styling, redesigns, "make this look good/better/professional", or anything where visual quality matters. Provides creative direction and bold aesthetics that avoid generic AI-generated design. Complements frontend-guidelines.md SOP (engineering standards) with aesthetic intent.
+description: Aesthetic direction for new user-facing UI or explicit redesign and polish requests. Not for bug fixes or small edits inside an existing design system.
 ---
 
 # Frontend Design
 
-Build interfaces that look intentionally designed, not AI-generated. This skill provides creative direction for frontend work — bold aesthetic choices, distinctive visual identity, and cohesive execution.
+Give an interface a point of view that belongs to its subject, then execute it
+with discipline. Generic design comes from deferred decisions, not from a lack
+of decoration.
 
-**Relationship with `frontend-guidelines.md` SOP**: The SOP covers engineering standards (accessibility, performance, responsive design, component patterns). This skill covers aesthetic intent (visual identity, typography choices, color personality, motion design). Both apply simultaneously — the SOP ensures the interface *works correctly*, this skill ensures it *looks distinctive*.
+## Scope
 
-## When to Use This Skill
+- New UI, or a request to redesign or polish: set a clear aesthetic direction.
+- Changes inside an existing product: extend its tokens, components, and
+  patterns. Match what is there; a new direction is not wanted.
+- A brief or design system that pins down a look: follow it exactly, even when
+  the look is one of the common defaults listed below.
 
-- Creating new pages, components, or layouts
-- Styling or restyling existing interfaces
-- Building landing pages, dashboards, forms, or any user-facing view
-- User asks to "make this look good", "polish this", or "make it professional"
-- Any task where visual quality and design identity matter
+Existing design systems take priority. Read the project's CSS variables,
+component library, and brand guidelines before proposing anything.
 
----
+## Before writing code
 
-## Core Principle: Every Project Gets Its Own Identity
+1. **What is this for?** The subject, the audience, and the screen's primary
+   job. If the brief does not say, propose an answer and confirm it.
+2. **What is the tone?** Take it from the subject's own world: its materials,
+   vocabulary, and the people who use it. A tool for kids and a tool for
+   bond traders should not look alike.
+3. **What are the constraints?** Framework, existing design system, browser
+   support, performance budget.
+4. **What is the one memorable detail?** Name the single thing a person would
+   describe to someone else afterward: an interaction, a layout move, a type
+   treatment, a color decision.
 
-No two projects should converge on the same aesthetic. If the last dashboard used dark backgrounds with geometric accents, the next one should use warm tones with editorial typography — or dense monospace with industrial borders — or anything else that isn't a repeat. The goal is variety across projects and intentionality within each one.
+Intentionality matters more than intensity. A quiet design with precise
+choices is as distinctive as a loud one.
 
----
+## Plan, check, build, critique
 
-## Before Writing Code
+1. **Plan** a compact token system:
+   - palette: a few named colors with roles;
+   - type: one or two families, their roles, and a scale;
+   - layout: the structure and alignment, sketched in a sentence or an ASCII
+     wireframe;
+   - principles: two or three rules that make this design specific.
+2. **Check the plan against the brief.** For each choice, ask whether you would
+   have made it for any similar page. If so, it is a default; replace it with a
+   choice drawn from the subject, and say what changed.
+3. **Build** with the project's stack. Put tokens in CSS custom properties or
+   the existing theme, and keep selector specificity flat so section and
+   component rules do not fight each other.
+4. **Critique in a browser.** Look at the rendered page, take screenshots when
+   the environment allows, and fix what you see. Check whether the memorable
+   detail comes through and whether anything around it is competing. Remove one
+   decoration before calling it done.
 
-Every interface deserves a deliberate aesthetic direction. Answer these four questions before touching CSS:
+## Restraint
 
-1. **What is this for?** Who uses it, what problem does it solve, what emotion should it evoke?
-2. **What is the visual tone?** Commit to a direction: stark minimalism, dense information design, warm editorial, raw brutalist, geometric precision, organic softness, retro analog, high-contrast drama, playful irreverence, quiet luxury. These are starting points — combine, invent, adapt.
-3. **What are the constraints?** Framework, browser support, performance budget, accessibility requirements, existing design system.
-4. **What is the one memorable detail?** Every interface needs one thing a person would remember and describe to someone else. A distinctive interaction, an unexpected layout choice, a signature color treatment, a typographic detail.
+Pick one place to be bold and let the rest of the page stay calm around it.
+If a decoration says nothing about the subject or helps no reader, remove it.
 
-The key insight: intentionality matters more than intensity. A restrained minimal design executed with precision is just as distinctive as an elaborate maximalist one. What makes design generic is the absence of deliberate choices, not the absence of complexity.
+- **Typography** carries most of the personality. Pick faces for this subject
+  rather than the ones you would use anywhere. One family is often enough; if
+  you use two, make the contrast obvious. Keep body text to a comfortable
+  measure.
+- **Structure is information.** Borders, numbers, labels, and dividers should
+  encode something about the content. Number items only when they are a real
+  sequence.
+- **Motion** earns its place by pointing somewhere. A single designed moment,
+  such as how the page first appears, does more than effects on every element.
+  Animate in response to a user's action when it clarifies the result.
 
-**Existing design systems take priority.** If the project has CSS variables, a component library, or brand guidelines — research them first. The creative direction extends and polishes what exists. It never overrides or conflicts.
+## Current generic-AI tells
 
-Then implement working code (HTML/CSS/JS, React, Vue, or whatever the project uses) that meets these bars:
+These are defaults that show up regardless of subject. Each can be right for a
+specific brief; use one only when the brief calls for it.
 
-- **Production-grade** — functional, not a mockup
-- **Visually distinctive** — looks designed for this specific context
-- **Aesthetically cohesive** — every element reflects the same point of view
-- **Refined in detail** — spacing, color, type, and motion all feel considered
+- A warm off-white page with a heavy serif headline and a rust or clay accent
+  color.
+- A black page lit by one neon accent color.
+- Content split into matching rounded cards, all with one soft shadow and one
+  corner radius, with gradients added for decoration.
+- A small spaced-out uppercase label sitting over each section heading.
+- A hero built around one oversized metric, whatever the product does.
+- A headline with a single word singled out by weight, slant, or color.
+- A fade-and-slide-up entrance on every section and a hover lift on every card.
 
----
+The test: swap the logo and copy for another product's. If nobody could tell,
+the design has no point of view.
 
-## Visual Identity
+## Interface copy
 
-### Typography
+Words in an interface help people understand and act. Name things the way
+users think of them, not by system internals. Use plain verbs and sentence
+case. Buttons say what happens ("Send invoice"), and an action is called the
+same thing on the button, in the confirmation, and anywhere else it appears.
+Errors say what happened and how to fix it, without apology or vagueness. Empty states tell the person what to do next.
 
-Font choice is the highest-leverage aesthetic decision. The default system font stack communicates nothing.
+## Engineering floor
 
-**Principles:**
-- **Choose fonts with character.** Serif, sans-serif, monospace, display — the family matters less than whether the choice feels intentional and fits the tone.
-- **Pair deliberately.** A display face for headings paired with a contrasting body face creates hierarchy and visual interest. Contrast in weight, width, or classification (serif + sans, geometric + humanist).
-- **Size with purpose.** Large headings create drama. Tight body text creates density. The scale should reflect the content's nature — a dashboard reads differently than a landing page.
+Meet these without announcing them:
 
-**Avoid:** Defaulting to overused safe choices — system-ui, the framework's default sans-serif, or whichever geometric sans is popular this year. If every interface uses the same typeface, none of them have an identity. Rotate through serif, slab, monospace, humanist, display — the full range exists for a reason.
-
-### Color
-
-Color defines mood faster than any other element.
-
-**Principles:**
-- **Commit to a palette.** Define a dominant color, a secondary, and one or two accents. Use CSS custom properties for consistency.
-- **Let one color dominate.** Evenly distributed palettes feel timid. A strong primary with sharp accents creates confidence.
-- **Dark and light are both valid.** Choose based on context, not habit. Vary between projects.
-- **Use color functionally.** Status colors (success, warning, error) should be distinct from brand colors. Semantic meaning must be unambiguous.
-
-**Avoid:** Purple-on-white gradients, rainbow hero sections, and other patterns that have become visual shorthand for "AI made this."
-
-### Spatial Composition
-
-Layout communicates hierarchy before anyone reads a word.
-
-**Principles:**
-- **Break the expected grid.** Asymmetric layouts, overlapping elements, diagonal flow, elements that bleed to edges — these choices create visual energy.
-- **Use negative space deliberately.** Generous whitespace signals confidence and luxury. Dense layouts signal information richness. Both work — the choice must be intentional.
-- **Create depth.** Layered elements, shadows with personality (not generic `box-shadow`), z-axis relationships, transparency — flat layouts are easy but rarely memorable.
-
-**Avoid:** Centering everything, uniform card grids with identical spacing, layouts that look like a wireframe someone forgot to design.
-
-### Texture and Atmosphere
-
-Solid flat backgrounds are a missed opportunity.
-
-**Principles:**
-- **Add visual texture.** Subtle noise overlays, gradient meshes, geometric patterns, grain effects — even at low opacity, texture adds warmth and depth.
-- **Create atmosphere.** Background treatments, border details, decorative elements, custom cursors that reinforce the tone. An industrial interface might use hard borders and monospace everywhere. An organic one might use soft gradients and rounded shapes.
-- **Layer transparencies.** Frosted glass, translucent overlays, and backdrop filters create sophisticated depth.
-
-**Avoid:** Untreated flat backgrounds as the default. Pure black or white can work when the design is deliberately stark — but that's a choice, not a fallback. If the background has no texture, gradient, or depth, ask whether that's intentional.
-
-### Motion and Interaction
-
-Animation should feel purposeful, not decorative.
-
-**Principles:**
-- **Orchestrate entry.** A single well-choreographed page load — elements appearing in sequence with staggered delays — creates more impact than scattered micro-interactions.
-- **Respond to the user.** Hover states, focus indicators, and click feedback should feel immediate and specific. A button that subtly shifts on hover communicates interactivity.
-- **Use scroll as a trigger.** Elements that reveal on scroll, parallax layers, progress indicators — scroll is the primary interaction on most pages.
-- **Prefer CSS.** `transition`, `animation`, `@keyframes`, and `scroll-timeline` handle most motion needs without JavaScript overhead. Use a motion library only when CSS falls short.
-
-**Avoid:** Gratuitous bounce effects, animations that delay usability, motion that runs on every render.
-
----
-
-## What Generic AI Design Looks Like
-
-These patterns appear when aesthetic decisions are deferred rather than made. Avoid all of them:
-
-- **Typography:** System font stacks, the same popular geometric sans-serif on every project, no font pairing, uniform sizing
-- **Color:** Purple/blue gradients on white, pastel rainbow palettes, no dominant color, identical schemes across unrelated projects
-- **Layout:** Everything centered, uniform card grids, symmetrical hero sections, predictable component stacking
-- **Motion:** No animation at all, or identical fade-in on every element
-- **Details:** No texture, no depth, no decorative elements, no personality
-
-**The test:** If you swapped the logo and content with a different project and nobody could tell, the design lacks identity.
-
----
-
-## Execution
-
-Match implementation effort to the aesthetic vision:
-
-- **Maximalist designs** need elaborate CSS — extensive custom properties, complex gradients, multiple animation sequences, layered pseudo-elements, detailed hover states. Use `@keyframes` liberally, stack pseudo-elements for depth, and define 20+ custom properties if the palette demands it. Cutting corners makes maximalism look unfinished.
-- **Minimalist designs** need precision — perfect spacing, considered typography scales, subtle transitions, restrained color. Build a tight spacing scale (4/8/16/32/64px), limit the palette to 3-4 values, and make every `margin` and `padding` deliberate. Minimalism with sloppy spacing is just empty.
-- **Information-dense designs** need systematic organization — consistent component patterns, clear data hierarchy, functional color coding, readable type at small sizes. Use CSS grid for structure, define semantic color tokens for status/category, and test readability at 12-14px.
-
-**Always verify the result.** After implementation, view the page at full viewport. Check that the aesthetic direction comes through. Adjust until it does.
-
-## Example: Generic vs. Distinctive
-
-A generic card component — functional but forgettable:
-
-```css
-.card {
-  background: #fff;
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  font-family: system-ui, sans-serif;
-}
-```
-
-The same card with aesthetic intent — editorial tone, depth, character:
-
-```css
-.card {
-  background: linear-gradient(135deg, #faf8f5 0%, #f3ede6 100%);
-  border-left: 3px solid #c4956a;
-  padding: 2rem 1.75rem;
-  box-shadow: 0 4px 24px rgba(120,90,60,0.08), 0 1px 2px rgba(120,90,60,0.04);
-  font-family: 'Source Serif 4', 'Georgia', serif;
-  letter-spacing: -0.01em;
-  position: relative;
-}
-.card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: url("data:image/svg+xml,...") repeat; /* subtle paper grain */
-  opacity: 0.03;
-  pointer-events: none;
-}
-```
-
-The difference: specific colors with warmth, a signature border accent, layered shadows with tinted color (not generic gray), a serif with tracking, and a texture overlay for atmosphere. Every property reflects a decision.
-
----
-
-Push creative boundaries. Extraordinary interfaces come from committing fully to a vision and executing it without hedging. Don't default to safe choices — the whole point of this skill is to produce work that feels genuinely designed, not generated.
-
-**SOP Reference**: `${CLAUDE_PLUGIN_ROOT}/sop/frontend-guidelines.md` — accessibility (WCAG 2.1 AA), responsive breakpoints, performance metrics, component patterns, form design, error handling, loading states. These engineering standards apply to all frontend work regardless of aesthetic direction.
+- WCAG 2.2 AA: text and UI contrast, full keyboard access, visible focus that
+  other content does not obscure, and pointer targets of at least 24 by 24 CSS
+  pixels.
+- Honor `prefers-reduced-motion`.
+- Do not regress LCP, INP, or CLS; load fonts and images so layout does not
+  shift.
+- Design loading, empty, and error states, not only the happy path.
+- Check the result at narrow and wide viewport widths.

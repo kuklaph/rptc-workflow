@@ -2,7 +2,7 @@
 
 > Provider-aware engineering workflows for Claude Code and Codex.
 
-**Version**: 4.1.0
+**Version**: 4.2.0
 **Status**: Beta
 **License**: MIT
 
@@ -57,18 +57,28 @@ is `VERIFIED`, `NOT VERIFIED`, or `INCONCLUSIVE`.
 | `/rptc:verify-loop` | `rptc-verify-loop` | Fix accepted findings and recheck affected evidence |
 | `/rptc:test-impact` | `rptc-test-impact` | Audit changed behavior against tests and independent contracts |
 | `/rptc:commit [pr]` | `rptc-commit` | Run project checks, stage selected paths, and perform requested git actions |
-| `/rptc:config` | `rptc-config` | Create a minimal provider-specific project pointer and shared project contract |
+| `/rptc:research` | `rptc-research` | Investigate a codebase question or external topic with sourced findings |
+| `/rptc:structure` | `rptc-structure` | Audit concrete structure friction and propose evidence-backed refactors |
+| `/rptc:config` | `rptc-config` | Add a short "Checks" section with the project's real check commands to `CLAUDE.md` or `AGENTS.md` |
+| (not needed) | `rptc-init` | Install the packaged Codex agent TOML files |
 
 ## Claude-only flows
 
-Claude provides persistent peer teams and inbox messaging:
+`/rptc:fix-team` runs competing read-only investigators that try to disprove
+each other's hypotheses, then continues with the `/rptc:fix` steps. It needs
+Claude agent teams, which are experimental and enabled with
+`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`. The `rptc:agent-teams` skill covers
+other team uses, such as parallel workstreams with separate file owners.
 
-- `/rptc:feat-team`
-- `/rptc:fix-team`
+Codex sub-agents report only to the parent, so Codex uses the standard feature
+and fix skills with parent-orchestrated `spawn_agent` workers and `wait_agent`
+barriers. This is an intentional capability difference, not missing parity.
 
-Codex uses the standard feature and fix skills with parent-orchestrated
-`spawn_agent` workers and `wait_agent` barriers. This is an intentional
-capability difference, not missing parity.
+## Long-running work
+
+When approved `feat` or `fix` work will span many turns, RPTC offers a
+ready-to-paste `/goal` condition built from the acceptance predicates and their
+checks. You start goal mode; RPTC only drafts the condition.
 
 ## Risk-scaled execution
 
@@ -123,24 +133,18 @@ before submitting changes.
 
 ## Project configuration
 
-`rptc-config` writes a small provider-neutral contract at:
-
-```text
-.rptc/project.yml
-```
-
-Claude adds one pointer to `CLAUDE.md`. Codex adds one pointer to `AGENTS.md`.
-RPTC does not copy its command catalog into always-loaded project context.
+RPTC reads your project's own instructions and task-runner files. `config`
+discovers the real check commands (focused tests, full tests, typecheck, lint,
+build) and, with your approval, adds a short "Checks" section to `CLAUDE.md`
+(Claude) or `AGENTS.md` (Codex) when one is missing. RPTC does not copy its
+command catalog into always-loaded project context.
 
 ## Evidence
 
 For every material claim, report:
 
 ```text
-Claim:
-Status: VERIFIED | NOT VERIFIED | INCONCLUSIVE
-Evidence:
-Observed result:
+<claim>: <VERIFIED | NOT VERIFIED | INCONCLUSIVE>. <command or artifact> → <observed result>
 ```
 
 A typecheck proves type consistency. It does not automatically prove runtime
@@ -151,3 +155,4 @@ behavior.
 - [Plugin architecture](docs/PLUGIN_ARCHITECTURE.md)
 - [Workflow guide](docs/RPTC_WORKFLOW_GUIDE.md)
 - [Provider adapters](docs/PROVIDER_ADAPTERS.md)
+- [Project configuration](docs/PROJECT_TEMPLATE.md)

@@ -1,57 +1,72 @@
 ---
-description: Discover project conventions and configure a minimal Claude-facing RPTC project contract
-allowed-tools: Bash(git *), Read, Write, Edit, Glob, Grep, LS, AskUserQuestion
+description: Discover the project's check commands and propose a short Checks section for CLAUDE.md
+allowed-tools: Bash(rm .rptc/project.yml), Bash(rmdir .rptc), Read, Write, Edit, Glob, Grep, AskUserQuestion
 ---
 
 # /rptc:config
 
 Shared contract: `shared/provider-adapter-contract.md`
 
-Claude and Codex have different project-instruction files. This adapter writes
-Claude's `CLAUDE.md` pointer and the provider-neutral project contract.
+RPTC flows run a project's checks: focused tests while working, then the full
+suite, typecheck, lint, and build before completion. This command records the
+real commands in `CLAUDE.md` so every session finds them without rediscovery.
+Claude reads `CLAUDE.md`; Codex's equivalent flow writes `AGENTS.md`.
 
 ## 1. Discover
 
-Inspect:
+Find the commands the project actually uses for:
 
-- `CLAUDE.md`;
-- `CONTRIBUTING.md` and repository docs;
-- package, build, and task-runner files;
-- CI workflows;
-- existing test, typecheck, lint, and build commands;
-- glossary or ADR locations;
-- current git and worktree conventions.
+- focused tests (one file or test name);
+- full tests;
+- typecheck;
+- lint;
+- build.
 
-Do not copy the plugin command catalog into project context.
+Look in task-runner and build files (`package.json` scripts, `Makefile`,
+`justfile`, `pyproject.toml`, `Cargo.toml`, and similar), CI workflows, and
+`CONTRIBUTING.md`. CI shows which commands the project treats as its gate.
+Leave out a category the project does not have.
+
+Also read the existing `CLAUDE.md`. If it imports `AGENTS.md` (for example
+`@AGENTS.md`), the shared file is the better home for the section.
 
 ## 2. Propose
 
-Start from `${CLAUDE_PLUGIN_ROOT}/templates/project-contract.yml`.
+Skip the edit when the instruction file already lists current check commands;
+report any that look stale instead.
 
-Propose only facts that are durable or cannot be reliably rediscovered:
-
-- approval mode: `guided`, `balanced`, or `autonomous`;
-- workspace mode: `current`, `auto`, or `worktree`;
-- project check commands;
-- glossary and ADR locations;
-- commit convention when project-defined.
-
-Ask the user to confirm unresolved preferences. Preserve existing custom values.
-
-## 3. Write
-
-Write `.rptc/project.yml`.
-
-Ensure `CLAUDE.md` contains one concise pointer:
+Otherwise, show the exact edit before writing, because it changes the user's
+own instruction file:
 
 ```markdown
-RPTC project contract: `.rptc/project.yml`.
+## Checks
+
+- Focused tests: `<command> <path>`
+- Full tests: `<command>`
+- Typecheck: `<command>`
+- Lint: `<command>`
+- Build: `<command>`
 ```
 
-Update an existing pointer in place. Do not add command tables, workflow
-diagrams, version markers, or duplicated plugin documentation.
+Keep it to those lines. Do not add RPTC's command catalog, workflow
+descriptions, or version markers; instruction files cost context in every
+session.
 
-## 4. Verify
+Handle older RPTC setups in the same proposal:
 
-Read both files back, validate the configured commands against the repository,
-and report what was discovered versus explicitly chosen.
+- A 3.x block between `<!-- RPTC-START` and `RPTC-END -->`: propose replacing
+  the whole block with the Checks section.
+- A 4.x `.rptc/project.yml`: offer to move its `checks` values into the Checks
+  section, delete the file (and `.rptc/` if it is then empty), and remove the
+  `RPTC project contract:` pointer line. RPTC no longer reads that file.
+
+If `CLAUDE.md` does not exist, propose creating it with only the Checks
+section.
+
+Ask with `AskUserQuestion` and write nothing until the user approves.
+
+## 3. Write and verify
+
+Apply the approved edit. Read the file back and confirm each listed command
+resolves to a real script, target, or tool in the repository. Report which
+commands came from CI or task-runner files and which the user supplied.

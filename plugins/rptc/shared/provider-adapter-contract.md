@@ -27,7 +27,7 @@ Claude adapters own Claude-specific behavior such as:
 - `AskUserQuestion`;
 - `EnterPlanMode` and `ExitPlanMode`;
 - `Task` sub-agents;
-- persistent team commands and team messaging;
+- experimental agent teams and teammate messaging;
 - `${CLAUDE_PLUGIN_ROOT}` path resolution.
 
 Codex adapters own Codex-specific behavior such as:
@@ -41,6 +41,9 @@ Codex adapters own Codex-specific behavior such as:
 - Codex plugin-cache path resolution.
 
 These differences are required adapter code, not removable duplication.
+
+No MCP server or optional tool is required by any flow. A missing tool changes
+the method, not the engineering contract.
 
 ## Parity rule
 

@@ -1,6 +1,6 @@
 ---
 description: Reproduce, diagnose, fix, and verify a bug on the same observable surface
-allowed-tools: Bash(git *), Bash(npm *), Bash(npx *), Bash(bunx *), Bash(pnpm *), Bash(yarn *), Bash(bun *), Bash(cargo *), Bash(go *), Bash(pytest *), Bash(python -m pytest *), Bash(make *), Bash(dotnet *), Read, Write, Edit, Glob, Grep, LS, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion, EnterPlanMode, ExitPlanMode
+allowed-tools: Bash(git worktree add *), Bash(npm test *), Bash(npm run *), Bash(pnpm test *), Bash(pnpm run *), Bash(yarn test *), Bash(yarn run *), Bash(bun test *), Bash(bun run *), Bash(pytest *), Bash(python -m pytest *), Bash(uv run pytest *), Bash(cargo test *), Bash(cargo build *), Bash(cargo check *), Bash(cargo clippy *), Bash(go test *), Bash(go build *), Bash(go vet *), Bash(dotnet test *), Bash(dotnet build *), Read, Write, Edit, Glob, Grep, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion, EnterPlanMode, ExitPlanMode
 ---
 
 # /rptc:fix
@@ -14,8 +14,9 @@ Claude-specific task, planning, and delegation mechanics.
 
 `/rptc:fix "<bug description>"`
 
-Use `/rptc:fix-team` only when persistent peers add value to a difficult,
-cross-cutting diagnosis.
+Use `/rptc:fix-team` when a reproduction exists but several plausible
+mechanisms remain and Claude agent teams are enabled; it runs competing
+investigators before this flow's fix steps.
 
 ## 1. Initialize
 
@@ -33,7 +34,6 @@ Load conditionally:
 rptc:tdd-methodology        a practical regression-test seam exists
 rptc:architect-methodology  interfaces, ownership, or sequencing remain unresolved
 rptc:brainstorming          a genuine product decision remains
-rptc:frontend-design        the defect is user-facing frontend behavior
 rptc:unslop-writing-clearly substantial prose, documentation, or user-facing copy
 ```
 
@@ -78,8 +78,10 @@ Use one recommended fix design. Add alternatives only when the choice is real.
 The user decides product behavior and consequential trade-offs.
 
 When the fix will span many turns, offer a ready-to-paste `/goal <condition>`
-as the shared contract's long-running work section describes. Claude's goal
-evaluator reads only the transcript, so print each check's result.
+as the shared contract's long-running work section describes. Keep it under
+4,000 characters and recommend running it in auto mode for unattended turns.
+Claude's goal evaluator reads only the transcript and runs no commands, so
+print each check's result.
 
 ## 5. Implement the supported fix
 
@@ -103,8 +105,9 @@ Rerun:
 
 Use independent review when it tests a distinct unresolved risk. Require independent final verification for high-risk fixes. Use security review when a trust boundary changed and documentation review when public or operational behavior changed.
 
-Address confirmed findings and rerun the affected evidence. Do not chase zero
-LLM findings.
+Act on blocking and should-fix findings that affect correctness, the request,
+security, or a documented rule; list optional findings without acting on them.
+Rerun the affected evidence. Do not chase zero LLM findings.
 
 ## 7. Complete
 
