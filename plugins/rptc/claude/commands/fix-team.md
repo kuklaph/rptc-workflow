@@ -1,112 +1,100 @@
 ---
-description: Diagnose and fix a difficult bug with a persistent Claude team and continuous root-cause review
-allowed-tools: Bash(git *), Bash(npm *), Bash(npx *), Bash(bunx *), Bash(pnpm *), Bash(yarn *), Bash(bun *), Bash(cargo *), Bash(go *), Bash(pytest *), Bash(python -m pytest *), Bash(make *), Bash(dotnet *), Read, Write, Edit, Glob, Grep, LS, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion, EnterPlanMode, ExitPlanMode, TeamCreate, SendMessage
+description: Debug with competing-hypothesis investigators on a Claude agent team, then fix as a single writer
+allowed-tools: Bash(git worktree add *), Bash(npm test *), Bash(npm run *), Bash(pnpm test *), Bash(pnpm run *), Bash(yarn test *), Bash(yarn run *), Bash(bun test *), Bash(bun run *), Bash(pytest *), Bash(python -m pytest *), Bash(uv run pytest *), Bash(cargo test *), Bash(cargo build *), Bash(cargo check *), Bash(cargo clippy *), Bash(go test *), Bash(go build *), Bash(go vet *), Bash(dotnet test *), Bash(dotnet build *), Read, Write, Edit, Glob, Grep, Agent, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion, EnterPlanMode, ExitPlanMode, SendMessage
 ---
 
 # /rptc:fix-team
 
 Shared contract: `shared/workflows/fix.md`
 
-Claude-only adapter for a difficult bug whose diagnosis benefits from persistent
-research, architecture, implementation, and review peers.
+Claude-only debugging mode. Several investigators each own one hypothesis and
+try to disprove each other's, so the diagnosis does not anchor on the first
+plausible explanation. The lead then fixes the bug alone.
 
-Use `/rptc:fix` for clear or localized defects. Codex uses its standard fix
-adapter with parent-orchestrated agents.
+## When to use
+
+Use this when the bug reproduces but several plausible mechanisms remain and a
+single investigator would likely settle on the first one it explores. For a
+clear or localized defect, use `/rptc:fix`.
+
+This mode needs Claude agent teams (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`)
+in an interactive session. Without them, use `/rptc:fix`.
 
 ## 1. Initialize
 
 Load:
 
 ```text
-rptc:core-principles
-rptc:diagnose-methodology
-rptc:verification-evidence
+Skill("rptc:core-principles")
+Skill("rptc:diagnose-methodology")
+Skill("rptc:verification-evidence")
 ```
 
-Load `rptc:unslop-writing-clearly` only when the fix produces substantial prose,
-documentation, or user-facing copy.
-
-Read `${CLAUDE_PLUGIN_ROOT}/shared/workflows/fix.md`.
-
-Create one team with:
-
-- `researcher`: read-only reproduction support and code tracing;
-- `architect`: read-only mechanism and fix-design guardian;
-- `implementer`: the only product-code writer;
-- `reviewer`: report-only regression, correctness, security, and docs review.
-
-Create sequential tasks for reproduction and diagnosis. Add fix design,
-implementation, final verification, and wrap-up tasks once the reproduction
-establishes the shape of the work; skip fix design when the mechanism points to
-a clear correction.
-
-Use an isolated worktree when the fix is high risk or the user requests it.
-One implementation writer owns all shared product files.
+Read `${CLAUDE_PLUGIN_ROOT}/shared/workflows/fix.md` and the project's own
+instructions and checks.
 
 ## 2. Reproduce
 
-The Team Lead owns the user's original reproduction and the final same-surface
-check.
+The lead owns the user's original reproduction and the final same-surface
+check. Produce one repeatable failing command or interaction before spawning
+anyone. If the bug does not reproduce, continue with `/rptc:fix`, whose
+reproduction step covers blocked environments; a debate without a failing loop
+has nothing to test against.
 
-The researcher helps trace entry points, history, related failures, and
-candidate instrumentation. It returns evidence to the architect and Team Lead.
+## 3. Investigate with competing hypotheses
 
-Do not advance until there is a trustworthy failing loop or a precise
-`INCONCLUSIVE` statement describing why the environment cannot reproduce it.
+List the plausible mechanisms. Spawn one investigator teammate per mechanism,
+up to five. With only one plausible mechanism, use `/rptc:fix` instead.
 
-## 3. Diagnose
+Teammates load CLAUDE.md, MCP servers, and skills, but not the lead's
+conversation, so each spawn prompt has to stand on its own:
 
-The architect and researcher apply `rptc:diagnose-methodology`:
+- the symptom as the user observed it;
+- the exact reproduction command or steps;
+- the teammate's hypothesis and the names of the other investigators;
+- the evidence standard: executable or runtime evidence, with inference labeled
+  as inference;
+- the skills to load, such as `rptc:diagnose-methodology` (a teammate does not
+  inherit an agent definition's preloaded skills);
+- the report shape: verdict (supported, refuted, or inconclusive), evidence
+  with commands and output, and what would change the verdict.
 
-1. minimize the loop when useful;
-2. form falsifiable mechanisms;
-3. choose observations that eliminate the most possibilities;
-4. instrument one variable at a time;
-5. confirm the surviving mechanism.
+Investigators do not edit files. They read code, run the reproduction and other
+existing commands, and report. When a hypothesis needs temporary
+instrumentation, the investigator describes it and the lead adds, runs, and
+removes it, so the shared checkout has one writer.
 
-The architect proposes the smallest fix supported by the evidence. Execution
-breadth alone does not require Plan Mode. Use Plan Mode when interfaces,
-ownership, sequencing, migration, rollback, or consequential alternatives remain
-unresolved.
+Have investigators message each other to try to disprove each other's
+hypotheses, not only to support their own. A mechanism survives only when it
+explains the reproduction with executable or runtime evidence and the others
+have been ruled out or shown to be contributing factors.
 
-The user decides product behavior and consequential trade-offs.
+Claude Code approves teammate plan requests automatically. If a teammate
+submits a plan, read it yourself before relying on its conclusions.
 
-## 4. Implement and review
+## 4. Decide and shut down
 
-The implementer loads `rptc:tdd-agent-methodology`.
+The lead decides the mechanism from the evidence, not from which teammate
+argued longest. If no mechanism survives, report that as `INCONCLUSIVE`,
+say which observation would separate the remaining candidates, and ask the user
+how to proceed.
 
-For each fix slice:
+Ask each teammate to shut down once its report is collected, before any
+product code changes.
 
-1. demonstrate failing-before behavior at a stable seam when practical;
-2. apply the minimum coherent production correction;
-3. remove speculative attempts and temporary instrumentation;
-4. run focused checks;
-5. send the actual changed paths and evidence to architect and reviewer;
-6. wait for both responses;
-7. address confirmed findings.
+## 5. Fix, verify, review
 
-The architect rejects symptom treatment not supported by the mechanism.
-The reviewer evaluates regression protection, correctness, repository fit,
-security impact, and documentation impact. Reviewers remain report-only.
+The lead is the only writer. Continue with `/rptc:fix` from design onward:
+design only when needed, implement the supported fix with regression
+protection, verify on the same surface, and run the review lanes that test a
+distinct unresolved risk.
 
-## 5. Final verification
+## 6. Complete
 
-Rerun:
+Report the symptom, the hypotheses tested and how each was resolved, the
+confirmed mechanism, the fix, failing-before and passing-after evidence,
+checks, reviews, and each material claim as `VERIFIED`, `NOT VERIFIED`, or
+`INCONCLUSIVE`.
 
-- the minimized reproduction;
-- the original user reproduction on the same surface;
-- repository-declared affected checks;
-- complete-diff architecture and review passes.
-
-Do not seek an empty reviewer report. Resolve every material claim as verified,
-failed, inconclusive, or explicitly open.
-
-## 6. Wrap up
-
-Shut down team members after collecting reports.
-
-Return the symptom, confirmed mechanism, fix, failing-before and passing-after
-evidence, checks, feedback, and unresolved claims.
-
-No commit, push, pull request, or deployment occurs without explicit user
-intent.
+Do not commit, push, create a pull request, or deploy unless the user
+explicitly requests it.

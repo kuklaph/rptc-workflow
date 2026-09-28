@@ -25,16 +25,16 @@ Do not perform a generic checklist dump when none of these properties changed.
 
 ## Analysis
 
-For each candidate issue:
+Each confirmed finding states:
 
-1. name the trust boundary;
-2. trace attacker-controlled or sensitive data;
-3. identify the missing or broken property;
-4. show the exploit or failure path;
-5. cite the exact location;
-6. state impact and preconditions;
-7. propose the smallest correction;
-8. name the strongest practical verification.
+- the trust boundary;
+- the attacker-controlled or sensitive data path;
+- the missing or broken property;
+- the exploit or failure path;
+- the exact location;
+- impact and preconditions;
+- the smallest correction;
+- the strongest practical verification.
 
 Use project security guidance and applicable standards as authority. A scanner
 or model warning is a lead, not proof.
@@ -47,5 +47,10 @@ Separate:
 - context needed;
 - checks performed;
 - security properties unchanged or verified.
+
+Report every evidence-backed finding with its severity: blocking (breaks the
+request, correctness, or security), should-fix (violates a documented rule or
+leaves a real risk), or optional (improvement). An axis with none reports
+`No findings`. The parent decides what to act on.
 
 Do not use arbitrary numerical confidence as a reporting gate.

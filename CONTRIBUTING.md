@@ -22,8 +22,6 @@ plugins/rptc/
 ├── claude/
 ├── codex/
 ├── skills/
-├── sop/
-├── templates/
 └── docs/
 ```
 

@@ -72,6 +72,19 @@
         "Update several call sites to the already-approved interface.",
         "Make this localized reversible change using the repository's existing pattern."
       ]
+    },
+    {
+      "skill": "frontend-design",
+      "should_trigger": [
+        "Design a landing page for our new scheduling product.",
+        "Redesign the settings page so it feels more polished and distinctive.",
+        "Build a new dashboard UI for the analytics feature from scratch."
+      ],
+      "should_not_trigger": [
+        "Fix the dropdown that closes when you click inside it.",
+        "Change the card padding to use the existing spacing token.",
+        "Add a disabled state to this button following our design system."
+      ]
     }
   ]
 }

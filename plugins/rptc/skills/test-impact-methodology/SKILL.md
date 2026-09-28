@@ -74,4 +74,3 @@ weaker assertion or a coverage percentage.
   value.
 - Do not convert a rejected implementation fix into a test rewrite.
 - Do not use coverage percentage alone to claim that behavior is protected.
-- Do not make current implementation the default source of expected behavior.

@@ -1,6 +1,6 @@
 ---
 description: Implement a feature with rigor scaled to uncertainty, risk, and available evidence
-allowed-tools: Bash(git *), Bash(npm *), Bash(npx *), Bash(bunx *), Bash(pnpm *), Bash(yarn *), Bash(bun *), Bash(cargo *), Bash(go *), Bash(pytest *), Bash(python -m pytest *), Bash(make *), Bash(dotnet *), Read, Write, Edit, Glob, Grep, LS, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion, EnterPlanMode, ExitPlanMode
+allowed-tools: Bash(git worktree add *), Bash(npm test *), Bash(npm run *), Bash(pnpm test *), Bash(pnpm run *), Bash(yarn test *), Bash(yarn run *), Bash(bun test *), Bash(bun run *), Bash(pytest *), Bash(python -m pytest *), Bash(uv run pytest *), Bash(cargo test *), Bash(cargo build *), Bash(cargo check *), Bash(cargo clippy *), Bash(go test *), Bash(go build *), Bash(go vet *), Bash(dotnet test *), Bash(dotnet build *), Read, Write, Edit, Glob, Grep, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion, EnterPlanMode, ExitPlanMode
 ---
 
 # /rptc:feat
@@ -15,8 +15,8 @@ engineering outcome.
 
 `/rptc:feat "<feature description>"`
 
-Use `/rptc:feat-team` only when persistent peer agents and continuous
-cross-agent feedback provide a concrete advantage.
+For several independent workstreams with separate file owners, the
+`rptc:agent-teams` skill describes when a Claude agent team is worth its cost.
 
 ## 1. Initialize
 
@@ -33,7 +33,7 @@ Load these only when their condition applies:
 rptc:brainstorming          unresolved product or preference decisions
 rptc:architect-methodology  uncertain interfaces, data shapes, ownership, or sequencing
 rptc:tdd-methodology        changed behavior with a practical test seam
-rptc:frontend-design        user-facing frontend work
+rptc:frontend-design        new user-facing UI or an explicit redesign or polish request
 rptc:unslop-writing-clearly substantial prose, documentation, or user-facing copy
 ```
 
@@ -96,7 +96,8 @@ strongest feasible evidence:
 Investigate discoverable facts. Ask the user only about product intent,
 preferences, scope, or irreversible trade-offs.
 
-Use `AskUserQuestion` one decision at a time when a structured choice helps.
+Use `AskUserQuestion` when a structured choice helps. Batch independent
+decisions; ask dependent ones in sequence.
 
 ## 4. Design only when needed
 
@@ -193,8 +194,11 @@ Then select independent review by changed properties:
   evidence, unless the user requested it.
 
 Launch selected report-only agents in parallel. Give them the exact diff,
-request or spec, project standards, and evidence. Address confirmed findings, then rerun evidence affected by the fix and any
-acceptance predicates whose state may have changed.
+request or spec, project standards, and evidence. Act on blocking and
+should-fix findings that affect correctness, the request, security, or a
+documented rule; list optional findings without acting on them. Then rerun
+evidence affected by the fixes and any acceptance predicates whose state may
+have changed.
 
 Do not rerun reviewers merely to obtain zero findings.
 

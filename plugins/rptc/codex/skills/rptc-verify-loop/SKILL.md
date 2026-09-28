@@ -11,12 +11,12 @@ This compatibility flow converges on resolved evidence, not zero model findings.
 
 ## 1. Initialize
 
-Load `rptc:verification-evidence` and read the shared verification contract.
+Load `rptc:verification-evidence` and read `../../../shared/workflows/verification.md` (relative to this SKILL.md).
 Keep the loop and its current finding in `update_plan`.
 
 ## 2. Iterate
 
-1. Run the `rptc:rptc-verify` contract on the fixed scope.
+1. Apply the `rptc:rptc-verify` procedure to the fixed scope.
 2. Separate confirmed findings from context-needed and inconclusive items.
 3. Obtain approval for consequential fixes. `request_user_input` requires Codex
    Plan Mode; otherwise ask in normal chat and stop for the answer.
@@ -24,8 +24,10 @@ Keep the loop and its current finding in `update_plan`.
 5. At every `spawn_agent`, immediately call `wait_agent` for all required IDs.
 6. Rerun the affected checks, original acceptance predicates, and only the
    review axes that raised confirmed findings.
-7. Stop when every material claim is verified, failed, inconclusive, or accepted
-   as open.
+7. Stop when every accepted fix has been applied and rechecked, and each
+   remaining claim is `VERIFIED`, or `NOT VERIFIED` / `INCONCLUSIVE` with a
+   stated reason the loop cannot resolve it (declined, blocked, or awaiting a
+   product decision).
 
 ## 3. Safety
 

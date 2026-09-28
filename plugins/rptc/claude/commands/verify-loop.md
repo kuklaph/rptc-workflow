@@ -1,6 +1,6 @@
 ---
 description: Fix accepted verification findings and recheck affected evidence until claims are resolved or explicitly open
-allowed-tools: Bash(git *), Bash(npm *), Bash(npx *), Bash(bunx *), Bash(pnpm *), Bash(yarn *), Bash(bun *), Bash(cargo *), Bash(go *), Bash(pytest *), Bash(python -m pytest *), Bash(make *), Bash(dotnet *), Read, Write, Edit, Glob, Grep, LS, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion
+allowed-tools: Bash(npm test *), Bash(npm run *), Bash(pnpm test *), Bash(pnpm run *), Bash(yarn test *), Bash(yarn run *), Bash(bun test *), Bash(bun run *), Bash(pytest *), Bash(python -m pytest *), Bash(uv run pytest *), Bash(cargo test *), Bash(cargo build *), Bash(cargo check *), Bash(cargo clippy *), Bash(go test *), Bash(go build *), Bash(go vet *), Bash(dotnet test *), Bash(dotnet build *), Read, Write, Edit, Glob, Grep, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion
 ---
 
 # /rptc:verify-loop
@@ -16,7 +16,7 @@ Same scope rules as `/rptc:verify`.
 
 ## Loop
 
-1. Run one `/rptc:verify` pass.
+1. Apply the `/rptc:verify` procedure.
 2. Separate confirmed findings from context-needed or inconclusive items.
 3. Present consequential fixes for approval.
 4. Apply accepted fixes:
@@ -27,11 +27,10 @@ Same scope rules as `/rptc:verify`.
    - checks affected by the fix;
    - original acceptance predicates;
    - only the review axes that produced confirmed findings.
-6. Stop when every material claim is:
-   - `VERIFIED`;
-   - `NOT VERIFIED`;
-   - `INCONCLUSIVE`;
-   - or explicitly accepted as open.
+6. Stop when every accepted fix has been applied and rechecked, and each
+   remaining claim is `VERIFIED`, or `NOT VERIFIED` / `INCONCLUSIVE` with a
+   stated reason the loop cannot resolve it (declined, blocked, or awaiting a
+   product decision).
 
 ## Safety
 

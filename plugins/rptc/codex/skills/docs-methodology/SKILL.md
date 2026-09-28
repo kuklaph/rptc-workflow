@@ -17,8 +17,7 @@ Check whether the diff changes:
   configuration;
 - examples that now produce the wrong result.
 
-Update or report only documentation made inaccurate, incomplete, or unsafe by
-the change.
+Report only documentation made inaccurate, incomplete, or unsafe by the change.
 
 ## Project instruction files
 
@@ -36,5 +35,10 @@ For each finding include:
 - document and location;
 - evidence from the diff or contract;
 - smallest update.
+
+Report every evidence-backed finding with its severity: blocking (breaks the
+request, correctness, or security), should-fix (violates a documented rule or
+leaves a real risk), or optional (improvement). An axis with none reports
+`No findings`. The parent decides what to act on.
 
 Do not request documentation merely because files changed.

@@ -1,8 +1,8 @@
 # RPTC Workflow Plugin
 
-> Provider-aware Research, Plan, Test, and Commit workflows for Claude Code and Codex.
+> Provider-aware Research, Plan, TDD, and Commit workflows for Claude Code and Codex.
 
-**Version**: 4.1.0
+**Version**: 4.2.0
 **Status**: Beta
 **License**: MIT
 
@@ -13,7 +13,7 @@ The distributable package lives under [`plugins/rptc`](plugins/rptc/README.md).
 RPTC ships from one repository to two different harnesses:
 
 - Claude exposes slash commands, plugin-declared agents, native plan mode,
-  task dependencies, and persistent agent teams.
+  task dependencies, and experimental agent teams.
 - Codex exposes skills, `update_plan`, parent-orchestrated agents, spawn
   barriers, and packaged TOML agents installed by `rptc-init`.
 

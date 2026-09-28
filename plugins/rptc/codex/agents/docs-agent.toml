@@ -2,7 +2,7 @@ name = "rptc:docs-agent"
 description = "Report-only reviewer for documentation required by changed public behavior, APIs, configuration, migration, or operating procedures."
 sandbox_mode = "read-only"
 developer_instructions = '''
-Follow `rptc:docs-methodology`.
+Follow `rptc:core-principles` and `rptc:docs-methodology`.
 
 Report only. Identify documentation made inaccurate, incomplete, or
 operationally unsafe by the change. Avoid stuffing AGENTS.md with discoverable

@@ -1,47 +1,31 @@
-# RPTC project template
+# RPTC project setup
 
-RPTC project configuration is optional. Run the provider's `rptc-config` flow
-when a repository needs durable overrides.
-
-## `.rptc/project.yml`
-
-```yaml
-version: 1
-
-approval: balanced
-workspace: auto
-
-context:
-  glossary: null
-  adrs: null
-
-checks:
-  focused: null
-  full: null
-  typecheck: null
-  lint: null
-  build: null
-
-ship:
-  commit_style: project
-  stage: selected-files
-```
-
-Record only durable project facts that cannot be reliably rediscovered.
-
-## Provider pointer
-
-Claude `CLAUDE.md`:
+RPTC needs no project configuration file. Its flows discover checks from the
+repository. To save that discovery, run `/rptc:config` (Claude) or the
+`rptc-config` skill (Codex). It finds the project's real commands in
+task-runner files and CI, then proposes a short section for the project's
+instruction file (`CLAUDE.md` for Claude, `AGENTS.md` for Codex):
 
 ```markdown
-RPTC project contract: `.rptc/project.yml`.
+## Checks
+
+- Focused tests: `npm test -- <path>`
+- Full tests: `npm test`
+- Typecheck: `npm run typecheck`
+- Lint: `npm run lint`
+- Build: `npm run build`
 ```
 
-Codex `AGENTS.md`:
+The flow shows the exact edit and writes it only after you approve. It lists
+only the categories the project has.
 
-```markdown
-RPTC project contract: `.rptc/project.yml`.
-```
+Keep instruction files minimal. Do not paste RPTC's command catalog, workflow
+diagrams, or plugin version into them.
 
-Do not paste RPTC's command catalog, workflow diagrams, or plugin version into
-project instruction files.
+## Upgrading
+
+- RPTC 3.x `<!-- RPTC-START ... RPTC-END -->` blocks: the config flow proposes
+  replacing the block with the Checks section.
+- RPTC 4.0-4.1 `.rptc/project.yml`: RPTC no longer reads this file. The config
+  flow offers to move its checks into the Checks section, delete the file, and
+  remove the `RPTC project contract:` pointer.

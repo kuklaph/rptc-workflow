@@ -75,19 +75,12 @@
       "parity": "provider-specific",
       "reason": "Claude writes CLAUDE.md and Codex writes AGENTS.md; their project instruction and plugin discovery surfaces differ."
     },
-    "feat-team": {
-      "shared_contract": "shared/workflows/feature.md",
-      "claude": "claude/commands/feat-team.md",
-      "codex": null,
-      "parity": "intentional-asymmetry",
-      "reason": "Claude exposes persistent peer teams and inbox messaging. Codex uses parent-orchestrated spawn_agent delegation without an equivalent persistent team command."
-    },
     "fix-team": {
       "shared_contract": "shared/workflows/fix.md",
       "claude": "claude/commands/fix-team.md",
       "codex": null,
       "parity": "intentional-asymmetry",
-      "reason": "Claude exposes persistent peer teams and inbox messaging. Codex uses parent-orchestrated spawn_agent delegation without an equivalent persistent team command."
+      "reason": "Claude agent teams (experimental) let read-only investigators message each other to test competing hypotheses. Codex sub-agents report only to the parent, so Codex runs the standard fix adapter."
     },
     "init": {
       "shared_contract": "shared/provider-adapter-contract.md",

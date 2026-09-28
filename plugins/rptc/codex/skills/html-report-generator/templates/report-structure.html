@@ -7,35 +7,213 @@
   <style>
     :root {
       color-scheme: light dark;
-      font-family: system-ui, sans-serif;
+      --bg: #ffffff;
+      --surface: #f5f6f8;
+      --text: #1d2127;
+      --muted: #59616d;
+      --border: #d5d9df;
+      --link: #0b5cad;
+      --accent: #0b5cad;
+      --code-bg: #f0f2f5;
+      --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #16181c;
+        --surface: #1e2126;
+        --text: #e4e7eb;
+        --muted: #a0a8b3;
+        --border: #363b43;
+        --link: #7db4f0;
+        --accent: #7db4f0;
+        --code-bg: #22262c;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 1rem;
       line-height: 1.6;
     }
-    body {
+
+    .page {
+      max-width: 48rem;
       margin: 0 auto;
-      max-width: 76rem;
-      padding: 2rem;
+      padding: 3rem 1.5rem 4rem;
     }
-    main { min-width: 0; }
-    nav { border-bottom: 1px solid currentColor; margin-bottom: 2rem; }
-    pre, code { font-family: ui-monospace, monospace; }
-    pre { overflow-x: auto; padding: 1rem; border: 1px solid currentColor; }
-    .table-wrap { overflow-x: auto; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid currentColor; padding: .5rem; text-align: left; }
-    a:focus-visible, button:focus-visible { outline: 3px solid currentColor; }
-    @media (max-width: 40rem) { body { padding: 1rem; } }
-    @media print { nav, .screen-only { display: none; } body { max-width: none; } }
-    @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem;
+      padding-bottom: 1.25rem;
+    }
+
+    h1, h2, h3 { line-height: 1.25; margin: 2rem 0 0.75rem; }
+    h1 { font-size: 2rem; margin-top: 0; }
+    h2 { font-size: 1.4rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
+    h3 { font-size: 1.1rem; }
+    h2, h3 { scroll-margin-top: 1rem; }
+
+    p, ul, ol { margin: 0 0 1rem; }
+    li + li { margin-top: 0.25rem; }
+
+    .meta { color: var(--muted); font-size: 0.9rem; margin: 0.5rem 0 0; }
+
+    a { color: var(--link); text-underline-offset: 0.15em; }
+    a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    nav.toc {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 2rem;
+      padding: 1rem 1.25rem;
+    }
+    nav.toc h2 { border: 0; font-size: 1rem; margin: 0 0 0.5rem; padding: 0; }
+    nav.toc ol { margin: 0; padding-left: 1.25rem; }
+
+    .summary {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+    }
+
+    code, pre { font-family: var(--font-mono); font-size: 0.9em; }
+    code { background: var(--code-bg); border-radius: 3px; padding: 0.1em 0.3em; }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin: 0 0 1rem;
+      overflow-x: auto;
+      padding: 0.75rem 1rem;
+    }
+    pre code { background: none; padding: 0; }
+
+    .table-wrap { margin: 0 0 1rem; overflow-x: auto; }
+    table { border-collapse: collapse; min-width: 100%; font-size: 0.95rem; }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.45rem 0.7rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: var(--surface); font-weight: 600; }
+
+    blockquote {
+      border-left: 3px solid var(--border);
+      color: var(--muted);
+      margin: 0 0 1rem;
+      padding-left: 1rem;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 3rem;
+      padding-top: 1rem;
+    }
+
+    @media (max-width: 40rem) {
+      .page { padding: 1.5rem 1rem 3rem; }
+      h1 { font-size: 1.6rem; }
+    }
+
+    @media print {
+      :root {
+        --bg: #ffffff;
+        --surface: #ffffff;
+        --text: #000000;
+        --muted: #333333;
+        --border: #999999;
+        --link: #000000;
+        --code-bg: #ffffff;
+      }
+      .page { max-width: none; padding: 0; }
+      nav.toc { display: none; }
+      h2, h3 { break-after: avoid; }
+      pre, table, blockquote { break-inside: avoid; }
+      pre { white-space: pre-wrap; }
+      a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.8em; }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>{{TITLE}}</h1>
-    <p>{{METADATA}}</p>
-  </header>
-  {{TABLE_OF_CONTENTS}}
-  <main>
-    {{CONTENT}}
-  </main>
+  <div class="page">
+    <header>
+      <h1>{{TITLE}}</h1>
+      <p class="meta">{{DATE}} · {{SCOPE_OR_AUTHOR}}</p>
+    </header>
+
+    <!-- Keep the table of contents for long reports; delete it for short ones. -->
+    <nav class="toc" aria-labelledby="toc-heading">
+      <h2 id="toc-heading">Contents</h2>
+      <ol>
+        <li><a href="#summary">Summary</a></li>
+        <li><a href="#findings">Findings</a></li>
+        <li><a href="#evidence">Evidence and sources</a></li>
+        <li><a href="#open-questions">Open questions</a></li>
+        <li><a href="#next-steps">Next steps</a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <section aria-labelledby="summary">
+        <h2 id="summary">Summary</h2>
+        <div class="summary">
+          <p>{{SUMMARY: the answer or outcome in a few sentences}}</p>
+        </div>
+      </section>
+
+      <section aria-labelledby="findings">
+        <h2 id="findings">Findings</h2>
+        <h3 id="finding-1">{{FINDING_TITLE}}</h3>
+        <p>{{FINDING_DETAIL}}</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th scope="col">{{COLUMN}}</th><th scope="col">{{COLUMN}}</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>{{VALUE}}</td><td>{{VALUE}}</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <pre><code>{{CODE_OR_COMMAND_OUTPUT}}</code></pre>
+      </section>
+
+      <section aria-labelledby="evidence">
+        <h2 id="evidence">Evidence and sources</h2>
+        <ol>
+          <li><a href="{{URL}}">{{SOURCE_TITLE}}</a>: {{WHAT_IT_SUPPORTS}}</li>
+        </ol>
+      </section>
+
+      <section aria-labelledby="open-questions">
+        <h2 id="open-questions">Open questions</h2>
+        <ul>
+          <li>{{QUESTION}}</li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="next-steps">
+        <h2 id="next-steps">Next steps</h2>
+        <ol>
+          <li>{{ACTION}}</li>
+        </ol>
+      </section>
+    </main>
+
+    <footer>
+      <p>{{FOOTER: how the report was produced and any checks not performed}}</p>
+    </footer>
+  </div>
 </body>
 </html>

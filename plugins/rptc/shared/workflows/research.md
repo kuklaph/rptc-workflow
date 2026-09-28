@@ -10,7 +10,8 @@ claim and a clear distinction between facts, inference, disagreement, and gaps.
 1. State the question and scope.
 2. Choose codebase, external, or hybrid mode.
 3. Build an evidence plan from the claim.
-4. Use parallel investigators only for independent evidence sources.
+4. Answer narrow questions in the parent. Use parallel research agents only for
+   independent, sizeable evidence sources.
 5. Verify citations and code locations.
 6. Synthesize without hiding conflicting evidence.
 7. Return the answer inline unless the user requested an artifact.

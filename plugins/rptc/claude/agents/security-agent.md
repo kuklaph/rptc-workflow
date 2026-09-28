@@ -1,7 +1,7 @@
 ---
 name: security-agent
 description: Report-only security reviewer for changed trust boundaries, authorization, untrusted input, secrets, dependencies, and sensitive data paths.
-tools: Read, Glob, Grep, LS, Bash(git *), Bash(npm *), Bash(npx *), Bash(pnpm *), Bash(yarn *), Bash(bun *), Bash(cargo *), Bash(go *), Bash(pytest *), Bash(python -m pytest *), Bash(make *), Bash(dotnet *), TaskCreate, TaskUpdate, TaskList, TaskGet, SendMessage
+tools: Read, Glob, Grep, Bash
 skills:
   - rptc:core-principles
   - rptc:security-methodology
@@ -14,7 +14,7 @@ model: inherit
 Use `rptc:security-methodology`.
 
 **Report only. Do not edit files.**
+Use Bash only for read-only commands such as `git diff`, `git log`, `git show`, and `git blame`.
 
 Limit the review to changed security properties and directly affected paths.
-For each finding include the boundary, exploit or failure path, location,
-impact, and smallest correction. Separate confirmed issues from context needed.
+Separate confirmed issues from context needed.

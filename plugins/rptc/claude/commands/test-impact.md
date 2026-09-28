@@ -1,6 +1,6 @@
 ---
 description: Audit changed behavior against tests and independent contracts without assuming implementation or tests are automatically correct
-allowed-tools: Bash(git *), Bash(npm *), Bash(npx *), Bash(bunx *), Bash(pnpm *), Bash(yarn *), Bash(bun *), Bash(cargo *), Bash(go *), Bash(pytest *), Bash(python -m pytest *), Bash(make *), Bash(dotnet *), Read, Write, Edit, Glob, Grep, LS, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion
+allowed-tools: Bash(npm test *), Bash(npm run *), Bash(pnpm test *), Bash(pnpm run *), Bash(yarn test *), Bash(yarn run *), Bash(bun test *), Bash(bun run *), Bash(pytest *), Bash(python -m pytest *), Bash(uv run pytest *), Bash(cargo test *), Bash(cargo build *), Bash(cargo check *), Bash(cargo clippy *), Bash(go test *), Bash(go build *), Bash(go vet *), Bash(dotnet test *), Bash(dotnet build *), Read, Write, Edit, Glob, Grep, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion
 ---
 
 # /rptc:test-impact
@@ -25,17 +25,12 @@ Skill("rptc:verification-evidence")
 
 Read `${CLAUDE_PLUGIN_ROOT}/shared/workflows/test-impact.md`.
 
-Create tasks for authority, analysis, decisions, corrections, and verification.
+When several behaviors or packages are in scope, track authority, analysis,
+decisions, corrections, and verification with `TaskCreate` and `TaskUpdate`.
 
 ## 2. Establish behavioral authority
 
-Collect, in order:
-
-1. explicit requirements or acceptance criteria;
-2. public contracts, schemas, standards, or API guarantees;
-3. previously verified external behavior or a reproduction;
-4. existing tests;
-5. current implementation.
+Apply the shared contract's behavioral-authority order.
 
 Do not proceed from the assumption that either current implementation or tests
 are correct.
@@ -83,5 +78,5 @@ Classify unresolved behavior as `INCONCLUSIVE`; do not force convergence.
 ## 6. Report
 
 List behavior, authority, classification, correction, evidence, and remaining
-gaps. Project-defined coverage policy applies; RPTC supplies no universal
-percentage.
+gaps. List every test edit applied automatically. Project-defined coverage
+policy applies; RPTC supplies no universal percentage.

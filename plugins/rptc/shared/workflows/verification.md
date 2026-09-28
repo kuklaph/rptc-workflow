@@ -25,7 +25,8 @@ Keep findings separate:
 
 - **Request fidelity:** missing, partial, incorrect, or unrequested behavior.
 - **Correctness and risk:** executable failure paths, integration gaps, unsafe
-  assumptions, and blast-radius concerns.
+  assumptions, blast-radius concerns, tests edited, removed, or weakened by the
+  change, and implementation that special-cases test inputs.
 - **Repository fit:** documented convention violations, inconsistent local
   patterns, unnecessary abstractions, and maintainability concerns.
 - **Documentation impact:** public behavior or operational procedures that must
@@ -33,8 +34,22 @@ Keep findings separate:
 - **Security impact:** changed trust boundaries, authorization, input handling,
   secret handling, dependency assumptions, or sensitive data paths.
 
+Rate each finding:
+
+- **blocking:** breaks the request, correctness, or security;
+- **should-fix:** violates a documented rule or leaves a real risk;
+- **optional:** an improvement.
+
 A finding must cite a location plus evidence or a documented rule. Numerical
 model confidence is not evidence.
+
+An axis with no findings reports `No findings`; that is a normal result.
+
+Reviewers report every evidence-backed finding; the parent decides what to act
+on. Act on blocking and should-fix findings that affect correctness, the
+request, security, or a documented rule. List optional findings without acting
+on them. In a report-only pass, mark those findings as requiring action instead
+of fixing them.
 
 ## Recheck loop
 
@@ -44,9 +59,10 @@ After accepted fixes, rerun:
 2. the original acceptance predicates;
 3. the review axis that produced the finding.
 
-Stop when all predicates are `VERIFIED` or when remaining items are explicitly
-`NOT VERIFIED`, `INCONCLUSIVE`, or accepted as open. Do not loop solely to obtain
-an empty reviewer response.
+Stop when every accepted fix has been applied and rechecked, and each remaining
+claim is `VERIFIED`, or `NOT VERIFIED` / `INCONCLUSIVE` with a stated reason the
+loop cannot resolve it (declined, blocked, or awaiting a product decision). Do
+not loop solely to obtain an empty reviewer response.
 
 ## Status language
 

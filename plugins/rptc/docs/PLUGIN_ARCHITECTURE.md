@@ -18,11 +18,8 @@ plugins/rptc/
 │   └── agents/
 ├── codex/
 │   ├── skills/
-│   ├── agents/
-│   └── sop/
+│   └── agents/
 ├── skills/
-├── sop/
-├── templates/
 └── docs/
 ```
 
@@ -54,11 +51,12 @@ Claude owns:
 - `AskUserQuestion`;
 - `EnterPlanMode` and `ExitPlanMode`;
 - plugin-declared agents;
-- persistent teams through `TeamCreate` and `SendMessage`;
+- experimental agent teams: teammates spawned through `Agent` with a `name`,
+  plus `SendMessage`;
 - `${CLAUDE_PLUGIN_ROOT}` resolution.
 
-Team commands are Claude-only because Codex has no equivalent persistent peer
-team and inbox surface.
+`/rptc:fix-team` is Claude-only because Codex sub-agents report only to the
+parent and cannot message one another.
 
 ## Codex adapter
 
@@ -92,18 +90,6 @@ Parity classes:
 - `provider-specific`: both implement the flow with different project or
   harness behavior;
 - `intentional-asymmetry`: one provider exposes a capability the other does not.
-
-## Removed surfaces
-
-RPTC no longer packages:
-
-- an external chat-notification integration;
-- a named semantic-navigation service or its project state;
-- the legacy production-to-test synchronization flow;
-- the old test synchronization and automatic test-fixer agents.
-
-`test-impact` remains as a contract-first workflow. It uses a focused
-methodology and the provider's normal repository, task, and delegation tools.
 
 ## Validation
 

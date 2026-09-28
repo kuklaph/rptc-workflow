@@ -1,7 +1,7 @@
 {
   "name": "rptc",
-  "version": "4.1.0",
-  "description": "Research -> Plan -> TDD -> Commit workflow with quality gates, test-driven implementation, and documentation review.",
+  "version": "4.2.0",
+  "description": "Risk-scaled feature, fix, verification, and commit workflows with test-driven implementation and evidence-based completion for Claude Code and Codex.",
   "author": {
     "name": "kuklaph",
     "email": "30103848+kuklaph@users.noreply.github.com",
@@ -15,10 +15,11 @@
     "tdd",
     "research",
     "planning",
-    "quality-gates",
-    "documentation",
     "test-driven-development",
-    "multi-agent"
+    "multi-agent",
+    "debugging",
+    "verification",
+    "codex"
   ],
   "skills": "./codex/skills/",
   "interface": {

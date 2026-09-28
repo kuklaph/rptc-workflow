@@ -5,17 +5,15 @@ description: Classify completion claims as VERIFIED, NOT VERIFIED, or INCONCLUSI
 
 # Verification Evidence
 
-Read `RPTC plugin root/shared/workflows/verification.md`.
+Read `${CLAUDE_PLUGIN_ROOT}/shared/workflows/verification.md`.
 
-For each acceptance predicate or material claim, record:
+For each acceptance predicate or material claim, record one line:
 
 ```text
-Claim:
-Status: VERIFIED | NOT VERIFIED | INCONCLUSIVE
-Evidence:
-Observed result:
-Git state or artifact:
+<claim>: <VERIFIED | NOT VERIFIED | INCONCLUSIVE>. <command or artifact> → <observed result>
 ```
+
+Add the git state only when the evidence predates the current diff.
 
 `VERIFIED` requires a direct observation that proves the stated claim.
 `NOT VERIFIED` means the predicate failed.
@@ -24,3 +22,4 @@ prevented a reliable answer.
 
 Do not promote a weaker proxy into a stronger claim. A typecheck proves type
 consistency. It does not by itself prove runtime behavior.
+A statement that TDD was followed is not evidence.

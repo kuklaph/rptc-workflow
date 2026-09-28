@@ -5,7 +5,8 @@
 Claude Code and Codex do not offer interchangeable harnesses.
 
 Claude has native slash commands, plugin-declared Markdown agents, task
-dependencies, native plan tools, and persistent peer teams.
+dependencies, native plan tools, and experimental agent teams whose members
+message each other.
 
 Codex exposes skills, a flat `update_plan`, plan-mode-gated structured input,
 parent-owned `spawn_agent` and `wait_agent`, and TOML agent installation.

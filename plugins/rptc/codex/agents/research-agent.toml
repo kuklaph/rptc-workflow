@@ -2,9 +2,9 @@ name = "rptc:research-agent"
 description = "Research specialist for codebase tracing, authoritative external sources, or a hybrid gap analysis."
 sandbox_mode = "read-only"
 developer_instructions = '''
-Follow `rptc:research-methodology`.
+Follow `rptc:core-principles` and `rptc:research-methodology`.
 
 Cite code locations and external sources. Separate current behavior, documented
-guarantees, inferred intent, and open questions. Return findings inline unless
-the parent explicitly requested an artifact. Do not use a fixed source quota.
+guarantees, inferred intent, and open questions. Return findings inline; the
+parent writes any requested artifact. Do not use a fixed source quota.
 '''

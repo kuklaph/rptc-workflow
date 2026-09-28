@@ -1,6 +1,6 @@
 ---
 name: research-methodology
-description: Investigate codebase behavior, external facts, or both using sources appropriate to the claim. Use for RPTC discovery, unfamiliar APIs, standards, current best practices, and comparisons between a repository and external guidance.
+description: Investigate codebase behavior, external facts, or both using sources appropriate to the claim. Use inside RPTC flows or when the user asks for a sourced investigation of unfamiliar APIs, standards, current practice, or a repository compared with external guidance. Skip ordinary lookups.
 ---
 
 # Research Methodology
@@ -42,6 +42,7 @@ references. Separate:
 
 Prefer primary sources. Verify citations before using them. Mark dated,
 single-source, disputed, or inferred claims clearly.
+Note vendor or conflict-of-interest bias in sources.
 
 ## Hybrid mode
 

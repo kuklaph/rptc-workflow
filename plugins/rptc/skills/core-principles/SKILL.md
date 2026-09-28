@@ -5,7 +5,7 @@ description: RPTC's portable engineering invariants. Load for RPTC feature, fix,
 
 # RPTC Core Principles
 
-Read `RPTC plugin root/shared/engineering-policy.md` and apply it as the
+Read `${CLAUDE_PLUGIN_ROOT}/shared/engineering-policy.md` and apply it as the
 authoritative cross-provider policy.
 
 Project instructions and repository-defined conventions override RPTC defaults

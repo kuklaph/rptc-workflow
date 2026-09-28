@@ -26,11 +26,10 @@ Load conditionally:
 rptc:tdd-methodology        a practical regression-test seam exists
 rptc:architect-methodology  interfaces, ownership, or sequencing remain unresolved
 rptc:brainstorming          a genuine product decision remains
-rptc:frontend-design        user-facing frontend behavior is affected
 rptc:unslop-writing-clearly substantial prose, documentation, or user-facing copy
 ```
 
-Read `RPTC plugin root/shared/workflows/fix.md`, project `AGENTS.md`,
+Read `../../../shared/workflows/fix.md` (relative to this SKILL.md), project `AGENTS.md`,
 repository guidance, and declared checks.
 
 Do not initialize the full `update_plan` phase structure before reproduction
@@ -58,8 +57,9 @@ change one variable at a time. Confirm the surviving mechanism with executable
 or runtime evidence.
 
 For distinct read-only investigations, use `rptc:research-agent` when available.
-If custom agents are missing, run `rptc:rptc-init` once. If sub-agent tools are
-unavailable, perform the same investigation in the parent.
+If custom agents are missing, run `rptc:rptc-init` once to install the packaged
+agents, mention the installation in the final report, and retry. If sub-agent
+tools are unavailable, perform the same investigation in the parent.
 
 At every `spawn_agent` point, immediately call `wait_agent` for all required
 agent IDs. The parent does not edit, test, or synthesize while they run.
@@ -100,10 +100,11 @@ Rerun:
 3. repository-declared affected checks;
 4. selected independent review.
 
-Select reviewers by changed properties and unresolved risk rather than always running a general reviewer. Require independent final verification for high-risk fixes. Use the spawn barrier for each selected set.
+Select reviewers by changed properties and unresolved risk rather than always running a general reviewer. Require independent final verification for high-risk fixes. Use security review when a trust boundary changed and documentation review when public or operational behavior changed. Use the spawn barrier for each selected set.
 
-Address confirmed findings and rerun the affected evidence. Do not loop merely
-to obtain zero findings.
+Act on blocking and should-fix findings that affect correctness, the request,
+security, or a documented rule; list optional findings without acting on them.
+Rerun the affected evidence. Do not loop merely to obtain zero findings.
 
 ## 7. Complete
 

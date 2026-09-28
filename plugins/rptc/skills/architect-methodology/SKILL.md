@@ -1,6 +1,6 @@
 ---
 name: architect-methodology
-description: Design implementation structure when module boundaries, interfaces, data shapes, dependencies, ownership, or sequencing are genuinely uncertain. Use before non-trivial cross-component work or high-risk changes. Skip localized work that follows an established pattern.
+description: Plan a design when interfaces, data shapes, ownership, sequencing, or migration are genuinely uncertain, including high-risk work. Skip changes that follow an established pattern, even across several files.
 ---
 
 # Architect Methodology
@@ -32,8 +32,9 @@ different designs only when several are viable and the trade-off matters.
 ## Plan as hypothesis
 
 State assumptions and the evidence that would invalidate the design. For a
-large change, implement one representative vertical slice before committing to
-the remaining structure. Redesign when reality repeatedly fights the plan.
+large change, name the representative vertical slice to implement first and the
+signals from it that should trigger a redesign before the remaining structure
+is built.
 
 ## Output
 
@@ -43,8 +44,9 @@ Return:
 2. recommended design;
 3. alternatives considered when relevant;
 4. interface and data-shape decisions;
-5. implementation slices and dependencies;
-6. verification and rollback;
-7. open product decisions.
+5. implementation slices and dependencies, representative slice first;
+6. verification; rollback when high-risk or hard to reverse;
+7. assumptions and invalidation signals;
+8. open product decisions.
 
 Avoid universal line, file, test-count, and coverage quotas. Project rules win.

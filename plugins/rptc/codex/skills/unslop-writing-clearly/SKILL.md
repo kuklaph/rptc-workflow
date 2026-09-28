@@ -1,51 +1,46 @@
 ---
 name: unslop-writing-clearly
-description: Edit substantial user-facing prose to remove AI writing patterns while preserving the intended voice. Use for documentation, reports, explanations, release notes, and other prose deliverables; do not load for code-only work.
+description: Edit prose deliverables (documentation, reports, commit messages, PR descriptions, release notes, user-facing copy) to remove AI writing patterns while keeping the intended voice. Not for code-only work.
 ---
 
 # Unslop and Write Clearly
 
-Apply this skill to substantial prose artifacts. Do not make feature or bug-fix
-work load the full style guide when the task produces no meaningful prose.
-
 ## Process
 
-1. Preserve meaning and the intended audience.
-2. Remove obvious AI patterns, filler, puffery, vague attribution, and repetitive structure.
-3. Prefer concrete facts and plain language.
-4. Keep the source's voice rather than imposing a generic style.
-5. Self-audit the finished prose for remaining model tells.
+1. Preserve meaning, audience, and the source's voice.
+2. Fix substance first: replace generic claims with the fact, mechanism,
+   example, or number. Surface tells usually mark vague content.
+3. Remove the tells below.
+4. Reread as the reader: "What makes this obviously machine-written?" Fix what
+   remains.
 
-## Structure and correctness
+## Tells current models still produce
 
-- Keep one main topic per paragraph.
-- Prefer direct, positive statements when they are clearer.
-- Fix accidental fragments, comma splices, dangling modifiers, and inconsistent tense.
-- Keep related words and clauses close together.
-- Use parallel grammar for parallel ideas.
-- Split sentences that require rereading to parse.
-- Prefer active voice when the actor matters.
+- Contrast framing: "Not just X, but Y", "It's not X, it's Y", "This isn't about X. It's about Y.", "No X. No Y. Just Z.". State the point; name an alternative only if the reader raised it.
+- Significance padding: "marking a pivotal moment", "reflects broader trends", "setting the stage for", "a testament to", trailing -ing clauses (highlighting, showcasing, emphasizing, ensuring, fostering). Cut, or state the specific consequence.
+- Copula avoidance: "serves as", "stands as", "functions as", "boasts", "features", "offers" where "is" or "has" fits.
+- Vague links and sources: "associated with", "in connection with", "experts say", "several sources". Name the relationship and the source.
+- Stock words: delve, foster, leverage, crucial, pivotal, enhance, showcase, underscore, tapestry, landscape (abstract), vibrant, genuinely, importantly, "it's worth noting". Use the plain word.
+- Mannered prose: metaphors and invented compound labels in place of the literal claim. Say it literally.
+- Forced triplets: three items when the content has one, two, or four.
+- Hooks and labeled conclusions: "The result? …", "Bottom line:", "In short:". State the point.
+- Procedural narration: what you preserved, avoided, or left unchanged, and how you will organize the answer. Report what changed, including in commit messages and PR descriptions.
+- Monotone sentences: uniform length, clauses chained with "and", few commas or parentheses. Vary length; split sentences that need rereading.
+- Em dashes: current models, Claude especially, overuse them. Prefer a comma, colon, parentheses, or a new sentence.
+- Formatting habits: bold-label bullets that restate the line, bold on every key term, tables or headings for content that is prose, title-case headings (use sentence case), decorative emoji. Use lists for parallel, sequential, or compared items.
+- Chatbot register: "Great question", "You're absolutely right", "I hope this helps", "Let me know if", "Honest caveat:". Answer directly.
+- Padding: filler sections, redundant summaries, generic closers, stacked caveats. Match length to the task.
 
-## Style
+## Integrity
 
-- Be specific. Replace vague reactions with the fact, mechanism, example, or number.
-- Cut puffery, promotional language, generic conclusions, and empty signposting.
-- Avoid synonym cycling and forced groups of three.
-- Prefer plain words: use, help, many, if.
-- Avoid em-dash and colon habits when a period or ordinary sentence is clearer.
-- Do not overuse boldface, headings, decorative formatting, or emojis.
-- Use sentence-case headings.
-- Remove chatbot filler and sycophantic phrasing.
-- Cut excessive hedging and unnecessary adverbs.
-- Do not invent sources, quotations, identifiers, or links.
+- Never invent sources, quotations, identifiers, links, DOIs, or page numbers. A plausible citation is not a verified one.
+- Mark quoted source text as quotation; paraphrase the rest.
+- Do not fill gaps with speculation; find the source or say it is unknown.
+- Present judgment as judgment; call something fact only when it is checkable.
+- Remove template residue and tool artifacts (placeholders, citation markup, tracking parameters).
 
 ## Context
 
 Match the artifact. Neutral documentation should stay neutral. A personal essay
 may use first person and stronger voice. Technical writing should name the
 mechanism rather than describe how it feels.
-
-If the task is primarily code, configuration, testing, diagnosis, or repository
-work, rely on the workflow's normal completion summary instead of loading this
-editorial checklist. Load this skill only when prose quality is itself part of
-the deliverable.

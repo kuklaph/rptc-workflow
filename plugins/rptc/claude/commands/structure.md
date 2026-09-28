@@ -1,6 +1,6 @@
 ---
 description: Audit concrete codebase structure friction and propose evidence-backed deepening refactors
-allowed-tools: Bash(git *), Read, Write, Glob, Grep, LS, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion
+allowed-tools: Read, Write, Glob, Grep, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion
 ---
 
 # /rptc:structure
@@ -15,8 +15,8 @@ Shared contract: `shared/workflows/structure.md`
 
 ## Procedure
 
-1. Load `rptc:core-principles`, `rptc:structure-methodology`, and
-   `rptc:unslop-writing-clearly`.
+1. Load `rptc:core-principles` and `rptc:structure-methodology`. Load
+   `rptc:unslop-writing-clearly` when the output is substantial prose.
 2. Read `${CLAUDE_PLUGIN_ROOT}/shared/workflows/structure.md`.
 3. Scope the audit before scanning.
 4. Use read-only agents for distinct module, dependency, or testability angles

@@ -1,6 +1,6 @@
 ---
 description: Verify acceptance claims, changed risks, and repository fit with direct evidence
-allowed-tools: Bash(git *), Bash(npm *), Bash(npx *), Bash(bunx *), Bash(pnpm *), Bash(yarn *), Bash(bun *), Bash(cargo *), Bash(go *), Bash(pytest *), Bash(python -m pytest *), Bash(make *), Bash(dotnet *), Read, Write, Edit, Glob, Grep, LS, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion
+allowed-tools: Bash(npm test *), Bash(npm run *), Bash(pnpm test *), Bash(pnpm run *), Bash(yarn test *), Bash(yarn run *), Bash(bun test *), Bash(bun run *), Bash(pytest *), Bash(python -m pytest *), Bash(uv run pytest *), Bash(cargo test *), Bash(cargo build *), Bash(cargo check *), Bash(cargo clippy *), Bash(go test *), Bash(go build *), Bash(go vet *), Bash(dotnet test *), Bash(dotnet build *), Read, Write, Edit, Glob, Grep, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion
 ---
 
 # /rptc:verify
@@ -72,17 +72,19 @@ Keep findings under separate headings:
 A confirmed finding needs a location plus evidence or a documented rule.
 Do not filter or rank findings by arbitrary numerical confidence.
 
-Do not modify files unless the user asked this verification pass to fix findings.
+Mark blocking and should-fix findings that affect correctness, the stated
+request, security, or a documented rule as requiring action; list optional
+findings separately.
+
+Fix them only when the user asked this verification pass to fix findings;
+otherwise leave files unchanged.
 
 ## 6. Report
 
 For each material claim, output:
 
 ```text
-Claim:
-Status: VERIFIED | NOT VERIFIED | INCONCLUSIVE
-Evidence:
-Observed result:
+<claim>: <VERIFIED | NOT VERIFIED | INCONCLUSIVE>. <command or artifact> → <observed result>
 ```
 
 List findings, checks run, checks unavailable, and the smallest next action.

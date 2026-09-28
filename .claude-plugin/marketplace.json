@@ -5,15 +5,15 @@
     "email": "30103848+kuklaph@users.noreply.github.com"
   },
   "metadata": {
-    "description": "Official marketplace for RPTC (Research → Plan → TDD → Commit) workflow plugin",
-    "version": "4.1.0"
+    "description": "Marketplace for the RPTC (Research → Plan → TDD → Commit) workflow plugin for Claude Code and Codex",
+    "version": "4.2.0"
   },
   "plugins": [
     {
       "name": "rptc",
       "source": "./plugins/rptc",
-      "description": "Complete RPTC workflow with research, planning, TDD implementation, and quality gates",
-      "version": "4.1.0",
+      "description": "Risk-scaled feature, fix, verification, and commit workflows with test-driven implementation and evidence-based completion",
+      "version": "4.2.0",
       "author": {
         "name": "kuklaph",
         "email": "30103848+kuklaph@users.noreply.github.com"
@@ -26,9 +26,9 @@
         "tdd",
         "research",
         "planning",
-        "quality-gates",
-        "documentation",
-        "pm-collaboration"
+        "debugging",
+        "verification",
+        "codex"
       ],
       "category": "workflow"
     }

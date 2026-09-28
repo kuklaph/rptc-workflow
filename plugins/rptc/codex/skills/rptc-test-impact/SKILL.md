@@ -21,11 +21,12 @@ rptc:test-impact-methodology
 rptc:verification-evidence
 ```
 
-Read `RPTC plugin root/shared/workflows/test-impact.md`.
+Read `../../../shared/workflows/test-impact.md` (relative to this SKILL.md).
 
 Default to changed files. Accept a path or dry-run request.
 
-Keep these phases visible in `update_plan`:
+When several behaviors or packages are in scope, track these phases in
+`update_plan`:
 
 1. Establish behavioral authority.
 2. Analyze affected behavior and tests.
@@ -35,8 +36,7 @@ Keep these phases visible in `update_plan`:
 
 ## 2. Establish authority
 
-Collect requirements, public contracts, prior verified behavior, existing
-tests, and current implementation in that order.
+Apply the shared contract's behavioral-authority order.
 
 Do not make either implementation or tests the automatic source of truth.
 
@@ -69,7 +69,8 @@ ownership, then inspect the actual diff.
 ## 5. Verify and report
 
 Rerun affected checks and nearby project-declared checks. Report
-failing-before and passing-after evidence where applicable.
+failing-before and passing-after evidence where applicable. List every test
+edit applied automatically.
 
 Unresolved expectations remain `INCONCLUSIVE`. Project-defined coverage policy
 applies; RPTC supplies no universal percentage.

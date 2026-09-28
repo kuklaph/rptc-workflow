@@ -17,7 +17,7 @@ Do not make the user answer a question the environment can resolve.
 
 ## Dialogue
 
-Ask one decision at a time. Lead with a recommendation when evidence supports
+Batch independent decisions; ask dependent ones in sequence. Lead with a recommendation when evidence supports
 one. Offer alternatives only when they are materially different and viable.
 
 Capture:
@@ -30,5 +30,3 @@ Capture:
 
 Stop when the implementation can proceed without guessing product intent. Do
 not turn a localized change into an interview ceremony.
-
-Provider adapters choose the available question and planning tools.
