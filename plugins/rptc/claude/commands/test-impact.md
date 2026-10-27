@@ -1,6 +1,6 @@
 ---
 description: Audit changed behavior against tests and independent contracts without assuming implementation or tests are automatically correct
-allowed-tools: Bash(npm test *), Bash(npm run *), Bash(pnpm test *), Bash(pnpm run *), Bash(yarn test *), Bash(yarn run *), Bash(bun test *), Bash(bun run *), Bash(pytest *), Bash(python -m pytest *), Bash(uv run pytest *), Bash(cargo test *), Bash(cargo build *), Bash(cargo check *), Bash(cargo clippy *), Bash(go test *), Bash(go build *), Bash(go vet *), Bash(dotnet test *), Bash(dotnet build *), Read, Write, Edit, Glob, Grep, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion
+allowed-tools: Bash(npm test *), Bash(npm run *), Bash(pnpm test *), Bash(pnpm run *), Bash(yarn test *), Bash(yarn run *), Bash(bun test *), Bash(bun run *), Bash(pytest *), Bash(python -m pytest *), Bash(uv run pytest *), Bash(cargo test *), Bash(cargo build *), Bash(cargo check *), Bash(cargo clippy *), Bash(go test *), Bash(go build *), Bash(go vet *), Bash(dotnet test *), Bash(dotnet build *), Read, Write, Edit, Glob, Grep, Agent, AskUserQuestion
 ---
 
 # /rptc:test-impact
@@ -25,8 +25,9 @@ Skill("rptc:verification-evidence")
 
 Read `${CLAUDE_PLUGIN_ROOT}/shared/workflows/test-impact.md`.
 
-When several behaviors or packages are in scope, track authority, analysis,
-decisions, corrections, and verification with `TaskCreate` and `TaskUpdate`.
+When several behaviors or packages are in scope, keep a short task list in your
+progress updates covering authority, analysis, decisions, corrections, and
+verification, marked as items finish.
 
 ## 2. Establish behavioral authority
 
@@ -47,8 +48,8 @@ For each changed behavior:
 - classify the result;
 - cite the authority and evidence for the classification.
 
-Use report-only `Task` agents only for bounded independent investigations, such
-as a contract lookup or a separate package inventory. The parent owns the
+Use report-only `Agent` sub-agents only for bounded independent investigations,
+such as a contract lookup or a separate package inventory. The parent owns the
 behavioral authority, classification, and final judgment.
 
 ## 4. Decide and correct

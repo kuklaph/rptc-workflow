@@ -7,9 +7,8 @@ description: Audit changed behavior against tests and independent contracts with
 
 Shared contract: `shared/workflows/test-impact.md`
 
-This is the Codex adapter. It uses `update_plan` and optional
-parent-orchestrated read-only investigations while preserving the shared
-behavioral-authority contract.
+This is the Codex adapter. It uses optional parent-orchestrated read-only
+investigations while preserving the shared behavioral-authority contract.
 
 ## 1. Initialize
 
@@ -25,8 +24,8 @@ Read `../../../shared/workflows/test-impact.md` (relative to this SKILL.md).
 
 Default to changed files. Accept a path or dry-run request.
 
-When several behaviors or packages are in scope, track these phases in
-`update_plan`:
+When several behaviors or packages are in scope, keep a short task list of these
+phases in your progress updates, marked as items finish:
 
 1. Establish behavioral authority.
 2. Analyze affected behavior and tests.
@@ -48,9 +47,12 @@ For each changed behavior, trace consumers, locate tests and harnesses, run the
 narrowest relevant check, classify the result, and cite its authority.
 
 Use `spawn_agent` only for bounded independent read-only investigations. At
-every spawn, immediately call `wait_agent` for all required IDs. The parent does
-not edit, test, or synthesize while those agents run. The parent owns the final
-classification.
+every spawn, keep calling `wait_agent` until every required agent has returned
+or failed; one call can return when the first agent finishes or the wait times
+out. The parent does not edit, test, or synthesize while those agents run. Once
+results are collected, close agents that are no longer needed with `close_agent`
+when available; finished agents count toward the concurrency limit until closed.
+The parent owns the final classification.
 
 ## 4. Decide and correct
 

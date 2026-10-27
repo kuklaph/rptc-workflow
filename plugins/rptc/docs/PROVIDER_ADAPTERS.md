@@ -4,12 +4,12 @@
 
 Claude Code and Codex do not offer interchangeable harnesses.
 
-Claude has native slash commands, plugin-declared Markdown agents, task
-dependencies, native plan tools, and experimental agent teams whose members
-message each other.
+Claude has native slash commands, plugin-declared Markdown agents, native plan
+tools, and experimental agent teams whose members message each other.
 
-Codex exposes skills, a flat `update_plan`, plan-mode-gated structured input,
-parent-owned `spawn_agent` and `wait_agent`, and TOML agent installation.
+Codex exposes skills, plan-mode-gated structured input, `spawn_agent` and
+`wait_agent` sub-agents that RPTC coordinates from the parent, and TOML agent
+installation.
 
 Trying to generate one identical prompt for both would either remove useful
 Claude behavior or describe Codex capabilities that do not exist.

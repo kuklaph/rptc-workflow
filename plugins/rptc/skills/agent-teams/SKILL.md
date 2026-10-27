@@ -5,8 +5,9 @@ description: Claude-only orchestration for several independent substantial works
 
 # RPTC Agent Teams
 
-Claude exposes persistent teams and peer messaging. Codex does not; Codex uses
-parent-orchestrated sub-agents through its feature and fix adapters.
+Claude exposes persistent teams and peer messaging. RPTC's Codex adapter has no
+team workflow; it keeps coordination in the parent session through its feature
+and fix adapters.
 
 Teams are experimental in Claude Code. They require
 `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` and an interactive session. Without
@@ -43,7 +44,12 @@ Teammates load CLAUDE.md, MCP servers, and skills, but not the lead's
 conversation. Each spawn prompt needs everything the teammate would otherwise
 have to guess: the goal, relevant paths and commands, the files it owns, the
 evidence standard, the report shape, and the skills to load (a teammate does not
-inherit an agent definition's preloaded skills).
+inherit an agent definition's preloaded skills). A teammate spawned from an RPTC
+agent definition has no `Skill` tool, so give it the resolved
+`${CLAUDE_PLUGIN_ROOT}/skills/<name>/SKILL.md` path to read instead. Such a
+teammate also lacks `SendMessage` unless it runs in-process, where Claude Code
+adds it; for teammates that must message each other, use in-process mode or a
+definition that lists `SendMessage`.
 
 ## Team modes
 
@@ -71,8 +77,10 @@ reliable than one reached alone. The Team Lead decides.
 - Only the lead spawns teammates; teammates cannot spawn their own.
 - Teammates do not recursively spawn teams.
 - Product and irreversible decisions go through the Team Lead.
-- Claude Code approves teammate plan requests automatically, so the Team Lead
-  reads any teammate plan before relying on it.
+- Claude Code approves a teammate's plan request automatically unless the
+  teammate's permission mode changed after it spawned, in which case the lead
+  reviews it. Either way, the Team Lead reads any teammate plan before
+  relying on it.
 - The Team Lead inspects artifacts rather than trusting completion summaries.
 - Final integration checks run from the lead session.
 - Shut down teammates after their reports are collected.

@@ -1,6 +1,6 @@
 ---
 description: Research a codebase, external question, or both using evidence appropriate to the claim
-allowed-tools: Read, Write, Glob, Grep, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion, WebSearch, WebFetch
+allowed-tools: Read, Write, Glob, Grep, Agent, AskUserQuestion, WebSearch, WebFetch
 ---
 
 # /rptc:research

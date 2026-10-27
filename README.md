@@ -12,10 +12,10 @@ The distributable package lives under [`plugins/rptc`](plugins/rptc/README.md).
 
 RPTC ships from one repository to two different harnesses:
 
-- Claude exposes slash commands, plugin-declared agents, native plan mode,
-  task dependencies, and experimental agent teams.
-- Codex exposes skills, `update_plan`, parent-orchestrated agents, spawn
-  barriers, and packaged TOML agents installed by `rptc-init`.
+- Claude exposes slash commands, plugin-declared agents, native plan mode, and
+  experimental agent teams.
+- Codex exposes skills, parent-orchestrated agents, spawn barriers, and packaged
+  TOML agents installed by `rptc-codex-init`.
 
 Shared engineering policy and workflow outcomes live under
 `plugins/rptc/shared/`. Provider adapters remain separate where their harnesses

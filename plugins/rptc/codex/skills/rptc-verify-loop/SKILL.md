@@ -11,8 +11,9 @@ This compatibility flow converges on resolved evidence, not zero model findings.
 
 ## 1. Initialize
 
-Load `rptc:verification-evidence` and read `../../../shared/workflows/verification.md` (relative to this SKILL.md).
-Keep the loop and its current finding in `update_plan`.
+Load `rptc:verification-evidence` and read
+`../../../shared/workflows/verification.md` (relative to this SKILL.md). Keep
+the loop and its current finding visible in your progress updates.
 
 ## 2. Iterate
 
@@ -21,7 +22,10 @@ Keep the loop and its current finding in `update_plan`.
 3. Obtain approval for consequential fixes. `request_user_input` requires Codex
    Plan Mode; otherwise ask in normal chat and stop for the answer.
 4. Apply accepted fixes in the parent or through a bounded custom agent.
-5. At every `spawn_agent`, immediately call `wait_agent` for all required IDs.
+5. At every `spawn_agent`, keep calling `wait_agent` until every required agent
+   has returned or failed; one call can return when the first agent finishes or
+   the wait times out. Close agents that are no longer needed with `close_agent`
+   when available, because finished agents count toward the concurrency limit.
 6. Rerun the affected checks, original acceptance predicates, and only the
    review axes that raised confirmed findings.
 7. Stop when every accepted fix has been applied and rechecked, and each

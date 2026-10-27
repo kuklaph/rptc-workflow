@@ -10,7 +10,8 @@ Shared contract: `shared/provider-adapter-contract.md`
 RPTC flows run a project's checks: focused tests while working, then the full
 suite, typecheck, lint, and build before completion. This skill records the
 real commands in `AGENTS.md` so every session finds them without rediscovery.
-Codex reads `AGENTS.md`; Claude's equivalent flow writes `CLAUDE.md`.
+Codex reads `AGENTS.md`; Claude's equivalent flow writes the project instruction
+file Claude loads.
 
 ## 1. Discover
 

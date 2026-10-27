@@ -25,7 +25,7 @@
   "interface": {
     "displayName": "RPTC Workflow",
     "shortDescription": "Research, plan, implement with TDD, verify, and ship.",
-    "longDescription": "RPTC packages a Codex adapter for the original Research -> Plan -> TDD -> Commit workflow. Codex skills are exposed from ./codex/skills/. Custom RPTC agents are packaged in ./codex/agents/ and installed with the rptc-init skill, which copies them to .codex/agents/ or the user's Codex agents directory.",
+    "longDescription": "RPTC packages a Codex adapter for the original Research -> Plan -> TDD -> Commit workflow. Codex skills are exposed from ./codex/skills/. Custom RPTC agents are packaged in ./codex/agents/ and installed with the rptc-codex-init skill, which copies them to .codex/agents/ or the user's Codex agents directory.",
     "developerName": "kuklaph",
     "category": "Productivity",
     "capabilities": [

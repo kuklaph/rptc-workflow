@@ -4,7 +4,8 @@ RPTC needs no project configuration file. Its flows discover checks from the
 repository. To save that discovery, run `/rptc:config` (Claude) or the
 `rptc-config` skill (Codex). It finds the project's real commands in
 task-runner files and CI, then proposes a short section for the project's
-instruction file (`CLAUDE.md` for Claude, `AGENTS.md` for Codex):
+instruction file (`AGENTS.md` for Codex; for Claude, the `CLAUDE.md` it loads,
+or `AGENTS.md` in a project that has only that file):
 
 ```markdown
 ## Checks

@@ -1,6 +1,6 @@
 ---
 description: Reproduce, diagnose, fix, and verify a bug on the same observable surface
-allowed-tools: Bash(git worktree add *), Bash(npm test *), Bash(npm run *), Bash(pnpm test *), Bash(pnpm run *), Bash(yarn test *), Bash(yarn run *), Bash(bun test *), Bash(bun run *), Bash(pytest *), Bash(python -m pytest *), Bash(uv run pytest *), Bash(cargo test *), Bash(cargo build *), Bash(cargo check *), Bash(cargo clippy *), Bash(go test *), Bash(go build *), Bash(go vet *), Bash(dotnet test *), Bash(dotnet build *), Read, Write, Edit, Glob, Grep, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion, EnterPlanMode, ExitPlanMode
+allowed-tools: Bash(git worktree add *), Bash(npm test *), Bash(npm run *), Bash(pnpm test *), Bash(pnpm run *), Bash(yarn test *), Bash(yarn run *), Bash(bun test *), Bash(bun run *), Bash(pytest *), Bash(python -m pytest *), Bash(uv run pytest *), Bash(cargo test *), Bash(cargo build *), Bash(cargo check *), Bash(cargo clippy *), Bash(go test *), Bash(go build *), Bash(go vet *), Bash(dotnet test *), Bash(dotnet build *), Read, Write, Edit, Glob, Grep, Agent, AskUserQuestion, EnterPlanMode, ExitPlanMode
 ---
 
 # /rptc:fix
@@ -40,10 +40,11 @@ rptc:unslop-writing-clearly substantial prose, documentation, or user-facing cop
 Read `${CLAUDE_PLUGIN_ROOT}/shared/workflows/fix.md` and the project's own
 instructions and checks.
 
-Do not create the full task structure before reproduction establishes the shape
-of the work. For a narrow correction, track work only when it protects a real
-dependency or unfinished item. For broader or high-risk fixes, keep the
-remaining diagnosis, implementation, and verification work visible.
+Do not use task-tracking tools or create a task list before reproduction
+establishes the shape of the work. For a narrow correction, skip the list unless
+it protects a real dependency or unfinished item. For broader or high-risk
+fixes, keep a short task list of the remaining diagnosis, implementation, and
+verification work in your progress updates, marked as items finish.
 
 ## 2. Reproduce
 

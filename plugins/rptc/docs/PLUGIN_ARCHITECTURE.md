@@ -47,7 +47,6 @@ Claude owns:
 
 - slash-command frontmatter;
 - allowed tools;
-- `TaskCreate` and `TaskUpdate`;
 - `AskUserQuestion`;
 - `EnterPlanMode` and `ExitPlanMode`;
 - plugin-declared agents;
@@ -55,24 +54,24 @@ Claude owns:
   plus `SendMessage`;
 - `${CLAUDE_PLUGIN_ROOT}` resolution.
 
-`/rptc:fix-team` is Claude-only because Codex sub-agents report only to the
-parent and cannot message one another.
+`/rptc:fix-team` is Claude-only because the Codex adapter keeps coordination in
+the parent session and has no team workflow.
 
 ## Codex adapter
 
 Codex owns:
 
 - skill frontmatter and natural-language routing;
-- `update_plan`;
 - plan-mode restrictions on `request_user_input`;
 - `spawn_agent` and `wait_agent`;
 - parent-session spawn barriers;
 - packaged TOML agents;
-- `rptc-init` installation and obsolete managed-agent cleanup;
+- `rptc-codex-init` installation and obsolete managed-agent cleanup;
 - Codex plugin-cache path resolution.
 
-Codex agents do not message one another directly. The parent session relays
-state and owns integration.
+The Codex adapter keeps coordination in the parent session: the parent relays
+state between agents and owns integration, even when the active Codex backend
+offers direct inter-agent messaging.
 
 ## Provider contract
 

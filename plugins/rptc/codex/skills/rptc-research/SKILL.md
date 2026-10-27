@@ -13,12 +13,18 @@ Load `rptc:core-principles` and `rptc:research-methodology`, plus
 
 State the question, scope, mode, and evidence plan. Answer narrow questions in
 the parent. Use parallel `rptc:research-agent` instances only for independent,
-sizeable evidence sources. If the custom agent is missing, run `rptc:rptc-init`
-once to install the packaged agents, mention the installation in the final
-report, and retry.
+sizeable evidence sources. If the custom agent is missing, run
+`rptc:rptc-codex-init` once to install the packaged agents, mention the
+installation in the final report, and confirm the agent can be spawned. If it
+still cannot, report the spawn error and any reload the user needs instead of
+reinstalling.
 
-At every spawn, immediately call `wait_agent` for all required IDs. The parent
-does not duplicate the research while agents run.
+At every spawn, keep calling `wait_agent` until every required agent has
+returned or failed; one call can return when the first agent finishes or the
+wait times out. The parent does not duplicate the research while agents run.
+Once results are collected, close agents that are no longer needed with
+`close_agent` when available; finished agents count toward the concurrency limit
+until closed.
 
 Verify code locations and citations. Return direct evidence, inference,
 disagreement, and gaps. Write an artifact only when requested. No fixed source

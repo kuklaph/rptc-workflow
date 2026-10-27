@@ -1,5 +1,5 @@
 ---
-description: Discover the project's check commands and propose a short Checks section for CLAUDE.md
+description: Discover the project's check commands and propose a short Checks section for the project instruction file Claude loads
 allowed-tools: Bash(rm .rptc/project.yml), Bash(rmdir .rptc), Read, Write, Edit, Glob, Grep, AskUserQuestion
 ---
 
@@ -9,8 +9,8 @@ Shared contract: `shared/provider-adapter-contract.md`
 
 RPTC flows run a project's checks: focused tests while working, then the full
 suite, typecheck, lint, and build before completion. This command records the
-real commands in `CLAUDE.md` so every session finds them without rediscovery.
-Claude reads `CLAUDE.md`; Codex's equivalent flow writes `AGENTS.md`.
+real commands in the project instruction file Claude loads, so every session
+finds them without rediscovery. Codex's equivalent flow writes `AGENTS.md`.
 
 ## 1. Discover
 
@@ -27,8 +27,18 @@ Look in task-runner and build files (`package.json` scripts, `Makefile`,
 `CONTRIBUTING.md`. CI shows which commands the project treats as its gate.
 Leave out a category the project does not have.
 
-Also read the existing `CLAUDE.md`. If it imports `AGENTS.md` (for example
-`@AGENTS.md`), the shared file is the better home for the section.
+Then find the project instruction file Claude loads. By default:
+
+- A project `CLAUDE.md`, `.claude/CLAUDE.md`, or `CLAUDE.local.md` in the
+  working directory or above it: Claude reads the `CLAUDE.md` files. If one
+  imports `AGENTS.md` (for example `@AGENTS.md`), the shared file is the better
+  home for the section.
+- Only an `AGENTS.md`: current Claude Code reads it directly, so it is the home
+  for the section.
+
+The **Project instructions** setting can change this (for example `claude-md`
+reads only `CLAUDE.md` files). Check which instruction files this session
+actually loaded and write to one of those.
 
 ## 2. Propose
 
@@ -60,8 +70,11 @@ Handle older RPTC setups in the same proposal:
   section, delete the file (and `.rptc/` if it is then empty), and remove the
   `RPTC project contract:` pointer line. RPTC no longer reads that file.
 
-If `CLAUDE.md` does not exist, propose creating it with only the Checks
-section.
+If neither file exists, propose creating `CLAUDE.md` with only the Checks
+section. Do not create a `CLAUDE.md` in a project whose loaded instructions
+come from `AGENTS.md`:
+by default Claude then reads the `CLAUDE.md` files instead, and the existing
+`AGENTS.md` instructions stop loading.
 
 Ask with `AskUserQuestion` and write nothing until the user approves.
 

@@ -23,21 +23,19 @@ maps that contract to its own tools.
 Claude adapters own Claude-specific behavior such as:
 
 - slash-command frontmatter and allowed tools;
-- `TaskCreate` and `TaskUpdate`;
 - `AskUserQuestion`;
 - `EnterPlanMode` and `ExitPlanMode`;
-- `Task` sub-agents;
+- `Agent` sub-agents;
 - experimental agent teams and teammate messaging;
 - `${CLAUDE_PLUGIN_ROOT}` path resolution.
 
 Codex adapters own Codex-specific behavior such as:
 
 - skill frontmatter and chat-intent routing;
-- `update_plan`;
 - `request_user_input` and plan-mode restrictions;
 - `spawn_agent` and `wait_agent`;
 - the parent-session spawn barrier;
-- packaged TOML agents installed by `rptc-init`;
+- packaged TOML agents installed by `rptc-codex-init`;
 - Codex plugin-cache path resolution.
 
 These differences are required adapter code, not removable duplication.
