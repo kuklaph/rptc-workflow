@@ -2,7 +2,7 @@
 
 > Provider-aware Research, Plan, TDD, and Commit workflows for Claude Code and Codex.
 
-**Version**: 4.2.0
+**Version**: 4.3.0
 **Status**: Beta
 **License**: MIT
 

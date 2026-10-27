@@ -10,7 +10,7 @@ Release history through 3.16.7 is preserved in
 
 ---
 
-## [Unreleased]
+## [4.3.0] - 2026-10-27
 
 A review of RPTC's harness interaction against current Claude Code and Codex
 documentation.
