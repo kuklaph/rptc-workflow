@@ -10,8 +10,8 @@
       "agent_root": "claude/agents",
       "skill_root": "skills",
       "planning": "EnterPlanMode and ExitPlanMode",
-      "tracking": "TaskCreate and TaskUpdate",
-      "delegation": "Task",
+      "tracking": "A short task list in progress updates for multi-step work; RPTC does not call the task tools, which current Claude Code omits by default on newer models",
+      "delegation": "Agent",
       "interactive_questions": "AskUserQuestion",
       "persistent_teams": true,
       "goal_mode": "User-started /goal; a small model judges the condition from the transcript after each turn",
@@ -23,12 +23,12 @@
       "agent_root": "codex/agents",
       "skill_root": "codex/skills",
       "planning": "Codex plan mode and request_user_input",
-      "tracking": "update_plan",
+      "tracking": "A short task list in progress updates for multi-step work; RPTC does not call update_plan, which current Codex enables only through [tools.update_plan] config",
       "delegation": "spawn_agent and wait_agent",
       "interactive_questions": "request_user_input in plan mode; normal chat otherwise",
       "persistent_teams": false,
       "goal_mode": "User-started /goal; the goal text is both the first prompt and the completion criteria",
-      "agent_installation": "rptc-init copies packaged TOML agents to the project or Codex home"
+      "agent_installation": "rptc-codex-init copies packaged TOML agents to the project or Codex home"
     }
   },
   "flows": {
@@ -73,19 +73,19 @@
       "claude": "claude/commands/config.md",
       "codex": "codex/skills/rptc-config/SKILL.md",
       "parity": "provider-specific",
-      "reason": "Claude writes CLAUDE.md and Codex writes AGENTS.md; their project instruction and plugin discovery surfaces differ."
+      "reason": "Codex writes AGENTS.md. Claude writes the instruction file it loads: CLAUDE.md, or AGENTS.md in a project that has only that file. Their discovery rules differ."
     },
     "fix-team": {
       "shared_contract": "shared/workflows/fix.md",
       "claude": "claude/commands/fix-team.md",
       "codex": null,
       "parity": "intentional-asymmetry",
-      "reason": "Claude agent teams (experimental) let read-only investigators message each other to test competing hypotheses. Codex sub-agents report only to the parent, so Codex runs the standard fix adapter."
+      "reason": "Claude agent teams (experimental) let read-only investigators message each other to test competing hypotheses. RPTC's Codex adapter keeps coordination in the parent session, so Codex runs the standard fix adapter."
     },
-    "init": {
+    "codex-init": {
       "shared_contract": "shared/provider-adapter-contract.md",
       "claude": null,
-      "codex": "codex/skills/rptc-init/SKILL.md",
+      "codex": "codex/skills/rptc-codex-init/SKILL.md",
       "parity": "intentional-asymmetry",
       "reason": "Claude agents are installed through its plugin manifest. Codex requires packaged TOML agents to be copied into an agents directory."
     },

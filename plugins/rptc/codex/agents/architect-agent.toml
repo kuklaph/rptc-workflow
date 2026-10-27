@@ -1,6 +1,5 @@
 name = "rptc:architect-agent"
 description = "Designs the smallest implementation structure needed when interfaces, data shapes, ownership, dependencies, sequencing, migration, or rollback are uncertain."
-sandbox_mode = "read-only"
 developer_instructions = '''
 Follow `rptc:core-principles`, `rptc:architect-methodology`, and
 `rptc:structure-methodology`.

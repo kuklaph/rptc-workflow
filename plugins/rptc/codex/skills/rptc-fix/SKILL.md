@@ -8,7 +8,7 @@ description: Reproduce, diagnose, fix, and verify a bug with RPTC. Use for broke
 Shared contract: `shared/workflows/fix.md`
 
 This is the Codex adapter. It preserves the reproduction-first contract while
-using `update_plan`, Codex Plan Mode, and parent-orchestrated sub-agents.
+using Codex Plan Mode and parent-orchestrated sub-agents.
 
 ## 1. Initialize
 
@@ -32,10 +32,11 @@ rptc:unslop-writing-clearly substantial prose, documentation, or user-facing cop
 Read `../../../shared/workflows/fix.md` (relative to this SKILL.md), project `AGENTS.md`,
 repository guidance, and declared checks.
 
-Do not initialize the full `update_plan` phase structure before reproduction
-establishes the shape of the work. For a narrow correction, omit `update_plan`
-when no real dependency or unfinished item would be lost. For broader or
-high-risk fixes, track only phases that correspond to real work.
+Do not use `update_plan` or create a task list before reproduction establishes
+the shape of the work. For a narrow correction, skip the list unless it protects
+a real dependency or unfinished item. For broader or high-risk fixes, keep a
+short task list of the remaining diagnosis, implementation, and verification
+work in your progress updates, marked as items finish.
 
 ## 2. Reproduce
 
@@ -57,12 +58,18 @@ change one variable at a time. Confirm the surviving mechanism with executable
 or runtime evidence.
 
 For distinct read-only investigations, use `rptc:research-agent` when available.
-If custom agents are missing, run `rptc:rptc-init` once to install the packaged
-agents, mention the installation in the final report, and retry. If sub-agent
-tools are unavailable, perform the same investigation in the parent.
+If custom agents are missing, run `rptc:rptc-codex-init` once to install the
+packaged agents, mention the installation in the final report, and confirm the
+agent can be spawned. If it still cannot, report the spawn error and any reload
+the user needs instead of reinstalling. If sub-agent tools are unavailable,
+perform the same investigation in the parent.
 
-At every `spawn_agent` point, immediately call `wait_agent` for all required
-agent IDs. The parent does not edit, test, or synthesize while they run.
+At every `spawn_agent` point, keep calling `wait_agent` until every required
+agent has returned or failed; one call can return when the first agent finishes
+or the wait times out. The parent does not edit, test, or synthesize while they
+run. Once results are collected, close agents that are no longer needed with
+`close_agent` when available; finished agents count toward the concurrency limit
+until closed.
 
 ## 4. Design only when needed
 

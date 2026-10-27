@@ -1,9 +1,9 @@
 ---
-name: rptc-init
+name: rptc-codex-init
 description: Install or refresh the packaged RPTC Codex custom-agent TOML files in the project-local or explicitly requested global Codex agents directory.
 ---
 
-# RPTC Init
+# RPTC Codex Init
 
 Shared contract: `shared/provider-adapter-contract.md`
 
@@ -16,7 +16,7 @@ copied into an agents directory.
 From an installed plugin, resolve the plugin version root from this skill:
 
 ```text
-<plugin-version-root>/codex/skills/rptc-init/SKILL.md
+<plugin-version-root>/codex/skills/rptc-codex-init/SKILL.md
 ```
 
 The packaged source is:

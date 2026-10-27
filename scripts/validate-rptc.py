@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Validate RPTC provider contracts, skill metadata, removed surfaces, and evals."""
+"""Validate RPTC provider contracts, skill metadata, Codex agents, removed surfaces, and evals."""
 
 from __future__ import annotations
 
 import json
 import re
 import sys
+import tomllib
 from pathlib import Path
 from typing import Any
 
@@ -77,6 +78,7 @@ REMOVED_PATHS = (
     "skills/html-report-generator/reference/dark-theme.css",
     "codex/skills/html-report-generator/templates/report-template.html",
     "codex/skills/html-report-generator/reference/dark-theme.css",
+    "codex/skills/rptc-init",
 )
 
 FORBIDDEN_ACTIVE_MARKERS = (
@@ -85,6 +87,16 @@ FORBIDDEN_ACTIVE_MARKERS = (
     "sync-prod-to-tests",
     "test-sync-agent",
     "test-fixer-agent",
+    "rptc-init",
+)
+
+# Codex custom agents inherit these from the parent session; setting them in an
+# agent file has no effect and implies an isolation the agent does not get.
+CODEX_AGENT_INHERITED_KEYS = (
+    "sandbox_mode",
+    "approval_policy",
+    "model_provider",
+    "mcp_servers",
 )
 
 FRONTMATTER_RE = re.compile(r"\A---\s*\n(.*?)\n---\s*\n", re.DOTALL)
@@ -283,6 +295,36 @@ def validate_skills() -> list[str]:
     return warnings
 
 
+def validate_codex_agents() -> list[str]:
+    paths = sorted((PLUGIN / "codex" / "agents").glob("*.toml"))
+    if not paths:
+        raise ValidationError("no packaged Codex agent TOMLs found")
+    for path in paths:
+        relative = path.relative_to(ROOT)
+        try:
+            agent = tomllib.loads(path.read_text(encoding="utf-8"))
+        except tomllib.TOMLDecodeError as exc:
+            raise ValidationError(f"{relative} is not valid TOML: {exc}") from exc
+        missing = [
+            key
+            for key in ("name", "description", "developer_instructions")
+            if not agent.get(key)
+        ]
+        if missing:
+            raise ValidationError(
+                f"{relative} is missing required fields: " + ", ".join(missing)
+            )
+        if not str(agent["name"]).startswith("rptc:"):
+            raise ValidationError(f"{relative} name must start with 'rptc:'")
+        inherited = [key for key in CODEX_AGENT_INHERITED_KEYS if key in agent]
+        if inherited:
+            raise ValidationError(
+                f"{relative} sets parent-inherited setting(s) Codex ignores: "
+                + ", ".join(inherited)
+            )
+    return []
+
+
 def validate_evals() -> list[str]:
     routing = load_json(ROOT / "evals" / "routing.json")
     parity = load_json(ROOT / "evals" / "provider-parity.json")
@@ -315,6 +357,7 @@ def main() -> int:
         warnings.extend(validate_contract())
         warnings.extend(validate_removed_surfaces())
         warnings.extend(validate_skills())
+        warnings.extend(validate_codex_agents())
         warnings.extend(validate_evals())
     except ValidationError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)

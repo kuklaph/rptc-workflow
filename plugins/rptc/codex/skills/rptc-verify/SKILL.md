@@ -28,7 +28,8 @@ Identify the source request or spec, project standards, declared checks, changed
 public behavior, trust boundaries, and documentation impact. State when no
 usable specification exists.
 
-Keep verification phases in `update_plan` when the pass is non-trivial.
+When the pass is non-trivial, keep a short task list of verification phases in
+your progress updates.
 
 ## 3. Run direct checks
 
@@ -46,12 +47,18 @@ Select report-only agents by changed properties:
 - `rptc:security-agent`;
 - `rptc:docs-agent`.
 
-If the custom agents are missing, run `rptc:rptc-init` once to install the
-packaged agents, mention the installation in the final report, and retry. If
-sub-agent tools are unavailable, perform the review axes in the parent.
+If the custom agents are missing, run `rptc:rptc-codex-init` once to install the
+packaged agents, mention the installation in the final report, and confirm the
+agent can be spawned. If it still cannot, report the spawn error and any reload
+the user needs instead of reinstalling. If sub-agent tools are unavailable,
+perform the review axes in the parent.
 
-For every selected set, spawn in parallel and immediately call `wait_agent` for
-all required IDs. Do not edit, test, or synthesize in the parent while they run.
+For every selected set, spawn in parallel, then keep calling `wait_agent` until
+every required agent has returned or failed; one call can return when the first
+agent finishes or the wait times out. Do not edit, test, or synthesize in the
+parent while they run. Once results are collected, close agents that are no
+longer needed with `close_agent` when available; finished agents count toward
+the concurrency limit until closed.
 
 ## 5. Consolidate
 

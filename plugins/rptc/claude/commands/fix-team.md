@@ -1,6 +1,6 @@
 ---
 description: Debug with competing-hypothesis investigators on a Claude agent team, then fix as a single writer
-allowed-tools: Bash(git worktree add *), Bash(npm test *), Bash(npm run *), Bash(pnpm test *), Bash(pnpm run *), Bash(yarn test *), Bash(yarn run *), Bash(bun test *), Bash(bun run *), Bash(pytest *), Bash(python -m pytest *), Bash(uv run pytest *), Bash(cargo test *), Bash(cargo build *), Bash(cargo check *), Bash(cargo clippy *), Bash(go test *), Bash(go build *), Bash(go vet *), Bash(dotnet test *), Bash(dotnet build *), Read, Write, Edit, Glob, Grep, Agent, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion, EnterPlanMode, ExitPlanMode, SendMessage
+allowed-tools: Bash(git worktree add *), Bash(npm test *), Bash(npm run *), Bash(pnpm test *), Bash(pnpm run *), Bash(yarn test *), Bash(yarn run *), Bash(bun test *), Bash(bun run *), Bash(pytest *), Bash(python -m pytest *), Bash(uv run pytest *), Bash(cargo test *), Bash(cargo build *), Bash(cargo check *), Bash(cargo clippy *), Bash(go test *), Bash(go build *), Bash(go vet *), Bash(dotnet test *), Bash(dotnet build *), Read, Write, Edit, Glob, Grep, Agent, AskUserQuestion, EnterPlanMode, ExitPlanMode, SendMessage
 ---
 
 # /rptc:fix-team
@@ -55,7 +55,11 @@ conversation, so each spawn prompt has to stand on its own:
 - the evidence standard: executable or runtime evidence, with inference labeled
   as inference;
 - the skills to load, such as `rptc:diagnose-methodology` (a teammate does not
-  inherit an agent definition's preloaded skills);
+  inherit an agent definition's preloaded skills). A teammate spawned from an
+  RPTC agent definition has no `Skill` tool, so give it the resolved
+  `${CLAUDE_PLUGIN_ROOT}/skills/<name>/SKILL.md` path to read instead. Such a
+  teammate also lacks `SendMessage` unless it runs in-process, where Claude
+  Code adds it, so run RPTC-definition investigators in-process;
 - the report shape: verdict (supported, refuted, or inconclusive), evidence
   with commands and output, and what would change the verdict.
 
@@ -69,8 +73,10 @@ hypotheses, not only to support their own. A mechanism survives only when it
 explains the reproduction with executable or runtime evidence and the others
 have been ruled out or shown to be contributing factors.
 
-Claude Code approves teammate plan requests automatically. If a teammate
-submits a plan, read it yourself before relying on its conclusions.
+Claude Code approves a teammate's plan request automatically unless the
+teammate's permission mode changed after it spawned, in which case you review
+it. Either way, read any teammate plan yourself before relying on its
+conclusions.
 
 ## 4. Decide and shut down
 

@@ -2,7 +2,7 @@
 
 > Provider-aware engineering workflows for Claude Code and Codex.
 
-**Version**: 4.2.0
+**Version**: 4.3.0
 **Status**: Beta
 **License**: MIT
 
@@ -23,8 +23,12 @@ Claude exposes `/rptc:*` slash commands and plugin-declared agents.
 
 ### Codex
 
-Install the plugin from this repository, then run `rptc-init` once when custom
-agents are not already installed.
+```text
+codex plugin marketplace add https://github.com/kuklaph/rptc-workflow
+codex plugin add rptc@rptc-workflow
+```
+
+Then run `rptc-codex-init` once when custom agents are not already installed.
 
 Invoke skills through chat, for example:
 
@@ -60,7 +64,7 @@ is `VERIFIED`, `NOT VERIFIED`, or `INCONCLUSIVE`.
 | `/rptc:research` | `rptc-research` | Investigate a codebase question or external topic with sourced findings |
 | `/rptc:structure` | `rptc-structure` | Audit concrete structure friction and propose evidence-backed refactors |
 | `/rptc:config` | `rptc-config` | Add a short "Checks" section with the project's real check commands to `CLAUDE.md` or `AGENTS.md` |
-| (not needed) | `rptc-init` | Install the packaged Codex agent TOML files |
+| (not needed) | `rptc-codex-init` | Install the packaged Codex agent TOML files |
 
 ## Claude-only flows
 
@@ -70,9 +74,10 @@ Claude agent teams, which are experimental and enabled with
 `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`. The `rptc:agent-teams` skill covers
 other team uses, such as parallel workstreams with separate file owners.
 
-Codex sub-agents report only to the parent, so Codex uses the standard feature
-and fix skills with parent-orchestrated `spawn_agent` workers and `wait_agent`
-barriers. This is an intentional capability difference, not missing parity.
+RPTC's Codex adapter keeps coordination in the parent session, so Codex uses the
+standard feature and fix skills with parent-orchestrated `spawn_agent` workers
+and `wait_agent` barriers. This is an intentional adapter difference, not
+missing parity.
 
 ## Long-running work
 
@@ -135,9 +140,10 @@ before submitting changes.
 
 RPTC reads your project's own instructions and task-runner files. `config`
 discovers the real check commands (focused tests, full tests, typecheck, lint,
-build) and, with your approval, adds a short "Checks" section to `CLAUDE.md`
-(Claude) or `AGENTS.md` (Codex) when one is missing. RPTC does not copy its
-command catalog into always-loaded project context.
+build) and, with your approval, adds a short "Checks" section to the project
+instruction file when one is missing: `AGENTS.md` for Codex, and for Claude the
+`CLAUDE.md` it loads, or `AGENTS.md` in a project that has only that file. RPTC
+does not copy its command catalog into project instruction files.
 
 ## Evidence
 

@@ -21,10 +21,11 @@ Report only documentation made inaccurate, incomplete, or unsafe by the change.
 
 ## Project instruction files
 
-`CLAUDE.md` and `AGENTS.md` are always-loaded context. Add only durable,
-non-discoverable project facts and concise pointers. Do not copy plugin command
-catalogs, architecture trees, tool manuals, or implementation details that the
-repository can reveal directly.
+`CLAUDE.md` and `AGENTS.md` files that a harness loads at session start become
+context for every session; files in subdirectories may load only on demand. Add
+only durable, non-discoverable project facts and concise pointers. Do not copy
+plugin command catalogs, architecture trees, tool manuals, or implementation
+details that the repository can reveal directly.
 
 ## Output
 

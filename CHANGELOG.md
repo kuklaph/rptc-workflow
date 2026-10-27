@@ -10,6 +10,55 @@ Release history through 3.16.7 is preserved in
 
 ---
 
+## [4.3.0] - 2026-10-27
+
+A review of RPTC's harness interaction against current Claude Code and Codex
+documentation.
+
+### Changed
+
+- Renamed the Codex skill `rptc-init` to `rptc-codex-init`, since it only
+  installs Codex agent TOMLs. Invoke it as `rptc:rptc-codex-init`.
+- Claude: delegation uses the `Agent` tool name instead of the retired `Task`
+  name.
+- Claude: flows no longer use `TaskCreate`, `TaskUpdate`, `TaskList`, or
+  `TaskGet`, and commands no longer list them in `allowed-tools`. Current Claude
+  Code omits these tools by default on newer models, which track multi-step work
+  without a written checklist. For multi-step work, flows keep a short task list
+  in their progress updates instead.
+- Codex: flows no longer call `update_plan`, which current Codex enables only
+  through `[tools.update_plan]` configuration. They keep the same short task
+  list in progress updates.
+- Claude: `/rptc:config` writes the instruction file Claude actually loads. In a
+  project with only `AGENTS.md`, it adds the Checks section there instead of
+  creating a `CLAUDE.md` that would stop `AGENTS.md` from loading, and it
+  respects a non-default **Project instructions** setting.
+- Claude: teammate guidance notes that automatic plan approval does not apply
+  after a teammate's permission mode changes, and that teammates spawned from
+  RPTC agent definitions read methodology files by path because they have no
+  `Skill` tool, and must run in-process to get `SendMessage`.
+- Codex: flows keep waiting until every required agent returns or fails (one
+  `wait_agent` call can return after the first), close finished agents with
+  `close_agent`, and confirm an agent can be spawned after `rptc-codex-init`
+  instead of retrying blindly.
+- Docs describe parent-owned coordination as RPTC's Codex adapter choice rather
+  than a Codex limitation, and describe instruction files as loaded per harness
+  rules rather than always loaded.
+- The Codex install section now gives the `codex plugin` commands.
+
+### Fixed
+
+- Codex agent TOMLs no longer set `sandbox_mode`. Codex ignores it in custom
+  agent files; agents inherit the parent session's sandbox. Report-only agents
+  now say "do not edit files" explicitly, and the validator rejects
+  parent-inherited settings in packaged agent TOMLs.
+
+### Upgrade notes
+
+- Codex: invoke `rptc:rptc-codex-init` instead of `rptc:rptc-init`, and run it
+  once to refresh the installed agent TOMLs. For enforced read-only review, set
+  a read-only sandbox on the parent session.
+
 ## [4.2.0] - 2026-09-27
 
 A full review of 4.1 against current Anthropic and OpenAI guidance, plus a

@@ -1,6 +1,6 @@
 ---
 description: Audit concrete codebase structure friction and propose evidence-backed deepening refactors
-allowed-tools: Read, Write, Glob, Grep, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion
+allowed-tools: Read, Write, Glob, Grep, Agent, AskUserQuestion
 ---
 
 # /rptc:structure

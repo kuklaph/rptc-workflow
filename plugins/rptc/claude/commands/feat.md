@@ -1,14 +1,14 @@
 ---
 description: Implement a feature with rigor scaled to uncertainty, risk, and available evidence
-allowed-tools: Bash(git worktree add *), Bash(npm test *), Bash(npm run *), Bash(pnpm test *), Bash(pnpm run *), Bash(yarn test *), Bash(yarn run *), Bash(bun test *), Bash(bun run *), Bash(pytest *), Bash(python -m pytest *), Bash(uv run pytest *), Bash(cargo test *), Bash(cargo build *), Bash(cargo check *), Bash(cargo clippy *), Bash(go test *), Bash(go build *), Bash(go vet *), Bash(dotnet test *), Bash(dotnet build *), Read, Write, Edit, Glob, Grep, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion, EnterPlanMode, ExitPlanMode
+allowed-tools: Bash(git worktree add *), Bash(npm test *), Bash(npm run *), Bash(pnpm test *), Bash(pnpm run *), Bash(yarn test *), Bash(yarn run *), Bash(bun test *), Bash(bun run *), Bash(pytest *), Bash(python -m pytest *), Bash(uv run pytest *), Bash(cargo test *), Bash(cargo build *), Bash(cargo check *), Bash(cargo clippy *), Bash(go test *), Bash(go build *), Bash(go vet *), Bash(dotnet test *), Bash(dotnet build *), Read, Write, Edit, Glob, Grep, Agent, AskUserQuestion, EnterPlanMode, ExitPlanMode
 ---
 
 # /rptc:feat
 
 Shared contract: `shared/workflows/feature.md`
 
-Implement new or changed behavior. Claude owns the Claude-specific planning,
-task-tracking, and delegation mechanics below. The shared contract owns the
+Implement new or changed behavior. Claude owns the Claude-specific planning and
+delegation mechanics below. The shared contract owns the
 engineering outcome.
 
 ## Arguments
@@ -42,10 +42,11 @@ Read `${CLAUDE_PLUGIN_ROOT}/shared/workflows/feature.md`.
 Read project `CLAUDE.md`, repository contribution guidance, task-runner files,
 and any project SOPs. Project rules override RPTC defaults.
 
-Do not create a full phase structure before classifying the work. For a local
-route, track work only when it protects a real dependency or unfinished item.
-For normal and high-risk routes, create only tasks that correspond to real work.
-Use `TaskUpdate` to preserve unfinished work and dependencies.
+Do not use task-tracking tools or create a phase structure before classifying
+the work. For a local route, skip the task list unless it protects a real
+dependency or unfinished item. For normal and high-risk routes, keep a short
+task list in your progress updates: only items that correspond to real work,
+with dependencies noted, marked as they finish.
 
 ## 2. Ground and classify
 
@@ -146,7 +147,7 @@ Create a sibling worktree when:
 - the change is high risk and an isolated branch materially improves recovery.
 
 Delegate only bounded work with clear file ownership and a checkable result.
-Use parallel `Task` calls for independent investigations or artifacts. Keep one
+Use parallel `Agent` calls for independent investigations or artifacts. Keep one
 writer for shared files.
 
 The parent owns design, diff review, evidence, and final judgment. Do not pass a

@@ -8,7 +8,7 @@ description: Implement a feature with RPTC, scaling research, planning, TDD, del
 Shared contract: `shared/workflows/feature.md`
 
 This is the Codex adapter. It preserves the shared feature outcome while using
-Codex planning, `update_plan`, and parent-orchestrated sub-agents.
+Codex planning and parent-orchestrated sub-agents.
 
 ## Invocation
 
@@ -44,10 +44,11 @@ Read `../../../shared/workflows/feature.md` (relative to this SKILL.md).
 Read project `AGENTS.md`, repository contribution guidance, task-runner files,
 and project SOPs. Project and Codex global guidance override RPTC defaults.
 
-Do not initialize the full `update_plan` phase structure before classifying the
-work. For a local route, omit `update_plan` when the work is obvious and can be
-completed without losing dependencies or unfinished items. For normal and
-high-risk routes, track only phases that correspond to real work.
+Do not use `update_plan` or create a phase structure before classifying the
+work. For a local route, skip the task list unless it protects a real dependency
+or unfinished item. For normal and high-risk routes, keep a short task list in
+your progress updates: only items that correspond to real work, with
+dependencies noted, marked as they finish.
 
 ## 2. Ground and classify
 
@@ -103,18 +104,24 @@ Use the current workspace by default. Create a sibling worktree when the user
 requested isolation, parallel writers need exclusive ownership, or the change is
 high risk and an isolated branch materially improves recovery.
 
-If a required `rptc:*` custom agent is unavailable, run `rptc:rptc-init` once to
-install the packaged agents, mention the installation in the final report, and
-retry. If the environment has no sub-agent tools, the parent executes the same
-contract directly.
+If a required `rptc:*` custom agent is unavailable, run `rptc:rptc-codex-init`
+once to install the packaged agents, mention the installation in the final
+report, and confirm the agent can be spawned. If it still cannot, report the
+spawn error and any reload the user needs instead of reinstalling. If the
+environment has no sub-agent tools, the parent executes the same contract
+directly.
 
 At each `spawn_agent` point:
 
 1. spawn only bounded agents with an explicit agent type, scope, file ownership,
    and output contract;
-2. immediately call `wait_agent` for all required agent IDs;
+2. keep calling `wait_agent` until every required agent has returned or
+   failed; one call can return when the first agent finishes or the wait times
+   out;
 3. do not research, edit, test, or synthesize in the parent while they run;
-4. process results only after all required agents return or fail.
+4. process results only after all required agents return or fail;
+5. close agents that are no longer needed with `close_agent` when available;
+   finished agents count toward the concurrency limit until closed.
 
 Parallelize independent investigations or artifacts. Keep one writer for every
 shared file or branch.
